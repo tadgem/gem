@@ -6,7 +6,7 @@
 #include "shader.h"
 #include "vertex.h"
 #include "utils.h"
-
+#include "model.h"
 
 int main()
 {
@@ -37,6 +37,8 @@ int main()
 
     shader texture(texture_vert, texture_frag);
 
+    model sponza = model::load_model_from_path("assets/models/sponza/Sponza.gltf");
+
 
     float vertices[] = {
          0.5f, -0.5f, 0.0f,  // bottom right
@@ -47,7 +49,7 @@ int main()
     vao_builder builder;
 
     builder.begin();
-    builder.add_buffer<float>(&vertices[0], 9, 3);
+    builder.add_vertex_buffer(&vertices[0], 9);
     builder.add_vertex_attribute(0, 3 * sizeof(float), 3);
 
     VAO new_vao = builder.build();

@@ -5,9 +5,9 @@
 #include "shape.h"
 #include "texture.h"
 
-class mesh
+struct mesh
 {
-	gl_handle		m_vao;
+	VAO				m_vao;
 	uint32_t		m_index_count;
 	shapes::aabb	m_aabb;
 	uint32_t		m_material_index;
