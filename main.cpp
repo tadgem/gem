@@ -2,7 +2,9 @@
 #include "imgui.h"
 
 #include "gl.h"
-
+#include "texture.h" 
+#include "shader.h"
+#include "vertex.h"
 
 
 int main()
@@ -12,27 +14,65 @@ int main()
     bool show_another_window = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
+    texture tex("assets/textures/crate.jpg");
 
+    std::string vertexShaderSource = "#version 330 core\n"
+        "layout (location = 0) in vec3 aPos;\n"
+        "void main()\n"
+        "{\n"
+        "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+        "}\0";
+    std::string fragmentShaderSource = "#version 330 core\n"
+        "out vec4 FragColor;\n"
+        "void main()\n"
+        "{\n"
+        "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+        "}\n\0";
+
+    shader basic(vertexShaderSource, fragmentShaderSource);
+
+    float vertices[] = {
+         0.5f, -0.5f, 0.0f,  // bottom right
+        -0.5f, -0.5f, 0.0f,  // bottom left
+         0.0f,  0.5f, 0.0f   // top 
+    };
+
+    vao_builder builder;
+
+    builder.begin();
+    builder.add_buffer<float>(&vertices[0], 9, 3);
+    builder.add_vertex_attribute(0, 3 * sizeof(float), 3);
+
+    VAO new_vao = builder.build();
 
     while (!engine::s_quit)
     {
         engine::process_sdl_event();
         engine::engine_pre_frame();
 
-        // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
+        basic.use();
+        new_vao.use();
+
+        // update shader uniform
+        double  timeValue = engine::get_frame_time();
+        float greenValue = static_cast<float>(sin(timeValue) / 2.0 + 0.5);
+
+        basic.setVec4("outColour", { 0.0f, greenValue, 0.0f, 1.0f });
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+
         {
             static float f = 0.0f;
             static int counter = 0;
 
-            ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+            ImGui::Begin("Hello, world!");                          
 
-            ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
+            ImGui::Text("This is some useful text.");               
             ImGui::Checkbox("Another Window", &show_another_window);
 
-            ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-            ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+            ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            
+            ImGui::ColorEdit3("clear color", (float*)&clear_color); 
 
-            if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+            if (ImGui::Button("Button"))                            
                 counter++;
             ImGui::SameLine();
             ImGui::Text("counter = %d", counter);
@@ -41,10 +81,9 @@ int main()
             ImGui::End();
         }
 
-        // 3. Show another simple window.
         if (show_another_window)
         {
-            ImGui::Begin("Another Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+            ImGui::Begin("Another Window", &show_another_window);
             ImGui::Text("Hello from another window!");
             if (ImGui::Button("Close Me"))
                 show_another_window = false;

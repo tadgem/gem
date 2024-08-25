@@ -3,6 +3,7 @@ project(gl-fun)
 set(CMAKE_CXX_STANDARD 17)
 add_subdirectory(third-party/sdl)
 add_subdirectory(third-party/glew/build/cmake)
+add_subdirectory(third-party/glm)
 
 set(GL_SRC 
         ${CMAKE_CURRENT_SOURCE_DIR}/third-party/imgui/imgui_draw.cpp
@@ -14,6 +15,13 @@ set(GL_SRC
         main.cpp
         gl.cpp
         gl.h
+        shader.cpp
+        shader.h
+        texture.cpp
+        texture.h
+        vertex.cpp
+        vertex.h
+        stb_image.h
 )
 
 add_executable(demo ${GL_SRC})
@@ -23,8 +31,11 @@ set(GL_INCLUDES
         ${CMAKE_CURRENT_SOURCE_DIR}/third-party/sdl/include
         ${CMAKE_CURRENT_SOURCE_DIR}/third-party/imgui
         ${CMAKE_CURRENT_SOURCE_DIR}/third-party/imgui/backends
+        ${CMAKE_CURRENT_SOURCE_DIR}/third-party/glm
         ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-target_link_libraries(demo PRIVATE glew_s SDL2-static)
+target_link_libraries(demo PRIVATE glew_s SDL2-static glm)
 target_include_directories(demo PRIVATE ${GL_INCLUDES})
+
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/assets DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
