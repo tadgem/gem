@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.16)
 project(gl-fun)
+
 set(CMAKE_CXX_STANDARD 17)
+
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "Disable ASSIMP dynamic linking")
+
 add_subdirectory(third-party/sdl)
 add_subdirectory(third-party/glew/build/cmake)
 add_subdirectory(third-party/glm)
@@ -20,12 +24,12 @@ set(GL_SRC
         shader.h
         texture.cpp
         texture.h
-        vertex.cpp
-        vertex.h
         model.cpp
         model.h
         shape.cpp
         shape.h
+        vertex.cpp
+        vertex.h
         utils.cpp
         utils.h
         stb_image.h
@@ -37,9 +41,9 @@ set(GL_INCLUDES
         ${CMAKE_CURRENT_SOURCE_DIR}/third-party/glew/include
         ${CMAKE_CURRENT_SOURCE_DIR}/third-party/sdl/include
         ${CMAKE_CURRENT_SOURCE_DIR}/third-party/imgui
+        ${CMAKE_CURRENT_SOURCE_DIR}/submodules/assimp/include
         ${CMAKE_CURRENT_SOURCE_DIR}/third-party/imgui/backends
         ${CMAKE_CURRENT_SOURCE_DIR}/third-party/glm
-        ${CMAKE_CURRENT_SOURCE_DIR}/submodules/assimp/include
         ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
