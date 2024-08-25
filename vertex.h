@@ -1,9 +1,12 @@
 #pragma once
 #include <vector>
 #include "GL/glew.h"
+
+using gl_handle = unsigned int;
+
 struct VAO
 {
-	unsigned int m_vao_id;
+	gl_handle m_vao_id;
 
 	void	use();
 };
@@ -19,7 +22,7 @@ public:
 	template<typename _Ty>
 	void add_buffer(float* data, uint32_t count, uint32_t num_float_elements_per_vertex = 2)
 	{		
-		unsigned int vbo;
+		gl_handle vbo;
 		glGenBuffers(1, &vbo);
 
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -31,7 +34,7 @@ public:
 	VAO	 build();
 private:
 
-	unsigned int				m_vao;
-	std::vector<unsigned int>	m_vbos;
+	gl_handle					m_vao;
+	std::vector<gl_handle>		m_vbos;
 	uint32_t					m_offset_counter;
 };

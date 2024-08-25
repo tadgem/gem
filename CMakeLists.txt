@@ -4,6 +4,7 @@ set(CMAKE_CXX_STANDARD 17)
 add_subdirectory(third-party/sdl)
 add_subdirectory(third-party/glew/build/cmake)
 add_subdirectory(third-party/glm)
+add_subdirectory(submodules/assimp)
 
 set(GL_SRC 
         ${CMAKE_CURRENT_SOURCE_DIR}/third-party/imgui/imgui_draw.cpp
@@ -21,6 +22,10 @@ set(GL_SRC
         texture.h
         vertex.cpp
         vertex.h
+        model.cpp
+        model.h
+        shape.cpp
+        shape.h
         utils.cpp
         utils.h
         stb_image.h
@@ -34,6 +39,7 @@ set(GL_INCLUDES
         ${CMAKE_CURRENT_SOURCE_DIR}/third-party/imgui
         ${CMAKE_CURRENT_SOURCE_DIR}/third-party/imgui/backends
         ${CMAKE_CURRENT_SOURCE_DIR}/third-party/glm
+        ${CMAKE_CURRENT_SOURCE_DIR}/submodules/assimp/include
         ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
