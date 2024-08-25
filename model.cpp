@@ -115,11 +115,20 @@ model model::load_model_from_path(const std::string& path)
     model m{};
 
     ProcessNode(m, scene->mRootNode, scene);
-
+    std::string directory = path.substr(0, path.find_last_of('/') + 1);
     for (int i = 0; i < scene->mNumMaterials; i++)
     {
         auto* material = scene->mMaterials[i];
-        material->GetName();
+        uint32_t diffuseCount = aiGetMaterialTextureCount(material, aiTextureType_DIFFUSE);
+
+        if (diffuseCount > 0)
+        {
+            aiString resultPath;
+            aiGetMaterialTexture(material, aiTextureType_DIFFUSE, 0, &resultPath);
+            std::string finalPath = directory + std::string(resultPath.C_Str());
+            texture tex(finalPath);
+            material->GetName();
+        }
     }
 
 	return m;
