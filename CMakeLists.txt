@@ -8,7 +8,7 @@ set(BUILD_SHARED_LIBS OFF CACHE BOOL "Disable ASSIMP dynamic linking")
 add_subdirectory(third-party/sdl)
 add_subdirectory(third-party/glew/build/cmake)
 add_subdirectory(third-party/glm)
-add_subdirectory(submodules/assimp)
+add_subdirectory(third-party/assimp)
 
 set(GL_SRC 
         ${CMAKE_CURRENT_SOURCE_DIR}/third-party/imgui/imgui_draw.cpp
