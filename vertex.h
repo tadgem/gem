@@ -26,14 +26,15 @@ public:
 		glGenBuffers(1, &vbo);
 
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(_Ty) * count, data, GL_STATIC_DRAW);
+		auto data_size = sizeof(_Ty) * count;
+		glBufferData(GL_ARRAY_BUFFER, data_size, data, GL_STATIC_DRAW);
 		m_vbos.push_back(vbo);
 	}
 
 	template<typename _Ty>
 	void add_vertex_buffer(std::vector<_Ty> data)
 	{
-		add_vertex_buffer<_Ty>(data.data(), data.size());
+		add_vertex_buffer<_Ty>(&data[0], data.size());
 	}
 
 	void add_index_buffer(uint32_t* data, uint32_t data_count);

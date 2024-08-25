@@ -1,4 +1,6 @@
 #include "shader.h"
+#include "gtc/type_ptr.hpp"
+
 #include <iostream>
 
 
@@ -47,6 +49,11 @@ void shader::setVec3(const std::string& name, glm::vec3 value) const
 void shader::setVec4(const std::string& name, glm::vec4 value) const
 {
 	glUniform4f(glGetUniformLocation(m_shader_id, name.c_str()), value.x, value.y, value.z, value.w);
+}
+
+void shader::setMat4(const std::string& name, glm::mat4 value) const
+{
+	glUniformMatrix4fv(glGetUniformLocation(m_shader_id, name.c_str()), 1, GL_FALSE, glm::value_ptr(value));
 }
 
 int shader::compile_shader(const std::string& source, GLenum shader_stage)

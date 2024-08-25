@@ -28,6 +28,8 @@ set(GL_SRC
         gl.h
         shader.cpp
         shader.h
+        camera.cpp
+        camera.h
         texture.cpp
         texture.h
         model.cpp

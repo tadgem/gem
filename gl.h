@@ -3,6 +3,7 @@
 #undef main
 #include "GL/glew.h"
 #include "imgui.h"
+#include "glm.hpp"
 
 class engine {
 public:
@@ -12,6 +13,7 @@ public:
 	static void engine_post_frame();
 	static void engine_shut_down();
 	static float get_frame_time();
+	static glm::vec2 get_window_dim();
 
 	inline static SDL_Window*	s_window = nullptr;
 	inline static bool			s_quit = false;

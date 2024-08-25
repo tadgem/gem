@@ -47,6 +47,9 @@ void ProcessMesh(model& model, aiMesh* m, aiNode* node, const aiScene* scene) {
             verts.push_back(m->mTextureCoords[0][i].y);            
         }
         mesh_builder.add_vertex_buffer(verts);
+        mesh_builder.add_vertex_attribute(0, 8 * sizeof(float), 3);
+        mesh_builder.add_vertex_attribute(1, 8 * sizeof(float), 3);
+        mesh_builder.add_vertex_attribute(2, 8 * sizeof(float), 2);
     }
 
     std::vector<uint32_t> indices;
@@ -94,6 +97,21 @@ void ProcessNode(model& model, aiNode* node, const aiScene* scene) {
     }
 }
 
+void get_material_texture(const std::string& directory, aiMaterial* material, model::material_entry& mat, aiTextureType ass_texture_type, texture_map_type gl_texture_type)
+{
+    uint32_t tex_count = aiGetMaterialTextureCount(material, ass_texture_type);
+    if (tex_count > 0)
+    {
+        aiString resultPath;
+        aiGetMaterialTexture(material, ass_texture_type, 0, &resultPath);
+        std::string finalPath = directory + std::string(resultPath.C_Str());
+        texture tex(finalPath);
+
+        mat.m_material_maps[gl_texture_type] = tex;
+    }
+
+}
+
 model model::load_model_from_path(const std::string& path)
 {
     Assimp::Importer importer;
@@ -119,16 +137,26 @@ model model::load_model_from_path(const std::string& path)
     for (int i = 0; i < scene->mNumMaterials; i++)
     {
         auto* material = scene->mMaterials[i];
-        uint32_t diffuseCount = aiGetMaterialTextureCount(material, aiTextureType_DIFFUSE);
 
+        material_entry mat{};
+
+        get_material_texture(directory, material, mat, aiTextureType_DIFFUSE, texture_map_type::diffuse);
+        get_material_texture(directory, material, mat, aiTextureType_NORMALS, texture_map_type::normal);
+        get_material_texture(directory, material, mat, aiTextureType_SPECULAR, texture_map_type::specular);
+
+        uint32_t diffuseCount = aiGetMaterialTextureCount(material, aiTextureType_DIFFUSE);
         if (diffuseCount > 0)
         {
             aiString resultPath;
             aiGetMaterialTexture(material, aiTextureType_DIFFUSE, 0, &resultPath);
             std::string finalPath = directory + std::string(resultPath.C_Str());
             texture tex(finalPath);
-            material->GetName();
+
+            mat.m_material_maps[texture_map_type::diffuse] = tex;
         }
+
+
+        m.m_materials.push_back(mat);
     }
 
 	return m;

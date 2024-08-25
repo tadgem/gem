@@ -19,10 +19,11 @@ public:
 
 	struct material_entry
 	{
-		std::unordered_map<texture_map_type, std::string> m_map_paths;
+		std::unordered_map<texture_map_type, texture> m_material_maps;
 	};
 
-	std::vector<mesh> m_meshes;
+	std::vector<mesh>				m_meshes;
+	std::vector<material_entry>		m_materials;
 
 	static model load_model_from_path(const std::string& path);
 };

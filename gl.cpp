@@ -209,6 +209,7 @@ void engine::engine_pre_frame()
     glViewport(0, 0, (int)s_imgui_io->DisplaySize.x, (int)s_imgui_io->DisplaySize.y);
     glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
     glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_DEPTH_BUFFER_BIT);
 
     // Start the Dear ImGui frame
     ImGui_ImplOpenGL3_NewFrame();
@@ -240,4 +241,11 @@ void engine::engine_shut_down()
 float engine::get_frame_time()
 {
     return s_frametime;
+}
+
+glm::vec2 engine::get_window_dim()
+{
+    int w, h;
+    SDL_GetWindowSize(s_window, &w, &h);
+    return glm::vec2{ static_cast<float>(w), static_cast<float>(h) };
 }
