@@ -1,6 +1,14 @@
 #pragma once
 #include <string>
 
+enum class texture_map_type
+{
+	diffuse,
+	normal,
+	specular,
+
+};
+
 class texture
 {
 public:
