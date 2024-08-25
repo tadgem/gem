@@ -3520,7 +3520,7 @@ if(SDL_TEST)
 endif()
 
 if(MSVC AND NOT SDL_LIBC)
-  set(targets SDL2)
+  set(targets SDL2-static)
   if(TARGET SDL2-static)
     list(APPEND targets SDL2-static)
   endif()

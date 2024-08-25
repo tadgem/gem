@@ -99,7 +99,7 @@ model model::load_model_from_path(const std::string& path)
     );
     //
     if (scene == nullptr) {
-        return;
+        return {};
     }
 
     model m{};
