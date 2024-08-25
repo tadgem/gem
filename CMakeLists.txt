@@ -21,6 +21,8 @@ set(GL_SRC
         texture.h
         vertex.cpp
         vertex.h
+        utils.cpp
+        utils.h
         stb_image.h
 )
 

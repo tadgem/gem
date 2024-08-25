@@ -5,6 +5,7 @@
 #include "texture.h" 
 #include "shader.h"
 #include "vertex.h"
+#include "utils.h"
 
 
 int main()
@@ -30,6 +31,12 @@ int main()
         "}\n\0";
 
     shader basic(vertexShaderSource, fragmentShaderSource);
+
+    std::string texture_vert = utils::load_string_from_path("assets/shaders/texture.vert.glsl");
+    std::string texture_frag = utils::load_string_from_path("assets/shaders/texture.frag.glsl");
+
+    shader texture(texture_vert, texture_frag);
+
 
     float vertices[] = {
          0.5f, -0.5f, 0.0f,  // bottom right
