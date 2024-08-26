@@ -14,23 +14,7 @@ int main()
 {
     engine::init_gl_sdl();
 
-    texture tex("assets/textures/crate.jpg");
-
-    std::string vertexShaderSource = "#version 330 core\n"
-        "layout (location = 0) in vec3 aPos;\n"
-        "void main()\n"
-        "{\n"
-        "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-        "}\0";
-    std::string fragmentShaderSource = "#version 330 core\n"
-        "out vec4 FragColor;\n"
-        "void main()\n"
-        "{\n"
-        "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-        "}\n\0";
-
-    shader basic(vertexShaderSource, fragmentShaderSource);
-
+    
     std::string texture_vert = utils::load_string_from_path("assets/shaders/texture.vert.glsl");
     std::string texture_frag = utils::load_string_from_path("assets/shaders/texture.frag.glsl");
 
@@ -61,11 +45,6 @@ int main()
         engine::process_sdl_event();
         engine::engine_pre_frame();
         
-
-        double  timeValue = engine::get_frame_time();
-        float greenValue = static_cast<float>(sin(timeValue) / 2.0 + 0.5);
-        basic.setVec4("outColour", { 0.0f, greenValue, 0.0f, 1.0f });
-        glDrawArrays(GL_TRIANGLES, 0, 3);
 
         texture.use();
         cam.update(engine::get_window_dim());
