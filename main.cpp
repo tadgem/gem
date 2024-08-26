@@ -24,12 +24,19 @@ int main()
     std::string present_frag = utils::load_string_from_path("assets/shaders/present.frag.glsl");
 
     shader texture_shader(texture_vert, texture_frag);
-    shader gbuffer_shader(texture_vert, texture_frag);
-    shader present_shader(texture_vert, texture_frag);
+    shader gbuffer_shader(gbuffer_vert, gbuffer_frag);
+    shader present_shader(present_vert, present_frag);
 
     camera cam{};
     model sponza = model::load_model_from_path("assets/models/sponza/Sponza.gltf");
-    framebuffer gbuffer;
+    framebuffer gbuffer{};
+    gbuffer.bind();
+    gbuffer.add_colour_attachment(GL_COLOR_ATTACHMENT0, 1280, 720, GL_RGBA16F, GL_NEAREST, GL_FLOAT);
+    gbuffer.add_colour_attachment(GL_COLOR_ATTACHMENT1, 1280, 720, GL_RGBA16F, GL_NEAREST, GL_FLOAT);
+    gbuffer.add_colour_attachment(GL_COLOR_ATTACHMENT2, 1280, 720, GL_RGBA16F, GL_NEAREST, GL_FLOAT);
+    gbuffer.add_depth_attachment(1280, 720);
+    gbuffer.check();
+    gbuffer.unbind();
 
     float vertices[] = {
          0.5f, -0.5f, 0.0f,  // bottom right
@@ -68,7 +75,21 @@ int main()
             glDrawElements(GL_TRIANGLES, entry.m_index_count, GL_UNSIGNED_INT, 0);
         }
 
-        // update shader uniform
+        gbuffer.bind();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        gbuffer_shader.use();
+        gbuffer_shader.setMat4("u_mvp", mvp);
+        gbuffer_shader.setMat4("u_model", model);
+        gbuffer_shader.setInt("u_diffuse_sampler", 0);
+        for (auto& entry : sponza.m_meshes)
+        {
+            entry.m_vao.use();
+            auto diffuse_tex = sponza.m_materials[entry.m_material_index].m_material_maps[texture_map_type::diffuse];
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, diffuse_tex.m_handle);
+            glDrawElements(GL_TRIANGLES, entry.m_index_count, GL_UNSIGNED_INT, 0);
+        }
+        gbuffer.unbind();
 
         {
             ImGui::Begin("Hello, world!");                          

@@ -4,10 +4,10 @@ out vec4 FragColor;
 
 layout (location = 0) in vec2 aUV;
 
-uniform sampler2D uImageSampler;
+uniform sampler2D u_image_sampler;
 
 
 void main()
 {
-   FragColor = texture(uDiffuseSampler, aUV);
+   FragColor = texture(u_image_sampler, aUV);
 }

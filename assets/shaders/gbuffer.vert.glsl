@@ -15,7 +15,7 @@ uniform mat4 u_model;
 void main()
 {
     oUV = aUV;
-    oPosition = aPos * u_model;
-    oNormal = aNormal * u_model
+    oPosition = (vec4(aPos , 1.0) * u_model).xyz;
+    oNormal = (vec4(aNormal, 1.0) * u_model).xyz;
     gl_Position = u_mvp * vec4(aPos.x, aPos.y, aPos.z, 1.0);
 }

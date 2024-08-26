@@ -22,7 +22,7 @@ void framebuffer::add_colour_attachment(GLenum attachment_index, uint32_t width,
 	gl_handle textureColorbuffer;
 	glGenTextures(1, &textureColorbuffer);
 	glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
-	glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, pixel_format, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, GL_RGBA, pixel_format, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -33,7 +33,7 @@ void framebuffer::add_colour_attachment(GLenum attachment_index, uint32_t width,
 
 void framebuffer::add_depth_attachment(uint32_t width, uint32_t height, GLenum format)
 {
-	unsigned int rbo;
+	gl_handle rbo;
 	glGenRenderbuffers(1, &rbo);
 	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
 	glRenderbufferStorage(GL_RENDERBUFFER, format, width, height);
@@ -46,8 +46,19 @@ void framebuffer::add_depth_attachment(uint32_t width, uint32_t height, GLenum f
 
 void framebuffer::check()
 {
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+	auto zero = GL_COLOR_ATTACHMENT0;
+	std::vector<unsigned int> attachments;
+
+	for (auto& a : m_colour_attachments)
+	{
+		attachments.push_back(zero);
+		zero++;
+	}
+	glDrawBuffers(attachments.size(), attachments.data());
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
 		std::cerr << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+	}
 }
 
 void framebuffer::bind()
