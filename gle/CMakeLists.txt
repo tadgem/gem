@@ -13,6 +13,8 @@ set(GL_SRC
         ${CMAKE_CURRENT_SOURCE_DIR}/camera.h
         ${CMAKE_CURRENT_SOURCE_DIR}/texture.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/texture.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/framebuffer.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/framebuffer.h
         ${CMAKE_CURRENT_SOURCE_DIR}/model.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/model.h
         ${CMAKE_CURRENT_SOURCE_DIR}/shape.cpp

@@ -8,20 +8,28 @@
 #include "utils.h"
 #include "model.h"
 #include "camera.h"
-#include <ext/matrix_transform.hpp>
+#include "framebuffer.h"
 
 int main()
 {
     engine::init_gl_sdl();
-
     
     std::string texture_vert = utils::load_string_from_path("assets/shaders/texture.vert.glsl");
     std::string texture_frag = utils::load_string_from_path("assets/shaders/texture.frag.glsl");
 
-    shader texture(texture_vert, texture_frag);
+    std::string gbuffer_vert = utils::load_string_from_path("assets/shaders/gbuffer.vert.glsl");
+    std::string gbuffer_frag = utils::load_string_from_path("assets/shaders/gbuffer.frag.glsl");
+
+    std::string present_vert = utils::load_string_from_path("assets/shaders/present.vert.glsl");
+    std::string present_frag = utils::load_string_from_path("assets/shaders/present.frag.glsl");
+
+    shader texture_shader(texture_vert, texture_frag);
+    shader gbuffer_shader(texture_vert, texture_frag);
+    shader present_shader(texture_vert, texture_frag);
+
     camera cam{};
     model sponza = model::load_model_from_path("assets/models/sponza/Sponza.gltf");
-
+    framebuffer gbuffer;
 
     float vertices[] = {
          0.5f, -0.5f, 0.0f,  // bottom right
@@ -43,14 +51,13 @@ int main()
     while (!engine::s_quit)
     {
         engine::process_sdl_event();
-        engine::engine_pre_frame();
-        
+        engine::engine_pre_frame();        
 
-        texture.use();
+        texture_shader.use();
         cam.update(engine::get_window_dim());
         glm::mat4 mvp = cam.m_proj * cam.m_view * model;
-        texture.setMat4("u_mvp", mvp);
-        texture.setInt("uDiffuseSampler", 0);
+        texture_shader.setMat4("u_mvp", mvp);
+        texture_shader.setInt("uDiffuseSampler", 0);
 
         for (auto& entry : sponza.m_meshes)
         {
