@@ -1,3 +1,6 @@
 [submodule "submodules/glew"]
 	path = submodules/glew
 	url = https://github.com/nigels-com/glew.git
+[submodule "submodules/im3d"]
+	path = submodules/im3d
+	url = https://github.com/john-chapman/im3d.git

@@ -1,5 +1,7 @@
 #include "shader.h"
 #include "shader.h"
+#include "shader.h"
+#include "shader.h"
 #include "gtc/type_ptr.hpp"
 
 #include <iostream>
@@ -8,6 +10,19 @@
 shader::shader(const std::string& vert, const std::string& frag)
 {
 	auto v = compile_shader(vert, GL_VERTEX_SHADER);
+	auto f = compile_shader(frag, GL_FRAGMENT_SHADER);
+
+	m_shader_id = link_shader(v, f);
+
+	glDeleteShader(v);
+	glDeleteShader(f);
+
+}
+
+shader::shader(const std::string& vert, const std::string& geom, const std::string& frag)
+{
+	auto v = compile_shader(vert, GL_VERTEX_SHADER);
+	auto g = compile_shader(geom, GL_GEOMETRY_SHADER);
 	auto f = compile_shader(frag, GL_FRAGMENT_SHADER);
 
 	m_shader_id = link_shader(v, f);
@@ -87,6 +102,27 @@ int shader::link_shader(unsigned int vert, unsigned int frag)
 {
 	auto prog_id = glCreateProgram();
 	glAttachShader(prog_id, vert);
+	glAttachShader(prog_id, frag);
+	glLinkProgram(prog_id);
+
+	int success = 0;
+
+	glGetProgramiv(prog_id, GL_LINK_STATUS, &success);
+	if (!success)
+	{
+		char infoLog[512];
+		glGetProgramInfoLog(prog_id, 512, NULL, infoLog);
+		std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
+	}
+
+	return prog_id;
+}
+
+int shader::link_shader(unsigned int vert, unsigned int geom, unsigned int frag)
+{
+	auto prog_id = glCreateProgram();
+	glAttachShader(prog_id, vert);
+	glAttachShader(prog_id, geom);
 	glAttachShader(prog_id, frag);
 	glLinkProgram(prog_id);
 

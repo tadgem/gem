@@ -5,6 +5,11 @@ set(GL_SRC
         ${THIRD_PARTY_DIR}/imgui/imgui.cpp
         ${THIRD_PARTY_DIR}/imgui/backends/imgui_impl_opengl3.cpp
         ${THIRD_PARTY_DIR}/imgui/backends/imgui_impl_sdl2.cpp
+        ${SUBMODULE_DIR}/im3d/im3d.cpp
+        ${SUBMODULE_DIR}/im3d/im3d_config.h
+        ${SUBMODULE_DIR}/im3d/im3d_math.h
+        ${SUBMODULE_DIR}/im3d/im3d.h
+
         ${CMAKE_CURRENT_SOURCE_DIR}/gl.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/gl.h
         ${CMAKE_CURRENT_SOURCE_DIR}/shader.cpp

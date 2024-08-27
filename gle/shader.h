@@ -9,6 +9,7 @@ public:
 	unsigned int m_shader_id;
 
 	shader(const std::string& vert, const std::string& frag);
+    shader(const std::string& vert, const std::string& geom, const std::string& frag);
 
     void use();
     

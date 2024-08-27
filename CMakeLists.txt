@@ -12,6 +12,7 @@ set(SDL2_DISABLE_INSTALL ON CACHE BOOL "Disable SDL Install")
 set(SDL2_DISABLE_UNINSTALL ON CACHE BOOL "Disable SDL Uninstall")
 
 set(THIRD_PARTY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/third-party/ CACHE INTERNAL "")
+set(SUBMODULE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/submodules/ CACHE INTERNAL "")
 
 add_subdirectory(third-party/sdl)
 add_subdirectory(third-party/glew/build/cmake)
