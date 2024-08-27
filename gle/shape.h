@@ -11,4 +11,9 @@ public:
 		glm::vec3 max;
 	};
 
+	struct screen_quad
+	{
+
+	};
+
 };

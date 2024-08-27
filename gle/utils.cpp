@@ -1,4 +1,5 @@
 #include "utils.h"
+#include "utils.h"
 #include <fstream>
 #include <sstream>
 #define GLM_ENABLE_EXPERIMENTAL
@@ -42,6 +43,11 @@ glm::mat4 utils::get_model_matrix(glm::vec3 position, glm::vec3 euler, glm::vec3
     localScale = glm::scale(localScale, scale);
     
     return modelMatrix * localRotation * localScale;
+}
+
+glm::mat3 utils::get_normal_matrix(glm::mat4 model)
+{
+    return glm::transpose(glm::inverse(glm::mat3(model)));
 }
 
 void utils::validate_euler_angles(glm::vec3& input)

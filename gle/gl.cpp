@@ -10,6 +10,7 @@
 #else
 #include <SDL_opengl.h>
 #endif
+#include "texture.h"
 
 static SDL_GLContext*   s_sdl_gl_context = nullptr;
 static Uint64           s_now_counter;
@@ -99,6 +100,15 @@ void set_imgui_style()
     style.TabRounding = 4;
 }
 
+void init_built_in_assets()
+{
+    std::vector<unsigned int> black_data = { 0 };
+    std::vector<unsigned int> white_data = { UINT32_MAX };
+    texture::white = new texture(texture::from_data(white_data.data(), white_data.size(), 1, 1, 1, 4));
+    texture::black = new texture(texture::from_data(black_data.data(), white_data.size(), 1, 1, 1, 4));
+
+}
+
 void engine::init_gl_sdl()
 {
     // Setup SDL
@@ -179,6 +189,8 @@ void engine::init_gl_sdl()
 
     s_now_counter = SDL_GetPerformanceCounter();
     s_last_counter  = 0;
+
+    init_built_in_assets();
 }
 
 void engine::process_sdl_event()

@@ -7,6 +7,9 @@ enum class texture_map_type
 	diffuse,
 	normal,
 	specular,
+	metallicness,
+	roughness,
+	ao
 
 };
 
@@ -21,4 +24,8 @@ public:
 
 	gl_handle m_handle;
 
+	static texture from_data(unsigned int* data, unsigned int count, int width, int height, int depth, int nr_channels);
+
+	inline static texture* white;
+	inline static texture* black;
 };

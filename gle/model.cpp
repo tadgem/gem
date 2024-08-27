@@ -143,17 +143,10 @@ model model::load_model_from_path(const std::string& path)
         get_material_texture(directory, material, mat, aiTextureType_DIFFUSE, texture_map_type::diffuse);
         get_material_texture(directory, material, mat, aiTextureType_NORMALS, texture_map_type::normal);
         get_material_texture(directory, material, mat, aiTextureType_SPECULAR, texture_map_type::specular);
+        get_material_texture(directory, material, mat, aiTextureType_AMBIENT_OCCLUSION, texture_map_type::ao);
+        get_material_texture(directory, material, mat, aiTextureType_DIFFUSE_ROUGHNESS, texture_map_type::roughness);
+        get_material_texture(directory, material, mat, aiTextureType_METALNESS, texture_map_type::metallicness);
 
-        uint32_t diffuseCount = aiGetMaterialTextureCount(material, aiTextureType_DIFFUSE);
-        if (diffuseCount > 0)
-        {
-            aiString resultPath;
-            aiGetMaterialTexture(material, aiTextureType_DIFFUSE, 0, &resultPath);
-            std::string finalPath = directory + std::string(resultPath.C_Str());
-            texture tex(finalPath);
-
-            mat.m_material_maps[texture_map_type::diffuse] = tex;
-        }
 
 
         m.m_materials.push_back(mat);
