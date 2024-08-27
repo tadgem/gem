@@ -77,10 +77,10 @@ void shader::setMat4(const std::string& name, glm::mat4 value) const
 	glUniformMatrix4fv(glGetUniformLocation(m_shader_id, name.c_str()), 1, GL_FALSE, glm::value_ptr(value));
 }
 
-int shader::compile_shader(const std::string& source, GLenum shader_stage)
+gl_handle shader::compile_shader(const std::string& source, GLenum shader_stage)
 {
 	const char* src = source.c_str();
-	auto s = glCreateShader(shader_stage);
+	gl_handle s = glCreateShader(shader_stage);
 	glShaderSource(s, 1, &src, NULL);
 	glCompileShader(s);
 
@@ -98,7 +98,7 @@ int shader::compile_shader(const std::string& source, GLenum shader_stage)
 	return s;
 }
 
-int shader::link_shader(unsigned int vert, unsigned int frag)
+int shader::link_shader(gl_handle vert, gl_handle frag)
 {
 	auto prog_id = glCreateProgram();
 	glAttachShader(prog_id, vert);
@@ -118,7 +118,7 @@ int shader::link_shader(unsigned int vert, unsigned int frag)
 	return prog_id;
 }
 
-int shader::link_shader(unsigned int vert, unsigned int geom, unsigned int frag)
+int shader::link_shader(gl_handle vert, gl_handle geom, gl_handle frag)
 {
 	auto prog_id = glCreateProgram();
 	glAttachShader(prog_id, vert);

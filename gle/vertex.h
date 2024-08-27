@@ -1,8 +1,7 @@
 #pragma once
 #include <vector>
 #include "GL/glew.h"
-
-using gl_handle = unsigned int;
+#include "alias.h"
 
 struct VAO
 {

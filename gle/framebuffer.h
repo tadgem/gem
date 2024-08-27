@@ -1,6 +1,8 @@
 #pragma once
-#include "vertex.h"
-
+#include "alias.h"
+#include "GL/glew.h"
+#include <cstdint>
+#include <vector>
 class framebuffer
 {
 public:
