@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include "vertex.h"
+#include "glm.hpp"
 
 enum class texture_map_type
 {
@@ -25,6 +26,7 @@ public:
 	gl_handle m_handle;
 
 	static texture from_data(unsigned int* data, unsigned int count, int width, int height, int depth, int nr_channels);
+	static texture create_3d_texture(glm::ivec3 dim, GLenum format, GLenum pixel_format, GLenum data_type, void* data, GLenum filter = GL_LINEAR, GLenum wrap_mode = GL_REPEAT);
 
 	inline static texture* white;
 	inline static texture* black;
