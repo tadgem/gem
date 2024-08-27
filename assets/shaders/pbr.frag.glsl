@@ -18,6 +18,8 @@ uniform vec3 lightColors[4];
 uniform vec3 camPos;
 
 const float PI = 3.14159265359;
+
+
 // ----------------------------------------------------------------------------
 // Easy trick to get tangent-normals to world-space to keep PBR code simplified.
 // Don't worry if you don't get what's going on; you generally want to do normal 
@@ -79,6 +81,14 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0)
 {
     return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
+
+float blinnPhongAttenuation(float range, float dist)
+{
+    float l = 4.5 / range;
+    float q = 75.0f / range;
+
+    return 1.0 / (1.0 + l * dist + q * (dist * dist));
+}
 // ----------------------------------------------------------------------------
 void main()
 {
@@ -99,12 +109,15 @@ void main()
     vec3 Lo = vec3(0.0);
     for (int i = 0; i < 4; ++i)
     {
+        vec3 LightDir = lightPositions[i] - WorldPos;
         // calculate per-light radiance
-        vec3 L = normalize(lightPositions[i] - WorldPos);
+        vec3 L = normalize(LightDir);
         vec3 H = normalize(V + L);
-        float distance = length(lightPositions[i] - WorldPos);
-        float attenuation = 1.0 / (distance * distance);
-        vec3 radiance = lightColors[i] * attenuation;
+        //vec3 H = normalize(L);
+
+        float distance = length(LightDir);
+        float attenuation = blinnPhongAttenuation(10.0f, length(LightDir));
+        vec3 radiance = lightColors[i] * (attenuation);
 
         // Cook-Torrance BRDF
         float NDF = DistributionGGX(N, H, roughness);
@@ -128,9 +141,9 @@ void main()
 
         // scale light by NdotL
         float NdotL = max(dot(N, L), 0.0);
-
+        vec3 diffuse = NdotL * albedo;
         // add to outgoing radiance Lo
-        Lo += (kD * albedo / PI + specular) * radiance * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
+        Lo += (kD * diffuse / PI + specular) * radiance * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
     }
 
     // ambient lighting (note that the next IBL tutorial will replace 

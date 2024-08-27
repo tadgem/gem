@@ -60,7 +60,7 @@ int main()
     {
         engine::process_sdl_event();
         engine::engine_pre_frame();        
-
+        glCullFace(GL_BACK);
         pbr_shader.use();
         cam.update(engine::get_window_dim());
         glm::mat4 mvp = cam.m_proj * cam.m_view * model;
@@ -99,24 +99,9 @@ int main()
 
         for (auto& entry : sponza.m_meshes)
         {
-            entry.m_vao.use();
-            auto diffuse_tex = sponza.m_materials[entry.m_material_index].m_material_maps[texture_map_type::diffuse];
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, diffuse_tex.m_handle);
-            glDrawElements(GL_TRIANGLES, entry.m_index_count, GL_UNSIGNED_INT, 0);
-        }
-
-        gbuffer.bind();
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        gbuffer_shader.use();
-        gbuffer_shader.setMat4("u_mvp", mvp);
-        gbuffer_shader.setMat4("u_model", model);
-        gbuffer_shader.setInt("u_diffuse_sampler", 0);
-        for (auto& entry : sponza.m_meshes)
-        {
             auto& maps = sponza.m_materials[entry.m_material_index].m_material_maps;
             entry.m_vao.use();
-            auto diffuse_tex = maps[texture_map_type::diffuse];
+            auto diffuse_tex = sponza.m_materials[entry.m_material_index].m_material_maps[texture_map_type::diffuse];
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, diffuse_tex.m_handle);
             if (maps.find(texture_map_type::normal) != maps.end())
@@ -139,6 +124,22 @@ int main()
                 glActiveTexture(GL_TEXTURE4);
                 glBindTexture(GL_TEXTURE_2D, maps[texture_map_type::metallicness].m_handle);
             }
+            glDrawElements(GL_TRIANGLES, entry.m_index_count, GL_UNSIGNED_INT, 0);
+        }
+
+        gbuffer.bind();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        gbuffer_shader.use();
+        gbuffer_shader.setMat4("u_mvp", mvp);
+        gbuffer_shader.setMat4("u_model", model);
+        gbuffer_shader.setInt("u_diffuse_sampler", 0);
+        for (auto& entry : sponza.m_meshes)
+        {
+            auto& maps = sponza.m_materials[entry.m_material_index].m_material_maps;
+            entry.m_vao.use();
+            auto diffuse_tex = maps[texture_map_type::diffuse];
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, diffuse_tex.m_handle);
             glDrawElements(GL_TRIANGLES, entry.m_index_count, GL_UNSIGNED_INT, 0);
         }
         gbuffer.unbind();
