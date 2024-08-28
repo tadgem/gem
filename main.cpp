@@ -17,6 +17,75 @@ struct light
     glm::vec3 colour;
 };
 
+void handle_pbr_forward(shader& pbr_shader, glm::mat4 model_mat, glm::mat3 normal, camera& cam, std::vector<light>& lights, model& sponza)
+{
+    pbr_shader.use();
+    cam.update(engine::get_window_dim());
+    glm::mat4 mvp = cam.m_proj * cam.m_view * model_mat;
+    pbr_shader.setMat4("model", model_mat);
+    pbr_shader.setMat4("projection", cam.m_proj);
+    pbr_shader.setMat4("view", cam.m_view);
+    pbr_shader.setMat3("normalMatrix", normal);
+    pbr_shader.setVec3("camPos", cam.m_pos);
+
+    for (int l = 0; l < lights.size(); l++)
+    {
+        std::stringstream pos_name;
+        pos_name << "lightPositions[" << l + 1 << "]";
+        std::stringstream col_name;
+        col_name << "lightColors[" << l + 1 << "]";
+
+        pbr_shader.setVec3(pos_name.str(), lights[l].position);
+        pbr_shader.setVec3(col_name.str(), lights[l].colour);
+    }
+
+    pbr_shader.setInt("albedoMap", 0);
+    pbr_shader.setInt("normalMap", 1);
+    pbr_shader.setInt("metallicMap", 2);
+    pbr_shader.setInt("roughnessMap", 3);
+    pbr_shader.setInt("aoMap", 4);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture::white->m_handle);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, texture::black->m_handle);
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, texture::black->m_handle);
+    glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D, texture::white->m_handle);
+    glActiveTexture(GL_TEXTURE4);
+    glBindTexture(GL_TEXTURE_2D, texture::white->m_handle);
+
+    for (auto& entry : sponza.m_meshes)
+    {
+        auto& maps = sponza.m_materials[entry.m_material_index].m_material_maps;
+        entry.m_vao.use();
+        auto diffuse_tex = sponza.m_materials[entry.m_material_index].m_material_maps[texture_map_type::diffuse];
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, diffuse_tex.m_handle);
+        if (maps.find(texture_map_type::normal) != maps.end())
+        {
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, maps[texture_map_type::normal].m_handle);
+        }
+        if (maps.find(texture_map_type::metallicness) != maps.end())
+        {
+            glActiveTexture(GL_TEXTURE2);
+            glBindTexture(GL_TEXTURE_2D, maps[texture_map_type::metallicness].m_handle);
+        }
+        if (maps.find(texture_map_type::roughness) != maps.end())
+        {
+            glActiveTexture(GL_TEXTURE3);
+            glBindTexture(GL_TEXTURE_2D, maps[texture_map_type::roughness].m_handle);
+        }
+        if (maps.find(texture_map_type::ao) != maps.end())
+        {
+            glActiveTexture(GL_TEXTURE4);
+            glBindTexture(GL_TEXTURE_2D, maps[texture_map_type::metallicness].m_handle);
+        }
+        glDrawElements(GL_TRIANGLES, entry.m_index_count, GL_UNSIGNED_INT, 0);
+    }
+}
+
 int main()
 {
     engine::init_gl_sdl();
@@ -41,6 +110,8 @@ int main()
     gbuffer.add_colour_attachment(GL_COLOR_ATTACHMENT0, 1280, 720, GL_RGBA, GL_NEAREST, GL_UNSIGNED_BYTE);
     gbuffer.add_colour_attachment(GL_COLOR_ATTACHMENT1, 1280, 720, GL_RGBA16F, GL_NEAREST, GL_FLOAT);
     gbuffer.add_colour_attachment(GL_COLOR_ATTACHMENT2, 1280, 720, GL_RGBA16F, GL_NEAREST, GL_FLOAT);
+    gbuffer.add_colour_attachment(GL_COLOR_ATTACHMENT3, 1280, 720, GL_RGBA16F, GL_NEAREST, GL_FLOAT);
+
     gbuffer.add_depth_attachment(1280, 720);
     gbuffer.check();
     gbuffer.unbind();
@@ -74,49 +145,30 @@ int main()
         engine::process_sdl_event();
         engine::engine_pre_frame();        
         glCullFace(GL_BACK);
-        pbr_shader.use();
-        cam.update(engine::get_window_dim());
+        
         glm::mat4 mvp = cam.m_proj * cam.m_view * model;
-        pbr_shader.setMat4("model", model);
-        pbr_shader.setMat4("projection", cam.m_proj);
-        pbr_shader.setMat4("view", cam.m_view);
-        pbr_shader.setMat3("normalMatrix", normal);
-        pbr_shader.setVec3("camPos", cam.m_pos);
+        handle_pbr_forward(pbr_shader, model, normal, cam, lights, sponza);
 
-        for (int l = 0; l < lights.size(); l++)
-        {
-            std::stringstream pos_name;
-            pos_name << "lightPositions[" << l + 1 << "]";
-            std::stringstream col_name;
-            col_name << "lightColors[" << l + 1 << "]";
 
-            pbr_shader.setVec3(pos_name.str(), lights[l].position);
-            pbr_shader.setVec3(col_name.str(), lights[l].colour);
-        }
-
-        pbr_shader.setInt("albedoMap", 0);
-        pbr_shader.setInt("normalMap", 1);
-        pbr_shader.setInt("metallicMap", 2);
-        pbr_shader.setInt("roughnessMap", 3);
-        pbr_shader.setInt("aoMap", 4);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture::white->m_handle);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, texture::black->m_handle);
-        glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, texture::black->m_handle);
-        glActiveTexture(GL_TEXTURE3);
-        glBindTexture(GL_TEXTURE_2D, texture::white->m_handle);
-        glActiveTexture(GL_TEXTURE4);
-        glBindTexture(GL_TEXTURE_2D, texture::white->m_handle);
-
+        gbuffer.bind();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        gbuffer_shader.use();
+        gbuffer_shader.setMat4("u_mvp", mvp);
+        gbuffer_shader.setMat4("u_model", model);
+        gbuffer_shader.setMat4("u_normal", normal);
+        gbuffer_shader.setInt("u_diffuse_map", 0);
+        gbuffer_shader.setInt("u_normal_map", 1);
+        gbuffer_shader.setInt("u_metallic_map", 2);
+        gbuffer_shader.setInt("u_roughness_map", 3);
+        gbuffer_shader.setInt("u_ao_map", 4);
         for (auto& entry : sponza.m_meshes)
         {
             auto& maps = sponza.m_materials[entry.m_material_index].m_material_maps;
             entry.m_vao.use();
-            auto diffuse_tex = sponza.m_materials[entry.m_material_index].m_material_maps[texture_map_type::diffuse];
+            auto diffuse_tex = maps[texture_map_type::diffuse];
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, diffuse_tex.m_handle);
+
             if (maps.find(texture_map_type::normal) != maps.end())
             {
                 glActiveTexture(GL_TEXTURE1);
@@ -137,22 +189,7 @@ int main()
                 glActiveTexture(GL_TEXTURE4);
                 glBindTexture(GL_TEXTURE_2D, maps[texture_map_type::metallicness].m_handle);
             }
-            glDrawElements(GL_TRIANGLES, entry.m_index_count, GL_UNSIGNED_INT, 0);
-        }
 
-        gbuffer.bind();
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        gbuffer_shader.use();
-        gbuffer_shader.setMat4("u_mvp", mvp);
-        gbuffer_shader.setMat4("u_model", model);
-        gbuffer_shader.setInt("u_diffuse_sampler", 0);
-        for (auto& entry : sponza.m_meshes)
-        {
-            auto& maps = sponza.m_materials[entry.m_material_index].m_material_maps;
-            entry.m_vao.use();
-            auto diffuse_tex = maps[texture_map_type::diffuse];
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, diffuse_tex.m_handle);
             glDrawElements(GL_TRIANGLES, entry.m_index_count, GL_UNSIGNED_INT, 0);
         }
         gbuffer.unbind();

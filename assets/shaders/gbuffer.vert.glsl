@@ -10,12 +10,12 @@ layout(location = 2) out vec3 oNormal;
 
 uniform mat4 u_mvp;
 uniform mat4 u_model;
-
+uniform mat4 u_normal;
 
 void main()
 {
     oUV = aUV;
     oPosition = (vec4(aPos , 1.0) * u_model).xyz;
-    oNormal = (vec4(aNormal, 1.0) * u_model).xyz;
+    oNormal = (vec4(aNormal, 1.0) * u_normal).xyz;
     gl_Position = u_mvp * vec4(aPos.x, aPos.y, aPos.z, 1.0);
 }
