@@ -184,7 +184,7 @@ int main()
 
         handle_gbuffer(gbuffer, gbuffer_shader, mvp, model, normal, cam, lights, sponza);
 
-        // handle_light_pass(lighting_shader, gbuffer, cam, lights);
+        handle_light_pass(lighting_shader, gbuffer, cam, lights);
 
         shapes::s_cube_pos_only.use();
         debug3dtex_shader.use();
