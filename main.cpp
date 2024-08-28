@@ -160,17 +160,29 @@ int main()
     constexpr int _3d_cube_res = _3d_tex_res * _3d_tex_res * _3d_tex_res;
 
     float* _3d_tex_data = new float[_3d_cube_res * 4];
+    std::vector<glm::vec3> positions;
 
     for (auto i = 0; i < _3d_cube_res; i++)
     {
         float r = rand() * 10000000;
         _3d_tex_data[i] = r;
+
+        //create a new VAO for debug cubes
+        // first vbo is same as cube
+        // instance vbo is per-instance transform
+        int x = i / (128 * 128);
+        int y = (i / 128) % 128;
+        int z = i % 128;
+
+        positions.push_back({ z,y,x });
     }
 
     texture _3d_tex = texture::create_3d_texture({ 128, 128, 128 }, GL_RGBA, GL_RGBA32F, GL_FLOAT, _3d_tex_data);
     
     glm::mat4 model = utils::get_model_matrix(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(0.2f));
     glm::mat3 normal = utils::get_normal_matrix(model);
+
+
 
     glEnable(GL_DEPTH_TEST);
     while (!engine::s_quit)
