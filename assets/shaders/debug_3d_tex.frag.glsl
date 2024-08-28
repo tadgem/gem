@@ -8,5 +8,10 @@ uniform sampler3D u_volume;
 
 void main()
 {
-	FragColor = texture(u_volume, oUVW) / 100000.0;
+	vec4 col = texture(u_volume, oUVW);
+	if (col.w < 0.75)
+	{
+		discard;
+	}
+	FragColor = texture(u_volume, oUVW) * 2.0f;
 }

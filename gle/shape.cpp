@@ -1,6 +1,6 @@
 #include "shape.h"
 
-VAO shapes::gen_cube_instanced_vao(std::vector<glm::mat4>& matrices)
+VAO shapes::gen_cube_instanced_vao(std::vector<glm::mat4>& matrices, std::vector<glm::vec3>& uvs)
 {
     //  Set up vertex attribute data and attribute pointers
     std::vector<float>  cube_data = {
@@ -55,26 +55,33 @@ VAO shapes::gen_cube_instanced_vao(std::vector<glm::mat4>& matrices)
     cube_builder.add_vertex_attribute(0, 3 * sizeof(float), 3);
     cube_builder.add_vertex_buffer(matrices);
     auto matrices_vbo = cube_builder.m_vbos.back();
+    cube_builder.add_vertex_buffer(uvs);
+    auto uvs_vbo = cube_builder.m_vbos.back();
     cube_builder.add_index_buffer(cube_indices);
 
-    std::size_t vec4Size = sizeof(glm::vec4);
     glEnableVertexAttribArray(1);
-    glBindBuffer(GL_ARRAY_BUFFER, matrices_vbo);
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)0);
+    glBindBuffer(GL_ARRAY_BUFFER, uvs_vbo);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
+
+    std::size_t vec4Size = sizeof(glm::vec4);
     glEnableVertexAttribArray(2);
     glBindBuffer(GL_ARRAY_BUFFER, matrices_vbo);
-    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(1 * vec4Size));
+    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)0);
     glEnableVertexAttribArray(3);
     glBindBuffer(GL_ARRAY_BUFFER, matrices_vbo);
-    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(2 * vec4Size));
+    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(1 * vec4Size));
     glEnableVertexAttribArray(4);
     glBindBuffer(GL_ARRAY_BUFFER, matrices_vbo);
-    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(3 * vec4Size));
+    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(2 * vec4Size));
+    glEnableVertexAttribArray(5);
+    glBindBuffer(GL_ARRAY_BUFFER, matrices_vbo);
+    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(3 * vec4Size));
 
     glVertexAttribDivisor(1, 1);
     glVertexAttribDivisor(2, 1);
     glVertexAttribDivisor(3, 1);
     glVertexAttribDivisor(4, 1);
+    glVertexAttribDivisor(5, 1);
     return cube_builder.build();
 
 

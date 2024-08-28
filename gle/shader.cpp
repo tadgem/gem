@@ -2,10 +2,20 @@
 #include "shader.h"
 #include "shader.h"
 #include "shader.h"
+#include "shader.h"
+#include "shader.h"
 #include "gtc/type_ptr.hpp"
 
 #include <iostream>
 
+
+shader::shader(const std::string& comp)
+{
+	auto c = compile_shader(comp, GL_COMPUTE_SHADER);
+	m_shader_id = link_shader(c);
+
+	glDeleteShader(c);
+}
 
 shader::shader(const std::string& vert, const std::string& frag)
 {
@@ -96,6 +106,25 @@ gl_handle shader::compile_shader(const std::string& source, GLenum shader_stage)
 	};
 
 	return s;
+}
+
+int shader::link_shader(gl_handle comp)
+{
+	auto prog_id = glCreateProgram();
+	glAttachShader(prog_id, comp);
+	glLinkProgram(prog_id);
+
+	int success = 0;
+
+	glGetProgramiv(prog_id, GL_LINK_STATUS, &success);
+	if (!success)
+	{
+		char infoLog[512];
+		glGetProgramInfoLog(prog_id, 512, NULL, infoLog);
+		std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
+	}
+
+	return prog_id;
 }
 
 int shader::link_shader(gl_handle vert, gl_handle frag)

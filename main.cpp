@@ -130,10 +130,13 @@ int main()
     std::string present_vert = utils::load_string_from_path("assets/shaders/present.vert.glsl");
     std::string present_frag = utils::load_string_from_path("assets/shaders/present.frag.glsl");
 
+    std::string voxelization_compute = utils::load_string_from_path("assets/shaders/gbuffer_voxelization.comp.glsl");
+
     shader gbuffer_shader(gbuffer_vert, gbuffer_frag);
     shader lighting_shader(present_vert, gbuffer_lighting_frag);
     shader present_shader(present_vert, present_frag);
     shader debug3dtex_shader(debug3dtex_vert, debug3dtex_frag);
+    shader voxelization(voxelization_compute);
 
 
     camera cam{};
@@ -150,6 +153,12 @@ int main()
     gbuffer.check();
     gbuffer.unbind();
 
+    framebuffer lightpass_buffer{};
+    lightpass_buffer.bind();
+    lightpass_buffer.add_colour_attachment(GL_COLOR_ATTACHMENT0, 1280, 720, GL_RGBA16F, GL_NEAREST, GL_FLOAT);
+    lightpass_buffer.check();
+    lightpass_buffer.unbind();
+
     std::vector<point_light> lights;
     lights.push_back({ {0.0, 0.0, 0.0}, {255.0, 0.0, 0.0}, 10.0f});
     lights.push_back({ {10.0, 0.0, 10.0}, {255.0, 255.0, 0.0}, 20.0f });
@@ -161,46 +170,62 @@ int main()
 
     float* _3d_tex_data = new float[_3d_cube_res * 4];
     std::vector<glm::mat4> instance_matrices;
+    std::vector<glm::vec3> instance_uvs;
+
+
+    for (auto i = 0; i < _3d_cube_res * 4; i++)
+    {
+        // float r = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
+        float r = 0.0f;
+        _3d_tex_data[i] = r;
+    }
 
     for (auto i = 0; i < _3d_cube_res; i++)
     {
-        float r = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX)) * 255.0f;
-        _3d_tex_data[i] = r;
-
         //create a new VAO for debug cubes
         // first vbo is same as cube
         // instance vbo is per-instance transform
-        int x = i / (128 * 128);
-        int y = (i / 128) % 128;
-        int z = i % 128;
+        float x = i / (128 * 128);
+        float y = (i / 128) % 128;
+        float z = i % 128;
 
+        instance_uvs.push_back({ (z + 1) / 128,(y + 1) / 128, (x + 1)/ 128 });
         instance_matrices.push_back(utils::get_model_matrix({ z,y,x }, {0,90,0}, {0.1,0.1,0.1}));
     }
-    VAO instanced_cubes = shapes::gen_cube_instanced_vao(instance_matrices);
+    VAO instanced_cubes = shapes::gen_cube_instanced_vao(instance_matrices, instance_uvs);
     texture _3d_tex = texture::create_3d_texture({ 128, 128, 128 }, GL_RGBA, GL_RGBA32F, GL_FLOAT, _3d_tex_data);
+    glBindImageTexture(0, _3d_tex.m_handle, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+
+    voxelization.use();
+    voxelization.setInt("u_gbuffer_pos", 0);
+    voxelization.setInt("u_gbuffer_lighting", 1);
+
     
     glm::mat4 model = utils::get_model_matrix(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(0.2f));
     glm::mat3 normal = utils::get_normal_matrix(model);
 
-
+    bool draw_debug_3d_texture = true;
 
     glEnable(GL_DEPTH_TEST);
+    glCullFace(GL_BACK);
     while (!engine::s_quit)
     {
         engine::process_sdl_event();
         engine::engine_pre_frame();        
-        glCullFace(GL_BACK);
         glm::mat4 mvp = cam.m_proj * cam.m_view * model;
-
         cam.update(engine::get_window_dim());
-
-        handle_gbuffer(gbuffer, gbuffer_shader, mvp, model, normal, cam, lights, sponza);
-
-        handle_light_pass(lighting_shader, gbuffer, cam, lights);
-
+        
+        // compute
+        voxelization.use();
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, gbuffer.m_colour_attachments[1]);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, lightpass_buffer.m_colour_attachments[0]);
+        glDispatchCompute((unsigned int)1280 / 10, (unsigned int)720/ 10, 1);
+        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
         glClear(GL_DEPTH_BUFFER_BIT);
 
-        if(true)
+        if(draw_debug_3d_texture)
         {
             instanced_cubes.use();
             debug3dtex_shader.use();
@@ -211,6 +236,12 @@ int main()
             glBindTexture(GL_TEXTURE_3D, _3d_tex.m_handle);
             glDrawElementsInstanced(GL_TRIANGLES, 36, GL_UNSIGNED_INT,  0, _3d_cube_res);
         }
+        
+        handle_gbuffer(gbuffer, gbuffer_shader, mvp, model, normal, cam, lights, sponza);
+        lightpass_buffer.bind();
+        handle_light_pass(lighting_shader, gbuffer, cam, lights);
+        lightpass_buffer.unbind();
+        
 
         {
             ImGui::Begin("Hello, world!");                          

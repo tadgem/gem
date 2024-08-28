@@ -9,6 +9,7 @@ class shader
 public:
 	unsigned int m_shader_id;
 
+    shader(const std::string& comp);
 	shader(const std::string& vert, const std::string& frag);
     shader(const std::string& vert, const std::string& geom, const std::string& frag);
 
@@ -25,6 +26,7 @@ public:
 
 
     static gl_handle compile_shader(const std::string& source, GLenum shader_stage);
+    static int link_shader(gl_handle comp);
     static int link_shader(gl_handle vert, gl_handle frag);
     static int link_shader(gl_handle vert, gl_handle geom, gl_handle frag);
 };
