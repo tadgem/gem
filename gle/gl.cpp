@@ -118,20 +118,65 @@ void init_built_in_assets()
         -1.0f,  1.0f, 0.0f,  0.0f, 1.0f    // top left 
     };
 
-    std::vector<unsigned int> indices = {
+    std::vector<unsigned int> screen_quad_indices = {
         0, 1, 3, // first triangle
         1, 2, 3  // second triangle
     };
 
-    vao_builder builder;
-    builder.begin();
-    builder.add_vertex_buffer(screen_quad_verts);
-    builder.add_vertex_attribute(0, 5 * sizeof(float), 3);
-    builder.add_vertex_attribute(1, 5 * sizeof(float), 2);
-    builder.add_index_buffer(indices);
-    auto vao = builder.build();
+    vao_builder screen_quad_builder;
+    screen_quad_builder.begin();
+    screen_quad_builder.add_vertex_buffer(screen_quad_verts);
+    screen_quad_builder.add_vertex_attribute(0, 5 * sizeof(float), 3);
+    screen_quad_builder.add_vertex_attribute(1, 5 * sizeof(float), 2);
+    screen_quad_builder.add_index_buffer(screen_quad_indices);
+    auto vao = screen_quad_builder.build();
 
-    shapes::s_screen_quad.m_vao = vao;
+    std::vector<float> cube_buffer_data = {
+    -1.0f,-1.0f,-1.0f, // triangle 1 : begin
+    -1.0f,-1.0f, 1.0f,
+    -1.0f, 1.0f, 1.0f, // triangle 1 : end
+    1.0f, 1.0f,-1.0f, // triangle 2 : begin
+    -1.0f,-1.0f,-1.0f,
+    -1.0f, 1.0f,-1.0f, // triangle 2 : end
+    1.0f,-1.0f, 1.0f,
+    -1.0f,-1.0f,-1.0f,
+    1.0f,-1.0f,-1.0f,
+    1.0f, 1.0f,-1.0f,
+    1.0f,-1.0f,-1.0f,
+    -1.0f,-1.0f,-1.0f,
+    -1.0f,-1.0f,-1.0f,
+    -1.0f, 1.0f, 1.0f,
+    -1.0f, 1.0f,-1.0f,
+    1.0f,-1.0f, 1.0f,
+    -1.0f,-1.0f, 1.0f,
+    -1.0f,-1.0f,-1.0f,
+    -1.0f, 1.0f, 1.0f,
+    -1.0f,-1.0f, 1.0f,
+    1.0f,-1.0f, 1.0f,
+    1.0f, 1.0f, 1.0f,
+    1.0f,-1.0f,-1.0f,
+    1.0f, 1.0f,-1.0f,
+    1.0f,-1.0f,-1.0f,
+    1.0f, 1.0f, 1.0f,
+    1.0f,-1.0f, 1.0f,
+    1.0f, 1.0f, 1.0f,
+    1.0f, 1.0f,-1.0f,
+    -1.0f, 1.0f,-1.0f,
+    1.0f, 1.0f, 1.0f,
+    -1.0f, 1.0f,-1.0f,
+    -1.0f, 1.0f, 1.0f,
+    1.0f, 1.0f, 1.0f,
+    -1.0f, 1.0f, 1.0f,
+    1.0f,-1.0f, 1.0f
+    };
+
+    vao_builder cube_builder;
+    cube_builder.begin();
+    cube_builder.add_vertex_buffer(cube_buffer_data);
+    cube_builder.add_vertex_attribute(0, 3 * sizeof(float), 3);
+
+    shapes::s_screen_quad = vao;
+    shapes::s_cube_pos_only = cube_builder.build();
 }
 
 void engine::init()

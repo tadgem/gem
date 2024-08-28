@@ -19,75 +19,6 @@ struct point_light
     float       radius;
 };
 
-
-void handle_pbr_forward(shader& pbr_shader, glm::mat4 model_mat, glm::mat3 normal, camera& cam, std::vector<point_light>& lights, model& sponza)
-{
-    pbr_shader.use();
-    glm::mat4 mvp = cam.m_proj * cam.m_view * model_mat;
-    pbr_shader.setMat4("model", model_mat);
-    pbr_shader.setMat4("projection", cam.m_proj);
-    pbr_shader.setMat4("view", cam.m_view);
-    pbr_shader.setMat3("normalMatrix", normal);
-    pbr_shader.setVec3("camPos", cam.m_pos);
-
-    for (int l = 0; l < lights.size(); l++)
-    {
-        std::stringstream pos_name;
-        pos_name << "lightPositions[" << l << "]";
-        std::stringstream col_name;
-        col_name << "lightColors[" << l << "]";
-
-        pbr_shader.setVec3(pos_name.str(), lights[l].position);
-        pbr_shader.setVec3(col_name.str(), lights[l].colour);
-    }
-
-    pbr_shader.setInt("albedoMap", 0);
-    pbr_shader.setInt("normalMap", 1);
-    pbr_shader.setInt("metallicMap", 2);
-    pbr_shader.setInt("roughnessMap", 3);
-    pbr_shader.setInt("aoMap", 4);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture::white->m_handle);
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, texture::black->m_handle);
-    glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, texture::black->m_handle);
-    glActiveTexture(GL_TEXTURE3);
-    glBindTexture(GL_TEXTURE_2D, texture::white->m_handle);
-    glActiveTexture(GL_TEXTURE4);
-    glBindTexture(GL_TEXTURE_2D, texture::white->m_handle);
-
-    for (auto& entry : sponza.m_meshes)
-    {
-        auto& maps = sponza.m_materials[entry.m_material_index].m_material_maps;
-        entry.m_vao.use();
-        auto diffuse_tex = sponza.m_materials[entry.m_material_index].m_material_maps[texture_map_type::diffuse];
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, diffuse_tex.m_handle);
-        if (maps.find(texture_map_type::normal) != maps.end())
-        {
-            glActiveTexture(GL_TEXTURE1);
-            glBindTexture(GL_TEXTURE_2D, maps[texture_map_type::normal].m_handle);
-        }
-        if (maps.find(texture_map_type::metallicness) != maps.end())
-        {
-            glActiveTexture(GL_TEXTURE2);
-            glBindTexture(GL_TEXTURE_2D, maps[texture_map_type::metallicness].m_handle);
-        }
-        if (maps.find(texture_map_type::roughness) != maps.end())
-        {
-            glActiveTexture(GL_TEXTURE3);
-            glBindTexture(GL_TEXTURE_2D, maps[texture_map_type::roughness].m_handle);
-        }
-        if (maps.find(texture_map_type::ao) != maps.end())
-        {
-            glActiveTexture(GL_TEXTURE4);
-            glBindTexture(GL_TEXTURE_2D, maps[texture_map_type::metallicness].m_handle);
-        }
-        glDrawElements(GL_TRIANGLES, entry.m_index_count, GL_UNSIGNED_INT, 0);
-    }
-}
-
 void handle_gbuffer(framebuffer& gbuffer, shader& gbuffer_shader, glm::mat4 mvp, glm::mat4 model_mat, glm::mat3 normal, camera& cam, std::vector<point_light>& lights, model& sponza)
 {
     gbuffer.bind();
@@ -138,7 +69,7 @@ void handle_gbuffer(framebuffer& gbuffer, shader& gbuffer_shader, glm::mat4 mvp,
 void handle_present_image(shader& present_shader, const std::string& uniform_name, const int texture_slot, gl_handle texture)
 {
     present_shader.use();
-    shapes::s_screen_quad.m_vao.use();
+    shapes::s_screen_quad.use();
     present_shader.setInt(uniform_name.c_str(), texture_slot);
     glActiveTexture(GL_TEXTURE0 + texture_slot);
     glBindTexture(GL_TEXTURE_2D, texture);
@@ -148,7 +79,7 @@ void handle_present_image(shader& present_shader, const std::string& uniform_nam
 void handle_light_pass(shader& lighting_shader, framebuffer& gbuffer, camera& cam, std::vector<point_light>& point_lights)
 {
     lighting_shader.use();
-    shapes::s_screen_quad.m_vao.use();
+    shapes::s_screen_quad.use();
 
     lighting_shader.setInt("u_diffuse_map", 0);
     lighting_shader.setInt("u_position_map", 1);
@@ -189,20 +120,21 @@ int main()
 {
     engine::init();
 
-    std::string pbr_vert = utils::load_string_from_path("assets/shaders/pbr.vert.glsl");
-    std::string pbr_frag = utils::load_string_from_path("assets/shaders/pbr.frag.glsl");
-
     std::string gbuffer_vert = utils::load_string_from_path("assets/shaders/gbuffer.vert.glsl");
     std::string gbuffer_frag = utils::load_string_from_path("assets/shaders/gbuffer.frag.glsl");
     std::string gbuffer_lighting_frag = utils::load_string_from_path("assets/shaders/lighting.frag.glsl");
 
+    std::string debug3dtex_vert = utils::load_string_from_path("assets/shaders/debug_3d_tex.vert.glsl");
+    std::string debug3dtex_frag = utils::load_string_from_path("assets/shaders/debug_3d_tex.frag.glsl");
+
     std::string present_vert = utils::load_string_from_path("assets/shaders/present.vert.glsl");
     std::string present_frag = utils::load_string_from_path("assets/shaders/present.frag.glsl");
 
-    shader pbr_shader(pbr_vert, pbr_frag);
     shader gbuffer_shader(gbuffer_vert, gbuffer_frag);
     shader lighting_shader(present_vert, gbuffer_lighting_frag);
     shader present_shader(present_vert, present_frag);
+    shader debug3dtex_shader(debug3dtex_vert, debug3dtex_frag);
+
 
     camera cam{};
     model sponza = model::load_model_from_path("assets/models/sponza/Sponza.gltf");
@@ -212,6 +144,7 @@ int main()
     gbuffer.add_colour_attachment(GL_COLOR_ATTACHMENT1, 1280, 720, GL_RGBA16F, GL_NEAREST, GL_FLOAT);
     gbuffer.add_colour_attachment(GL_COLOR_ATTACHMENT2, 1280, 720, GL_RGBA16F, GL_NEAREST, GL_FLOAT);
     gbuffer.add_colour_attachment(GL_COLOR_ATTACHMENT3, 1280, 720, GL_RGBA16F, GL_NEAREST, GL_FLOAT);
+
 
     gbuffer.add_depth_attachment(1280, 720);
     gbuffer.check();
@@ -244,17 +177,25 @@ int main()
     {
         engine::process_sdl_event();
         engine::engine_pre_frame();        
+        glCullFace(GL_BACK);
+        glm::mat4 mvp = cam.m_proj * cam.m_view * model;
 
         cam.update(engine::get_window_dim());
-        glCullFace(GL_BACK);
-        
-        glm::mat4 mvp = cam.m_proj * cam.m_view * model;
-        //handle_pbr_forward(pbr_shader, model, normal, cam, lights, sponza);
 
         handle_gbuffer(gbuffer, gbuffer_shader, mvp, model, normal, cam, lights, sponza);
 
-        // handle_present_image(present_shader, "u_image_sampler", 0, gbuffer.m_colour_attachments[00]);
-        handle_light_pass(lighting_shader, gbuffer, cam, lights);
+        // handle_light_pass(lighting_shader, gbuffer, cam, lights);
+
+        shapes::s_cube_pos_only.use();
+        debug3dtex_shader.use();
+        debug3dtex_shader.setMat4("u_mvp", mvp);
+        debug3dtex_shader.setInt("u_volume", _3d_tex.m_handle);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_3D, _3d_tex.m_handle);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        /*glDrawArraysInstanced(GL_TRIANGLES, 0, _3d_cube_res, 32);*/
+
 
         {
             ImGui::Begin("Hello, world!");                          

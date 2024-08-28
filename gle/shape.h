@@ -12,10 +12,7 @@ public:
 		glm::vec3 max;
 	};
 
-	struct screen_quad
-	{
-		VAO m_vao;
-	};
 
-	inline static screen_quad s_screen_quad;
+	inline static VAO s_screen_quad;
+	inline static VAO s_cube_pos_only;
 };
