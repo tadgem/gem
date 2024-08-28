@@ -1,10 +1,11 @@
 #version 450
 
 layout(location = 0) in vec3 aPos;
+layout(location = 1) in mat4 iTransform;
 
 layout(location = 0) out vec3 oUVW;
 
-uniform mat4 u_mvp;
+uniform mat4 viewProjection;
 
 void main()
 {
@@ -14,5 +15,7 @@ void main()
 	
 	oUVW = vec3(x, y, z);
 
-	gl_Position = u_mvp * vec4(aPos.x, aPos.y, aPos.z, 1.0);
+	vec3 worldPos = vec3(iTransform * vec4(aPos, 1.0));
+
+	gl_Position = viewProjection * vec4(worldPos, 1.0);
 }

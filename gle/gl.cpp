@@ -131,48 +131,66 @@ void init_built_in_assets()
     screen_quad_builder.add_index_buffer(screen_quad_indices);
     auto vao = screen_quad_builder.build();
 
-    std::vector<float> cube_buffer_data = {
-    -1.0f,-1.0f,-1.0f, // triangle 1 : begin
-    -1.0f,-1.0f, 1.0f,
-    -1.0f, 1.0f, 1.0f, // triangle 1 : end
-    1.0f, 1.0f,-1.0f, // triangle 2 : begin
-    -1.0f,-1.0f,-1.0f,
-    -1.0f, 1.0f,-1.0f, // triangle 2 : end
-    1.0f,-1.0f, 1.0f,
-    -1.0f,-1.0f,-1.0f,
-    1.0f,-1.0f,-1.0f,
-    1.0f, 1.0f,-1.0f,
-    1.0f,-1.0f,-1.0f,
-    -1.0f,-1.0f,-1.0f,
-    -1.0f,-1.0f,-1.0f,
-    -1.0f, 1.0f, 1.0f,
-    -1.0f, 1.0f,-1.0f,
-    1.0f,-1.0f, 1.0f,
-    -1.0f,-1.0f, 1.0f,
-    -1.0f,-1.0f,-1.0f,
-    -1.0f, 1.0f, 1.0f,
-    -1.0f,-1.0f, 1.0f,
-    1.0f,-1.0f, 1.0f,
-    1.0f, 1.0f, 1.0f,
-    1.0f,-1.0f,-1.0f,
-    1.0f, 1.0f,-1.0f,
-    1.0f,-1.0f,-1.0f,
-    1.0f, 1.0f, 1.0f,
-    1.0f,-1.0f, 1.0f,
-    1.0f, 1.0f, 1.0f,
-    1.0f, 1.0f,-1.0f,
-    -1.0f, 1.0f,-1.0f,
-    1.0f, 1.0f, 1.0f,
-    -1.0f, 1.0f,-1.0f,
-    -1.0f, 1.0f, 1.0f,
-    1.0f, 1.0f, 1.0f,
-    -1.0f, 1.0f, 1.0f,
-    1.0f,-1.0f, 1.0f
+    // bottom back left :   -1, -1, -1
+    // bottom back right:   1, -1, -1
+    // top back left :      -1, 1, -1
+    // top back right:      1, 1, -1
+    // bottom front left :  -1, -1, 1
+    // bottom front right:  1, -1, 1
+    // top front left :     -1, 1, 1
+    // top front right:     1, 1, 1
+
+    //  Set up vertex attribute data and attribute pointers
+    std::vector<float>  cube_data = {
+        -0.5f, -0.5f, -0.5f,
+        0.5f, -0.5f, -0.5f, 
+        0.5f,  0.5f, -0.5f, 
+        -0.5f,  0.5f, -0.5f,
+        -0.5f, -0.5f,  0.5f,
+        0.5f, -0.5f,  0.5f, 
+        0.5f,  0.5f,  0.5f, 
+        -0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f,
+        -0.5f, -0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f,
+        0.5f, -0.5f, -0.5f, 
+        0.5f,  0.5f, -0.5f, 
+        0.5f,  0.5f,  0.5f, 
+        0.5f, -0.5f,  0.5f, 
+        -0.5f, -0.5f, -0.5f,
+        0.5f, -0.5f, -0.5f, 
+        0.5f, -0.5f,  0.5f, 
+        -0.5f, -0.5f,  0.5f,
+        0.5f,  0.5f, -0.5f, 
+        -0.5f,  0.5f, -0.5f,
+        -0.5f,  0.5f,  0.5f,
+        0.5f,  0.5f,  0.5f, 
     };
+    // index data
+    std::vector<unsigned int> cube_indices = {
+        // front and back
+        0, 3, 2,
+        2, 1, 0,
+        4, 5, 6,
+        6, 7 ,4,
+        // left and right
+        11, 8, 9,
+        9, 10, 11,
+        12, 13, 14,
+        14, 15, 12,
+        // bottom and top
+        16, 17, 18,
+        18, 19, 16,
+        20, 21, 22,
+        22, 23, 20
+    };
+
 
     vao_builder cube_builder;
     cube_builder.begin();
-    cube_builder.add_vertex_buffer(cube_buffer_data);
+    cube_builder.add_vertex_buffer(cube_data);
+    cube_builder.add_index_buffer(cube_indices);
     cube_builder.add_vertex_attribute(0, 3 * sizeof(float), 3);
 
     shapes::s_screen_quad = vao;

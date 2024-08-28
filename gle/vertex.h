@@ -42,10 +42,10 @@ public:
 	void add_vertex_attribute(uint32_t binding, uint32_t total_vertex_size, uint32_t num_elements, uint32_t element_size = 4, GLenum primitive_type = GL_FLOAT);
 
 	VAO	 build();
-private:
 
 	gl_handle					m_vao;
 	gl_handle					m_ibo;
 	std::vector<gl_handle>		m_vbos;
 	uint32_t					m_offset_counter;
+
 };

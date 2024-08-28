@@ -160,7 +160,7 @@ int main()
     constexpr int _3d_cube_res = _3d_tex_res * _3d_tex_res * _3d_tex_res;
 
     float* _3d_tex_data = new float[_3d_cube_res * 4];
-    std::vector<glm::vec3> positions;
+    std::vector<glm::mat4> instance_matrices;
 
     for (auto i = 0; i < _3d_cube_res; i++)
     {
@@ -174,9 +174,9 @@ int main()
         int y = (i / 128) % 128;
         int z = i % 128;
 
-        positions.push_back({ z,y,x });
+        instance_matrices.push_back(utils::get_model_matrix({ z,y,x }, {0,90,0}, {0.1,0.1,0.1}));
     }
-
+    VAO instanced_cubes = shapes::gen_cube_instanced_vao(instance_matrices);
     texture _3d_tex = texture::create_3d_texture({ 128, 128, 128 }, GL_RGBA, GL_RGBA32F, GL_FLOAT, _3d_tex_data);
     
     glm::mat4 model = utils::get_model_matrix(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(0.2f));
@@ -196,17 +196,16 @@ int main()
 
         handle_gbuffer(gbuffer, gbuffer_shader, mvp, model, normal, cam, lights, sponza);
 
-        handle_light_pass(lighting_shader, gbuffer, cam, lights);
+        // handle_light_pass(lighting_shader, gbuffer, cam, lights);
 
-        shapes::s_cube_pos_only.use();
+        instanced_cubes.use();
         debug3dtex_shader.use();
-        debug3dtex_shader.setMat4("u_mvp", mvp);
-        debug3dtex_shader.setInt("u_volume", _3d_tex.m_handle);
+        debug3dtex_shader.setMat4("viewProjection", cam.m_proj * cam.m_view);
+        debug3dtex_shader.setInt("u_volume", 0);
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_3D, _3d_tex.m_handle);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-        /*glDrawArraysInstanced(GL_TRIANGLES, 0, _3d_cube_res, 32);*/
+        glDrawElementsInstanced(GL_TRIANGLES, 36, GL_UNSIGNED_INT,  0, _3d_cube_res);
 
 
         {

@@ -15,4 +15,6 @@ public:
 
 	inline static VAO s_screen_quad;
 	inline static VAO s_cube_pos_only;
+
+	static VAO gen_cube_instanced_vao(std::vector<glm::mat4>& matrices);
 };
