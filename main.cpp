@@ -225,6 +225,19 @@ int main()
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
         glClear(GL_DEPTH_BUFFER_BIT);
 
+        
+        handle_gbuffer(gbuffer, gbuffer_shader, mvp, model, normal, cam, lights, sponza);
+        lightpass_buffer.bind();
+        handle_light_pass(lighting_shader, gbuffer, cam, lights);
+        lightpass_buffer.unbind();
+        
+        shapes::s_screen_quad.use();
+        present_shader.use();
+        present_shader.setInt("u_image_sampler", 0);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, lightpass_buffer.m_colour_attachments.front());
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
         if(draw_debug_3d_texture)
         {
             instanced_cubes.use();
@@ -236,13 +249,6 @@ int main()
             glBindTexture(GL_TEXTURE_3D, _3d_tex.m_handle);
             glDrawElementsInstanced(GL_TRIANGLES, 36, GL_UNSIGNED_INT,  0, _3d_cube_res);
         }
-        
-        handle_gbuffer(gbuffer, gbuffer_shader, mvp, model, normal, cam, lights, sponza);
-        lightpass_buffer.bind();
-        handle_light_pass(lighting_shader, gbuffer, cam, lights);
-        lightpass_buffer.unbind();
-        
-
         {
             ImGui::Begin("Hello, world!");                          
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / engine::s_imgui_io->Framerate, engine::s_imgui_io->Framerate);
