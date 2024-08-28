@@ -13,7 +13,7 @@ void main()
 	int y = (gl_InstanceID / 128) % 128;
 	int x = gl_InstanceID / (128 * 128);
 	
-	oUVW = vec3(x, y, z);
+	oUVW = vec3(z, y, x);
 
 	vec3 worldPos = vec3(iTransform * vec4(aPos, 1.0));
 

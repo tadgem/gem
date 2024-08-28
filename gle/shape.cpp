@@ -52,10 +52,10 @@ VAO shapes::gen_cube_instanced_vao(std::vector<glm::mat4>& matrices)
     vao_builder cube_builder;
     cube_builder.begin();
     cube_builder.add_vertex_buffer(cube_data);
+    cube_builder.add_vertex_attribute(0, 3 * sizeof(float), 3);
     cube_builder.add_vertex_buffer(matrices);
     auto matrices_vbo = cube_builder.m_vbos.back();
     cube_builder.add_index_buffer(cube_indices);
-    cube_builder.add_vertex_attribute(0, 3 * sizeof(float), 3);
 
     std::size_t vec4Size = sizeof(glm::vec4);
     glEnableVertexAttribArray(1);

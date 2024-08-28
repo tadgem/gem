@@ -164,7 +164,7 @@ int main()
 
     for (auto i = 0; i < _3d_cube_res; i++)
     {
-        float r = rand() * 10000000;
+        float r = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX)) * 255.0f;
         _3d_tex_data[i] = r;
 
         //create a new VAO for debug cubes
@@ -196,17 +196,21 @@ int main()
 
         handle_gbuffer(gbuffer, gbuffer_shader, mvp, model, normal, cam, lights, sponza);
 
-        // handle_light_pass(lighting_shader, gbuffer, cam, lights);
+        handle_light_pass(lighting_shader, gbuffer, cam, lights);
 
-        instanced_cubes.use();
-        debug3dtex_shader.use();
-        debug3dtex_shader.setMat4("viewProjection", cam.m_proj * cam.m_view);
-        debug3dtex_shader.setInt("u_volume", 0);
+        glClear(GL_DEPTH_BUFFER_BIT);
 
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_3D, _3d_tex.m_handle);
-        glDrawElementsInstanced(GL_TRIANGLES, 36, GL_UNSIGNED_INT,  0, _3d_cube_res);
+        if(true)
+        {
+            instanced_cubes.use();
+            debug3dtex_shader.use();
+            debug3dtex_shader.setMat4("viewProjection", cam.m_proj * cam.m_view);
+            debug3dtex_shader.setInt("u_volume", 0);
 
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_3D, _3d_tex.m_handle);
+            glDrawElementsInstanced(GL_TRIANGLES, 36, GL_UNSIGNED_INT,  0, _3d_cube_res);
+        }
 
         {
             ImGui::Begin("Hello, world!");                          

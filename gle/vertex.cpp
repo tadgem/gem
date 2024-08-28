@@ -34,7 +34,7 @@ void vao_builder::add_vertex_attribute(uint32_t binding, uint32_t total_vertex_s
 {
 	glVertexAttribPointer(binding, num_elements, primitive_type, GL_FALSE, total_vertex_size, (void*)m_offset_counter);
 	glEnableVertexAttribArray(binding);
-	glBindBuffer(GL_ARRAY_BUFFER, m_vbos.back());
+	// glBindBuffer(GL_ARRAY_BUFFER, m_vbos.back());
 	m_offset_counter += num_elements * element_size;
 }
 
