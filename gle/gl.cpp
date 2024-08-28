@@ -11,6 +11,8 @@
 #include <SDL_opengl.h>
 #endif
 #include "texture.h"
+#include "shape.h"
+
 
 static SDL_GLContext*   s_sdl_gl_context = nullptr;
 static Uint64           s_now_counter;
@@ -107,9 +109,32 @@ void init_built_in_assets()
     texture::white = new texture(texture::from_data(white_data.data(), white_data.size(), 1, 1, 1, 4));
     texture::black = new texture(texture::from_data(black_data.data(), white_data.size(), 1, 1, 1, 4));
 
+    std::vector<float> screen_quad_verts
+    {
+        // positions        texture coords
+         1.0f,  1.0f, 0.0f,  1.0f, 1.0f,   // top right
+         1.0f, -1.0f, 0.0f,  1.0f, 0.0f,   // bottom right
+        -1.0f, -1.0f, 0.0f,  0.0f, 0.0f,   // bottom left
+        -1.0f,  1.0f, 0.0f,  0.0f, 1.0f    // top left 
+    };
+
+    std::vector<unsigned int> indices = {
+        0, 1, 3, // first triangle
+        1, 2, 3  // second triangle
+    };
+
+    vao_builder builder;
+    builder.begin();
+    builder.add_vertex_buffer(screen_quad_verts);
+    builder.add_vertex_attribute(0, 5 * sizeof(float), 3);
+    builder.add_vertex_attribute(1, 5 * sizeof(float), 2);
+    builder.add_index_buffer(indices);
+    auto vao = builder.build();
+
+    shapes::s_screen_quad.m_vao = vao;
 }
 
-void engine::init_gl_sdl()
+void engine::init()
 {
     // Setup SDL
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0)
@@ -188,7 +213,7 @@ void engine::init_gl_sdl()
     ImGui_ImplOpenGL3_Init(glsl_version);
 
     s_now_counter = SDL_GetPerformanceCounter();
-    s_last_counter  = 0;
+    s_last_counter  = 0;    
 
     init_built_in_assets();
 }

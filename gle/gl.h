@@ -7,7 +7,7 @@
 
 class engine {
 public:
-	static void init_gl_sdl();
+	static void init();
 	static void process_sdl_event();
 	static void engine_pre_frame();
 	static void engine_post_frame();
