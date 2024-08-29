@@ -39,7 +39,7 @@ void DrawIm3dTextListsImGuiAsChild(const Im3d::TextDrawList _textDrawLists[], ui
 
             // Project world -> screen space.
             Im3d::Vec4 clip = viewProj * Im3d::Vec4(textData.m_positionSize.x, textData.m_positionSize.y, textData.m_positionSize.z, 1.0f);
-            Im3d::Vec2 screen = Im3d::Vec2(clip.x / clip.w, clip.y / clip.w);
+            Im3d::Vec2 screen = Im3d::Vec2(clip.x / clip.w, -clip.y / clip.w);
 
             // Cull text which falls offscreen. Note that this doesn't take into account text size but works well enough in practice.
             if (clip.w < 0.0f || screen.x >= 1.0f || screen.y >= 1.0f)
