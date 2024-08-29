@@ -11,6 +11,8 @@
 #include "framebuffer.h"
 #include "shape.h"
 #include <sstream>
+#include "im3d.h"
+#include "im3d_gl.h"
 
 struct point_light
 {
@@ -116,6 +118,7 @@ void handle_light_pass(shader& lighting_shader, framebuffer& gbuffer, camera& ca
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
+
 int main()
 {
     engine::init();
@@ -206,6 +209,8 @@ int main()
 
     bool draw_debug_3d_texture = true;
 
+    auto im3d_s =  im3d_gl::load_im3d();
+
     glEnable(GL_DEPTH_TEST);
     glCullFace(GL_BACK);
     while (!engine::s_quit)
@@ -214,6 +219,7 @@ int main()
         engine::engine_pre_frame();        
         glm::mat4 mvp = cam.m_proj * cam.m_view * model;
         cam.update(engine::get_window_dim());
+        im3d_gl::new_frame_im3d(im3d_s);
         
         // compute
         voxelization.use();
@@ -277,9 +283,11 @@ int main()
             ImGui::End();
         }
 
+        im3d_gl::end_frame_im3d(im3d_s, {1280, 720}, cam);
 
         engine::engine_post_frame();
     }
+    im3d_gl::shutdown_im3d(im3d_s);
     engine::engine_shut_down();
 
     return 0;
