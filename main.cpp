@@ -118,6 +118,26 @@ void handle_light_pass(shader& lighting_shader, framebuffer& gbuffer, camera& ca
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
+void OnIm3D()
+{
+    Im3d::PushAlpha(1.0f);
+    Im3d::PushColor(Im3d::Color_Red);
+    Im3d::SetAlpha(1.0f);
+    Im3d::DrawCircle({ 0.0f, 1.0f, 0.0f }, { 0.0f, 1.0f, 0.0f }, 20.5f, 32);
+    Im3d::DrawCone({ 40.0f, 0.0f, 0.0f }, { 0.0, 1.0, 0.0 }, 30.0f, 30.0f, 32);
+    Im3d::DrawPrism({ 80.0f, 0.0f, 0.0f }, { 80.0f, 80.0f, 0.0f }, 10.0f, 32);
+    Im3d::PopColor();
+    Im3d::PushColor(Im3d::Color_Green);
+    Im3d::DrawArrow({ 120.0f, 0.0f, 0.0f }, { 3.0f, 23.0f, 0.0f }, 2.0f, 2.0f);
+    Im3d::DrawXyzAxes();
+    Im3d::DrawCylinder({ 160.0f, 0.0f, 0.0f }, { 160.0f,20.0f, 0.0f }, 20.0f, 32);
+    Im3d::PopColor();
+    Im3d::PushColor(Im3d::Color_White);
+    Im3d::Text({ 0.0, 20.0f, 0.0f }, 0, "Hello from you fuck you bloody");
+    Im3d::PopColor();
+    Im3d::PopAlpha();
+}
+
 
 int main()
 {
@@ -207,7 +227,7 @@ int main()
     glm::mat4 model = utils::get_model_matrix(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(0.2f));
     glm::mat3 normal = utils::get_normal_matrix(model);
 
-    bool draw_debug_3d_texture = true;
+    bool draw_debug_3d_texture = false;
 
     auto im3d_s =  im3d_gl::load_im3d();
 
@@ -256,6 +276,9 @@ int main()
             glDrawElementsInstanced(GL_TRIANGLES, 36, GL_UNSIGNED_INT,  0, _3d_cube_res);
         }
         {
+            OnIm3D();
+        }
+        {
             ImGui::Begin("Hello, world!");                          
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / engine::s_imgui_io->Framerate, engine::s_imgui_io->Framerate);
             ImGui::Separator();
@@ -284,7 +307,6 @@ int main()
         }
 
         im3d_gl::end_frame_im3d(im3d_s, {1280, 720}, cam);
-
         engine::engine_post_frame();
     }
     im3d_gl::shutdown_im3d(im3d_s);
