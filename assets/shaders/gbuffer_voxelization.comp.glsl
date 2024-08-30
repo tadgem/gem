@@ -12,7 +12,7 @@ uniform sampler2D u_gbuffer_pos;
 uniform sampler2D u_gbuffer_lighting;
 uniform AABB	  u_aabb;
 uniform vec3	  u_voxel_resolution;
-
+const int div = 1;
 layout(binding = 0, rgba32f) uniform image3D imgOutput;
 
 bool is_in_aabb(vec3 pos)
@@ -31,18 +31,21 @@ bool is_in_aabb(vec3 pos)
 ivec3 get_texel_from_pos(vec3 position)
 {
 	vec3 aabb_dim = u_aabb.max - u_aabb.min;
-	vec3 unit = vec3(aabb_dim.x / u_voxel_resolution.x, aabb_dim.y / u_voxel_resolution.y, aabb_dim.z / u_voxel_resolution.z);
+	vec3 unit = vec3((aabb_dim.x / u_voxel_resolution.x) / div, (aabb_dim.y / u_voxel_resolution.y) / div, (aabb_dim.z / u_voxel_resolution.z) / div);
 
-	int x = int(position.x / unit.x);
-	int y = int(position.y / unit.y);
-	int z = int(position.z / unit.z);
+	/// <summary>
+	/// 0,0,0 is aabb.min
+	/// </summary>
+	vec3 new_pos = position - u_aabb.min;
+	int x = int(new_pos.x / unit.x) ;
+	int y = int(new_pos.y / unit.y) ;
+	int z = int(new_pos.z / unit.z) ;
 
 	return ivec3(x, y, z);
 
 }
 
 void main() {
-	vec4 value = vec4(0.0, 0.0, 0.0, 1.0);
 	ivec2 pix = ivec2(gl_GlobalInvocationID.xy);
 	ivec2 size = ivec2(1280, 720);
 	if (pix.x >= size.x || pix.y >= size.y) {

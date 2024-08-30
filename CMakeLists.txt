@@ -26,3 +26,4 @@ target_link_libraries(demo PRIVATE gle)
 target_include_directories(demo PRIVATE ${GLE_INCLUDES})
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/assets DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/assets DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

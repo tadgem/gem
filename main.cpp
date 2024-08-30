@@ -205,21 +205,21 @@ int main()
         //create a new VAO for debug cubes
         // first vbo is same as cube
         // instance vbo is per-instance transform
-        float x = i / (128 * 128);
-        float y = (i / 128) % 128;
-        float z = i % 128;
+        float x = i / (_3d_tex_res * _3d_tex_res);
+        float y = (i / _3d_tex_res) % _3d_tex_res;
+        float z = i % _3d_tex_res;
 
-        instance_uvs.push_back({ (z + 1) / 128,(y + 1) / 128, (x + 1)/ 128 });
-        instance_matrices.push_back(utils::get_model_matrix({ z,y,x }, {0,90,0}, {0.1,0.1,0.1}));
+        instance_uvs.push_back({ (z + 1) / _3d_tex_res,(y + 1) / _3d_tex_res, (x + 1)/ _3d_tex_res });
+        instance_matrices.push_back(utils::get_model_matrix({ z,y,x }, {0,90,0}, glm::vec3(1.0f)));
     }
     VAO instanced_cubes = shapes::gen_cube_instanced_vao(instance_matrices, instance_uvs);
-    texture _3d_tex = texture::create_3d_texture({ 128, 128, 128 }, GL_RGBA, GL_RGBA32F, GL_FLOAT, _3d_tex_data);
+    texture _3d_tex = texture::create_3d_texture({ _3d_tex_res, _3d_tex_res, _3d_tex_res }, GL_RGBA, GL_RGBA32F, GL_FLOAT, _3d_tex_data);
     glAssert(glBindImageTexture(0, _3d_tex.m_handle, 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA32F));
 
     voxelization.use();
     voxelization.setInt("u_gbuffer_pos", 0);
     voxelization.setInt("u_gbuffer_lighting", 1);
-    voxelization.setVec3("u_voxel_resolution", { 128, 128, 128 });
+    voxelization.setVec3("u_voxel_resolution", { _3d_tex_res, _3d_tex_res, _3d_tex_res });
     voxelization.setVec3("u_aabb.min", sponza.m_aabb.min);
     voxelization.setVec3("u_aabb.max", sponza.m_aabb.max);
     
@@ -255,14 +255,14 @@ int main()
         lightpass_buffer.bind();
         handle_light_pass(lighting_shader, gbuffer, cam, lights);
         lightpass_buffer.unbind();
-        
-        //shapes::s_screen_quad.use();
-        //present_shader.use();
-        //present_shader.setInt("u_image_sampler", 0);
-        //glActiveTexture(GL_TEXTURE0);
-        //glBindTexture(GL_TEXTURE_2D, lightpass_buffer.m_colour_attachments.front());
-        //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
+                
+        shapes::s_screen_quad.use();
+        present_shader.use();
+        present_shader.setInt("u_image_sampler", 0);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, lightpass_buffer.m_colour_attachments.front());
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glClear(GL_DEPTH_BUFFER_BIT);
         if(draw_debug_3d_texture)
         {
             instanced_cubes.use();
