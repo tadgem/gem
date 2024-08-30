@@ -35,9 +35,10 @@ shader::shader(const std::string& vert, const std::string& geom, const std::stri
 	auto g = compile_shader(geom, GL_GEOMETRY_SHADER);
 	auto f = compile_shader(frag, GL_FRAGMENT_SHADER);
 
-	m_shader_id = link_shader(v, f);
+	m_shader_id = link_shader(v, g, f);
 
 	glDeleteShader(v);
+	glDeleteShader(g);
 	glDeleteShader(f);
 
 }
