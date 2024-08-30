@@ -14,6 +14,7 @@
 #include "im3d.h"
 #include "im3d_gl.h"
 
+
 struct point_light
 {
     glm::vec3   position;
@@ -118,26 +119,25 @@ void handle_light_pass(shader& lighting_shader, framebuffer& gbuffer, camera& ca
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
-void OnIm3D()
+void OnIm3D(aabb& level_bb, glm::mat4 model_matrix)
 {
+    aabb bb = utils::transform_aabb(level_bb, model_matrix);
+    //aabb bb = level_bb;
+    Im3d::SetSize(0.33f);
     Im3d::PushAlpha(1.0f);
     Im3d::PushColor(Im3d::Color_Red);
     Im3d::SetAlpha(1.0f);
-    Im3d::DrawCircle({ 0.0f, 1.0f, 0.0f }, { 0.0f, 1.0f, 0.0f }, 20.5f, 32);
-    Im3d::DrawCone({ 40.0f, 0.0f, 0.0f }, { 0.0, 1.0, 0.0 }, 30.0f, 30.0f, 32);
-    Im3d::DrawPrism({ 80.0f, 0.0f, 0.0f }, { 80.0f, 80.0f, 0.0f }, 10.0f, 32);
-    Im3d::PopColor();
-    Im3d::PushColor(Im3d::Color_Green);
-    Im3d::DrawArrow({ 120.0f, 0.0f, 0.0f }, { 3.0f, 23.0f, 0.0f }, 2.0f, 2.0f);
-    Im3d::DrawXyzAxes();
-    Im3d::DrawCylinder({ 160.0f, 0.0f, 0.0f }, { 160.0f,20.0f, 0.0f }, 20.0f, 32);
-    Im3d::PopColor();
-    Im3d::PushColor(Im3d::Color_White);
-    Im3d::Text({ 0.0, 20.0f, 0.0f }, 0, "Hello from you fuck you bloody");
-    Im3d::PopColor();
-    Im3d::PopAlpha();
+    Im3d::DrawAlignedBox(
+        { bb.min.x, bb.min.y, bb.min.z }, 
+        { bb.max.x, bb.max.y, bb.max.z }
+    );
 }
 
+float get_aabb_area(aabb& bb)
+{
+    glm::vec3 dim = bb.max - bb.min;
+    return glm::length(dim);
+}
 
 int main()
 {
@@ -276,7 +276,7 @@ int main()
             glDrawElementsInstanced(GL_TRIANGLES, 36, GL_UNSIGNED_INT,  0, _3d_cube_res);
         }
         {
-            OnIm3D();
+            OnIm3D(sponza.m_aabb, model);
         }
         {
             ImGui::Begin("Hello, world!");                          
@@ -284,6 +284,12 @@ int main()
             ImGui::Separator();
             ImGui::DragFloat3("Camera Position", &cam.m_pos[0]);
             ImGui::DragFloat3("Camera Euler", &cam.m_euler[0]);
+            ImGui::Separator();
+            ImGui::DragFloat3("Level Bounding Box Min", &sponza.m_aabb.min[0]);
+            ImGui::DragFloat3("Level Bounding Box Max", &sponza.m_aabb.max[0]);
+            ImGui::Text("Level Bounding Volume Area %.2f", get_aabb_area(sponza.m_aabb));
+            glm::vec3 dim = sponza.m_aabb.max - sponza.m_aabb.min;
+            ImGui::Text("Level Bounding Volume Dimensions %.2f,%.2f,%.2f", dim.x, dim.y, dim.z);
             ImGui::Separator();
             for (int l = 0; l < lights.size(); l++)
             {

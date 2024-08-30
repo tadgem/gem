@@ -9,7 +9,7 @@ struct mesh
 {
 	VAO				m_vao;
 	uint32_t		m_index_count;
-	shapes::aabb	m_aabb;
+	aabb	m_aabb;
 	uint32_t		m_material_index;
 };
 
@@ -24,6 +24,7 @@ public:
 
 	std::vector<mesh>				m_meshes;
 	std::vector<material_entry>		m_materials;
+	aabb							m_aabb;
 
 	static model load_model_from_path(const std::string& path);
 };

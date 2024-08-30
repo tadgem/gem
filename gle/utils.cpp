@@ -1,12 +1,13 @@
 #include "utils.h"
 #include "utils.h"
+#include "utils.h"
 #include <fstream>
 #include <sstream>
 #define GLM_ENABLE_EXPERIMENTAL
 #include "gtc/quaternion.hpp"
 #include "gtc/matrix_transform.hpp"
 #include "gtx/quaternion.hpp"
-
+#include "gtx/matrix_decompose.hpp"
 std::string utils::load_string_from_path(const std::string& path)
 {
     std::ifstream in(path);
@@ -48,6 +49,39 @@ glm::mat4 utils::get_model_matrix(glm::vec3 position, glm::vec3 euler, glm::vec3
 glm::mat3 utils::get_normal_matrix(glm::mat4 model)
 {
     return glm::transpose(glm::inverse(glm::mat3(model)));
+}
+
+aabb utils::transform_aabb(aabb& box, glm::mat4& M)
+{
+    glm::vec3 corners[8];
+    corners[0] = box.min;
+    corners[1] = glm::vec3(box.min.x, box.max.y, box.min.z);
+    corners[2] = glm::vec3(box.min.x, box.max.y, box.max.z);
+    corners[3] = glm::vec3(box.min.x, box.min.y, box.max.z);
+    corners[4] = glm::vec3(box.max.x, box.min.y, box.min.z);
+    corners[5] = glm::vec3(box.max.x, box.max.y, box.min.z);
+    corners[6] = box.max;
+    corners[7] = glm::vec3(box.max.x, box.min.y, box.max.z);
+
+    // transform the first corner
+    glm::vec3 tmin = glm::vec3(M * glm::vec4(corners[0], 1.0));
+    glm::vec3 tmax = tmin;
+
+    // transform the other 7 corners and compute the result AABB
+    for (int i = 1; i < 8; i++)
+    {
+        glm::vec3 point = glm::vec3(M * glm::vec4(corners[i], 1.0));
+
+        tmin = min(tmin, point);
+        tmax = max(tmax, point);
+    }
+
+    aabb rbox;
+
+    rbox.min = tmin;
+    rbox.max = tmax;
+
+    return rbox;
 }
 
 void utils::validate_euler_angles(glm::vec3& input)

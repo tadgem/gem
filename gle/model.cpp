@@ -66,13 +66,13 @@ void ProcessMesh(model& model, aiMesh* m, aiNode* node, const aiScene* scene) {
         }
         mesh_builder.add_index_buffer(indices);
     }
-    shapes::aabb aabb = { {m->mAABB.mMin.x, m->mAABB.mMin.y, m->mAABB.mMin.z},
+    aabb bb= { {m->mAABB.mMin.x, m->mAABB.mMin.y, m->mAABB.mMin.z},
                 {m->mAABB.mMax.x, m->mAABB.mMax.y, m->mAABB.mMax.z} };
 
     mesh new_mesh{};
     new_mesh.m_vao = mesh_builder.build();
     new_mesh.m_index_count = indices.size();
-    new_mesh.m_aabb = aabb;
+    new_mesh.m_aabb = bb;
     new_mesh.m_material_index = m->mMaterialIndex;
 
     model.m_meshes.push_back(new_mesh);
@@ -131,8 +131,21 @@ model model::load_model_from_path(const std::string& path)
     }
 
     model m{};
-
+    aabb  model_aabb{};
     ProcessNode(m, scene->mRootNode, scene);
+
+    for (auto& mesh : m.m_meshes)
+    {
+        if (mesh.m_aabb.min.x < model_aabb.min.x) { model_aabb.min.x = mesh.m_aabb.min.x; }
+        if (mesh.m_aabb.min.y < model_aabb.min.y) { model_aabb.min.y = mesh.m_aabb.min.y; }
+        if (mesh.m_aabb.min.z < model_aabb.min.z) { model_aabb.min.z = mesh.m_aabb.min.z; }
+
+        if (mesh.m_aabb.max.x > model_aabb.max.x) { model_aabb.max.x = mesh.m_aabb.max.x; }
+        if (mesh.m_aabb.max.y > model_aabb.max.y) { model_aabb.max.y = mesh.m_aabb.max.y; }
+        if (mesh.m_aabb.max.z > model_aabb.max.z) { model_aabb.max.z = mesh.m_aabb.max.z; }
+    }
+    m.m_aabb = model_aabb;
+
     std::string directory = path.substr(0, path.find_last_of('/') + 1);
     for (int i = 0; i < scene->mNumMaterials; i++)
     {
