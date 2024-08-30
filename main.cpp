@@ -123,10 +123,7 @@ void OnIm3D(aabb& level_bb, glm::mat4 model_matrix)
 {
     aabb bb = utils::transform_aabb(level_bb, model_matrix);
     //aabb bb = level_bb;
-    Im3d::SetSize(0.33f);
-    Im3d::PushAlpha(1.0f);
     Im3d::PushColor(Im3d::Color_Red);
-    Im3d::SetAlpha(1.0f);
     Im3d::DrawAlignedBox(
         { bb.min.x, bb.min.y, bb.min.z }, 
         { bb.max.x, bb.max.y, bb.max.z }
@@ -198,7 +195,7 @@ int main()
 
     for (auto i = 0; i < _3d_cube_res * 4; i++)
     {
-        // float r = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
+        //float r = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
         float r = 0.0f;
         _3d_tex_data[i] = r;
     }
@@ -217,24 +214,25 @@ int main()
     }
     VAO instanced_cubes = shapes::gen_cube_instanced_vao(instance_matrices, instance_uvs);
     texture _3d_tex = texture::create_3d_texture({ 128, 128, 128 }, GL_RGBA, GL_RGBA32F, GL_FLOAT, _3d_tex_data);
-    glBindImageTexture(0, _3d_tex.m_handle, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+    glAssert(glBindImageTexture(0, _3d_tex.m_handle, 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA32F));
 
     voxelization.use();
     voxelization.setInt("u_gbuffer_pos", 0);
     voxelization.setInt("u_gbuffer_lighting", 1);
-
+    voxelization.setVec3("u_voxel_resolution", { 128, 128, 128 });
+    voxelization.setVec3("u_aabb.min", sponza.m_aabb.min);
+    voxelization.setVec3("u_aabb.max", sponza.m_aabb.max);
     
     glm::mat4 model = utils::get_model_matrix(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(0.2f));
     glm::mat3 normal = utils::get_normal_matrix(model);
 
-    bool draw_debug_3d_texture = false;
+    bool draw_debug_3d_texture = true;
 
     auto im3d_s =  im3d_gl::load_im3d();
 
-    glEnable(GL_DEPTH_TEST);
-    glCullFace(GL_BACK);
     while (!engine::s_quit)
     {
+        glEnable(GL_DEPTH_TEST);
         engine::process_sdl_event();
         engine::engine_pre_frame();        
         glm::mat4 mvp = cam.m_proj * cam.m_view * model;
@@ -247,7 +245,8 @@ int main()
         glBindTexture(GL_TEXTURE_2D, gbuffer.m_colour_attachments[1]);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, lightpass_buffer.m_colour_attachments[0]);
-        glDispatchCompute((unsigned int)1280 / 10, (unsigned int)720/ 10, 1);
+        glAssert(glDispatchCompute(128, 72, 1));
+
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
         glClear(GL_DEPTH_BUFFER_BIT);
 
@@ -257,12 +256,12 @@ int main()
         handle_light_pass(lighting_shader, gbuffer, cam, lights);
         lightpass_buffer.unbind();
         
-        shapes::s_screen_quad.use();
-        present_shader.use();
-        present_shader.setInt("u_image_sampler", 0);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, lightpass_buffer.m_colour_attachments.front());
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        //shapes::s_screen_quad.use();
+        //present_shader.use();
+        //present_shader.setInt("u_image_sampler", 0);
+        //glActiveTexture(GL_TEXTURE0);
+        //glBindTexture(GL_TEXTURE_2D, lightpass_buffer.m_colour_attachments.front());
+        //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         if(draw_debug_3d_texture)
         {

@@ -188,11 +188,6 @@ void im3d_gl::end_frame_im3d(im3d_state& state, glm::ivec2 screen_dim, camera& c
 	{
 		const Im3d::DrawList& drawList = Im3d::GetDrawLists()[i];
 
-		if (drawList.m_layerId == Im3d::MakeId("NamedLayer"))
-		{
-			// The application may group primitives into layers, which can be used to change the draw state (e.g. enable depth testing, use a different shader)
-		}
-
 		GLenum prim;
 		GLuint sh;
 		switch (drawList.m_primType)

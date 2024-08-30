@@ -3,7 +3,7 @@
 #include "GL/glew.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
-
+#include "gl.h"
 texture::texture(const std::string& path)
 {
 	stbi_set_flip_vertically_on_load(1);
@@ -49,15 +49,15 @@ texture texture::from_data(unsigned int* data, unsigned int count, int width, in
 texture texture::create_3d_texture(glm::ivec3 dim, GLenum format, GLenum pixel_format, GLenum data_type, void* data, GLenum filter, GLenum wrap_mode )
 {
 	texture t{};
-	glGenTextures(1, &t.m_handle);
-	glBindTexture(GL_TEXTURE_3D, t.m_handle);
+	glAssert(glGenTextures(1, &t.m_handle));
+	glAssert(glBindTexture(GL_TEXTURE_3D, t.m_handle));
 
-	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, wrap_mode);
-	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, wrap_mode);
-	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, wrap_mode);
+	glAssert(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, wrap_mode));
+	glAssert(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, wrap_mode));
+	glAssert(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, wrap_mode));
 
-	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, filter);
-	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, filter);
-	glTexImage3D(GL_TEXTURE_3D, 0, pixel_format, dim.x, dim.y, dim.z, 0, format, data_type, data);
+	glAssert(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, filter));
+	glAssert(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, filter));
+	glAssert(glTexImage3D(GL_TEXTURE_3D, 0, pixel_format, dim.x, dim.y, dim.z, 0, format, data_type, data));
 	return t;
 }

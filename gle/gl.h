@@ -4,6 +4,10 @@
 #include "GL/glew.h"
 #include "imgui.h"
 #include "glm.hpp"
+#include <string>
+#include <iostream>
+GLenum glCheckError_(const char* file, int line);
+#define glAssert(X) X; glCheckError_(__FILE__, __LINE__)
 
 class engine {
 public:
