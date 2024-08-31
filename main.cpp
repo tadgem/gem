@@ -119,14 +119,13 @@ void handle_light_pass(shader& lighting_shader, framebuffer& gbuffer, camera& ca
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
-void OnIm3D(aabb& level_bb, glm::mat4 model_matrix)
+void OnIm3D(aabb& level_bb)
 {
-    aabb bb = utils::transform_aabb(level_bb, model_matrix);
     //aabb bb = level_bb;
     Im3d::PushColor(Im3d::Color_Red);
     Im3d::DrawAlignedBox(
-        { bb.min.x, bb.min.y, bb.min.z }, 
-        { bb.max.x, bb.max.y, bb.max.z }
+        { level_bb.min.x, level_bb.min.y, level_bb.min.z },
+        { level_bb.max.x, level_bb.max.y, level_bb.max.z }
     );
 }
 
@@ -185,7 +184,7 @@ int main()
     lights.push_back({ {-10.0, 0.0, -10.0}, {0.0, 255.0, 0.0}, 30.0f });
     lights.push_back({ {-10.0, 0.0, 10.0}, {0.0, 0.0, 255.0} , 40.0f});
 
-    constexpr int _3d_tex_res = 128;
+    constexpr int _3d_tex_res = 192;
     constexpr int _3d_cube_res = _3d_tex_res * _3d_tex_res * _3d_tex_res;
 
     float* _3d_tex_data = new float[_3d_cube_res * 4];
@@ -220,13 +219,12 @@ int main()
     voxelization.setInt("u_gbuffer_pos", 0);
     voxelization.setInt("u_gbuffer_lighting", 1);
     voxelization.setVec3("u_voxel_resolution", { _3d_tex_res, _3d_tex_res, _3d_tex_res });
-    voxelization.setVec3("u_aabb.min", sponza.m_aabb.min);
-    voxelization.setVec3("u_aabb.max", sponza.m_aabb.max);
     
     glm::mat4 model = utils::get_model_matrix(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(0.2f));
     glm::mat3 normal = utils::get_normal_matrix(model);
 
     bool draw_debug_3d_texture = true;
+    sponza.m_aabb = utils::transform_aabb(sponza.m_aabb, model);
 
     auto im3d_s =  im3d_gl::load_im3d();
 
@@ -241,6 +239,8 @@ int main()
         
         // compute
         voxelization.use();
+        voxelization.setVec3("u_aabb.min", sponza.m_aabb.min);
+        voxelization.setVec3("u_aabb.max", sponza.m_aabb.max);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, gbuffer.m_colour_attachments[1]);
         glActiveTexture(GL_TEXTURE1);
@@ -275,7 +275,7 @@ int main()
             glDrawElementsInstanced(GL_TRIANGLES, 36, GL_UNSIGNED_INT,  0, _3d_cube_res);
         }
         {
-            OnIm3D(sponza.m_aabb, model);
+            OnIm3D(sponza.m_aabb);
         }
         {
             ImGui::Begin("Hello, world!");                          
