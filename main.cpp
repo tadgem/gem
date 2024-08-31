@@ -184,12 +184,20 @@ int main()
     lights.push_back({ {-10.0, 0.0, -10.0}, {0.0, 255.0, 0.0}, 30.0f });
     lights.push_back({ {-10.0, 0.0, 10.0}, {0.0, 0.0, 255.0} , 40.0f});
 
-    constexpr int _3d_tex_res = 128;
+    constexpr int _3d_tex_res = 192;
     constexpr int _3d_cube_res = _3d_tex_res * _3d_tex_res * _3d_tex_res;
 
     float* _3d_tex_data = new float[_3d_cube_res * 4];
     std::vector<glm::mat4> instance_matrices;
     std::vector<glm::vec3> instance_uvs;
+
+    
+    glm::mat4 model = utils::get_model_matrix(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(0.2f));
+    glm::mat3 normal = utils::get_normal_matrix(model);
+    sponza.m_aabb = utils::transform_aabb(sponza.m_aabb, model);
+
+    glm::vec3 aabb_dim = sponza.m_aabb.max - sponza.m_aabb.min;
+    glm::vec3 unit = glm::vec3((aabb_dim.x / _3d_tex_res), (aabb_dim.y / _3d_tex_res), (aabb_dim.z / _3d_tex_res));
 
 
     for (auto i = 0; i < _3d_cube_res * 4; i++)
@@ -199,17 +207,31 @@ int main()
         _3d_tex_data[i] = r;
     }
 
+
     for (auto i = 0; i < _3d_cube_res; i++)
     {
         //create a new VAO for debug cubes
         // first vbo is same as cube
         // instance vbo is per-instance transform
-        float x = i / (_3d_tex_res * _3d_tex_res);
-        float y = (i / _3d_tex_res) % _3d_tex_res;
-        float z = i % _3d_tex_res;
 
-        instance_uvs.push_back({ (z + 1) / _3d_tex_res,(y + 1) / _3d_tex_res, (x + 1)/ _3d_tex_res });
-        instance_matrices.push_back(utils::get_model_matrix({ z,y,x }, {0,90,0}, glm::vec3(1.0f)));
+        float z = sponza.m_aabb.min.z;
+        float y = sponza.m_aabb.min.y;
+        float x = sponza.m_aabb.min.x;
+
+        float z_offset = i / (_3d_tex_res * _3d_tex_res);
+        float y_offset = (i / _3d_tex_res) % _3d_tex_res;
+        float x_offset = i % _3d_tex_res;
+
+        float z_offset2 = z_offset * unit.z;
+        float y_offset2 = y_offset * unit.y;
+        float x_offset2 = x_offset * unit.x;
+
+        z += z_offset2;
+        y += y_offset2;
+        x += x_offset2;
+
+        instance_uvs.push_back({ (x_offset + 1) / _3d_tex_res ,(y_offset + 1) / _3d_tex_res,(z_offset + 1) / _3d_tex_res});
+        instance_matrices.push_back(utils::get_model_matrix({ x,y,z }, {0,90,0}, unit));
     }
     VAO instanced_cubes = shapes::gen_cube_instanced_vao(instance_matrices, instance_uvs);
     texture _3d_tex = texture::create_3d_texture({ _3d_tex_res, _3d_tex_res, _3d_tex_res }, GL_RGBA, GL_RGBA32F, GL_FLOAT, _3d_tex_data);
@@ -219,12 +241,9 @@ int main()
     voxelization.setInt("u_gbuffer_pos", 0);
     voxelization.setInt("u_gbuffer_lighting", 1);
     voxelization.setVec3("u_voxel_resolution", { _3d_tex_res, _3d_tex_res, _3d_tex_res });
-    
-    glm::mat4 model = utils::get_model_matrix(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(0.2f));
-    glm::mat3 normal = utils::get_normal_matrix(model);
 
     bool draw_debug_3d_texture = true;
-    sponza.m_aabb = utils::transform_aabb(sponza.m_aabb, model);
+    bool draw_direct_lighting = true;
 
     auto im3d_s =  im3d_gl::load_im3d();
 
@@ -256,12 +275,15 @@ int main()
         handle_light_pass(lighting_shader, gbuffer, cam, lights);
         lightpass_buffer.unbind();
                 
-        shapes::s_screen_quad.use();
-        present_shader.use();
-        present_shader.setInt("u_image_sampler", 0);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, lightpass_buffer.m_colour_attachments.front());
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        if (draw_direct_lighting)
+        {
+            shapes::s_screen_quad.use();
+            present_shader.use();
+            present_shader.setInt("u_image_sampler", 0);
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, lightpass_buffer.m_colour_attachments.front());
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        }
         glClear(GL_DEPTH_BUFFER_BIT);
         if(draw_debug_3d_texture)
         {
@@ -280,6 +302,9 @@ int main()
         {
             ImGui::Begin("Hello, world!");                          
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / engine::s_imgui_io->Framerate, engine::s_imgui_io->Framerate);
+            ImGui::Separator();
+            ImGui::Checkbox("Render 3D Voxel Grid", &draw_debug_3d_texture);
+            ImGui::Checkbox("Render Direct Lighting Pass", &draw_direct_lighting);
             ImGui::Separator();
             ImGui::DragFloat3("Camera Position", &cam.m_pos[0]);
             ImGui::DragFloat3("Camera Euler", &cam.m_euler[0]);
