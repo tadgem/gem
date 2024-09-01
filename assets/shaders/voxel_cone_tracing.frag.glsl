@@ -10,11 +10,18 @@ out vec4 FragColor;
 #define CONSTANT 1
 #define LINEAR 0 /* Looks meh when using gamma correction. */
 #define QUADRATIC 1
+struct AABB
+{
+	vec3 min;
+	vec3 max;
+};
+
 
 uniform sampler2D   u_position_map;
 uniform sampler2D   u_normal_map;
 uniform sampler3D   u_voxel_map; // x = metallic, y = roughness, z = AO
-uniform vec3		u_aabb_min;
+uniform AABB		u_aabb;
+uniform vec3	  u_voxel_resolution;
 #define VOXEL_SIZE (1/128.0)
 
 vec3 scaleAndBias(const vec3 p) { return 0.5f * p + vec3(0.5f); }
@@ -27,85 +34,41 @@ vec3 orthogonal(vec3 u) {
 	return abs(dot(u, v)) > 0.99999f ? cross(u, vec3(0, 1, 0)) : cross(u, v);
 }
 
-// Traces a diffuse voxel cone.
-vec3 traceDiffuseVoxelCone(const vec3 from, vec3 direction) {
-	direction = normalize(direction);
+bool is_in_aabb(vec3 pos)
+{
+	if (pos.x < u_aabb.min.x) { return false; }
+	if (pos.y < u_aabb.min.y) { return false; }
+	if (pos.z < u_aabb.min.z) { return false; }
 
-	const float CONE_SPREAD = 0.325;
+	if (pos.x > u_aabb.max.x) { return false; }
+	if (pos.y > u_aabb.max.y) { return false; }
+	if (pos.z > u_aabb.max.z) { return false; }
 
-	vec4 acc = vec4(0.0f);
-
-	// Controls bleeding from close surfaces.
-	// Low values look rather bad if using shadow cone tracing.
-	// Might be a better choice to use shadow maps and lower this value.
-	float dist = 0.1953125;
-
-	// Trace.
-	while (dist < SQRT2 && acc.a < 1) {
-		vec3 c = from + dist * direction;
-		c = scaleAndBias(from + dist * direction);
-		float l = (1 + CONE_SPREAD * dist / VOXEL_SIZE);
-		float level = log2(l);
-		float ll = (level + 1) * (level + 1);
-		vec4 voxel = texture(u_voxel_map, c);
-		acc += 0.075 * ll * voxel * pow(1 - voxel.a, 2);
-		dist += ll * VOXEL_SIZE * 2;
-	}
-	return pow(acc.rgb * 2.0, vec3(1.5));
+	return true;
 }
 
-vec3 indirectDiffuseLight(vec3 position, vec3 normal, vec3 diffuse) {
-	const float ANGLE_MIX = 0.5f; // Angle mix (1.0f => orthogonal direction, 0.0f => direction of normal).
 
-	const float w[3] = { 1.0, 1.0, 1.0 }; // Cone weights.
+vec3 get_texel_from_pos(vec3 position)
+{
+	vec3 aabb_dim = u_aabb.max - u_aabb.min;
+	vec3 unit = vec3((aabb_dim.x / u_voxel_resolution.x) , (aabb_dim.y / u_voxel_resolution.y), (aabb_dim.z / u_voxel_resolution.z));
 
-	// Find a base for the side cones with the normal as one of its base vectors.
-	const vec3 ortho = normalize(orthogonal(normal));
-	const vec3 ortho2 = normalize(cross(ortho, normal));
+	/// <summary>
+	/// 0,0,0 is aabb.min
+	/// </summary>
+	vec3 new_pos = position - u_aabb.min;
+	int x = int(new_pos.x / unit.x);
+	int y = int(new_pos.y / unit.y);
+	int z = int(new_pos.z / unit.z);
 
-	// Find base vectors for the corner cones too.
-	const vec3 corner = 0.5f * (ortho + ortho2);
-	const vec3 corner2 = 0.5f * (ortho - ortho2);
+	return vec3(float(x/ u_voxel_resolution.x), float(y / u_voxel_resolution.y), float(z / u_voxel_resolution.z));
 
-	// Find start position of trace (start with a bit of offset).
-	const vec3 N_OFFSET = normal * (1 + 4 * ISQRT2) * VOXEL_SIZE;
-	const vec3 C_ORIGIN = position + N_OFFSET;
+}
 
-	// Accumulate indirect diffuse light.
-	vec3 acc = vec3(0);
 
-	// We offset forward in normal direction, and backward in cone direction.
-	// Backward in cone direction improves GI, and forward direction removes
-	// artifacts.
-	const float CONE_OFFSET = -0.01;
-
-	// Trace front cone
-	acc += w[0] * traceDiffuseVoxelCone(C_ORIGIN + CONE_OFFSET * normal, normal);
-
-	// Trace 4 side cones.
-	const vec3 s1 = mix(normal, ortho, ANGLE_MIX);
-	const vec3 s2 = mix(normal, -ortho, ANGLE_MIX);
-	const vec3 s3 = mix(normal, ortho2, ANGLE_MIX);
-	const vec3 s4 = mix(normal, -ortho2, ANGLE_MIX);
-
-	acc += w[1] * traceDiffuseVoxelCone(C_ORIGIN + CONE_OFFSET * ortho, s1);
-	acc += w[1] * traceDiffuseVoxelCone(C_ORIGIN - CONE_OFFSET * ortho, s2);
-	acc += w[1] * traceDiffuseVoxelCone(C_ORIGIN + CONE_OFFSET * ortho2, s3);
-	acc += w[1] * traceDiffuseVoxelCone(C_ORIGIN - CONE_OFFSET * ortho2, s4);
-
-	// Trace 4 corner cones.
-	const vec3 c1 = mix(normal, corner, ANGLE_MIX);
-	const vec3 c2 = mix(normal, -corner, ANGLE_MIX);
-	const vec3 c3 = mix(normal, corner2, ANGLE_MIX);
-	const vec3 c4 = mix(normal, -corner2, ANGLE_MIX);
-
-	acc += w[2] * traceDiffuseVoxelCone(C_ORIGIN + CONE_OFFSET * corner, c1);
-	acc += w[2] * traceDiffuseVoxelCone(C_ORIGIN - CONE_OFFSET * corner, c2);
-	acc += w[2] * traceDiffuseVoxelCone(C_ORIGIN + CONE_OFFSET * corner2, c3);
-	acc += w[2] * traceDiffuseVoxelCone(C_ORIGIN - CONE_OFFSET * corner2, c4);
-
-	// Return result.
-	return 1.0 * acc * (diffuse + vec3(0.001f));
+vec3 get_voxel_colour(vec3 position)
+{
+	return texture(u_voxel_map, get_texel_from_pos(position)).xyz;
 }
 
 
@@ -115,5 +78,5 @@ void main()
 	vec3 position = texture(u_position_map, aUV).xyz;
 	vec3 normal = texture(u_normal_map, aUV).xyz;
 	vec3 normalized_n = normalize(normal);
-	FragColor = vec4(indirectDiffuseLight(position - u_aabb_min, normalized_n, diffuse), 1.0);
+	FragColor = vec4(get_voxel_colour(position), 1.0);
 }

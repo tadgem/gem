@@ -241,7 +241,7 @@ int main()
     voxelization.use();
     voxelization.setInt("u_gbuffer_pos", 0);
     voxelization.setInt("u_gbuffer_lighting", 1);
-    voxelization.setVec3("u_voxel_resolution", { _3d_tex_res, _3d_tex_res, _3d_tex_res });
+    voxelization.setVec3("u_voxel_resolution", glm::vec3( _3d_tex_res));
 
     bool draw_debug_3d_texture = true;
     bool draw_direct_lighting = true;
@@ -291,7 +291,9 @@ int main()
         {
             shapes::s_screen_quad.use();
             voxel_cone_tracing.use();
-            voxel_cone_tracing.setVec3("u_aabb_min", sponza.m_aabb.min);
+            voxel_cone_tracing.setVec3("u_aabb.min", sponza.m_aabb.min);
+            voxel_cone_tracing.setVec3("u_aabb.max", sponza.m_aabb.max);
+            voxel_cone_tracing.setVec3("u_voxel_resolution", glm::vec3(_3d_tex_res));
             voxel_cone_tracing.setInt("u_position_map", 0);
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, gbuffer.m_colour_attachments[1]);
