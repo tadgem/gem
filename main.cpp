@@ -150,13 +150,14 @@ int main()
     std::string present_frag = utils::load_string_from_path("assets/shaders/present.frag.glsl");
 
     std::string voxelization_compute = utils::load_string_from_path("assets/shaders/gbuffer_voxelization.comp.glsl");
+    std::string voxel_cone_tracing_frag = utils::load_string_from_path("assets/shaders/voxel_cone_tracing.frag.glsl");
 
     shader gbuffer_shader(gbuffer_vert, gbuffer_frag);
     shader lighting_shader(present_vert, gbuffer_lighting_frag);
     shader present_shader(present_vert, present_frag);
     shader debug3dtex_shader(debug3dtex_vert, debug3dtex_frag);
     shader voxelization(voxelization_compute);
-
+    shader voxel_cone_tracing(present_vert, voxel_cone_tracing_frag);
 
     camera cam{};
     model sponza = model::load_model_from_path("assets/models/sponza/Sponza.gltf");
@@ -184,7 +185,7 @@ int main()
     lights.push_back({ {-10.0, 0.0, -10.0}, {0.0, 255.0, 0.0}, 30.0f });
     lights.push_back({ {-10.0, 0.0, 10.0}, {0.0, 0.0, 255.0} , 40.0f});
 
-    constexpr int _3d_tex_res = 192;
+    constexpr int _3d_tex_res = 128;
     constexpr int _3d_cube_res = _3d_tex_res * _3d_tex_res * _3d_tex_res;
 
     float* _3d_tex_data = new float[_3d_cube_res * 4];
@@ -231,7 +232,7 @@ int main()
         x += x_offset2;
 
         instance_uvs.push_back({ (x_offset + 1) / _3d_tex_res ,(y_offset + 1) / _3d_tex_res,(z_offset + 1) / _3d_tex_res});
-        instance_matrices.push_back(utils::get_model_matrix({ x,y,z }, {0,90,0}, unit));
+        instance_matrices.push_back(utils::get_model_matrix({ x,y,z }, { 0,90,0 }, { unit.z, unit.y, unit.x }));
     }
     VAO instanced_cubes = shapes::gen_cube_instanced_vao(instance_matrices, instance_uvs);
     texture _3d_tex = texture::create_3d_texture({ _3d_tex_res, _3d_tex_res, _3d_tex_res }, GL_RGBA, GL_RGBA32F, GL_FLOAT, _3d_tex_data);
@@ -244,6 +245,7 @@ int main()
 
     bool draw_debug_3d_texture = true;
     bool draw_direct_lighting = true;
+    bool draw_cone_tracing_pass = true;
 
     auto im3d_s =  im3d_gl::load_im3d();
 
@@ -284,6 +286,23 @@ int main()
             glBindTexture(GL_TEXTURE_2D, lightpass_buffer.m_colour_attachments.front());
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         }
+
+        if (draw_cone_tracing_pass)
+        {
+            shapes::s_screen_quad.use();
+            voxel_cone_tracing.use();
+            voxel_cone_tracing.setVec3("u_aabb_min", sponza.m_aabb.min);
+            voxel_cone_tracing.setInt("u_position_map", 0);
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, gbuffer.m_colour_attachments[1]);
+            voxel_cone_tracing.setInt("u_normal_map", 1);
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, gbuffer.m_colour_attachments[2]);
+            voxel_cone_tracing.setInt("u_voxel_map", 2);
+            glActiveTexture(GL_TEXTURE2);
+            glBindTexture(GL_TEXTURE_3D, _3d_tex.m_handle);
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        }
         glClear(GL_DEPTH_BUFFER_BIT);
         if(draw_debug_3d_texture)
         {
@@ -305,6 +324,7 @@ int main()
             ImGui::Separator();
             ImGui::Checkbox("Render 3D Voxel Grid", &draw_debug_3d_texture);
             ImGui::Checkbox("Render Direct Lighting Pass", &draw_direct_lighting);
+            ImGui::Checkbox("Render Cone Tracing Pass", &draw_cone_tracing_pass);
             ImGui::Separator();
             ImGui::DragFloat3("Camera Position", &cam.m_pos[0]);
             ImGui::DragFloat3("Camera Euler", &cam.m_euler[0]);
