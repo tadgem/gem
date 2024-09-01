@@ -141,6 +141,7 @@ int main()
 
     std::string gbuffer_vert = utils::load_string_from_path("assets/shaders/gbuffer.vert.glsl");
     std::string gbuffer_frag = utils::load_string_from_path("assets/shaders/gbuffer.frag.glsl");
+    std::string gbuffer_floats_frag = utils::load_string_from_path("assets/shaders/gbuffer_floats.frag.glsl");
     std::string gbuffer_lighting_frag = utils::load_string_from_path("assets/shaders/lighting.frag.glsl");
 
     std::string debug3dtex_vert = utils::load_string_from_path("assets/shaders/debug_3d_tex.vert.glsl");
@@ -153,6 +154,7 @@ int main()
     std::string voxel_cone_tracing_frag = utils::load_string_from_path("assets/shaders/voxel_cone_tracing.frag.glsl");
 
     shader gbuffer_shader(gbuffer_vert, gbuffer_frag);
+    shader gbuffer_floats_shader(gbuffer_vert, gbuffer_floats_frag);
     shader lighting_shader(present_vert, gbuffer_lighting_frag);
     shader present_shader(present_vert, present_frag);
     shader debug3dtex_shader(debug3dtex_vert, debug3dtex_frag);
@@ -185,7 +187,7 @@ int main()
     lights.push_back({ {-10.0, 0.0, -10.0}, {0.0, 255.0, 0.0}, 30.0f });
     lights.push_back({ {-10.0, 0.0, 10.0}, {0.0, 0.0, 255.0} , 40.0f});
 
-    constexpr int _3d_tex_res = 128;
+    constexpr int _3d_tex_res = 384;
     constexpr int _3d_cube_res = _3d_tex_res * _3d_tex_res * _3d_tex_res;
 
     float* _3d_tex_data = new float[_3d_cube_res * 4];
