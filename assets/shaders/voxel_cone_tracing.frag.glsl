@@ -91,7 +91,7 @@ vec3 spherical_to_cart(vec3 spherical)
 
 vec3 trace_cone(vec3 from, vec3 dir, vec3 unit)
 {
-	const int max_steps = 64;
+	const int max_steps = 16;
 	vec4 accum = vec4(0.0);
 	vec3 pos = from;
 	int steps = 0;
@@ -100,7 +100,7 @@ vec3 trace_cone(vec3 from, vec3 dir, vec3 unit)
 		pos += unit * dir;
 		if (!is_in_aabb(pos))
 		{
-			result.w = 1.0;
+			accum.w = 1.0;
 		}
 		vec4 result = get_voxel_colour(pos, unit);
 		accum += result;
