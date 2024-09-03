@@ -3,6 +3,7 @@
 #include "utils.h"
 #include "utils.h"
 #include "utils.h"
+#include "utils.h"
 #include <fstream>
 #include <sstream>
 #define GLM_ENABLE_EXPERIMENTAL
@@ -55,9 +56,13 @@ glm::mat3 utils::get_normal_matrix(glm::mat4 model)
 
 glm::vec3 utils::cart_to_spherical(glm::vec3 normal)
 {
-    float p = glm::sqrt(glm::pow(normal.x + FLT_EPSILON, 2) + glm::pow(normal.y + FLT_EPSILON, 2) + glm::pow(normal.z + FLT_EPSILON, 2));
-    float theta = glm::acos((normal.y + FLT_EPSILON) / (normal.x + FLT_EPSILON));
-    float phi = glm::acos((normal.z + FLT_EPSILON) / p);
+    float p = glm::sqrt(glm::pow(normal.x, 2) + glm::pow(normal.y, 2) + glm::pow(normal.z, 2));
+    float theta = glm::acos((normal.y) / (normal.x));
+    if (std::isnan(theta))
+    {
+        theta = 0.0f;
+    }
+    float phi = glm::acos((normal.z) / p);
     return glm::vec3(p, theta, phi);
 }
 
@@ -69,7 +74,13 @@ glm::vec3 utils::spherical_to_cart(glm::vec3 spherical)
     float y = spherical.x * glm::sin(spherical.z) * glm::sin(spherical.y);
     // p * cos-phi
     float z = spherical.x * glm::cos(spherical.z);
-    return glm::vec3(x,y,z);
+    return glm::vec3(round_up(y, 4),round_up(x, 4), round_up(z, 4));
+}
+
+float utils::round_up(float value, int decimal_places)
+{
+    const float multiplier = std::pow(10.0, decimal_places);
+    return std::ceil(value * multiplier) / multiplier;
 }
 
 aabb utils::transform_aabb(aabb& box, glm::mat4& M)

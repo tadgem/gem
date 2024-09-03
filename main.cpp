@@ -14,6 +14,7 @@
 #include "im3d.h"
 #include "im3d_gl.h"
 
+static glm::vec3 custom_orientation;
 
 struct point_light
 {
@@ -126,25 +127,29 @@ void handle_light_pass(shader& lighting_shader, framebuffer& gbuffer, camera& ca
 
 void draw_arrow(glm::vec3 pos, glm::vec3 dir)
 {
-    const float factor = 10.0;
-    glm::vec3 end = pos + (dir * factor);
-    auto spherical = utils::cart_to_spherical(dir);
-    auto and_back_again = utils::spherical_to_cart(spherical);
+    glm::vec3 end = pos + dir;
     Im3d::DrawArrow(ToIm3D(pos), ToIm3D(end));
     Im3d::DrawSphere(ToIm3D(end), 0.25f);
 }
 
 void draw_normal_hemisphere(glm::vec3 pos, glm::vec3 dir)
 {
-    const float cone_spread_deg = 30.0f;
-    const float cone_spread_normalized = cone_spread_deg / 360.0f;
+    constexpr float cone_spread_deg = 30.0f;
+    constexpr float cone_spread_rad = glm::radians(cone_spread_deg);
+    constexpr float cone_spread_normalized = cone_spread_deg / 360.0f;
 
+    glm::vec3 spherical = utils::cart_to_spherical(dir);
+    // 4 traces for hemisphere
+    glm::vec3 dir1 = utils::spherical_to_cart(spherical + glm::vec3(0, cone_spread_rad, cone_spread_rad));
+    glm::vec3 dir2 = utils::spherical_to_cart(spherical + glm::vec3(0, -cone_spread_rad, cone_spread_rad));
+    glm::vec3 dir3 = utils::spherical_to_cart(spherical + glm::vec3(0, cone_spread_rad, -cone_spread_rad));
+    glm::vec3 dir4 = utils::spherical_to_cart(spherical + glm::vec3(0, -cone_spread_rad, -cone_spread_rad));
 
     draw_arrow(pos, dir);
-    draw_arrow(pos, { dir.x + cone_spread_normalized, dir.y, dir.z + cone_spread_normalized });
-    draw_arrow(pos, { dir.x - cone_spread_normalized, dir.y, dir.z + cone_spread_normalized });
-    draw_arrow(pos, { dir.x - cone_spread_normalized, dir.y, dir.z - cone_spread_normalized });
-    draw_arrow(pos, { dir.x + cone_spread_normalized, dir.y, dir.z - cone_spread_normalized });
+    draw_arrow(pos, dir1);
+    draw_arrow(pos, dir2);
+    draw_arrow(pos, dir3);
+    draw_arrow(pos, dir4);
 }
 
 void OnIm3D(aabb& level_bb)
@@ -158,11 +163,17 @@ void OnIm3D(aabb& level_bb)
     Im3d::PushColor(Im3d::Color_Red);
     draw_normal_hemisphere({ 0.0, 10.0, 0.0 }, { 1.0, 0.0, 0.0 });
     Im3d::PopColor();
+    
     Im3d::PushColor(Im3d::Color_Green);
     draw_normal_hemisphere({ 0.0, 10.0, 0.0 }, { 0.0, 1.0, 0.0 });
     Im3d::PopColor();
+    
     Im3d::PushColor(Im3d::Color_Blue);
     draw_normal_hemisphere({ 0.0, 10.0, 0.0 }, { 0.0, 0.0, 1.0 });
+    Im3d::PopColor();
+
+    Im3d::PushColor(Im3d::Color_White);
+    draw_normal_hemisphere({ 0.0, 10.0, 0.0 }, glm::normalize(custom_orientation));
     Im3d::PopColor();
 
 }
@@ -176,6 +187,7 @@ float get_aabb_area(aabb& bb)
 int main()
 {
     engine::init();
+    custom_orientation = glm::vec3(0, 1, 0);
 
     std::string gbuffer_vert = utils::load_string_from_path("assets/shaders/gbuffer.vert.glsl");
     std::string gbuffer_frag = utils::load_string_from_path("assets/shaders/gbuffer.frag.glsl");
@@ -225,7 +237,7 @@ int main()
     lights.push_back({ {-10.0, 0.0, -10.0}, {0.0, 255.0, 0.0}, 30.0f });
     lights.push_back({ {-10.0, 0.0, 10.0}, {0.0, 0.0, 255.0} , 40.0f});
 
-    constexpr int _3d_tex_res = 128;
+    constexpr int _3d_tex_res = 192;
     constexpr int _3d_cube_res = _3d_tex_res * _3d_tex_res * _3d_tex_res;
 
     float* _3d_tex_data = new float[_3d_cube_res * 4];
@@ -370,6 +382,8 @@ int main()
             ImGui::Separator();
             ImGui::DragFloat3("Camera Position", &cam.m_pos[0]);
             ImGui::DragFloat3("Camera Euler", &cam.m_euler[0]);
+            ImGui::Separator();
+            ImGui::DragFloat3("Orientation Test", &custom_orientation[0]);
             ImGui::Separator();
             ImGui::DragFloat3("Level Bounding Box Min", &sponza.m_aabb.min[0]);
             ImGui::DragFloat3("Level Bounding Box Max", &sponza.m_aabb.max[0]);

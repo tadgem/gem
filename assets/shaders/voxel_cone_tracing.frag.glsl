@@ -49,10 +49,10 @@ bool is_in_aabb(vec3 pos)
 vec3 get_texel_from_pos(vec3 position, vec3 unit)
 {
 	vec3 clip_pos = position - u_aabb.min;
-	int x = int(clip_pos.x / unit.x);
-	int y = int(clip_pos.y / unit.y);
-	int z = int(clip_pos.z / unit.z);
-	return vec3(float(x/ u_voxel_resolution.x), float(y / u_voxel_resolution.y), float(z / u_voxel_resolution.z));
+	float x = clip_pos.x / unit.x;
+	float y = clip_pos.y / unit.y;
+	float z = clip_pos.z / unit.z;
+	return vec3(x/ u_voxel_resolution.x, y / u_voxel_resolution.y, z / u_voxel_resolution.z);
 }
 
 vec4 get_voxel_colour(vec3 position, vec3 unit)
@@ -60,15 +60,48 @@ vec4 get_voxel_colour(vec3 position, vec3 unit)
 	return texture(u_voxel_map, get_texel_from_pos(position, unit));
 }
 
+float round_up(float value, int decimal_places)
+{
+	const float multiplier = pow(10.0, decimal_places);
+	return ceil(value * multiplier) / multiplier;
+}
+
+vec3 cart_to_spherical(vec3 cart)
+{
+	float p = sqrt(pow(cart.x, 2) + pow(cart.y, 2) + pow(cart.z, 2));
+	float theta = acos((cart.y) / (cart.x));
+	if (isnan(theta))
+	{
+		theta = 0.0f;
+	}
+	float phi = acos((cart.z) / p);
+	return vec3(p, theta, phi);
+}
+
+vec3 spherical_to_cart(vec3 spherical)
+{
+	// p * sin-phi * cos-theta
+	float x = spherical.x * sin(spherical.z) * cos(spherical.y);
+	// p * sin-phi * sin-theta
+	float y = spherical.x * sin(spherical.z) * sin(spherical.y);
+	// p * cos-phi
+	float z = spherical.x * cos(spherical.z);
+	return vec3(round_up(y, 4), round_up(x, 4), round_up(z, 4));
+}
+
 vec3 trace_cone(vec3 from, vec3 dir, vec3 unit)
 {
-	const int max_steps = 16;
+	const int max_steps = 64;
 	vec4 accum = vec4(0.0);
 	vec3 pos = from;
 	int steps = 0;
 	while (accum.w < 0.99 && steps < max_steps)
 	{
 		pos += unit * dir;
+		if (!is_in_aabb(pos))
+		{
+			result.w = 1.0;
+		}
 		vec4 result = get_voxel_colour(pos, unit);
 		accum += result;
 		steps += 1;
@@ -76,12 +109,16 @@ vec3 trace_cone(vec3 from, vec3 dir, vec3 unit)
 	return accum.xyz;
 }
 
-vec3 trace_cones(vec3 from, vec3 dir, vec3 unit)
+vec3 trace_cones(vec3 from, vec3 dir, vec3 unit, float angle)
 {
-	vec3 c1 = dir + vec3(0.1, 0.1, 0.1);
-	vec3 c2 = dir + vec3(-0.1, 0.1, -0.1);
-	vec3 c3 = dir + vec3(-0.1, 0.1, 0.1);
-	vec3 c4 = dir + vec3(0.1, 0.1, -0.1);
+	const float cone_spread_rad = radians(angle);
+
+	vec3 spherical = cart_to_spherical(dir);
+
+	vec3 c1 = spherical_to_cart(spherical + vec3(0.0, cone_spread_rad, cone_spread_rad));
+	vec3 c2 = spherical_to_cart(spherical + vec3(0.0, -cone_spread_rad, cone_spread_rad));
+	vec3 c3 = spherical_to_cart(spherical + vec3(0.0, cone_spread_rad, -cone_spread_rad));
+	vec3 c4 = spherical_to_cart(spherical + vec3(0.0, -cone_spread_rad, -cone_spread_rad));
 
 	vec3 r1 = trace_cone(from, c1, unit);
 	vec3 r2 = trace_cone(from, c2, unit);
@@ -101,5 +138,8 @@ void main()
 	vec3 position = texture(u_position_map, aUV).xyz;
 	vec3 normal = texture(u_normal_map, aUV).xyz;
 	vec3 normalized_n = normalize(normal);
-	FragColor = vec4(trace_cones(position, normalized_n, unit), 1.0);
+	vec3 v_direct_normal = trace_cone(position, normalized_n, unit);
+	vec3 v_diffuse = trace_cones(position, normalized_n, unit, 45.0f);
+	vec3 v_spec = trace_cones(position, normalized_n, unit, 5.0f);
+	FragColor = vec4((v_direct_normal + v_diffuse + v_spec) / 3.0, 1.0);
 }
