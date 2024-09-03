@@ -19,3 +19,4 @@ public:
     static void        new_frame_im3d(im3d_state& state);
     static void        end_frame_im3d(im3d_state& state, glm::ivec2 screen_dim, camera& cam);
 };
+

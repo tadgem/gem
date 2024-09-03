@@ -22,6 +22,11 @@ struct point_light
     float       radius;
 };
 
+Im3d::Vec3 ToIm3D(glm::vec3& input)
+{
+    return { input.x, input.y, input.z };
+}
+
 void handle_gbuffer(framebuffer& gbuffer, shader& gbuffer_shader, glm::mat4 mvp, glm::mat4 model_mat, glm::mat3 normal, camera& cam, std::vector<point_light>& lights, model& sponza)
 {
     gbuffer.bind();
@@ -119,14 +124,47 @@ void handle_light_pass(shader& lighting_shader, framebuffer& gbuffer, camera& ca
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
+void draw_arrow(glm::vec3 pos, glm::vec3 dir)
+{
+    const float factor = 10.0;
+    glm::vec3 end = pos + (dir * factor);
+    auto spherical = utils::cart_to_spherical(dir);
+    auto and_back_again = utils::spherical_to_cart(spherical);
+    Im3d::DrawArrow(ToIm3D(pos), ToIm3D(end));
+    Im3d::DrawSphere(ToIm3D(end), 0.25f);
+}
+
+void draw_normal_hemisphere(glm::vec3 pos, glm::vec3 dir)
+{
+    const float cone_spread_deg = 30.0f;
+    const float cone_spread_normalized = cone_spread_deg / 360.0f;
+
+
+    draw_arrow(pos, dir);
+    draw_arrow(pos, { dir.x + cone_spread_normalized, dir.y, dir.z + cone_spread_normalized });
+    draw_arrow(pos, { dir.x - cone_spread_normalized, dir.y, dir.z + cone_spread_normalized });
+    draw_arrow(pos, { dir.x - cone_spread_normalized, dir.y, dir.z - cone_spread_normalized });
+    draw_arrow(pos, { dir.x + cone_spread_normalized, dir.y, dir.z - cone_spread_normalized });
+}
+
 void OnIm3D(aabb& level_bb)
 {
     //aabb bb = level_bb;
-    Im3d::PushColor(Im3d::Color_Red);
     Im3d::DrawAlignedBox(
         { level_bb.min.x, level_bb.min.y, level_bb.min.z },
         { level_bb.max.x, level_bb.max.y, level_bb.max.z }
     );
+
+    Im3d::PushColor(Im3d::Color_Red);
+    draw_normal_hemisphere({ 0.0, 10.0, 0.0 }, { 1.0, 0.0, 0.0 });
+    Im3d::PopColor();
+    Im3d::PushColor(Im3d::Color_Green);
+    draw_normal_hemisphere({ 0.0, 10.0, 0.0 }, { 0.0, 1.0, 0.0 });
+    Im3d::PopColor();
+    Im3d::PushColor(Im3d::Color_Blue);
+    draw_normal_hemisphere({ 0.0, 10.0, 0.0 }, { 0.0, 0.0, 1.0 });
+    Im3d::PopColor();
+
 }
 
 float get_aabb_area(aabb& bb)
@@ -187,7 +225,7 @@ int main()
     lights.push_back({ {-10.0, 0.0, -10.0}, {0.0, 255.0, 0.0}, 30.0f });
     lights.push_back({ {-10.0, 0.0, 10.0}, {0.0, 0.0, 255.0} , 40.0f});
 
-    constexpr int _3d_tex_res = 384;
+    constexpr int _3d_tex_res = 128;
     constexpr int _3d_cube_res = _3d_tex_res * _3d_tex_res * _3d_tex_res;
 
     float* _3d_tex_data = new float[_3d_cube_res * 4];
@@ -245,7 +283,7 @@ int main()
     voxelization.setInt("u_gbuffer_lighting", 1);
     voxelization.setVec3("u_voxel_resolution", glm::vec3( _3d_tex_res));
 
-    bool draw_debug_3d_texture = true;
+    bool draw_debug_3d_texture = false;
     bool draw_direct_lighting = true;
     bool draw_cone_tracing_pass = true;
 

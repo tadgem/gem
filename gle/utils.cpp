@@ -1,6 +1,8 @@
 #include "utils.h"
 #include "utils.h"
 #include "utils.h"
+#include "utils.h"
+#include "utils.h"
 #include <fstream>
 #include <sstream>
 #define GLM_ENABLE_EXPERIMENTAL
@@ -49,6 +51,25 @@ glm::mat4 utils::get_model_matrix(glm::vec3 position, glm::vec3 euler, glm::vec3
 glm::mat3 utils::get_normal_matrix(glm::mat4 model)
 {
     return glm::transpose(glm::inverse(glm::mat3(model)));
+}
+
+glm::vec3 utils::cart_to_spherical(glm::vec3 normal)
+{
+    float p = glm::sqrt(glm::pow(normal.x + FLT_EPSILON, 2) + glm::pow(normal.y + FLT_EPSILON, 2) + glm::pow(normal.z + FLT_EPSILON, 2));
+    float theta = glm::acos((normal.y + FLT_EPSILON) / (normal.x + FLT_EPSILON));
+    float phi = glm::acos((normal.z + FLT_EPSILON) / p);
+    return glm::vec3(p, theta, phi);
+}
+
+glm::vec3 utils::spherical_to_cart(glm::vec3 spherical)
+{
+    // p * sin-phi * cos-theta
+    float x = spherical.x * glm::sin(spherical.z) * glm::cos(spherical.y);
+    // p * sin-phi * sin-theta
+    float y = spherical.x * glm::sin(spherical.z) * glm::sin(spherical.y);
+    // p * cos-phi
+    float z = spherical.x * glm::cos(spherical.z);
+    return glm::vec3(x,y,z);
 }
 
 aabb utils::transform_aabb(aabb& box, glm::mat4& M)
