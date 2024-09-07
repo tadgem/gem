@@ -173,7 +173,7 @@ void OnIm3D(aabb& level_bb)
     Im3d::PopColor();
 
     Im3d::PushColor(Im3d::Color_White);
-    draw_normal_hemisphere({ 0.0, 10.0, 0.0 }, glm::normalize(custom_orientation));
+    draw_normal_hemisphere({ 0.0, 10.0, 0.0 }, glm::normalize(utils::get_forward(custom_orientation)));
     Im3d::PopColor();
 
 }
@@ -287,8 +287,8 @@ int main()
         instance_matrices.push_back(utils::get_model_matrix({ x,y,z }, { 0,90,0 }, { unit.z, unit.y, unit.x }));
     }
     VAO instanced_cubes = shapes::gen_cube_instanced_vao(instance_matrices, instance_uvs);
-    texture _3d_tex = texture::create_3d_texture({ _3d_tex_res, _3d_tex_res, _3d_tex_res }, GL_RGBA, GL_RGBA32F, GL_FLOAT, _3d_tex_data);
-    glAssert(glBindImageTexture(0, _3d_tex.m_handle, 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA32F));
+    texture _3d_tex = texture::create_3d_texture({ _3d_tex_res, _3d_tex_res, _3d_tex_res }, GL_RGBA, GL_RGBA16F, GL_FLOAT, _3d_tex_data);
+    glAssert(glBindImageTexture(0, _3d_tex.m_handle, 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA16F));
 
     voxelization.use();
     voxelization.setInt("u_gbuffer_pos", 0);

@@ -4,6 +4,7 @@
 #include "utils.h"
 #include "utils.h"
 #include "utils.h"
+#include "utils.h"
 #include <fstream>
 #include <sstream>
 #define GLM_ENABLE_EXPERIMENTAL
@@ -75,6 +76,17 @@ glm::vec3 utils::spherical_to_cart(glm::vec3 spherical)
     // p * cos-phi
     float z = spherical.x * glm::cos(spherical.z);
     return glm::vec3(round_up(y, 4),round_up(x, 4), round_up(z, 4));
+}
+
+glm::vec3 utils::get_forward(glm::vec3 euler)
+{
+    float pitch = glm::radians(euler.x);
+    float yaw = glm::radians(euler.y);
+    glm::vec3 forward;
+    forward.x = glm::cos(pitch) * glm::sin(yaw);
+    forward.y = -glm::sin(pitch);
+    forward.z = glm::cos(pitch) * glm::cos(yaw);
+    return forward;
 }
 
 float utils::round_up(float value, int decimal_places)
