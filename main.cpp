@@ -173,7 +173,7 @@ void OnIm3D(aabb& level_bb)
     Im3d::PopColor();
 
     Im3d::PushColor(Im3d::Color_White);
-    draw_normal_hemisphere({ 0.0, 10.0, 0.0 }, glm::normalize(utils::get_forward(custom_orientation)));
+    draw_normal_hemisphere({ 0.0, 10.0, 0.0 }, utils::get_forward(custom_orientation));
     Im3d::PopColor();
 
 }
