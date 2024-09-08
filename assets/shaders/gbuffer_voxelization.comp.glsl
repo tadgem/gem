@@ -67,6 +67,6 @@ void main() {
 	light.w = 1.0f;
 
 	ivec3 sample_pos = get_texel_from_pos(pos.xyz);
-	
-	imageStore(imgOutput,sample_pos, light);
+	vec4 current = imageLoad(imgOutput, sample_pos);
+	imageStore(imgOutput,sample_pos, mix(light, current, 0.5));
 }

@@ -237,7 +237,7 @@ int main()
     lights.push_back({ {-10.0, 0.0, -10.0}, {0.0, 255.0, 0.0}, 30.0f });
     lights.push_back({ {-10.0, 0.0, 10.0}, {0.0, 0.0, 255.0} , 40.0f});
 
-    constexpr int _3d_tex_res = 128;
+    constexpr int _3d_tex_res = 256;
     constexpr int _3d_cube_res = _3d_tex_res * _3d_tex_res * _3d_tex_res;
 
     float* _3d_tex_data = new float[_3d_cube_res * 4];
@@ -298,6 +298,7 @@ int main()
     bool draw_debug_3d_texture = false;
     bool draw_direct_lighting = true;
     bool draw_cone_tracing_pass = true;
+    bool draw_im3d = true;
 
     auto im3d_s =  im3d_gl::load_im3d();
 
@@ -379,14 +380,15 @@ int main()
             ImGui::Checkbox("Render 3D Voxel Grid", &draw_debug_3d_texture);
             ImGui::Checkbox("Render Direct Lighting Pass", &draw_direct_lighting);
             ImGui::Checkbox("Render Cone Tracing Pass", &draw_cone_tracing_pass);
+            ImGui::Checkbox("Render IM3D", &draw_im3d);
             ImGui::Separator();
             ImGui::DragFloat3("Camera Position", &cam.m_pos[0]);
             ImGui::DragFloat3("Camera Euler", &cam.m_euler[0]);
             ImGui::Separator();
             ImGui::DragFloat3("Orientation Test", &custom_orientation[0]);
             ImGui::Separator();
-            ImGui::DragFloat3("Level Bounding Box Min", &sponza.m_aabb.min[0]);
-            ImGui::DragFloat3("Level Bounding Box Max", &sponza.m_aabb.max[0]);
+            // ImGui::DragFloat3("Level Bounding Box Min", &sponza.m_aabb.min[0]);
+            // ImGui::DragFloat3("Level Bounding Box Max", &sponza.m_aabb.max[0]);
             ImGui::Text("Level Bounding Volume Area %.2f", get_aabb_area(sponza.m_aabb));
             glm::vec3 dim = sponza.m_aabb.max - sponza.m_aabb.min;
             ImGui::Text("Level Bounding Volume Dimensions %.2f,%.2f,%.2f", dim.x, dim.y, dim.z);
@@ -411,8 +413,14 @@ int main()
 
             ImGui::End();
         }
-
-        im3d_gl::end_frame_im3d(im3d_s, {1280, 720}, cam);
+        if (draw_im3d)
+        {
+            im3d_gl::end_frame_im3d(im3d_s, {1280, 720}, cam);
+        }
+        else
+        {
+            Im3d::EndFrame();
+        }
         engine::engine_post_frame();
     }
     im3d_gl::shutdown_im3d(im3d_s);

@@ -1,14 +1,12 @@
 #include "texture.h"
 #include <iostream>
 #include "GL/glew.h"
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+#include "SOIL/SOIL.h"
 #include "gl.h"
 texture::texture(const std::string& path)
 {
-	stbi_set_flip_vertically_on_load(1);
-	unsigned char* data = stbi_load(path.c_str(), & m_width, & m_height, &m_num_channels, 0);
-
+	// unsigned char* data = stbi_load(path.c_str(), & m_width, & m_height, &m_num_channels, 0);
+	unsigned char* data = SOIL_load_image(path.c_str(), &m_width, &m_height, &m_num_channels, 0);
 	if (!data)
 	{
 		std::cerr << "Failed to load texture at path : " << path << std::endl;
@@ -25,8 +23,6 @@ texture::texture(const std::string& path)
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_width, m_height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 	glGenerateMipmap(GL_TEXTURE_2D);
-
-	stbi_image_free(data);
 }
 
 texture texture::from_data(unsigned int* data, unsigned int count, int width, int height, int depth, int nr_channels)

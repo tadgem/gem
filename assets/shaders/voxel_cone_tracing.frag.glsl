@@ -64,7 +64,7 @@ vec4 get_voxel_colour(vec3 position, vec3 unit)
 
 vec3 trace_cone(vec3 from, vec3 dir, vec3 unit)
 {
-	const int max_steps = 16;
+	const int max_steps = 64;
 	vec4 accum = vec4(0.0);
 	vec3 pos = from;
 	int steps = 0;
