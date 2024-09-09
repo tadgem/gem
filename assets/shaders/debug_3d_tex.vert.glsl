@@ -17,6 +17,5 @@ void main()
 	oUVW = aUV;
 
 	vec3 worldPos = vec3(iTransform * vec4(aPos, 1.0));
-
 	gl_Position = viewProjection * vec4(worldPos, 1.0);
 }

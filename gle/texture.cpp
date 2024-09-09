@@ -1,4 +1,6 @@
 #include "texture.h"
+#include "texture.h"
+#include "texture.h"
 #include <iostream>
 #include "GL/glew.h"
 #include "SOIL/SOIL.h"
@@ -25,6 +27,17 @@ texture::texture(const std::string& path)
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_width, m_height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 	glGenerateMipmap(GL_TEXTURE_2D);
+}
+
+void texture::bind(GLenum texture_slot, GLenum texture_target)
+{
+	bind_handle(m_handle, texture_slot, texture_target);
+}
+
+void texture::bind_handle(gl_handle handle, GLenum texture_slot, GLenum texture_target)
+{
+	glActiveTexture(texture_slot);
+	glBindTexture(texture_target, handle);
 }
 
 texture texture::from_data(unsigned int* data, unsigned int count, int width, int height, int depth, int nr_channels)

@@ -46,29 +46,23 @@ void handle_gbuffer(framebuffer& gbuffer, shader& gbuffer_shader, glm::mat4 mvp,
     {
         auto& maps = sponza.m_materials[entry.m_material_index].m_material_maps;
         entry.m_vao.use();
-        auto diffuse_tex = maps[texture_map_type::diffuse];
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, diffuse_tex.m_handle);
+        maps[texture_map_type::diffuse].bind(GL_TEXTURE0);
 
         if (maps.find(texture_map_type::normal) != maps.end())
         {
-            glActiveTexture(GL_TEXTURE1);
-            glBindTexture(GL_TEXTURE_2D, maps[texture_map_type::normal].m_handle);
+            texture::bind_handle(maps[texture_map_type::normal].m_handle, GL_TEXTURE1);
         }
         if (maps.find(texture_map_type::metallicness) != maps.end())
         {
-            glActiveTexture(GL_TEXTURE2);
-            glBindTexture(GL_TEXTURE_2D, maps[texture_map_type::metallicness].m_handle);
+            texture::bind_handle(maps[texture_map_type::metallicness].m_handle, GL_TEXTURE2);
         }
         if (maps.find(texture_map_type::roughness) != maps.end())
         {
-            glActiveTexture(GL_TEXTURE3);
-            glBindTexture(GL_TEXTURE_2D, maps[texture_map_type::roughness].m_handle);
+            texture::bind_handle(maps[texture_map_type::roughness].m_handle, GL_TEXTURE3);
         }
         if (maps.find(texture_map_type::ao) != maps.end())
         {
-            glActiveTexture(GL_TEXTURE4);
-            glBindTexture(GL_TEXTURE_2D, maps[texture_map_type::metallicness].m_handle);
+            texture::bind_handle(maps[texture_map_type::ao].m_handle, GL_TEXTURE4);
         }
 
         glDrawElements(GL_TRIANGLES, entry.m_index_count, GL_UNSIGNED_INT, 0);
@@ -81,8 +75,7 @@ void handle_present_image(shader& present_shader, const std::string& uniform_nam
     present_shader.use();
     shapes::s_screen_quad.use();
     present_shader.setInt(uniform_name.c_str(), texture_slot);
-    glActiveTexture(GL_TEXTURE0 + texture_slot);
-    glBindTexture(GL_TEXTURE_2D, texture);
+    texture::bind_handle(texture, GL_TEXTURE0 + texture_slot);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
@@ -116,14 +109,10 @@ void handle_light_pass(shader& lighting_shader, framebuffer& gbuffer, camera& ca
         lighting_shader.setFloat(int_name.str(), point_lights[i].intensity);
     }
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, gbuffer.m_colour_attachments[0]);
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, gbuffer.m_colour_attachments[1]);
-    glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, gbuffer.m_colour_attachments[2]);
-    glActiveTexture(GL_TEXTURE3);
-    glBindTexture(GL_TEXTURE_2D, gbuffer.m_colour_attachments[3]);
+    texture::bind_handle(gbuffer.m_colour_attachments[0], GL_TEXTURE0);
+    texture::bind_handle(gbuffer.m_colour_attachments[1], GL_TEXTURE1);
+    texture::bind_handle(gbuffer.m_colour_attachments[2], GL_TEXTURE2);
+    texture::bind_handle(gbuffer.m_colour_attachments[3], GL_TEXTURE3);
 
     // bind all maps
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -136,25 +125,6 @@ void draw_arrow(glm::vec3 pos, glm::vec3 dir)
     Im3d::DrawSphere(ToIm3D(end), 0.25f);
 }
 
-void draw_normal_hemisphere(glm::vec3 pos, glm::vec3 dir)
-{
-    constexpr float cone_spread_deg = 30.0f;
-    constexpr float cone_spread_rad = glm::radians(cone_spread_deg);
-    constexpr float cone_spread_normalized = cone_spread_deg / 360.0f;
-
-    glm::vec3 spherical = utils::cart_to_spherical(dir);
-    // 4 traces for hemisphere
-    glm::vec3 dir1 = utils::spherical_to_cart(spherical + glm::vec3(0, cone_spread_rad, cone_spread_rad));
-    glm::vec3 dir2 = utils::spherical_to_cart(spherical + glm::vec3(0, -cone_spread_rad, cone_spread_rad));
-    glm::vec3 dir3 = utils::spherical_to_cart(spherical + glm::vec3(0, cone_spread_rad, -cone_spread_rad));
-    glm::vec3 dir4 = utils::spherical_to_cart(spherical + glm::vec3(0, -cone_spread_rad, -cone_spread_rad));
-
-    draw_arrow(pos, dir);
-    draw_arrow(pos, dir1);
-    draw_arrow(pos, dir2);
-    draw_arrow(pos, dir3);
-    draw_arrow(pos, dir4);
-}
 
 void OnIm3D(aabb& level_bb)
 {
@@ -163,23 +133,6 @@ void OnIm3D(aabb& level_bb)
         { level_bb.min.x, level_bb.min.y, level_bb.min.z },
         { level_bb.max.x, level_bb.max.y, level_bb.max.z }
     );
-
-    Im3d::PushColor(Im3d::Color_Red);
-    draw_normal_hemisphere({ 0.0, 10.0, 0.0 }, { 1.0, 0.0, 0.0 });
-    Im3d::PopColor();
-    
-    Im3d::PushColor(Im3d::Color_Green);
-    draw_normal_hemisphere({ 0.0, 10.0, 0.0 }, { 0.0, 1.0, 0.0 });
-    Im3d::PopColor();
-    
-    Im3d::PushColor(Im3d::Color_Blue);
-    draw_normal_hemisphere({ 0.0, 10.0, 0.0 }, { 0.0, 0.0, 1.0 });
-    Im3d::PopColor();
-
-    Im3d::PushColor(Im3d::Color_White);
-    draw_normal_hemisphere({ 0.0, 10.0, 0.0 }, utils::get_forward(custom_orientation));
-    Im3d::PopColor();
-
 }
 
 float get_aabb_area(aabb& bb)
@@ -319,10 +272,8 @@ int main()
         voxelization.use();
         voxelization.setVec3("u_aabb.min", sponza.m_aabb.min);
         voxelization.setVec3("u_aabb.max", sponza.m_aabb.max);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, gbuffer.m_colour_attachments[1]);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, lightpass_buffer.m_colour_attachments[0]);
+        texture::bind_handle(gbuffer.m_colour_attachments[1], GL_TEXTURE0);
+        texture::bind_handle(lightpass_buffer.m_colour_attachments[0], GL_TEXTURE1);
         glAssert(glDispatchCompute(128, 72, 1));
 
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
@@ -339,8 +290,7 @@ int main()
             shapes::s_screen_quad.use();
             present_shader.use();
             present_shader.setInt("u_image_sampler", 0);
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, lightpass_buffer.m_colour_attachments.front());
+            texture::bind_handle(lightpass_buffer.m_colour_attachments.front(), GL_TEXTURE0);
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         }
 
@@ -352,14 +302,12 @@ int main()
             voxel_cone_tracing.setVec3("u_aabb.max", sponza.m_aabb.max);
             voxel_cone_tracing.setVec3("u_voxel_resolution", glm::vec3(_3d_tex_res));
             voxel_cone_tracing.setInt("u_position_map", 0);
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, gbuffer.m_colour_attachments[1]);
+
+            texture::bind_handle(gbuffer.m_colour_attachments[1], GL_TEXTURE0);
             voxel_cone_tracing.setInt("u_normal_map", 1);
-            glActiveTexture(GL_TEXTURE1);
-            glBindTexture(GL_TEXTURE_2D, gbuffer.m_colour_attachments[2]);
+            texture::bind_handle(gbuffer.m_colour_attachments[2], GL_TEXTURE1);
             voxel_cone_tracing.setInt("u_voxel_map", 2);
-            glActiveTexture(GL_TEXTURE2);
-            glBindTexture(GL_TEXTURE_3D, _3d_tex.m_handle);
+            texture::bind_handle(_3d_tex.m_handle , GL_TEXTURE2, GL_TEXTURE_3D);
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         }
         glClear(GL_DEPTH_BUFFER_BIT);
@@ -370,8 +318,7 @@ int main()
             debug3dtex_shader.setMat4("viewProjection", cam.m_proj * cam.m_view);
             debug3dtex_shader.setInt("u_volume", 0);
 
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_3D, _3d_tex.m_handle);
+            texture::bind_handle(_3d_tex.m_handle, GL_TEXTURE0, GL_TEXTURE_3D);
             glDrawElementsInstanced(GL_TRIANGLES, 36, GL_UNSIGNED_INT,  0, _3d_cube_res);
         }
         {
@@ -413,8 +360,6 @@ int main()
                 ImGui::PopID();
 
             }
-
-
 
             ImGui::End();
         }
