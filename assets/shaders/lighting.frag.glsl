@@ -8,6 +8,7 @@ struct PointLight
 	vec3	position;
 	vec3	colour;
 	float	radius;
+    float   intensity;
 };
 
 const int NUM_POINT_LIGHTS = 16;
@@ -94,8 +95,9 @@ void main()
        //vec3 H = normalize(L);
 
        float distance = length(LightDir);
-       float attenuation = blinnPhongAttenuation(u_point_lights[i].radius, length(LightDir));
-       vec3 radiance = u_point_lights[i].colour * (attenuation);
+       float attenuation = blinnPhongAttenuation(u_point_lights[i].radius, distance);
+       attenuation *= attenuation;
+       vec3 radiance = u_point_lights[i].colour;
 
        // Cook-Torrance BRDF
        float NDF = DistributionGGX(N, H, roughness);
@@ -121,7 +123,7 @@ void main()
        float NdotL = max(dot(N, L), 0.0);
        vec3 diffuse = NdotL * albedo;
        // add to outgoing radiance Lo
-       Lo += (kD * diffuse / PI + specular) * radiance * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
+       Lo += (kD * attenuation * (diffuse / PI + specular)) * (radiance * u_point_lights[i].intensity)* NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
    }
 
    // ambient lighting (note that the next IBL tutorial will replace 

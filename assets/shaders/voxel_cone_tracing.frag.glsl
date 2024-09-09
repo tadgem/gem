@@ -76,7 +76,7 @@ vec3 trace_cone(vec3 from, vec3 dir, vec3 unit)
 			accum.w = 1.0;
 		}
 		vec4 result = get_voxel_colour(pos, unit);
-		accum += result;
+		accum += result * (1.0 - float(steps / max_steps));
 		steps += 1;
 	}
 	return accum.xyz;

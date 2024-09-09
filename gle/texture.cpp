@@ -3,6 +3,7 @@
 #include "GL/glew.h"
 #include "SOIL/SOIL.h"
 #include "gl.h"
+#include "stb_image.h"
 texture::texture(const std::string& path)
 {
 	// unsigned char* data = stbi_load(path.c_str(), & m_width, & m_height, &m_num_channels, 0);
@@ -13,6 +14,7 @@ texture::texture(const std::string& path)
 		return;
 	}
 
+	// m_handle = SOIL_create_OGL_texture(data, m_width, m_height, m_num_channels, 0, SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y);
 	glGenTextures(1, &m_handle);
 	glBindTexture(GL_TEXTURE_2D, m_handle);
 	

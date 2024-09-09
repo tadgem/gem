@@ -21,6 +21,7 @@ struct point_light
     glm::vec3   position;
     glm::vec3   colour;
     float       radius;
+    float       intensity = 1.0f;
 };
 
 Im3d::Vec3 ToIm3D(glm::vec3& input)
@@ -106,10 +107,13 @@ void handle_light_pass(shader& lighting_shader, framebuffer& gbuffer, camera& ca
         col_name << "u_point_lights[" << i << "].colour";
         std::stringstream rad_name;
         rad_name << "u_point_lights[" << i << "].radius";
+        std::stringstream int_name;
+        int_name << "u_point_lights[" << i << "].intensity";
 
         lighting_shader.setVec3(pos_name.str(), point_lights[i].position);
         lighting_shader.setVec3(col_name.str(), point_lights[i].colour);
         lighting_shader.setFloat(rad_name.str(), point_lights[i].radius);
+        lighting_shader.setFloat(int_name.str(), point_lights[i].intensity);
     }
 
     glActiveTexture(GL_TEXTURE0);
@@ -237,7 +241,7 @@ int main()
     lights.push_back({ {-10.0, 0.0, -10.0}, {0.0, 255.0, 0.0}, 30.0f });
     lights.push_back({ {-10.0, 0.0, 10.0}, {0.0, 0.0, 255.0} , 40.0f});
 
-    constexpr int _3d_tex_res = 256;
+    constexpr int _3d_tex_res = 192;
     constexpr int _3d_cube_res = _3d_tex_res * _3d_tex_res * _3d_tex_res;
 
     float* _3d_tex_data = new float[_3d_cube_res * 4];
@@ -403,6 +407,7 @@ int main()
                     ImGui::DragFloat3("Position", &lights[l].position[0]);
                     ImGui::DragFloat3("Colour", &lights[l].colour[0]);
                     ImGui::DragFloat("Radius", &lights[l].radius);
+                    ImGui::DragFloat("Intensity", &lights[l].intensity);
                     ImGui::TreePop();
                 }
                 ImGui::PopID();
