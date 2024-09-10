@@ -19,7 +19,7 @@ uniform float u_ao;
 
 void main()
 {
-    oDiffuse = pow(texture(u_diffuse_map, aUV).rgb, vec3(2.2));
+    oDiffuse =  vec3(u_diffuse);
 	oPosition = aPosition;
     oNormal = aNormal;
     oPBR = vec3(u_metallic, u_roughness, u_ao);

@@ -16,6 +16,13 @@
 
 static glm::vec3 custom_orientation;
 
+struct dir_light
+{
+    glm::vec3   direction;
+    glm::vec3   colour;
+    float       intensity = 1.0f;
+};
+
 struct point_light
 {
     glm::vec3   position;
@@ -79,7 +86,7 @@ void handle_present_image(shader& present_shader, const std::string& uniform_nam
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
-void handle_light_pass(shader& lighting_shader, framebuffer& gbuffer, camera& cam, std::vector<point_light>& point_lights)
+void handle_light_pass(shader& lighting_shader, framebuffer& gbuffer, camera& cam, std::vector<point_light>& point_lights, dir_light& sun)
 {
     lighting_shader.use();
     shapes::s_screen_quad.use();
@@ -90,6 +97,11 @@ void handle_light_pass(shader& lighting_shader, framebuffer& gbuffer, camera& ca
     lighting_shader.setInt("u_pbr_map", 3);
     
     lighting_shader.setVec3("u_cam_pos", cam.m_pos);
+
+    lighting_shader.setVec3("u_dir_light.direction", utils::get_forward(sun.direction));
+    lighting_shader.setVec3("u_dir_light.colour", sun.colour);
+    lighting_shader.setFloat("u_dir_light.intensity", sun.intensity);
+
     int num_point_lights = std::min((int)point_lights.size(), 16);
 
     for (int i = 0; i < num_point_lights; i++)
@@ -154,6 +166,9 @@ int main()
     std::string debug3dtex_vert = utils::load_string_from_path("assets/shaders/debug_3d_tex.vert.glsl");
     std::string debug3dtex_frag = utils::load_string_from_path("assets/shaders/debug_3d_tex.frag.glsl");
 
+    std::string debug3dtex2_vert = utils::load_string_from_path("assets/shaders/visualize_voxel_tex.vert.glsl");
+    std::string debug3dtex2_frag = utils::load_string_from_path("assets/shaders/visualize_voxel_tex.frag.glsl");
+
     std::string present_vert = utils::load_string_from_path("assets/shaders/present.vert.glsl");
     std::string present_frag = utils::load_string_from_path("assets/shaders/present.frag.glsl");
 
@@ -167,6 +182,7 @@ int main()
     shader debug3dtex_shader(debug3dtex_vert, debug3dtex_frag);
     shader voxelization(voxelization_compute);
     shader voxel_cone_tracing(present_vert, voxel_cone_tracing_frag);
+    shader debug3dtex2_shader(debug3dtex2_vert, debug3dtex2_frag);
 
     camera cam{};
     model sponza = model::load_model_from_path("assets/models/sponza/Sponza.gltf");
@@ -188,6 +204,7 @@ int main()
     lightpass_buffer.check();
     lightpass_buffer.unbind();
 
+    dir_light dir{};
     std::vector<point_light> lights;
     lights.push_back({ {0.0, 0.0, 0.0}, {255.0, 0.0, 0.0}, 10.0f});
     lights.push_back({ {10.0, 0.0, 10.0}, {255.0, 255.0, 0.0}, 20.0f });
@@ -253,12 +270,17 @@ int main()
     voxelization.setVec3("u_voxel_resolution", glm::vec3( _3d_tex_res));
 
     bool draw_debug_3d_texture = false;
+    bool draw_debug_3d_texture2 = false;
     bool draw_direct_lighting = true;
     bool draw_cone_tracing_pass = true;
     bool draw_im3d = true;
 
     auto im3d_s =  im3d_gl::load_im3d();
 
+    glm::vec3 aabb_half_extent = (sponza.m_aabb.max - sponza.m_aabb.min) / 2.0f;
+    glm::vec3 aabb_center = sponza.m_aabb.min + aabb_half_extent;
+    glm::mat4 aabb_model = utils::get_model_matrix(aabb_center, glm::vec3(0.0f), aabb_half_extent * 2.0f);
+    
     while (!engine::s_quit)
     {
         glEnable(GL_DEPTH_TEST);
@@ -282,7 +304,7 @@ int main()
         
         handle_gbuffer(gbuffer, gbuffer_shader, mvp, model, normal, cam, lights, sponza);
         lightpass_buffer.bind();
-        handle_light_pass(lighting_shader, gbuffer, cam, lights);
+        handle_light_pass(lighting_shader, gbuffer, cam, lights, dir);
         lightpass_buffer.unbind();
                 
         if (draw_direct_lighting)
@@ -321,6 +343,22 @@ int main()
             texture::bind_handle(_3d_tex.m_handle, GL_TEXTURE0, GL_TEXTURE_3D);
             glDrawElementsInstanced(GL_TRIANGLES, 36, GL_UNSIGNED_INT,  0, _3d_cube_res);
         }
+        if (draw_debug_3d_texture2)
+        {
+            shapes::s_cube_pos_only.use();
+            debug3dtex2_shader.use();
+            debug3dtex2_shader.setMat4("mvp", cam.m_proj * cam.m_view * aabb_model);
+            debug3dtex2_shader.setMat4("model", aabb_model);
+            debug3dtex2_shader.setMat4("screen_width", 1280.0f);
+            debug3dtex2_shader.setMat4("screen_height", 720.0f);
+            debug3dtex2_shader.setVec3("box_eye_position", cam.m_pos);
+            debug3dtex2_shader.setInt("texture_3d", 0);
+
+
+
+            texture::bind_handle(_3d_tex.m_handle, GL_TEXTURE0, GL_TEXTURE_3D);
+            glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+        }
         {
             OnIm3D(sponza.m_aabb);
         }
@@ -329,6 +367,7 @@ int main()
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / engine::s_imgui_io->Framerate, engine::s_imgui_io->Framerate);
             ImGui::Separator();
             ImGui::Checkbox("Render 3D Voxel Grid", &draw_debug_3d_texture);
+            ImGui::Checkbox("Render 3D Voxel Grid 2", &draw_debug_3d_texture2);
             ImGui::Checkbox("Render Direct Lighting Pass", &draw_direct_lighting);
             ImGui::Checkbox("Render Cone Tracing Pass", &draw_cone_tracing_pass);
             ImGui::Checkbox("Render IM3D", &draw_im3d);
@@ -344,6 +383,11 @@ int main()
             glm::vec3 dim = sponza.m_aabb.max - sponza.m_aabb.min;
             ImGui::Text("Level Bounding Volume Dimensions %.2f,%.2f,%.2f", dim.x, dim.y, dim.z);
             ImGui::Separator();
+            ImGui::Text("Lights");
+            ImGui::ColorEdit3("Dir Light Colour", &dir.colour[0]);
+            ImGui::DragFloat3("Dir Light Rotation", &dir.direction[0]);
+            ImGui::DragFloat("Dir Light Intensity", &dir.intensity);
+
             for (int l = 0; l < lights.size(); l++)
             {
                 std::stringstream name;
@@ -352,7 +396,7 @@ int main()
                 if (ImGui::TreeNode(name.str().c_str()))
                 {
                     ImGui::DragFloat3("Position", &lights[l].position[0]);
-                    ImGui::DragFloat3("Colour", &lights[l].colour[0]);
+                    ImGui::ColorEdit3("Colour", &lights[l].colour[0]);
                     ImGui::DragFloat("Radius", &lights[l].radius);
                     ImGui::DragFloat("Intensity", &lights[l].intensity);
                     ImGui::TreePop();

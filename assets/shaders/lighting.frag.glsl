@@ -3,6 +3,14 @@
 out vec4 FragColor;
 
 layout (location = 0) in vec2 aUV;
+
+struct DirLight
+{
+	vec3	direction;
+	vec3	colour;
+    float   intensity;
+};
+
 struct PointLight
 {
 	vec3	position;
@@ -19,6 +27,7 @@ uniform sampler2D   u_position_map;
 uniform sampler2D   u_normal_map;
 uniform sampler2D   u_pbr_map; // x = metallic, y = roughness, z = AO
 uniform vec3        u_cam_pos;
+uniform DirLight    u_dir_light;
 uniform PointLight  u_point_lights[NUM_POINT_LIGHTS];
 
 float DistributionGGX(vec3 N, vec3 H, float roughness)
@@ -69,6 +78,38 @@ float blinnPhongAttenuation(float range, float dist)
     return 1.0 / (1.0 + l * dist + q * (dist * dist));
 }
 
+vec3 handle_dir_light(vec3 normal, float roughness, float metallic, vec3 albedo, vec3 V, vec3 F0)
+{
+    vec3 lightDir = normalize(-u_dir_light.direction);
+    float diff = max(dot(normal, lightDir), 0.0);
+    float s = pow(max(dot(normal, lightDir), 0.0), roughness);
+    vec3 H = normalize(V + lightDir);
+    float NDF = DistributionGGX(normal, H, roughness);
+    float G = GeometrySmith(normal, V, lightDir, roughness);
+    vec3 F = fresnelSchlick(max(dot(H, V), 0.0), F0);
+
+    vec3 numerator = NDF * G * F;
+    float denominator = 4.0 * max(dot(normal, V), 0.0) * max(dot(normal, lightDir), 0.0) + 0.0001; // + 0.0001 to prevent divide by zero
+    vec3 specular = numerator / denominator;
+
+    // kS is equal to Fresnel
+    vec3 kS = F;
+    // for energy conservation, the diffuse and specular light can't
+    // be above 1.0 (unless the surface emits light); to preserve this
+    // relationship the diffuse component (kD) should equal 1.0 - kS.
+    vec3 kD = vec3(1.0) - kS;
+    // multiply kD by the inverse metalness such that only non-metals 
+    // have diffuse lighting, or a linear blend if partly metal (pure metals
+    // have no diffuse light).
+    kD *= 1.0 - metallic;
+
+    // scale light by NdotL
+    float NdotL = max(dot(normal, lightDir), 0.0);
+    vec3 diffuse = NdotL * albedo;
+    // add to outgoing radiance Lo
+    return (kD * (diffuse / PI + specular)) * (u_dir_light.colour * u_dir_light.intensity) * NdotL;
+}
+
 void main()
 {
    vec3 albedo = texture(u_diffuse_map, aUV).xyz;
@@ -86,6 +127,9 @@ void main()
 
    // reflectance equation
    vec3 Lo = vec3(0.0);
+
+   Lo += handle_dir_light(N, roughness, metallic, albedo, V, F0);
+
    for (int i = 0; i < NUM_POINT_LIGHTS; ++i)
    {
        vec3 LightDir = u_point_lights[i].position - WorldPos;
