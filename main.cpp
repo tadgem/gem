@@ -204,7 +204,12 @@ int main()
     lightpass_buffer.check();
     lightpass_buffer.unbind();
 
-    dir_light dir{};
+    dir_light dir
+    {
+        {156.0f, -3.0f, 0.0f},
+        {1.0f,1.0f,1.0f},
+        2.75f
+    };
     std::vector<point_light> lights;
     lights.push_back({ {0.0, 0.0, 0.0}, {255.0, 0.0, 0.0}, 10.0f});
     lights.push_back({ {10.0, 0.0, 10.0}, {255.0, 255.0, 0.0}, 20.0f });
@@ -348,10 +353,10 @@ int main()
             shapes::s_cube_pos_only.use();
             debug3dtex2_shader.use();
             debug3dtex2_shader.setMat4("mvp", cam.m_proj * cam.m_view * aabb_model);
-            debug3dtex2_shader.setMat4("model", aabb_model);
+            debug3dtex2_shader.setMat4("model", aabb_model );
             debug3dtex2_shader.setMat4("screen_width", 1280.0f);
             debug3dtex2_shader.setMat4("screen_height", 720.0f);
-            debug3dtex2_shader.setVec3("box_eye_position", cam.m_pos);
+            debug3dtex2_shader.setVec4("box_eye_position", glm::vec4(cam.m_pos / (aabb_half_extent), 1.0f));
             debug3dtex2_shader.setInt("texture_3d", 0);
 
 

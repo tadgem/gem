@@ -10,6 +10,6 @@ uniform mat4 model;
 
 void main()
 {
-    frag_obj_pos = (model * vec4(pos, 1.0)).xyz;
+    frag_obj_pos = pos;
     gl_Position = mvp * vec4(pos,1.0);
 }
