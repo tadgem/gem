@@ -72,3 +72,21 @@ texture texture::create_3d_texture(glm::ivec3 dim, GLenum format, GLenum pixel_f
 	glAssert(glTexImage3D(GL_TEXTURE_3D, 0, pixel_format, dim.x, dim.y, dim.z, 0, format, data_type, data));
 	return t;
 }
+
+texture texture::create_3d_texture_empty(glm::ivec3 dim, GLenum format, GLenum pixel_format, GLenum data_type, GLenum filter, GLenum wrap_mode)
+{
+	texture t{};
+	glAssert(glGenTextures(1, &t.m_handle));
+	glAssert(glBindTexture(GL_TEXTURE_3D, t.m_handle));
+
+	glAssert(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, wrap_mode));
+	glAssert(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, wrap_mode));
+	glAssert(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, wrap_mode));
+
+	glAssert(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, filter));
+	glAssert(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, filter));
+	GLfloat clear[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+	glAssert(glTexImage3D(GL_TEXTURE_3D, 0, pixel_format, dim.x, dim.y, dim.z, 0, format, data_type, NULL));
+	glAssert(glClearTexImage(GL_TEXTURE_3D, 0, pixel_format, GL_FLOAT, &clear[0]));
+	return t;
+}

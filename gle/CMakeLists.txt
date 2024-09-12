@@ -35,6 +35,8 @@ set(GL_SRC
         ${CMAKE_CURRENT_SOURCE_DIR}/im3d_gl.h
         ${CMAKE_CURRENT_SOURCE_DIR}/utils.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/utils.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/voxelisation.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/voxelisation.h
         ${CMAKE_CURRENT_SOURCE_DIR}/stb_image.h
 )
 

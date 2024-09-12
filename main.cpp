@@ -10,6 +10,8 @@
 #include "camera.h"
 #include "framebuffer.h"
 #include "shape.h"
+#include "voxelisation.h"
+
 #include <sstream>
 #include "im3d.h"
 #include "im3d_gl.h"
@@ -137,7 +139,6 @@ void draw_arrow(glm::vec3 pos, glm::vec3 dir)
     Im3d::DrawSphere(ToIm3D(end), 0.25f);
 }
 
-
 void OnIm3D(aabb& level_bb)
 {
     //aabb bb = level_bb;
@@ -166,8 +167,8 @@ int main()
     std::string debug3dtex_vert = utils::load_string_from_path("assets/shaders/debug_3d_tex.vert.glsl");
     std::string debug3dtex_frag = utils::load_string_from_path("assets/shaders/debug_3d_tex.frag.glsl");
 
-    std::string debug3dtex2_vert = utils::load_string_from_path("assets/shaders/visualize_voxel_tex.vert.glsl");
-    std::string debug3dtex2_frag = utils::load_string_from_path("assets/shaders/visualize_voxel_tex.frag.glsl");
+    std::string visualize_3dtex_vert = utils::load_string_from_path("assets/shaders/visualize_3d_tex.vert.glsl");
+    std::string visualize_3dtex_frag = utils::load_string_from_path("assets/shaders/visualize_3d_tex.frag.glsl");
 
     std::string present_vert = utils::load_string_from_path("assets/shaders/present.vert.glsl");
     std::string present_frag = utils::load_string_from_path("assets/shaders/present.frag.glsl");
@@ -180,9 +181,9 @@ int main()
     shader lighting_shader(present_vert, gbuffer_lighting_frag);
     shader present_shader(present_vert, present_frag);
     shader debug3dtex_shader(debug3dtex_vert, debug3dtex_frag);
+    shader visualize_3dtex(visualize_3dtex_vert, visualize_3dtex_frag);
     shader voxelization(voxelization_compute);
     shader voxel_cone_tracing(present_vert, voxel_cone_tracing_frag);
-    shader debug3dtex2_shader(debug3dtex2_vert, debug3dtex2_frag);
 
     camera cam{};
     model sponza = model::load_model_from_path("assets/models/sponza/Sponza.gltf");
@@ -228,9 +229,12 @@ int main()
     glm::mat3 normal = utils::get_normal_matrix(model);
     sponza.m_aabb = utils::transform_aabb(sponza.m_aabb, model);
 
+    voxel::grid              voxel_data = voxel::create_grid({ _3d_tex_res, _3d_tex_res, _3d_tex_res }, sponza.m_aabb);
+    voxel::grid_visualiser   voxel_visualiser = voxel::create_grid_visualiser(voxel_data, visualize_3dtex, 8);
+
     glm::vec3 aabb_dim = sponza.m_aabb.max - sponza.m_aabb.min;
     glm::vec3 unit = glm::vec3((aabb_dim.x / _3d_tex_res), (aabb_dim.y / _3d_tex_res), (aabb_dim.z / _3d_tex_res));
-
+    glm::vec3 n_unit = glm::normalize(unit);
 
     for (auto i = 0; i < _3d_cube_res * 4; i++)
     {
@@ -265,9 +269,10 @@ int main()
         instance_uvs.push_back({ (x_offset + 1) / _3d_tex_res ,(y_offset + 1) / _3d_tex_res,(z_offset + 1) / _3d_tex_res});
         instance_matrices.push_back(utils::get_model_matrix({ x,y,z }, { 0,90,0 }, { unit.z, unit.y, unit.x }));
     }
+    float data = 0.0f;
     VAO instanced_cubes = shapes::gen_cube_instanced_vao(instance_matrices, instance_uvs);
-    texture _3d_tex = texture::create_3d_texture({ _3d_tex_res, _3d_tex_res, _3d_tex_res }, GL_RGBA, GL_RGBA16F, GL_FLOAT, _3d_tex_data);
-    glAssert(glBindImageTexture(0, _3d_tex.m_handle, 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA16F));
+    // texture _3d_tex = texture::create_3d_texture_empty({ _3d_tex_res, _3d_tex_res, _3d_tex_res }, GL_RGBA, GL_RGBA16F, GL_FLOAT);
+    // glAssert(glBindImageTexture(0, _3d_tex.m_handle, 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA16F));
 
     voxelization.use();
     voxelization.setInt("u_gbuffer_pos", 0);
@@ -334,7 +339,7 @@ int main()
             voxel_cone_tracing.setInt("u_normal_map", 1);
             texture::bind_handle(gbuffer.m_colour_attachments[2], GL_TEXTURE1);
             voxel_cone_tracing.setInt("u_voxel_map", 2);
-            texture::bind_handle(_3d_tex.m_handle , GL_TEXTURE2, GL_TEXTURE_3D);
+            texture::bind_handle(voxel_data.texture.m_handle, GL_TEXTURE2, GL_TEXTURE_3D);
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         }
         glClear(GL_DEPTH_BUFFER_BIT);
@@ -345,25 +350,23 @@ int main()
             debug3dtex_shader.setMat4("viewProjection", cam.m_proj * cam.m_view);
             debug3dtex_shader.setInt("u_volume", 0);
 
-            texture::bind_handle(_3d_tex.m_handle, GL_TEXTURE0, GL_TEXTURE_3D);
+            texture::bind_handle(voxel_data.texture.m_handle, GL_TEXTURE0, GL_TEXTURE_3D);
             glDrawElementsInstanced(GL_TRIANGLES, 36, GL_UNSIGNED_INT,  0, _3d_cube_res);
         }
+
         if (draw_debug_3d_texture2)
         {
-            shapes::s_cube_pos_only.use();
-            debug3dtex2_shader.use();
-            debug3dtex2_shader.setMat4("mvp", cam.m_proj * cam.m_view * aabb_model);
-            debug3dtex2_shader.setMat4("model", aabb_model );
-            debug3dtex2_shader.setMat4("screen_width", 1280.0f);
-            debug3dtex2_shader.setMat4("screen_height", 720.0f);
-            debug3dtex2_shader.setVec4("box_eye_position", glm::vec4(cam.m_pos / (aabb_half_extent), 1.0f));
-            debug3dtex2_shader.setInt("texture_3d", 0);
-
-
-
-            texture::bind_handle(_3d_tex.m_handle, GL_TEXTURE0, GL_TEXTURE_3D);
-            glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+            voxel_visualiser.texel_shape.use();
+            auto& vs = voxel_visualiser.visual_shader;
+            vs.use();
+            vs.setMat4("u_view_projection", cam.m_proj* cam.m_view);
+            vs.setIVec3("u_texture_resolution", voxel_data.resolution);
+            vs.setIVec3("u_voxel_group_resolution", glm::ivec3(voxel_visualiser.texel_resolution));
+            vs.setInt("u_volume", 0);
+            texture::bind_handle(voxel_data.texture.m_handle, GL_TEXTURE0, GL_TEXTURE_3D);
+            glDrawElementsInstanced(GL_TRIANGLES, voxel_visualiser.index_count, GL_UNSIGNED_INT, 0, voxel_visualiser.total_invocations);
         }
+
         {
             OnIm3D(sponza.m_aabb);
         }

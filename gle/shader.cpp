@@ -78,6 +78,21 @@ void shader::setVec4(const std::string& name, glm::vec4 value) const
 	glUniform4f(glGetUniformLocation(m_shader_id, name.c_str()), value.x, value.y, value.z, value.w);
 }
 
+void shader::setIVec2(const std::string& name, glm::ivec2 value) const
+{
+	glUniform2i(glGetUniformLocation(m_shader_id, name.c_str()), value.x, value.y);
+}
+
+void shader::setIVec3(const std::string& name, glm::ivec3 value) const
+{
+	glUniform3i(glGetUniformLocation(m_shader_id, name.c_str()), value.x, value.y, value.z);
+}
+
+void shader::setIVec4(const std::string& name, glm::ivec4 value) const
+{
+	glUniform4i(glGetUniformLocation(m_shader_id, name.c_str()), value.x, value.y, value.z, value.w);
+}
+
 void shader::setMat3(const std::string& name, glm::mat3 value) const
 {
 	glUniformMatrix3fv(glGetUniformLocation(m_shader_id, name.c_str()), 1, GL_FALSE, glm::value_ptr(value));
