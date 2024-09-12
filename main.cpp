@@ -230,7 +230,7 @@ int main()
     sponza.m_aabb = utils::transform_aabb(sponza.m_aabb, model);
 
     voxel::grid              voxel_data = voxel::create_grid({ _3d_tex_res, _3d_tex_res, _3d_tex_res }, sponza.m_aabb);
-    voxel::grid_visualiser   voxel_visualiser = voxel::create_grid_visualiser(voxel_data, visualize_3dtex, 4);
+    voxel::grid_visualiser   voxel_visualiser = voxel::create_grid_visualiser(voxel_data, visualize_3dtex, 8);
 
     glm::vec3 aabb_dim = sponza.m_aabb.max - sponza.m_aabb.min;
     glm::vec3 unit = glm::vec3((aabb_dim.x / _3d_tex_res), (aabb_dim.y / _3d_tex_res), (aabb_dim.z / _3d_tex_res));
@@ -294,6 +294,7 @@ int main()
     while (!engine::s_quit)
     {
         glEnable(GL_DEPTH_TEST);
+        
         engine::process_sdl_event();
         engine::engine_pre_frame();        
         glm::mat4 mvp = cam.m_proj * cam.m_view * model;

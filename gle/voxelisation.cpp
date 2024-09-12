@@ -9,8 +9,8 @@ voxel::grid voxel::create_grid(glm::ivec3 resolution, aabb bb)
 	grid.voxel_unit = glm::vec3((aabb_dim.x / resolution.x), (aabb_dim.y / resolution.y), (aabb_dim.z / resolution.z));
 	grid.resolution = resolution;
 	grid.bounding_box = bb;	
-	grid.texture = texture::create_3d_texture_empty(resolution, GL_RGBA, GL_RGBA32F, GL_FLOAT);
-	glAssert(glBindImageTexture(0, grid.texture.m_handle, 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA32F));
+	grid.texture = texture::create_3d_texture_empty(resolution, GL_RGBA, GL_RGBA16F, GL_FLOAT);
+	glAssert(glBindImageTexture(0, grid.texture.m_handle, 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA16F));
 	return grid;
 }
 
@@ -28,33 +28,33 @@ voxel::grid_visualiser voxel::create_grid_visualiser(voxel::grid& vg, shader& vi
 		{
 			for (int x = 0; x < texel_resolution; x++)
 			{
-				glm::vec3 current_pos = glm::vec3(0.5f * (x + 1) , 0.5f * (y + 1), 0.5f * (z + 1));
+				glm::vec3 current_pos = glm::vec3(x, y, z);
 
 				std::vector<float>  cube_data = {
-					-current_pos.x, -current_pos.y, -current_pos.z,
-					current_pos.x,  -current_pos.y, -current_pos.z,
-					current_pos.x,   current_pos.y, -current_pos.z,
-					-current_pos.x,  current_pos.y, -current_pos.z,
-					-current_pos.x, -current_pos.y,  current_pos.z,
-					current_pos.x,  -current_pos.y,  current_pos.z,
-					current_pos.x,   current_pos.y,  current_pos.z,
-					-current_pos.x,  current_pos.y,  current_pos.z,
-					-current_pos.x,  current_pos.y, -current_pos.z,
-					-current_pos.x, -current_pos.y, -current_pos.z,
-					-current_pos.x, -current_pos.y,  current_pos.z,
-					-current_pos.x,  current_pos.y,  current_pos.z,
-					current_pos.x,  -current_pos.y, -current_pos.z,
-					current_pos.x,	current_pos.y, -current_pos.z,
-					current_pos.x,	current_pos.y,  current_pos.z,
-					current_pos.x,  -current_pos.y,  current_pos.z,
-					-current_pos.x, -current_pos.y, -current_pos.z,
-					current_pos.x,  -current_pos.y, -current_pos.z,
-					current_pos.x,  -current_pos.y,  current_pos.z,
-					-current_pos.x, -current_pos.y,  current_pos.z,
-					current_pos.x,	current_pos.y, -current_pos.z,
-					-current_pos.x,  current_pos.y, -current_pos.z,
-					-current_pos.x,  current_pos.y,  current_pos.z,
-					current_pos.x,	current_pos.y,  current_pos.z,
+					current_pos.x + -0.5f,	current_pos.y + -0.5f,	current_pos.z + -0.5f,
+					current_pos.x + 0.5f,	current_pos.y + -0.5f,	current_pos.z + -0.5f,
+					current_pos.x + 0.5f,	current_pos.y + 0.5f,	current_pos.z + -0.5f,
+					current_pos.x + -0.5f,  current_pos.y + 0.5f,	current_pos.z + -0.5f,
+					current_pos.x + -0.5f,	current_pos.y + -0.5f,  current_pos.z + 0.5f,
+					current_pos.x + 0.5f,	current_pos.y + -0.5f,  current_pos.z + 0.5f,
+					current_pos.x + 0.5f,	current_pos.y + 0.5f,	current_pos.z + 0.5f,
+					current_pos.x + -0.5f,  current_pos.y + 0.5f,	current_pos.z + 0.5f,
+					current_pos.x + -0.5f,  current_pos.y + 0.5f,	current_pos.z + -0.5f,
+					current_pos.x + -0.5f,	current_pos.y + -0.5f,	current_pos.z + -0.5f,
+					current_pos.x + -0.5f,	current_pos.y + -0.5f,  current_pos.z + 0.5f,
+					current_pos.x + -0.5f,  current_pos.y + 0.5f,	current_pos.z + 0.5f,
+					current_pos.x + 0.5f,	current_pos.y + -0.5f,	current_pos.z + -0.5f,
+					current_pos.x + 0.5f,	current_pos.y + 0.5f,	current_pos.z + -0.5f,
+					current_pos.x + 0.5f,	current_pos.y + 0.5f,	current_pos.z + 0.5f,
+					current_pos.x + 0.5f,	current_pos.y + -0.5f,  current_pos.z + 0.5f,
+					current_pos.x + -0.5f,	current_pos.y + -0.5f,	current_pos.z + -0.5f,
+					current_pos.x + 0.5f,	current_pos.y + -0.5f,	current_pos.z + -0.5f,
+					current_pos.x + 0.5f,	current_pos.y + -0.5f,  current_pos.z + 0.5f,
+					current_pos.x + -0.5f,	current_pos.y + -0.5f,  current_pos.z + 0.5f,
+					current_pos.x + 0.5f,	current_pos.y + 0.5f,	current_pos.z + -0.5f,
+					current_pos.x + -0.5f,  current_pos.y + 0.5f,	current_pos.z + -0.5f,
+					current_pos.x + -0.5f,  current_pos.y + 0.5f,	current_pos.z + 0.5f,
+					current_pos.x + 0.5f,	current_pos.y + 0.5f,	current_pos.z + 0.5f,
 					};
 
 				std::vector<unsigned int> cube_indices = {
@@ -87,7 +87,10 @@ voxel::grid_visualiser voxel::create_grid_visualiser(voxel::grid& vg, shader& vi
 	const unsigned int voxels_per_shape = texel_resolution * texel_resolution * texel_resolution;
 	const unsigned int total_instances = total_voxels / voxels_per_shape;
 
+	glm::ivec3 scaled_resolution = vg.resolution / glm::ivec3(texel_resolution);
+
 	std::vector<glm::mat4> instance_matrices;
+	auto scaled_unit = glm::vec3{ vg.voxel_unit.x, vg.voxel_unit.y, vg.voxel_unit.z };
 	for (auto i = 0; i < total_instances; i++)
 	{
 		// instance vbo is per-instance transform
@@ -95,19 +98,20 @@ voxel::grid_visualiser voxel::create_grid_visualiser(voxel::grid& vg, shader& vi
 		float y = vg.bounding_box.min.y;
 		float x = vg.bounding_box.min.x;
 
-		float z_offset = i / (vg.resolution.x * vg.resolution.y);
-		float y_offset = (i / vg.resolution.x) % vg.resolution.y;
-		float x_offset = i % vg.resolution.x;
+		float z_offset = i / (scaled_resolution.x * scaled_resolution.y);
+		float y_offset = (i / scaled_resolution.x) % scaled_resolution.y;
+		float x_offset = i % scaled_resolution.x;
 
-		float z_offset2 = z_offset * vg.voxel_unit.z * texel_resolution;
-		float y_offset2 = y_offset * vg.voxel_unit.y * texel_resolution;
-		float x_offset2 = x_offset * vg.voxel_unit.x * texel_resolution;
+		float z_offset2 = z_offset * (vg.voxel_unit.z * texel_resolution);
+		float y_offset2 = y_offset * (vg.voxel_unit.y * texel_resolution);
+		float x_offset2 = x_offset * (vg.voxel_unit.x * texel_resolution);
 
 		z += z_offset2;
 		y += y_offset2;
 		x += x_offset2;
 
-		instance_matrices.push_back(utils::get_model_matrix({ x,y,z }, { 0,90,0 }, vg.voxel_unit));
+
+		instance_matrices.push_back(utils::get_model_matrix({ x,y,z }, { 0,0,0 }, scaled_unit));
 	}
 
 	vao_builder builder;
