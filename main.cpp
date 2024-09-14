@@ -150,8 +150,7 @@ void OnIm3D(aabb& level_bb)
 
 float get_aabb_area(aabb& bb)
 {
-    glm::vec3 dim = bb.max - bb.min;
-    return glm::length(dim);
+    return glm::length(bb.max - bb.min) ;
 }
 
 int main()
@@ -163,9 +162,6 @@ int main()
     std::string gbuffer_frag = utils::load_string_from_path("assets/shaders/gbuffer.frag.glsl");
     std::string gbuffer_floats_frag = utils::load_string_from_path("assets/shaders/gbuffer_floats.frag.glsl");
     std::string gbuffer_lighting_frag = utils::load_string_from_path("assets/shaders/lighting.frag.glsl");
-
-    std::string debug3dtex_vert = utils::load_string_from_path("assets/shaders/debug_3d_tex.vert.glsl");
-    std::string debug3dtex_frag = utils::load_string_from_path("assets/shaders/debug_3d_tex.frag.glsl");
 
     std::string visualize_3dtex_vert = utils::load_string_from_path("assets/shaders/visualize_3d_tex.vert.glsl");
     std::string visualize_3dtex_frag = utils::load_string_from_path("assets/shaders/visualize_3d_tex.frag.glsl");
@@ -180,7 +176,6 @@ int main()
     shader gbuffer_floats_shader(gbuffer_vert, gbuffer_floats_frag);
     shader lighting_shader(present_vert, gbuffer_lighting_frag);
     shader present_shader(present_vert, present_frag);
-    shader debug3dtex_shader(debug3dtex_vert, debug3dtex_frag);
     shader visualize_3dtex(visualize_3dtex_vert, visualize_3dtex_frag);
     shader voxelization(voxelization_compute);
     shader voxel_cone_tracing(present_vert, voxel_cone_tracing_frag);
@@ -217,14 +212,8 @@ int main()
     lights.push_back({ {-10.0, 0.0, -10.0}, {0.0, 255.0, 0.0}, 30.0f });
     lights.push_back({ {-10.0, 0.0, 10.0}, {0.0, 0.0, 255.0} , 40.0f});
 
-    constexpr int _3d_tex_res = 192;
-    constexpr int _3d_cube_res = _3d_tex_res * _3d_tex_res * _3d_tex_res;
+    constexpr int _3d_tex_res = 256;
 
-    float* _3d_tex_data = new float[_3d_cube_res * 4];
-    std::vector<glm::mat4> instance_matrices;
-    std::vector<glm::vec3> instance_uvs;
-
-    
     glm::mat4 model = utils::get_model_matrix(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(0.2f));
     glm::mat3 normal = utils::get_normal_matrix(model);
     sponza.m_aabb = utils::transform_aabb(sponza.m_aabb, model);
@@ -236,43 +225,6 @@ int main()
     glm::vec3 unit = glm::vec3((aabb_dim.x / _3d_tex_res), (aabb_dim.y / _3d_tex_res), (aabb_dim.z / _3d_tex_res));
     glm::vec3 n_unit = glm::normalize(unit);
 
-    for (auto i = 0; i < _3d_cube_res * 4; i++)
-    {
-        //float r = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
-        float r = 0.0f;
-        _3d_tex_data[i] = r;
-    }
-
-
-    for (auto i = 0; i < _3d_cube_res; i++)
-    {
-        //create a new VAO for debug cubes
-        // first vbo is same as cube
-        // instance vbo is per-instance transform
-
-        float z = sponza.m_aabb.min.z;
-        float y = sponza.m_aabb.min.y;
-        float x = sponza.m_aabb.min.x;
-
-        float z_offset = i / (_3d_tex_res * _3d_tex_res);
-        float y_offset = (i / _3d_tex_res) % _3d_tex_res;
-        float x_offset = i % _3d_tex_res;
-
-        float z_offset2 = z_offset * unit.z;
-        float y_offset2 = y_offset * unit.y;
-        float x_offset2 = x_offset * unit.x;
-
-        z += z_offset2;
-        y += y_offset2;
-        x += x_offset2;
-
-        instance_uvs.push_back({ (x_offset + 1) / _3d_tex_res ,(y_offset + 1) / _3d_tex_res,(z_offset + 1) / _3d_tex_res});
-        instance_matrices.push_back(utils::get_model_matrix({ x,y,z }, { 0,90,0 }, { unit.z, unit.y, unit.x }));
-    }
-    float data = 0.0f;
-    VAO instanced_cubes = shapes::gen_cube_instanced_vao(instance_matrices, instance_uvs);
-    // texture _3d_tex = texture::create_3d_texture_empty({ _3d_tex_res, _3d_tex_res, _3d_tex_res }, GL_RGBA, GL_RGBA16F, GL_FLOAT);
-    // glAssert(glBindImageTexture(0, _3d_tex.m_handle, 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA16F));
 
     voxelization.use();
     voxelization.setInt("u_gbuffer_pos", 0);
@@ -280,7 +232,6 @@ int main()
     voxelization.setVec3("u_voxel_resolution", glm::vec3( _3d_tex_res));
 
     bool draw_debug_3d_texture = false;
-    bool draw_debug_3d_texture2 = false;
     bool draw_direct_lighting = true;
     bool draw_cone_tracing_pass = true;
     bool draw_im3d = true;
@@ -308,7 +259,8 @@ int main()
         texture::bind_handle(gbuffer.m_colour_attachments[1], GL_TEXTURE0);
         texture::bind_handle(lightpass_buffer.m_colour_attachments[0], GL_TEXTURE1);
         glAssert(glDispatchCompute(128, 72, 1));
-
+        // way too expensive, maybe do this in separate compute passes?
+        // glGenerateTextureMipmap(voxel_data.texture.m_handle);
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
         glClear(GL_DEPTH_BUFFER_BIT);
 
@@ -344,24 +296,16 @@ int main()
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         }
         glClear(GL_DEPTH_BUFFER_BIT);
-        if(draw_debug_3d_texture)
-        {
-            instanced_cubes.use();
-            debug3dtex_shader.use();
-            debug3dtex_shader.setMat4("viewProjection", cam.m_proj * cam.m_view);
-            debug3dtex_shader.setInt("u_volume", 0);
 
-            texture::bind_handle(voxel_data.texture.m_handle, GL_TEXTURE0, GL_TEXTURE_3D);
-            glDrawElementsInstanced(GL_TRIANGLES, 36, GL_UNSIGNED_INT,  0, _3d_cube_res);
-        }
-
-        if (draw_debug_3d_texture2)
+        if (draw_debug_3d_texture)
         {
             voxel_visualiser.texel_shape.use();
             auto& vs = voxel_visualiser.visual_shader;
             vs.use();
             vs.setMat4("u_view_projection", cam.m_proj* cam.m_view);
             vs.setIVec3("u_texture_resolution", voxel_data.resolution);
+            vs.setVec3("u_aabb.min", sponza.m_aabb.min);
+            vs.setVec3("u_aabb.max", sponza.m_aabb.max);
             vs.setIVec3("u_voxel_group_resolution", glm::ivec3(voxel_visualiser.texel_resolution));
             vs.setInt("u_volume", 0);
             texture::bind_handle(voxel_data.texture.m_handle, GL_TEXTURE0, GL_TEXTURE_3D);
@@ -369,14 +313,10 @@ int main()
         }
 
         {
-            OnIm3D(sponza.m_aabb);
-        }
-        {
             ImGui::Begin("Hello, world!");                          
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / engine::s_imgui_io->Framerate, engine::s_imgui_io->Framerate);
             ImGui::Separator();
             ImGui::Checkbox("Render 3D Voxel Grid", &draw_debug_3d_texture);
-            ImGui::Checkbox("Render 3D Voxel Grid 2", &draw_debug_3d_texture2);
             ImGui::Checkbox("Render Direct Lighting Pass", &draw_direct_lighting);
             ImGui::Checkbox("Render Cone Tracing Pass", &draw_cone_tracing_pass);
             ImGui::Checkbox("Render IM3D", &draw_im3d);

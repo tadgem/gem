@@ -1,6 +1,6 @@
-prefix=C:/repos/glfun/out/install/x64-Debug
+prefix=C:/repos/glfun/out/install/x64-Release
 exec_prefix=${prefix}
-libdir=C:/repos/glfun/out/install/x64-Debug/lib
+libdir=C:/repos/glfun/out/install/x64-Release/lib
 includedir=${prefix}/include
 
 Name: glew

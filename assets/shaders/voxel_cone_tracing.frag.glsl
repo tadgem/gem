@@ -34,6 +34,10 @@ vec3 orthogonal(vec3 u) {
 	return abs(dot(u, v)) > 0.99999f ? cross(u, vec3(0, 1, 0)) : cross(u, v);
 }
 
+float rand(vec2 co){
+    return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
+}
+
 bool is_in_aabb(vec3 pos)
 {
 	if (pos.x < u_aabb.min.x) { return false; }
@@ -64,7 +68,7 @@ vec4 get_voxel_colour(vec3 position, vec3 unit)
 
 vec3 trace_cone(vec3 from, vec3 dir, vec3 unit)
 {
-	const int max_steps = 64;
+	const int max_steps = int(u_voxel_resolution.x);
 	vec4 accum = vec4(0.0);
 	vec3 pos = from;
 	int steps = 0;
@@ -84,7 +88,8 @@ vec3 trace_cone(vec3 from, vec3 dir, vec3 unit)
 
 vec3 trace_cones(vec3 from, vec3 dir, vec3 unit)
 {
-	const float ANGLE_MIX = 0.5f;
+	const float ANGLE_MIX = rand(dir.xy);
+	//const float ANGLE_MIX = 0.5;
 
 	const float w[3] = { 1.0, 1.0, 1.0 }; // Cone weights.
 

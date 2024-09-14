@@ -5,9 +5,18 @@ layout(location = 1) in mat4 iTransform;
 
 layout(location = 0) out vec3 oUVW;
 
+struct AABB
+{
+	vec3 min;
+	vec3 max;
+};
+
+
+
 uniform mat4	u_view_projection;
 uniform ivec3	u_texture_resolution;
 uniform ivec3	u_voxel_group_resolution;
+uniform AABB		u_aabb;
 
 vec3 get_uv_from_invocation( int idx, ivec3 limits ) {
     int tmp = idx;
@@ -16,6 +25,18 @@ vec3 get_uv_from_invocation( int idx, ivec3 limits ) {
     int x = tmp % limits.x;
     return vec3( float(x) , float(y), float(z));
 }
+
+bool is_in_aabb(vec3 pos)
+{
+	if (pos.x < u_aabb.min.x) { return false; }
+	if (pos.y < u_aabb.min.y) { return false; }
+	if (pos.z < u_aabb.min.z) { return false; }
+	if (pos.x > u_aabb.max.x) { return false; }
+	if (pos.y > u_aabb.max.y) { return false; }
+	if (pos.z > u_aabb.max.z) { return false; }
+	return true;
+}
+
 
 void main()
 {
@@ -28,5 +49,6 @@ void main()
 	oUVW = uvw;
 
 	vec3 worldPos = vec3(iTransform * vec4(aPos, 1.0));
+
 	gl_Position = u_view_projection * iTransform * vec4(aPos, 1.0);
 }
