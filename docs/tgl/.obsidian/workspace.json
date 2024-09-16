@@ -13,7 +13,7 @@
             "state": {
               "type": "pdf",
               "state": {
-                "file": "Papers & Articles/TemporalAA UE4.pdf"
+                "file": "Papers & Articles/Real-time Global Illumination Using Voxel Cone Tracing.pdf"
               }
             }
           }
@@ -97,7 +97,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Papers & Articles/TemporalAA UE4.pdf",
+                "file": "Papers & Articles/Real-time Global Illumination Using Voxel Cone Tracing.pdf",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -114,7 +114,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Papers & Articles/TemporalAA UE4.pdf",
+                "file": "Papers & Articles/Real-time Global Illumination Using Voxel Cone Tracing.pdf",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -137,7 +137,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Papers & Articles/TemporalAA UE4.pdf"
+                "file": "Papers & Articles/Real-time Global Illumination Using Voxel Cone Tracing.pdf"
               }
             }
           }
@@ -161,14 +161,17 @@
   "active": "658dc4440d024d96",
   "lastOpenFiles": [
     "Papers & Articles/Real-Time Global Illumination  Using Open GL.pdf",
+    "Notes etc/TAA.md",
+    "Notes etc/Images/Pasted image 20240915142407.png",
+    "Notes etc/Images",
+    "Images",
     "Papers & Articles/TemporalAA UE4.pdf",
+    "Notes etc",
+    "Welcome.md",
     "Papers & Articles/TemporalAA UE4.pdf.crdownload",
     "Papers & Articles/Real-time Global Illumination Using Voxel Cone Tracing.pdf",
     "Papers & Articles/Interactive Indirect Illumination Using Voxel Cone Tracing.pdf",
-    "Welcome.md",
     "GIVoxels-pg2011-authors.pdf",
-    "frepr183_voxel_cone_tracing.pdf",
-    "2104.00618v1.pdf",
-    "Papers & Articles"
+    "frepr183_voxel_cone_tracing.pdf"
   ]
 }

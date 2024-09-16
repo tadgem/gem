@@ -12,8 +12,11 @@ uniform sampler2D u_gbuffer_pos;
 uniform sampler2D u_gbuffer_lighting;
 uniform AABB	  u_aabb;
 uniform vec3	  u_voxel_resolution;
-const int div = 1;
+
 layout(binding = 0, rgba32f) uniform image3D imgOutput;
+layout(binding = 1, rgba32f) uniform image3D imgOutput1;
+layout(binding = 2, rgba32f) uniform image3D imgOutput2;
+layout(binding = 3, rgba32f) uniform image3D imgOutput3;
 
 bool is_in_aabb(vec3 pos)
 {
@@ -28,10 +31,10 @@ bool is_in_aabb(vec3 pos)
 	return true;
 }
 
-ivec3 get_texel_from_pos(vec3 position)
+ivec3 get_texel_from_pos(vec3 position, vec3 resolution)
 {
 	vec3 aabb_dim = u_aabb.max - u_aabb.min;
-	vec3 unit = vec3((aabb_dim.x / u_voxel_resolution.x), (aabb_dim.y / u_voxel_resolution.y) , (aabb_dim.z / u_voxel_resolution.z));
+	vec3 unit = vec3((aabb_dim.x / resolution.x), (aabb_dim.y / resolution.y) , (aabb_dim.z / resolution.z));
 
 	/// <summary>
 	/// 0,0,0 is aabb.min
@@ -66,7 +69,13 @@ void main() {
 	vec4 light = texture(u_gbuffer_lighting, uv);
 	light.w = 1.0f;
 
-	ivec3 sample_pos = get_texel_from_pos(pos.xyz);
+	ivec3 sample_pos = get_texel_from_pos(pos.xyz, u_voxel_resolution);
+	ivec3 sample_pos1 = get_texel_from_pos(pos.xyz, u_voxel_resolution / 2.0);
+	ivec3 sample_pos2 = get_texel_from_pos(pos.xyz, u_voxel_resolution / 4.0);
+	ivec3 sample_pos3 = get_texel_from_pos(pos.xyz, u_voxel_resolution / 8.0);
 	vec4 current = imageLoad(imgOutput, sample_pos);
 	imageStore(imgOutput,sample_pos, mix(light, current, 0.5));
+	imageStore(imgOutput1,sample_pos1, mix(light, current, 0.5));
+	imageStore(imgOutput2,sample_pos2, mix(light, current, 0.5));
+	imageStore(imgOutput3,sample_pos3, mix(light, current, 0.5));
 }

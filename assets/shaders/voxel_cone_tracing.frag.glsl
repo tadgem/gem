@@ -59,28 +59,42 @@ vec3 get_texel_from_pos(vec3 position, vec3 unit)
 	return vec3(x/ u_voxel_resolution.x, y / u_voxel_resolution.y, z / u_voxel_resolution.z);
 }
 
-vec4 get_voxel_colour(vec3 position, vec3 unit)
+vec4 get_voxel_colour(vec3 position, vec3 unit, int lod)
 {
-	return texture(u_voxel_map, get_texel_from_pos(position, unit));
+	return textureLod(u_voxel_map, get_texel_from_pos(position, unit), lod);
 }
 
 
 
 vec3 trace_cone(vec3 from, vec3 dir, vec3 unit)
 {
-	const int max_steps = int(u_voxel_resolution.x);
+	const int max_steps = int(max(max(u_voxel_resolution.x, u_voxel_resolution.y), u_voxel_resolution.z)); // should probs be the longest axis of minimum mip dimension
 	vec4 accum = vec4(0.0);
 	vec3 pos = from;
 	int steps = 0;
+	int lod = 3;
 	while (accum.w < 0.99 && steps < max_steps)
 	{
-		pos += unit * dir;
+		pos += unit * (lod + 1) * dir;
 		if (!is_in_aabb(pos))
 		{
-			accum.w = 1.0;
+			steps = max_steps;
+			accum.w = 2.0;
+			continue;
 		}
-		vec4 result = get_voxel_colour(pos, unit);
-		accum += result * (1.0 - float(steps / max_steps));
+		vec4 result = get_voxel_colour(pos, unit, lod);
+		if(result.w > 0.2 && lod > 0)
+		{
+			lod -= 1;
+		}
+		else if(result.w < 0.1)
+		{
+			lod += 1;
+		}
+		if(lod == 0)
+		{
+			accum += result * (1.0 - float(steps / max_steps));;
+		}
 		steps += 1;
 	}
 	return accum.xyz;

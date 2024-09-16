@@ -9,8 +9,12 @@ voxel::grid voxel::create_grid(glm::ivec3 resolution, aabb bb)
 	grid.voxel_unit = glm::vec3((aabb_dim.x / resolution.x), (aabb_dim.y / resolution.y), (aabb_dim.z / resolution.z));
 	grid.resolution = resolution;
 	grid.bounding_box = bb;	
-	grid.texture = texture::create_3d_texture_empty(resolution, GL_RGBA, GL_RGBA16F, GL_FLOAT);
-	glAssert(glBindImageTexture(0, grid.texture.m_handle, 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA16F));
+	grid.texture = texture::create_3d_texture_empty(resolution, GL_RGBA, GL_RGBA32F, GL_FLOAT);
+	glAssert(glBindImageTexture(0, grid.texture.m_handle, 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA32F));
+	glAssert(glBindImageTexture(1, grid.texture.m_handle, 1, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA32F));
+	glAssert(glBindImageTexture(2, grid.texture.m_handle, 2, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA32F));
+	glAssert(glBindImageTexture(3, grid.texture.m_handle, 3, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA32F));
+
 	return grid;
 }
 

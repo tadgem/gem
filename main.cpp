@@ -38,14 +38,17 @@ Im3d::Vec3 ToIm3D(glm::vec3& input)
     return { input.x, input.y, input.z };
 }
 
+inline static int frame_index = 0;
 void handle_gbuffer(framebuffer& gbuffer, shader& gbuffer_shader, glm::mat4 mvp, glm::mat4 model_mat, glm::mat3 normal, camera& cam, std::vector<point_light>& lights, model& sponza)
 {
+    frame_index++;
     gbuffer.bind();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     gbuffer_shader.use();
     gbuffer_shader.setMat4("u_mvp", mvp);
     gbuffer_shader.setMat4("u_model", model_mat);
     gbuffer_shader.setMat4("u_normal", normal);
+    gbuffer_shader.setInt("u_frame_index", frame_index);
     gbuffer_shader.setInt("u_diffuse_map", 0);
     gbuffer_shader.setInt("u_normal_map", 1);
     gbuffer_shader.setInt("u_metallic_map", 2);
@@ -260,7 +263,6 @@ int main()
         texture::bind_handle(lightpass_buffer.m_colour_attachments[0], GL_TEXTURE1);
         glAssert(glDispatchCompute(128, 72, 1));
         // way too expensive, maybe do this in separate compute passes?
-        // glGenerateTextureMipmap(voxel_data.texture.m_handle);
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
         glClear(GL_DEPTH_BUFFER_BIT);
 
