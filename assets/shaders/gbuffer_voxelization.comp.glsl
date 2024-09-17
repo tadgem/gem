@@ -52,7 +52,7 @@ ivec3 get_texel_from_pos(vec3 position, vec3 resolution)
 
 void main() {
 	ivec2 pix = ivec2(gl_GlobalInvocationID.xy);
-	ivec2 size = ivec2(1280, 720);
+	ivec2 size = ivec2(1920, 1080);
 	if (pix.x >= size.x || pix.y >= size.y) {
 		return;
 	}

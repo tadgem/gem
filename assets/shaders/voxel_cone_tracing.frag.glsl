@@ -102,7 +102,7 @@ vec3 trace_cone(vec3 from, vec3 dir, vec3 unit)
 
 vec3 trace_cones(vec3 from, vec3 dir, vec3 unit)
 {
-	const float ANGLE_MIX = rand(dir.xy);
+	const float ANGLE_MIX = rand((from.xy / from.z) + dir.xy);
 	//const float ANGLE_MIX = 0.66;
 
 	const float w[3] = { 1.0, 1.0, 1.0 }; // Cone weights.

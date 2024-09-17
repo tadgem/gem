@@ -41,7 +41,7 @@ Im3d::Vec3 ToIm3D(glm::vec3& input)
 static glm::mat4 last_vp = glm::mat4(1.0);
 
 inline static int frame_index = 0;
-void handle_gbuffer(framebuffer& gbuffer, shader& gbuffer_shader, glm::mat4 mvp, glm::mat4 model_mat, glm::mat3 normal, camera& cam, std::vector<point_light>& lights, model& sponza)
+void handle_gbuffer(framebuffer& gbuffer, framebuffer& previous_position_buffer, shader& gbuffer_shader, glm::mat4 mvp, glm::mat4 model_mat, glm::mat3 normal, camera& cam, std::vector<point_light>& lights, model& sponza)
 {
     frame_index++;
     gbuffer.bind();
@@ -57,6 +57,9 @@ void handle_gbuffer(framebuffer& gbuffer, shader& gbuffer_shader, glm::mat4 mvp,
     gbuffer_shader.setInt("u_metallic_map", 2);
     gbuffer_shader.setInt("u_roughness_map", 3);
     gbuffer_shader.setInt("u_ao_map", 4);
+    gbuffer_shader.setInt("u_prev_position_map", 5);
+
+    texture::bind_handle(previous_position_buffer.m_colour_attachments.front(), GL_TEXTURE5);
     for (auto& entry : sponza.m_meshes)
     {
         auto& maps = sponza.m_materials[entry.m_material_index].m_material_maps;
@@ -171,7 +174,7 @@ int main()
 {
     engine::init();
     custom_orientation = glm::vec3(0, 1, 0);
-
+    glm::ivec2 window_res{ 1920, 1080 };
     std::string gbuffer_vert = utils::load_string_from_path("assets/shaders/gbuffer.vert.glsl");
     std::string gbuffer_frag = utils::load_string_from_path("assets/shaders/gbuffer.frag.glsl");
     std::string gbuffer_floats_frag = utils::load_string_from_path("assets/shaders/gbuffer_floats.frag.glsl");
@@ -202,56 +205,56 @@ int main()
     model sponza = model::load_model_from_path("assets/models/sponza/Sponza.gltf");
     framebuffer gbuffer{};
     gbuffer.bind();
-    gbuffer.add_colour_attachment(GL_COLOR_ATTACHMENT0, 1280, 720, GL_RGBA, GL_NEAREST, GL_UNSIGNED_BYTE);
-    gbuffer.add_colour_attachment(GL_COLOR_ATTACHMENT1, 1280, 720, GL_RGBA16F, GL_NEAREST, GL_FLOAT);
-    gbuffer.add_colour_attachment(GL_COLOR_ATTACHMENT2, 1280, 720, GL_RGBA16F, GL_NEAREST, GL_FLOAT);
-    gbuffer.add_colour_attachment(GL_COLOR_ATTACHMENT3, 1280, 720, GL_RGBA16F, GL_NEAREST, GL_FLOAT);
-    gbuffer.add_colour_attachment(GL_COLOR_ATTACHMENT4, 1280, 720, GL_RG16F, GL_NEAREST, GL_FLOAT);
+    gbuffer.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x, window_res.y, GL_RGBA, GL_NEAREST, GL_UNSIGNED_BYTE);
+    gbuffer.add_colour_attachment(GL_COLOR_ATTACHMENT1, window_res.x, window_res.y, GL_RGBA16F, GL_NEAREST, GL_FLOAT);
+    gbuffer.add_colour_attachment(GL_COLOR_ATTACHMENT2, window_res.x, window_res.y, GL_RGBA16F, GL_NEAREST, GL_FLOAT);
+    gbuffer.add_colour_attachment(GL_COLOR_ATTACHMENT3, window_res.x, window_res.y, GL_RGBA16F, GL_NEAREST, GL_FLOAT);
+    gbuffer.add_colour_attachment(GL_COLOR_ATTACHMENT4, window_res.x, window_res.y, GL_RG16F, GL_NEAREST, GL_FLOAT);
 
 
-    gbuffer.add_depth_attachment(1280, 720);
+    gbuffer.add_depth_attachment(window_res.x, window_res.y);
     gbuffer.check();
     gbuffer.unbind();
 
     framebuffer lightpass_buffer{};
     lightpass_buffer.bind();
-    lightpass_buffer.add_colour_attachment(GL_COLOR_ATTACHMENT0, 1280, 720, GL_RGBA16F, GL_NEAREST, GL_FLOAT);
+    lightpass_buffer.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x, window_res.y, GL_RGBA16F, GL_NEAREST, GL_FLOAT);
     lightpass_buffer.check();
     lightpass_buffer.unbind();
 
     framebuffer lightpass_buffer_resolve{};
     lightpass_buffer_resolve.bind();
-    lightpass_buffer_resolve.add_colour_attachment(GL_COLOR_ATTACHMENT0, 1280, 720, GL_RGBA16F, GL_NEAREST, GL_FLOAT);
+    lightpass_buffer_resolve.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x, window_res.y, GL_RGBA16F, GL_NEAREST, GL_FLOAT);
     lightpass_buffer_resolve.check();
     lightpass_buffer_resolve.unbind();
 
     framebuffer history_buffer_lighting{};
     history_buffer_lighting.bind();
-    history_buffer_lighting.add_colour_attachment(GL_COLOR_ATTACHMENT0, 1280, 720, GL_RGBA16F, GL_LINEAR, GL_FLOAT);
+    history_buffer_lighting.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x, window_res.y, GL_RGBA16F, GL_LINEAR, GL_FLOAT);
     history_buffer_lighting.check();
     history_buffer_lighting.unbind();
 
     framebuffer history_buffer_position{};
     history_buffer_position.bind();
-    history_buffer_position.add_colour_attachment(GL_COLOR_ATTACHMENT0, 1280, 720, GL_RGBA16F, GL_NEAREST, GL_FLOAT);
+    history_buffer_position.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x, window_res.y, GL_RGBA16F, GL_NEAREST, GL_FLOAT);
     history_buffer_position.check();
     history_buffer_position.unbind();
 
     framebuffer history_buffer_conetracing{};
     history_buffer_conetracing.bind();
-    history_buffer_conetracing.add_colour_attachment(GL_COLOR_ATTACHMENT0, 1280, 720, GL_RGBA16F, GL_NEAREST, GL_FLOAT);
+    history_buffer_conetracing.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x, window_res.y, GL_RGBA16F, GL_NEAREST, GL_FLOAT);
     history_buffer_conetracing.check();
     history_buffer_conetracing.unbind();
 
     framebuffer buffer_conetracing{};
     buffer_conetracing.bind();
-    buffer_conetracing.add_colour_attachment(GL_COLOR_ATTACHMENT0, 1280, 720, GL_RGBA16F, GL_NEAREST, GL_FLOAT);
+    buffer_conetracing.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x, window_res.y, GL_RGBA16F, GL_NEAREST, GL_FLOAT);
     buffer_conetracing.check();
     buffer_conetracing.unbind();
 
     framebuffer buffer_conetracing_resolve{};
     buffer_conetracing_resolve.bind();
-    buffer_conetracing_resolve.add_colour_attachment(GL_COLOR_ATTACHMENT0, 1280, 720, GL_RGBA16F, GL_NEAREST, GL_FLOAT);
+    buffer_conetracing_resolve.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x, window_res.y, GL_RGBA16F, GL_NEAREST, GL_FLOAT);
     buffer_conetracing_resolve.check();
     buffer_conetracing_resolve.unbind();
 
@@ -313,12 +316,12 @@ int main()
         voxelization.setVec3("u_aabb.max", sponza.m_aabb.max);
         texture::bind_handle(gbuffer.m_colour_attachments[1], GL_TEXTURE0);
         texture::bind_handle(lightpass_buffer.m_colour_attachments[0], GL_TEXTURE1);
-        glAssert(glDispatchCompute(128, 72, 1));
+        glAssert(glDispatchCompute(window_res.x / 10, window_res.y / 10, 1));
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
         glClear(GL_DEPTH_BUFFER_BIT);
 
         
-        handle_gbuffer(gbuffer, gbuffer_shader, mvp, model, normal, cam, lights, sponza);
+        handle_gbuffer(gbuffer, history_buffer_position, gbuffer_shader, mvp, model, normal, cam, lights, sponza);
         lightpass_buffer.bind();
         handle_light_pass(lighting_shader, gbuffer, cam, lights, dir);
         lightpass_buffer.unbind();
@@ -332,6 +335,9 @@ int main()
             texture::bind_handle(lightpass_buffer.m_colour_attachments.front(), GL_TEXTURE0);
             taa.setInt("u_history_light_buffer", 1);
             texture::bind_handle(history_buffer_lighting.m_colour_attachments.front(), GL_TEXTURE1);
+            taa.setInt("u_velocity_buffer", 2);
+            texture::bind_handle(gbuffer.m_colour_attachments[4], GL_TEXTURE2);
+
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
             lightpass_buffer_resolve.unbind();
         }
@@ -369,6 +375,8 @@ int main()
             texture::bind_handle(buffer_conetracing.m_colour_attachments.front(), GL_TEXTURE0);
             taa.setInt("u_history_light_buffer", 1);
             texture::bind_handle(history_buffer_conetracing.m_colour_attachments.front(), GL_TEXTURE1);
+            taa.setInt("u_velocity_buffer", 2);
+            texture::bind_handle(gbuffer.m_colour_attachments[4], GL_TEXTURE2);
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
             buffer_conetracing_resolve.unbind();
 
@@ -442,7 +450,7 @@ int main()
         }
         if (draw_im3d)
         {
-            im3d_gl::end_frame_im3d(im3d_s, {1280, 720}, cam);
+            im3d_gl::end_frame_im3d(im3d_s, {window_res.x, window_res.y}, cam);
         }
         else
         {

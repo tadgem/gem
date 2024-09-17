@@ -167,7 +167,7 @@ void im3d_gl::new_frame_im3d(im3d_state& state)
 {
     // update app data e.g. mouse pos, viewport size keys etc.
 	Im3d::AppData& ad = Im3d::GetAppData(); 
-	ad.m_viewportSize = { 1280, 720 };
+	ad.m_viewportSize = { 1920, 1080};
     Im3d::NewFrame();
 }
 
@@ -224,7 +224,7 @@ void im3d_gl::end_frame_im3d(im3d_state& state, glm::ivec2 screen_dim, camera& c
 	}
 
     DrawIm3dTextListsImGui(Im3d::GetContext().getTextDrawLists(), Im3d::GetContext().getTextDrawListCount(),
-        1280, 720, viewProj);
+        1920, 1080, viewProj);
 
 }
 
