@@ -11,9 +11,11 @@
             "id": "658dc4440d024d96",
             "type": "leaf",
             "state": {
-              "type": "pdf",
+              "type": "markdown",
               "state": {
-                "file": "Papers & Articles/Real-time Global Illumination Using Voxel Cone Tracing.pdf"
+                "file": "Notes etc/TAA.md",
+                "mode": "source",
+                "source": false
               }
             }
           }
@@ -97,7 +99,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Papers & Articles/Real-time Global Illumination Using Voxel Cone Tracing.pdf",
+                "file": "Notes etc/TAA.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -114,7 +116,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Papers & Articles/Real-time Global Illumination Using Voxel Cone Tracing.pdf",
+                "file": "Notes etc/TAA.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -137,7 +139,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Papers & Articles/Real-time Global Illumination Using Voxel Cone Tracing.pdf"
+                "file": "Notes etc/TAA.md"
               }
             }
           }
@@ -160,6 +162,7 @@
   },
   "active": "658dc4440d024d96",
   "lastOpenFiles": [
+    "Papers & Articles/Real-time Global Illumination Using Voxel Cone Tracing.pdf",
     "Papers & Articles/Real-Time Global Illumination  Using Open GL.pdf",
     "Notes etc/TAA.md",
     "Notes etc/Images/Pasted image 20240915142407.png",
@@ -169,7 +172,6 @@
     "Notes etc",
     "Welcome.md",
     "Papers & Articles/TemporalAA UE4.pdf.crdownload",
-    "Papers & Articles/Real-time Global Illumination Using Voxel Cone Tracing.pdf",
     "Papers & Articles/Interactive Indirect Illumination Using Voxel Cone Tracing.pdf",
     "GIVoxels-pg2011-authors.pdf",
     "frepr183_voxel_cone_tracing.pdf"
