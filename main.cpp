@@ -291,7 +291,10 @@ int main()
 
     bool draw_debug_3d_texture = false;
     bool draw_direct_lighting = true;
+    bool draw_direct_lighting_no_taa = true;
     bool draw_cone_tracing_pass = true;
+    bool draw_cone_tracing_pass_no_taa = true;
+
     bool draw_im3d = true;
 
     auto im3d_s =  im3d_gl::load_im3d();
@@ -342,7 +345,7 @@ int main()
             lightpass_buffer_resolve.unbind();
         }
 
-        if (draw_cone_tracing_pass)
+        if (draw_cone_tracing_pass || draw_cone_tracing_pass_no_taa)
         {
             shapes::s_screen_quad.use();
             buffer_conetracing.bind();
@@ -382,6 +385,15 @@ int main()
 
             handle_present_image(present_shader, "u_image_sampler", 0, buffer_conetracing_resolve.m_colour_attachments.front());
         }
+        if (draw_cone_tracing_pass_no_taa)
+        {
+            handle_present_image(present_shader, "u_image_sampler", 0, buffer_conetracing.m_colour_attachments.front());
+        }
+        if (draw_direct_lighting_no_taa)
+        {
+            handle_present_image(present_shader, "u_image_sampler", 0, lightpass_buffer.m_colour_attachments.front());
+
+        }
 
         // copy history buffers
         blit_to_fb(history_buffer_lighting, present_shader, "u_image_sampler", 0, lightpass_buffer_resolve.m_colour_attachments[0]);
@@ -410,7 +422,9 @@ int main()
             ImGui::Separator();
             ImGui::Checkbox("Render 3D Voxel Grid", &draw_debug_3d_texture);
             ImGui::Checkbox("Render Direct Lighting Pass", &draw_direct_lighting);
+            ImGui::Checkbox("Render Direct Lighting Pass NO TAA", &draw_direct_lighting_no_taa);
             ImGui::Checkbox("Render Cone Tracing Pass", &draw_cone_tracing_pass);
+            ImGui::Checkbox("Render Cone Tracing Pass NO TAA", &draw_cone_tracing_pass_no_taa);
             ImGui::Checkbox("Render IM3D", &draw_im3d);
             ImGui::Separator();
             ImGui::DragFloat3("Camera Position", &cam.m_pos[0]);

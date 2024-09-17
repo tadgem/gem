@@ -71,8 +71,8 @@ void main()
     vec4 lastClipPos = (u_last_vp * lastPixelPos);
 
 
-    vec2 currentPosNDC = aClipPos.xy / aClipPos.w;
-    vec2 previousPosNDC = lastClipPos.xy / lastClipPos.w;
+    vec2 currentPosNDC = aClipPos.xy / aClipPos.z;
+    vec2 previousPosNDC = lastClipPos.xy / lastClipPos.z;
 
     // velocity 
     oVelocity = currentPosNDC - previousPosNDC;

@@ -39,16 +39,15 @@ void main()
 {
     oUV = aUV;
     oNormal = (vec4(aNormal, 1.0) * u_normal).xyz;
-    oPosition = (vec4(aPos , 1.0) * u_model).xyz;
+    oPosition = (u_model * vec4(aPos , 1.0)).xyz;
+    vec4 pos =  u_mvp * vec4(aPos, 1.0);
+    oClipPos = pos;
 
     int jitter_index = u_frame_index % 16;
     vec2 offset = halton_seq[jitter_index];
     offset.x = ((offset.x-0.5) / 1920.0) * 2.0;
     offset.y = ((offset.y-0.5) / 1080.0 ) * 2.0;
 
-    vec4 pos =  u_mvp * vec4(aPos, 1.0);
     pos += vec4(offset * pos.z, 0.0, 0.0);
-    oClipPos = pos;
-
     gl_Position = pos;
 }

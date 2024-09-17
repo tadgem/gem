@@ -106,7 +106,16 @@ void main()
 //    FragColor = vec4(antialiased, modulationFactor);
 
       vec4 current_colour = texture(u_current_light_buffer, aUV);
+      const vec2 unit = vec2(1.0) / vec2(1920.0, 1080.0);
       vec2 velocity       = texture(u_velocity_buffer, aUV).xy / vec2(1920.0, 1080.0);
+      if(velocity.x < unit.x)
+      {
+          velocity.x = 0.0;
+      }
+      if(velocity.y < unit.y)
+      {
+          velocity.y = 0.0;
+      }
       vec4 history_colour = texture(u_history_light_buffer, aUV - velocity);
 
       vec3 minColor = vec3(9999.0); 
