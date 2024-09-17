@@ -68,11 +68,11 @@ vec4 get_voxel_colour(vec3 position, vec3 unit, int lod)
 
 vec3 trace_cone(vec3 from, vec3 dir, vec3 unit)
 {
-	const int max_steps = int(max(max(u_voxel_resolution.x, u_voxel_resolution.y), u_voxel_resolution.z)); // should probs be the longest axis of minimum mip dimension
+	const int max_steps = int(max(max(u_voxel_resolution.x, u_voxel_resolution.y), u_voxel_resolution.z)) / 4; // should probs be the longest axis of minimum mip dimension
 	vec4 accum = vec4(0.0);
 	vec3 pos = from;
 	int steps = 0;
-	int lod = 3;
+	int lod = 5;
 	while (accum.w < 0.99 && steps < max_steps)
 	{
 		pos += unit * (lod + 1) * dir;
@@ -103,7 +103,7 @@ vec3 trace_cone(vec3 from, vec3 dir, vec3 unit)
 vec3 trace_cones(vec3 from, vec3 dir, vec3 unit)
 {
 	const float ANGLE_MIX = rand(dir.xy);
-	//const float ANGLE_MIX = 0.5;
+	//const float ANGLE_MIX = 0.66;
 
 	const float w[3] = { 1.0, 1.0, 1.0 }; // Cone weights.
 
@@ -137,7 +137,7 @@ vec3 trace_cones(vec3 from, vec3 dir, vec3 unit)
 	acc += w[2] * trace_cone(from, c3, unit);
 	acc += w[2] * trace_cone(from, c4, unit);
 
-	return acc / 9.0; // num traces to get a more usable output for now;
+	return acc /9.0; // num traces to get a more usable output for now;
 }
 
 

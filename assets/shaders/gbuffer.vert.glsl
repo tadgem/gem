@@ -7,9 +7,10 @@ layout (location = 2) in vec2 aUV;
 layout(location = 0) out vec2 oUV;
 layout(location = 1) out vec3 oPosition;
 layout(location = 2) out vec3 oNormal;
-
+layout(location = 3) out vec2 oVelocity;
 uniform mat4 u_mvp;
 uniform mat4 u_model;
+uniform mat4 u_last_vp;
 uniform mat4 u_normal;
 uniform int u_frame_index;
 
@@ -36,8 +37,8 @@ const vec2 halton_seq[16] = vec2[16]
 void main()
 {
     oUV = aUV;
-    oPosition = (vec4(aPos , 1.0) * u_model).xyz;
     oNormal = (vec4(aNormal, 1.0) * u_normal).xyz;
+    oPosition = (vec4(aPos , 1.0) * u_model).xyz;
 
     int jitter_index = u_frame_index % 16;
     vec2 offset = halton_seq[jitter_index];
@@ -45,7 +46,13 @@ void main()
     offset.x = ((offset.x-0.5) / 1280.0) * 2.0;
     offset.y = ((offset.y-0.5) / 720.0 ) * 2.0;
 
-    vec4 pos =  u_mvp * vec4(aPos.x, aPos.y, aPos.z, 1.0);
+    vec4 pos =  u_mvp * vec4(aPos, 1.0);
     pos += vec4(offset * pos.z, 0.0, 0.0);
+
+    vec2 last_offset = halton_seq[max(jitter_index - 1, 0)];
+    vec4 last_pos = u_last_vp * u_model * vec4(aPos, 1.0);
+    last_pos += vec4(last_offset * last_pos.z, 0.0, 0.0);
+    oVelocity = (pos - last_pos).xy;
+
     gl_Position = pos;
 }

@@ -14,6 +14,8 @@ voxel::grid voxel::create_grid(glm::ivec3 resolution, aabb bb)
 	glAssert(glBindImageTexture(1, grid.texture.m_handle, 1, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA32F));
 	glAssert(glBindImageTexture(2, grid.texture.m_handle, 2, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA32F));
 	glAssert(glBindImageTexture(3, grid.texture.m_handle, 3, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA32F));
+	glAssert(glBindImageTexture(4, grid.texture.m_handle, 4, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA32F));
+	glAssert(glBindImageTexture(5, grid.texture.m_handle, 5, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA32F));
 
 	return grid;
 }

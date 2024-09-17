@@ -17,6 +17,8 @@ layout(binding = 0, rgba32f) uniform image3D imgOutput;
 layout(binding = 1, rgba32f) uniform image3D imgOutput1;
 layout(binding = 2, rgba32f) uniform image3D imgOutput2;
 layout(binding = 3, rgba32f) uniform image3D imgOutput3;
+layout(binding = 4, rgba32f) uniform image3D imgOutput4;
+layout(binding = 5, rgba32f) uniform image3D imgOutput5;
 
 bool is_in_aabb(vec3 pos)
 {
@@ -73,9 +75,13 @@ void main() {
 	ivec3 sample_pos1 = get_texel_from_pos(pos.xyz, u_voxel_resolution / 2.0);
 	ivec3 sample_pos2 = get_texel_from_pos(pos.xyz, u_voxel_resolution / 4.0);
 	ivec3 sample_pos3 = get_texel_from_pos(pos.xyz, u_voxel_resolution / 8.0);
+	ivec3 sample_pos4 = get_texel_from_pos(pos.xyz, u_voxel_resolution / 16.0);
+	ivec3 sample_pos5 = get_texel_from_pos(pos.xyz, u_voxel_resolution / 32.0);
 	vec4 current = imageLoad(imgOutput, sample_pos);
 	imageStore(imgOutput,sample_pos, mix(light, current, 0.5));
 	imageStore(imgOutput1,sample_pos1, mix(light, current, 0.5));
 	imageStore(imgOutput2,sample_pos2, mix(light, current, 0.5));
 	imageStore(imgOutput3,sample_pos3, mix(light, current, 0.5));
+	imageStore(imgOutput4,sample_pos4, mix(light, current, 0.5));
+	imageStore(imgOutput5,sample_pos5, mix(light, current, 0.5));
 }

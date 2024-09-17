@@ -4,11 +4,13 @@
 layout(location = 0) in vec2 aUV;
 layout(location = 1) in vec3 aPosition;
 layout(location = 2) in vec3 aNormal;
+layout(location = 3) in vec2 aVelocity;
 
 layout(location = 0) out vec3 oDiffuse;
 layout(location = 1) out vec3 oPosition;
 layout(location = 2) out vec3 oNormal;
 layout(location = 3) out vec3 oPBR;
+layout(location = 4) out vec2 oVelocity;
 
 uniform sampler2D u_diffuse_map;
 uniform sampler2D u_normal_map;
@@ -40,6 +42,7 @@ void main()
     oDiffuse = pow(texture(u_diffuse_map, aUV).rgb, vec3(2.2));
 	oPosition = aPosition;
     oNormal = getNormalFromMap();
+    oVelocity = aVelocity;
 
     float metallic = texture(u_metallic_map, aUV).r;
     float roughness = texture(u_roughness_map, aUV).r;

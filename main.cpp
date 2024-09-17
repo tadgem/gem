@@ -38,6 +38,8 @@ Im3d::Vec3 ToIm3D(glm::vec3& input)
     return { input.x, input.y, input.z };
 }
 
+static glm::mat4 last_vp = glm::mat4(1.0);
+
 inline static int frame_index = 0;
 void handle_gbuffer(framebuffer& gbuffer, shader& gbuffer_shader, glm::mat4 mvp, glm::mat4 model_mat, glm::mat3 normal, camera& cam, std::vector<point_light>& lights, model& sponza)
 {
@@ -47,6 +49,7 @@ void handle_gbuffer(framebuffer& gbuffer, shader& gbuffer_shader, glm::mat4 mvp,
     gbuffer_shader.use();
     gbuffer_shader.setMat4("u_mvp", mvp);
     gbuffer_shader.setMat4("u_model", model_mat);
+    gbuffer_shader.setMat4("u_last_vp", last_vp);
     gbuffer_shader.setMat4("u_normal", normal);
     gbuffer_shader.setInt("u_frame_index", frame_index);
     gbuffer_shader.setInt("u_diffuse_map", 0);
@@ -80,6 +83,7 @@ void handle_gbuffer(framebuffer& gbuffer, shader& gbuffer_shader, glm::mat4 mvp,
         glDrawElements(GL_TRIANGLES, entry.m_index_count, GL_UNSIGNED_INT, 0);
     }
     gbuffer.unbind();
+    last_vp = cam.m_proj * cam.m_view;
 }
 
 void handle_present_image(shader& present_shader, const std::string& uniform_name, const int texture_slot, gl_handle texture)
@@ -89,6 +93,13 @@ void handle_present_image(shader& present_shader, const std::string& uniform_nam
     present_shader.setInt(uniform_name.c_str(), texture_slot);
     texture::bind_handle(texture, GL_TEXTURE0 + texture_slot);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+}
+
+void blit_to_fb(framebuffer& fb, shader& present_shader, const std::string& uniform_name, const int texture_slot, gl_handle texture)
+{
+    fb.bind();
+    handle_present_image(present_shader, uniform_name, texture_slot, texture);
+    fb.unbind();
 }
 
 void handle_light_pass(shader& lighting_shader, framebuffer& gbuffer, camera& cam, std::vector<point_light>& point_lights, dir_light& sun)
@@ -175,6 +186,9 @@ int main()
     std::string voxelization_compute = utils::load_string_from_path("assets/shaders/gbuffer_voxelization.comp.glsl");
     std::string voxel_cone_tracing_frag = utils::load_string_from_path("assets/shaders/voxel_cone_tracing.frag.glsl");
 
+    std::string taa_frag = utils::load_string_from_path("assets/shaders/taa.frag.glsl");
+
+
     shader gbuffer_shader(gbuffer_vert, gbuffer_frag);
     shader gbuffer_floats_shader(gbuffer_vert, gbuffer_floats_frag);
     shader lighting_shader(present_vert, gbuffer_lighting_frag);
@@ -182,6 +196,7 @@ int main()
     shader visualize_3dtex(visualize_3dtex_vert, visualize_3dtex_frag);
     shader voxelization(voxelization_compute);
     shader voxel_cone_tracing(present_vert, voxel_cone_tracing_frag);
+    shader taa(present_vert, taa_frag);
 
     camera cam{};
     model sponza = model::load_model_from_path("assets/models/sponza/Sponza.gltf");
@@ -191,6 +206,7 @@ int main()
     gbuffer.add_colour_attachment(GL_COLOR_ATTACHMENT1, 1280, 720, GL_RGBA16F, GL_NEAREST, GL_FLOAT);
     gbuffer.add_colour_attachment(GL_COLOR_ATTACHMENT2, 1280, 720, GL_RGBA16F, GL_NEAREST, GL_FLOAT);
     gbuffer.add_colour_attachment(GL_COLOR_ATTACHMENT3, 1280, 720, GL_RGBA16F, GL_NEAREST, GL_FLOAT);
+    gbuffer.add_colour_attachment(GL_COLOR_ATTACHMENT4, 1280, 720, GL_RG16F, GL_NEAREST, GL_FLOAT);
 
 
     gbuffer.add_depth_attachment(1280, 720);
@@ -202,6 +218,42 @@ int main()
     lightpass_buffer.add_colour_attachment(GL_COLOR_ATTACHMENT0, 1280, 720, GL_RGBA16F, GL_NEAREST, GL_FLOAT);
     lightpass_buffer.check();
     lightpass_buffer.unbind();
+
+    framebuffer lightpass_buffer_resolve{};
+    lightpass_buffer_resolve.bind();
+    lightpass_buffer_resolve.add_colour_attachment(GL_COLOR_ATTACHMENT0, 1280, 720, GL_RGBA16F, GL_NEAREST, GL_FLOAT);
+    lightpass_buffer_resolve.check();
+    lightpass_buffer_resolve.unbind();
+
+    framebuffer history_buffer_lighting{};
+    history_buffer_lighting.bind();
+    history_buffer_lighting.add_colour_attachment(GL_COLOR_ATTACHMENT0, 1280, 720, GL_RGBA16F, GL_LINEAR, GL_FLOAT);
+    history_buffer_lighting.check();
+    history_buffer_lighting.unbind();
+
+    framebuffer history_buffer_position{};
+    history_buffer_position.bind();
+    history_buffer_position.add_colour_attachment(GL_COLOR_ATTACHMENT0, 1280, 720, GL_RGBA16F, GL_NEAREST, GL_FLOAT);
+    history_buffer_position.check();
+    history_buffer_position.unbind();
+
+    framebuffer history_buffer_conetracing{};
+    history_buffer_conetracing.bind();
+    history_buffer_conetracing.add_colour_attachment(GL_COLOR_ATTACHMENT0, 1280, 720, GL_RGBA16F, GL_NEAREST, GL_FLOAT);
+    history_buffer_conetracing.check();
+    history_buffer_conetracing.unbind();
+
+    framebuffer buffer_conetracing{};
+    buffer_conetracing.bind();
+    buffer_conetracing.add_colour_attachment(GL_COLOR_ATTACHMENT0, 1280, 720, GL_RGBA16F, GL_NEAREST, GL_FLOAT);
+    buffer_conetracing.check();
+    buffer_conetracing.unbind();
+
+    framebuffer buffer_conetracing_resolve{};
+    buffer_conetracing_resolve.bind();
+    buffer_conetracing_resolve.add_colour_attachment(GL_COLOR_ATTACHMENT0, 1280, 720, GL_RGBA16F, GL_NEAREST, GL_FLOAT);
+    buffer_conetracing_resolve.check();
+    buffer_conetracing_resolve.unbind();
 
     dir_light dir
     {
@@ -262,7 +314,6 @@ int main()
         texture::bind_handle(gbuffer.m_colour_attachments[1], GL_TEXTURE0);
         texture::bind_handle(lightpass_buffer.m_colour_attachments[0], GL_TEXTURE1);
         glAssert(glDispatchCompute(128, 72, 1));
-        // way too expensive, maybe do this in separate compute passes?
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
         glClear(GL_DEPTH_BUFFER_BIT);
 
@@ -274,16 +325,21 @@ int main()
                 
         if (draw_direct_lighting)
         {
+            lightpass_buffer_resolve.bind();
             shapes::s_screen_quad.use();
-            present_shader.use();
-            present_shader.setInt("u_image_sampler", 0);
+            taa.use();
+            taa.setInt("u_current_light_buffer", 0);
             texture::bind_handle(lightpass_buffer.m_colour_attachments.front(), GL_TEXTURE0);
+            taa.setInt("u_history_light_buffer", 1);
+            texture::bind_handle(history_buffer_lighting.m_colour_attachments.front(), GL_TEXTURE1);
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+            lightpass_buffer_resolve.unbind();
         }
 
         if (draw_cone_tracing_pass)
         {
             shapes::s_screen_quad.use();
+            buffer_conetracing.bind();
             voxel_cone_tracing.use();
             voxel_cone_tracing.setVec3("u_aabb.min", sponza.m_aabb.min);
             voxel_cone_tracing.setVec3("u_aabb.max", sponza.m_aabb.max);
@@ -296,7 +352,33 @@ int main()
             voxel_cone_tracing.setInt("u_voxel_map", 2);
             texture::bind_handle(voxel_data.texture.m_handle, GL_TEXTURE2, GL_TEXTURE_3D);
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+            buffer_conetracing.unbind();
         }
+
+        if (draw_direct_lighting)
+        {
+            handle_present_image(present_shader, "u_image_sampler", 0, lightpass_buffer_resolve.m_colour_attachments.front());
+        }
+
+        if (draw_cone_tracing_pass)
+        {
+            buffer_conetracing_resolve.bind();
+            shapes::s_screen_quad.use();
+            taa.use();
+            taa.setInt("u_current_light_buffer", 0);
+            texture::bind_handle(buffer_conetracing.m_colour_attachments.front(), GL_TEXTURE0);
+            taa.setInt("u_history_light_buffer", 1);
+            texture::bind_handle(history_buffer_conetracing.m_colour_attachments.front(), GL_TEXTURE1);
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+            buffer_conetracing_resolve.unbind();
+
+            handle_present_image(present_shader, "u_image_sampler", 0, buffer_conetracing_resolve.m_colour_attachments.front());
+        }
+
+        // copy history buffers
+        blit_to_fb(history_buffer_lighting, present_shader, "u_image_sampler", 0, lightpass_buffer_resolve.m_colour_attachments[0]);
+        blit_to_fb(history_buffer_position, present_shader, "u_image_sampler", 0, gbuffer.m_colour_attachments[1]);
+        blit_to_fb(history_buffer_conetracing, present_shader, "u_image_sampler", 0, buffer_conetracing_resolve.m_colour_attachments.front());
         glClear(GL_DEPTH_BUFFER_BIT);
 
         if (draw_debug_3d_texture)
