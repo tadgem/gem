@@ -209,6 +209,7 @@ int main()
     shader gi_combine(present_vert, gi_combine_frag);
 
     camera cam{};
+    // model sponza = model::load_model_from_path("assets/models/tantive/scene.gltf");
     model sponza = model::load_model_from_path("assets/models/sponza/Sponza.gltf");
     framebuffer gbuffer{};
     gbuffer.bind();
@@ -287,7 +288,7 @@ int main()
 
     constexpr int _3d_tex_res = 256;
 
-    glm::mat4 model = utils::get_model_matrix(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(0.2f));
+    glm::mat4 model = utils::get_model_matrix(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
     glm::mat3 normal = utils::get_normal_matrix(model);
     sponza.m_aabb = utils::transform_aabb(sponza.m_aabb, model);
 

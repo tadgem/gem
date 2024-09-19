@@ -8,8 +8,8 @@
 #include "stb_image.h"
 texture::texture(const std::string& path)
 {
-	// unsigned char* data = stbi_load(path.c_str(), & m_width, & m_height, &m_num_channels, 0);
-	unsigned char* data = SOIL_load_image(path.c_str(), &m_width, &m_height, &m_num_channels, 0);
+	unsigned char* data = stbi_load(path.c_str(), & m_width, & m_height, &m_num_channels, 0);
+	//unsigned char* data = SOIL_load_image(path.c_str(), &m_width, &m_height, &m_num_channels, 0);
 	if (!data)
 	{
 		std::cerr << "Failed to load texture at path : " << path << std::endl;
@@ -24,8 +24,12 @@ texture::texture(const std::string& path)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_width, m_height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+	GLenum format = GL_RGBA;
+	if (m_num_channels < 4)
+	{
+		format = GL_RGB;
+	}
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_width, m_height, 0, format, GL_UNSIGNED_BYTE, data);
 	glGenerateMipmap(GL_TEXTURE_2D);
 }
 
