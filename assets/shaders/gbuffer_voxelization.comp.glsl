@@ -12,7 +12,7 @@ uniform sampler2D u_gbuffer_pos;
 uniform sampler2D u_gbuffer_lighting;
 uniform AABB	  u_aabb;
 uniform vec3	  u_voxel_resolution;
-
+uniform vec2	  u_input_resolution;
 layout(binding = 0, rgba32f) uniform image3D imgOutput;
 layout(binding = 1, rgba32f) uniform image3D imgOutput1;
 layout(binding = 2, rgba32f) uniform image3D imgOutput2;
@@ -52,7 +52,7 @@ ivec3 get_texel_from_pos(vec3 position, vec3 resolution)
 
 void main() {
 	ivec2 pix = ivec2(gl_GlobalInvocationID.xy);
-	ivec2 size = ivec2(1920, 1080);
+	ivec2 size = ivec2(u_input_resolution.x, u_input_resolution.y);
 	if (pix.x >= size.x || pix.y >= size.y) {
 		return;
 	}

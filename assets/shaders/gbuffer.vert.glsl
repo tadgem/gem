@@ -5,15 +5,18 @@ layout (location = 1) in vec3 aNormal;
 layout (location = 2) in vec2 aUV;
 
 layout(location = 0) out vec2 oUV;
-layout(location = 1) out vec3 oPosition;
+layout(location = 1) out vec4 oPosition;
 layout(location = 2) out vec3 oNormal;
 layout(location = 3) out vec4 oClipPos;
+layout(location = 4) out vec4 oLastClipPos;
 
-uniform mat4 u_mvp;
-uniform mat4 u_model;
-uniform mat4 u_last_vp;
-uniform mat4 u_normal;
-uniform int u_frame_index;
+uniform mat4      u_vp;
+uniform mat4      u_model;
+uniform mat4      u_last_vp;
+uniform mat4      u_last_model;
+uniform mat4      u_normal;
+uniform int       u_frame_index;
+uniform vec2      u_resolution;
 
 const vec2 halton_seq[16] = vec2[16] 
 (
@@ -39,14 +42,16 @@ void main()
 {
     oUV = aUV;
     oNormal = (vec4(aNormal, 1.0) * u_normal).xyz;
-    oPosition = (u_model * vec4(aPos , 1.0)).xyz;
-    vec4 pos =  u_mvp * vec4(aPos, 1.0);
+    oPosition = (u_model * vec4(aPos , 1.0));
+    vec4 pos =  u_vp * u_model * vec4(aPos, 1.0);
     oClipPos = pos;
+
+    oLastClipPos = u_last_vp * u_last_model * vec4(aPos, 1.0);
 
     int jitter_index = u_frame_index % 16;
     vec2 offset = halton_seq[jitter_index];
-    offset.x = ((offset.x-0.5) / 1920.0) * 2.0;
-    offset.y = ((offset.y-0.5) / 1080.0 ) * 2.0;
+    offset.x = ((offset.x-0.5) / u_resolution.x) * 2.0;
+    offset.y = ((offset.y-0.5) / u_resolution.y ) * 2.0;
 
     pos += vec4(offset * pos.z, 0.0, 0.0);
     gl_Position = pos;

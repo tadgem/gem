@@ -2,15 +2,19 @@
 
 
 layout(location = 0) in vec2 aUV;
-layout(location = 1) in vec3 aPosition;
+layout(location = 1) in vec4 aPosition;
 layout(location = 2) in vec3 aNormal;
 layout(location = 3) in vec4 aClipPos;
+layout(location = 4) in vec4 aLastClipPos;
+
 
 layout(location = 0) out vec3 oDiffuse;
-layout(location = 1) out vec3 oPosition;
+layout(location = 1) out vec4 oPosition;
 layout(location = 2) out vec3 oNormal;
 layout(location = 3) out vec3 oPBR;
 layout(location = 4) out vec2 oVelocity;
+layout(location = 5) out vec4 oCurrentClip;
+layout(location = 6) out vec4 oLastClip;
 
 uniform sampler2D u_diffuse_map;
 uniform sampler2D u_normal_map;
@@ -47,8 +51,8 @@ vec3 getNormalFromMap()
 {
     vec3 tangentNormal = texture(u_normal_map, aUV).xyz * 2.0 - 1.0;
 
-    vec3 Q1 = dFdx(aPosition);
-    vec3 Q2 = dFdy(aPosition);
+    vec3 Q1 = dFdx(aPosition.xyz);
+    vec3 Q2 = dFdy(aPosition.xyz);
     vec2 st1 = dFdx(aUV);
     vec2 st2 = dFdy(aUV);
 
@@ -67,12 +71,12 @@ void main()
 	oPosition = aPosition;
     oNormal = getNormalFromMap();
 
-    vec4 lastPixelPos = texture(u_prev_position_map, aUV);
-    vec4 lastClipPos = (u_last_vp * lastPixelPos);
+    oCurrentClip = aClipPos;
+    oLastClip = aLastClipPos;
 
 
     vec2 currentPosNDC = aClipPos.xy / aClipPos.z;
-    vec2 previousPosNDC = lastClipPos.xy / lastClipPos.z;
+    vec2 previousPosNDC = aLastClipPos.xy / aLastClipPos.z;
 
     // velocity 
     oVelocity = currentPosNDC - previousPosNDC;
