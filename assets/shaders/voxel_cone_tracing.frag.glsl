@@ -93,7 +93,7 @@ vec3 trace_cone(vec3 from, vec3 dir, vec3 unit)
 		}
 		if(lod == 0)
 		{
-			accum += result * (1.0 - float(steps / max_steps));;
+			accum += result;
 		}
 		steps += 1;
 	}
