@@ -62,6 +62,12 @@ void handle_gbuffer(framebuffer& gbuffer, framebuffer& previous_position_buffer,
     gbuffer_shader.setInt("u_ao_map", 4);
     gbuffer_shader.setInt("u_prev_position_map", 5);
 
+    texture::bind_handle(0, GL_TEXTURE0);
+    texture::bind_handle(0, GL_TEXTURE1);
+    texture::bind_handle(0, GL_TEXTURE2);
+    texture::bind_handle(0, GL_TEXTURE3);
+    texture::bind_handle(0, GL_TEXTURE4);
+
     texture::bind_handle(previous_position_buffer.m_colour_attachments.front(), GL_TEXTURE5);
     for (auto& entry : sponza.m_meshes)
     {
@@ -99,6 +105,7 @@ void handle_present_image(shader& present_shader, const std::string& uniform_nam
     present_shader.setInt(uniform_name.c_str(), texture_slot);
     texture::bind_handle(texture, GL_TEXTURE0 + texture_slot);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    texture::bind_handle(0, GL_TEXTURE0);
 }
 
 void blit_to_fb(framebuffer& fb, shader& present_shader, const std::string& uniform_name, const int texture_slot, gl_handle texture)
@@ -209,7 +216,7 @@ int main()
     shader gi_combine(present_vert, gi_combine_frag);
 
     camera cam{};
-    // model sponza = model::load_model_from_path("assets/models/tantive/scene.gltf");
+    //model sponza = model::load_model_from_path("assets/models/tantive/scene.gltf");
     model sponza = model::load_model_from_path("assets/models/sponza/Sponza.gltf");
     framebuffer gbuffer{};
     gbuffer.bind();
@@ -366,6 +373,10 @@ int main()
 
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
             lightpass_buffer_resolve.unbind();
+            texture::bind_handle(0, GL_TEXTURE0);
+            texture::bind_handle(0, GL_TEXTURE1);
+            texture::bind_handle(0, GL_TEXTURE2);
+
         }
 
         if (draw_cone_tracing_pass || draw_cone_tracing_pass_no_taa)
@@ -386,6 +397,9 @@ int main()
             texture::bind_handle(voxel_data.texture.m_handle, GL_TEXTURE2, GL_TEXTURE_3D);
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
             buffer_conetracing.unbind();
+            texture::bind_handle(0, GL_TEXTURE0);
+            texture::bind_handle(0, GL_TEXTURE1);
+            texture::bind_handle(0, GL_TEXTURE2);
             //glViewport(0, 0, 1920.0, 1080.0);
         }
 
@@ -408,6 +422,10 @@ int main()
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
             buffer_conetracing_resolve.unbind();
 
+            texture::bind_handle(0, GL_TEXTURE0);
+            texture::bind_handle(0, GL_TEXTURE1);
+            texture::bind_handle(0, GL_TEXTURE2);
+
             buffer_conetracing_denoise.bind();
             denoise.use();
             denoise.setInt("imageData", 0);
@@ -419,7 +437,9 @@ int main()
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
             buffer_conetracing_denoise.unbind();
 
+
             handle_present_image(present_shader, "u_image_sampler", 0, buffer_conetracing_denoise.m_colour_attachments.front());
+            texture::bind_handle(0, GL_TEXTURE0);
         }
         if (draw_cone_tracing_pass_no_taa)
         {
@@ -450,6 +470,7 @@ int main()
             vs.setInt("u_volume", 0);
             texture::bind_handle(voxel_data.texture.m_handle, GL_TEXTURE0, GL_TEXTURE_3D);
             glDrawElementsInstanced(GL_TRIANGLES, voxel_visualiser.index_count, GL_UNSIGNED_INT, 0, voxel_visualiser.total_invocations);
+            texture::bind_handle(0, GL_TEXTURE0);
         }
 
         if (draw_final_pass)
@@ -461,6 +482,9 @@ int main()
             gi_combine.setInt("cone_tracing_pass", 1);
             texture::bind_handle(buffer_conetracing_denoise.m_colour_attachments.front(), GL_TEXTURE1);
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+            texture::bind_handle(0, GL_TEXTURE0);
+            texture::bind_handle(0, GL_TEXTURE1);
         }
 
         {

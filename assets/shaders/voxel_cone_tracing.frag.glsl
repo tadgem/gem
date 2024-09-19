@@ -72,6 +72,7 @@ vec3 trace_cone(vec3 from, vec3 dir, vec3 unit)
 	vec4 accum = vec4(0.0);
 	vec3 pos = from;
 	int steps = 0;
+	const int MAX_LOD = 5;
 	int lod = 5;
 	while (accum.w < 0.99 && steps < max_steps)
 	{
@@ -91,9 +92,9 @@ vec3 trace_cone(vec3 from, vec3 dir, vec3 unit)
 		{
 			lod += 1;
 		}
-		if(lod == 0)
+		if(lod < 2)
 		{
-			accum += result;
+			accum += result * (1.0 - (lod / MAX_LOD));
 		}
 		steps += 1;
 	}
@@ -102,16 +103,22 @@ vec3 trace_cone(vec3 from, vec3 dir, vec3 unit)
 
 vec3 trace_cones(vec3 from, vec3 dir, vec3 unit)
 {
-	float ANGLE_MIX = rand((from.xy / from.z) + dir.xy);
-	//const float ANGLE_MIX = 0.5;
+	//float ANGLE_MIX = rand(from.xy + dir.xy);
+	const float ANGLE_MIX = 0.5;
 
 	const float w[3] = { 1.0, 1.0, 1.0 }; // Cone weights.
 
 	const vec3 ortho = normalize(orthogonal(dir));
 	const vec3 ortho2 = normalize(cross(ortho, dir));
 	
-	const vec3 corner = 0.5f * (ortho + ortho2);
-	const vec3 corner2 = 0.5f * (ortho - ortho2);
+	const vec3 corner1 = 0.5f * (ortho + ortho2);
+	const vec3 corner1_2 = 0.5f * (ortho - ortho2);
+	
+	const vec3 corner2 = 0.25f * (ortho + ortho2);
+	const vec3 corner2_2 = 0.25f * (ortho - ortho2);
+
+	const vec3 corner3 = 0.75f * (ortho + ortho2);
+	const vec3 corner3_2 = 0.75f * (ortho - ortho2);
 
 	vec3 acc = vec3(0);
 
@@ -127,17 +134,104 @@ vec3 trace_cones(vec3 from, vec3 dir, vec3 unit)
 	acc += w[1] * trace_cone(from, s3, unit);
 	acc += w[1] * trace_cone(from, s4, unit);
 
-	const vec3 c1 = mix(dir, corner, ANGLE_MIX);
-	const vec3 c2 = mix(dir, -corner, ANGLE_MIX);
-	const vec3 c3 = mix(dir, corner2, ANGLE_MIX);
-	const vec3 c4 = mix(dir, -corner2, ANGLE_MIX);
+	const vec3 c1_1 = mix(dir, corner1, ANGLE_MIX);
+	const vec3 c1_2 = mix(dir, -corner1, ANGLE_MIX);
+	const vec3 c1_3 = mix(dir, corner1_2, ANGLE_MIX);
+	const vec3 c1_4 = mix(dir, -corner1_2, ANGLE_MIX);
 
-	acc += w[2] * trace_cone(from, c1, unit);
-	acc += w[2] * trace_cone(from, c2, unit);
-	acc += w[2] * trace_cone(from, c3, unit);
-	acc += w[2] * trace_cone(from, c4, unit);
+	acc += w[2] * trace_cone(from, c1_1, unit);
+	acc += w[2] * trace_cone(from, c1_2, unit);
+	acc += w[2] * trace_cone(from, c1_3, unit);
+	acc += w[2] * trace_cone(from, c1_4, unit);
 
-	return acc /9.0; // num traces to get a more usable output for now;
+	const vec3 c2_1 = mix(dir, corner2, ANGLE_MIX);
+	const vec3 c2_2 = mix(dir, -corner2, ANGLE_MIX);
+	const vec3 c2_3 = mix(dir, corner2_2, ANGLE_MIX);
+	const vec3 c2_4 = mix(dir, -corner2_2, ANGLE_MIX);
+
+	acc += w[2] * trace_cone(from, c2_1, unit);
+	acc += w[2] * trace_cone(from, c2_2, unit);
+	acc += w[2] * trace_cone(from, c2_3, unit);
+	acc += w[2] * trace_cone(from, c2_4, unit);
+
+	const vec3 c3_1 = mix(dir, corner3, ANGLE_MIX);
+	const vec3 c3_2 = mix(dir, -corner3, ANGLE_MIX);
+	const vec3 c3_3 = mix(dir, corner3_2, ANGLE_MIX);
+	const vec3 c3_4 = mix(dir, -corner3_2, ANGLE_MIX);
+
+	acc += w[2] * trace_cone(from, c3_1, unit);
+	acc += w[2] * trace_cone(from, c3_2, unit);
+	acc += w[2] * trace_cone(from, c3_3, unit);
+	acc += w[2] * trace_cone(from, c3_4, unit);
+
+	return acc /17.0; // num traces to get a more usable output for now;
+}
+
+
+vec3 trace_cones_v2(vec3 from, vec3 dir, vec3 unit)
+{
+	//float ANGLE_MIX = rand(from.xy + dir.xy);
+	const float ANGLE_MIX = 0.5;
+
+	const float w[3] = { 1.0, 1.0, 1.0 }; // Cone weights.
+
+	const vec3 ortho = normalize(orthogonal(dir));
+	const vec3 ortho2 = normalize(cross(ortho, dir));
+	
+	const vec3 corner1 = 0.5f * (ortho + ortho2);
+	const vec3 corner1_2 = 0.5f * (ortho - ortho2);
+	
+	const vec3 corner2 = 0.25f * (ortho + ortho2);
+	const vec3 corner2_2 = 0.25f * (ortho - ortho2);
+
+	const vec3 corner3 = 0.75f * (ortho + ortho2);
+	const vec3 corner3_2 = 0.75f * (ortho - ortho2);
+
+	vec3 acc = vec3(0);
+
+	acc += w[0] * trace_cone(from, dir, unit);
+
+	const vec3 s1 = mix(dir, ortho, ANGLE_MIX);
+	const vec3 s2 = mix(dir, -ortho, ANGLE_MIX);
+	const vec3 s3 = mix(dir, ortho2, ANGLE_MIX);
+	const vec3 s4 = mix(dir, -ortho2, ANGLE_MIX);
+
+	acc += w[1] * trace_cone(from, s1, unit);
+	acc += w[1] * trace_cone(from, s2, unit);
+	acc += w[1] * trace_cone(from, s3, unit);
+	acc += w[1] * trace_cone(from, s4, unit);
+
+	const vec3 c1_1 = mix(dir, corner1, ANGLE_MIX);
+	const vec3 c1_2 = mix(dir, -corner1, ANGLE_MIX);
+	const vec3 c1_3 = mix(dir, corner1_2, ANGLE_MIX);
+	const vec3 c1_4 = mix(dir, -corner1_2, ANGLE_MIX);
+
+	acc += w[2] * trace_cone(from, c1_1, unit);
+	acc += w[2] * trace_cone(from, c1_2, unit);
+	acc += w[2] * trace_cone(from, c1_3, unit);
+	acc += w[2] * trace_cone(from, c1_4, unit);
+
+	const vec3 c2_1 = mix(dir, corner2, ANGLE_MIX);
+	const vec3 c2_2 = mix(dir, -corner2, ANGLE_MIX);
+	const vec3 c2_3 = mix(dir, corner2_2, ANGLE_MIX);
+	const vec3 c2_4 = mix(dir, -corner2_2, ANGLE_MIX);
+
+	acc += w[2] * trace_cone(from, c2_1, unit);
+	acc += w[2] * trace_cone(from, c2_2, unit);
+	acc += w[2] * trace_cone(from, c2_3, unit);
+	acc += w[2] * trace_cone(from, c2_4, unit);
+
+	const vec3 c3_1 = mix(dir, corner3, ANGLE_MIX);
+	const vec3 c3_2 = mix(dir, -corner3, ANGLE_MIX);
+	const vec3 c3_3 = mix(dir, corner3_2, ANGLE_MIX);
+	const vec3 c3_4 = mix(dir, -corner3_2, ANGLE_MIX);
+
+	acc += w[2] * trace_cone(from, c3_1, unit);
+	acc += w[2] * trace_cone(from, c3_2, unit);
+	acc += w[2] * trace_cone(from, c3_3, unit);
+	acc += w[2] * trace_cone(from, c3_4, unit);
+
+	return acc /17.0; // num traces to get a more usable output for now;
 }
 
 

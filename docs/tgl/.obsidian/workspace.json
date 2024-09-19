@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Notes etc/TAA.md",
+                "file": "Notes etc/TODO 19.9.24.md",
                 "mode": "source",
                 "source": false
               }
@@ -99,7 +99,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Notes etc/TAA.md",
+                "file": "Notes etc/TODO 19.9.24.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -116,7 +116,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Notes etc/TAA.md",
+                "file": "Notes etc/TODO 19.9.24.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -139,7 +139,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Notes etc/TAA.md"
+                "file": "Notes etc/TODO 19.9.24.md"
               }
             }
           }
@@ -162,17 +162,18 @@
   },
   "active": "658dc4440d024d96",
   "lastOpenFiles": [
-    "Papers & Articles/TemporalAA UE4.pdf",
-    "Notes etc/TAA.md",
     "Papers & Articles/Real-time Global Illumination Using Voxel Cone Tracing.pdf",
+    "Notes etc/TODO 19.9.24.md",
     "Papers & Articles/Real-Time Global Illumination  Using Open GL.pdf",
+    "Papers & Articles/Interactive Indirect Illumination Using Voxel Cone Tracing.pdf",
+    "Notes etc/TAA.md",
+    "Papers & Articles/TemporalAA UE4.pdf",
     "Notes etc/Images/Pasted image 20240915142407.png",
     "Notes etc/Images",
     "Images",
     "Notes etc",
     "Welcome.md",
     "Papers & Articles/TemporalAA UE4.pdf.crdownload",
-    "Papers & Articles/Interactive Indirect Illumination Using Voxel Cone Tracing.pdf",
     "GIVoxels-pg2011-authors.pdf",
     "frepr183_voxel_cone_tracing.pdf"
   ]
