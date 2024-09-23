@@ -99,18 +99,18 @@ float remap(float source, float sourceFrom, float sourceTo, float targetFrom, fl
 
 vec3 trace_cone(vec3 from, vec3 dir, vec3 unit)
 {
-	const int max_steps = 2000; // should probs be the longest axis of minimum mip dimension
+	const int MAX_STEPS = 2000; // should probs be the longest axis of minimum mip dimension
+	const int MAX_LOD	= 5;
 	vec4 accum = vec4(0.0);
 	vec3 pos = from;
 	int steps = 0;
-	const int MAX_LOD = 5;
 	float lod = 0.0;
-	while (accum.w < 1.0 && is_in_aabb(pos) && steps < max_steps)
+	while (accum.w < 1.0 && is_in_aabb(pos) && steps < MAX_STEPS)
 	{
-		pos += dir * (steps + 1);
+		pos += dir * 2.0;
 		vec4 result = get_voxel_colour(pos, unit, lod);
 		accum += result;
-		lod += 0.5;
+		lod += 1.0;
 		steps += 1;
 	}
 	return accum.xyz;
