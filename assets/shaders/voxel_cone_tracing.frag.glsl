@@ -166,8 +166,9 @@ vec3 trace_cones_v3(vec3 from, vec3 dir, vec3 unit)
 
 	for(int i = 0; i < DIFFUSE_CONE_COUNT_32; i++)
 	{
-	    float sDotN = max(dot(dir, DIFFUSE_CONE_DIRECTIONS_32[i]), 0.0);
-		acc += trace_cone(from, DIFFUSE_CONE_DIRECTIONS_32[i], unit) * sDotN;
+		vec3 final_dir = mix(dir, DIFFUSE_CONE_DIRECTIONS_32[i], 0.5);
+	    float sDotN = max(dot(dir, final_dir), 0.0);
+		acc += trace_cone(from, final_dir, unit) * sDotN;
 	}
 
 	return acc / 16.0 ; // num traces to get a more usable output for now;

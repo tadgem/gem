@@ -15,6 +15,8 @@
 #include <sstream>
 #include "im3d.h"
 #include "im3d_gl.h"
+#include "gtc/matrix_transform.hpp"
+#include "gtc/quaternion.hpp"
 
 static glm::vec3 custom_orientation;
 
@@ -39,8 +41,8 @@ Im3d::Vec3 ToIm3D(glm::vec3& input)
 }
 
 static glm::mat4 last_vp = glm::mat4(1.0);
-
 inline static int frame_index = 0;
+
 void handle_gbuffer(framebuffer& gbuffer, framebuffer& previous_position_buffer, shader& gbuffer_shader, glm::mat4 mvp, glm::mat4 model_mat, glm::mat3 normal, camera& cam, std::vector<point_light>& lights, model& sponza)
 {
     frame_index++;
@@ -113,6 +115,40 @@ void blit_to_fb(framebuffer& fb, shader& present_shader, const std::string& unif
     fb.bind();
     handle_present_image(present_shader, uniform_name, texture_slot, texture);
     fb.unbind();
+}
+
+void handle_shadow_pass(framebuffer& shadow_fb, shader& shadow_shader, dir_light& sun, model& model, glm::mat4 model_mat)
+{
+    float near_plane = 1.0f, far_plane = 1000.0f;
+    glm::mat4 lightProjection = glm::ortho(-500.0f, 500.0f, -500.0f, 500.0f, near_plane, far_plane);
+
+    glm::vec3 dir = glm::quat(glm::radians(sun.direction)) * glm::vec3(0.0f, 0.0f, 1.0f);
+
+    glm::vec3 lightPos = glm::vec3(0.0) + (dir * 100.0f);
+    glm::mat4 lightView = glm::lookAt(lightPos,
+        glm::vec3(0.0f, 0.0f, 0.0f),
+        glm::vec3(0.0f, 1.0f, 0.0f));
+    glm::mat4 lightSpaceMatrix = lightProjection * lightView;
+
+    shadow_fb.bind();
+    glClear(GL_DEPTH_BUFFER_BIT);
+    glViewport(0, 0, shadow_fb.m_width, shadow_fb.m_height);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_FRONT);
+    shadow_shader.use();
+    shadow_shader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
+    shadow_shader.setMat4("model", model_mat);
+
+    for (auto& entry : model.m_meshes)
+    {
+        entry.m_vao.use();
+        glDrawElements(GL_TRIANGLES, entry.m_index_count, GL_UNSIGNED_INT, 0);
+    }
+
+    shadow_fb.unbind();
+    glDisable(GL_CULL_FACE);
+    glViewport(0, 0, 1920, 1080);
+
 }
 
 void handle_light_pass(shader& lighting_shader, framebuffer& gbuffer, camera& cam, std::vector<point_light>& point_lights, dir_light& sun)
@@ -195,6 +231,9 @@ int main()
 
     std::string present_vert = utils::load_string_from_path("assets/shaders/present.vert.glsl");
     std::string present_frag = utils::load_string_from_path("assets/shaders/present.frag.glsl");
+    
+    std::string dir_light_shadow_vert = utils::load_string_from_path("assets/shaders/dir_light_shadow.vert.glsl");
+    std::string dir_light_shadow_frag = utils::load_string_from_path("assets/shaders/dir_light_shadow.frag.glsl");
 
     std::string voxelization_compute = utils::load_string_from_path("assets/shaders/gbuffer_voxelization.comp.glsl");
     std::string voxelization_mips_compute = utils::load_string_from_path("assets/shaders/voxel_mips.comp.glsl");
@@ -209,6 +248,7 @@ int main()
     shader gbuffer_floats_shader(gbuffer_vert, gbuffer_floats_frag);
     shader lighting_shader(present_vert, gbuffer_lighting_frag);
     shader present_shader(present_vert, present_frag);
+    shader shadow_shader(dir_light_shadow_vert, dir_light_shadow_frag);
     shader visualize_3dtex(visualize_3dtex_vert, visualize_3dtex_frag);
     shader voxelization(voxelization_compute);
     shader voxelization_mips(voxelization_mips_compute);
@@ -234,6 +274,12 @@ int main()
     gbuffer.add_depth_attachment(window_res.x, window_res.y);
     gbuffer.check();
     gbuffer.unbind();
+
+    framebuffer dir_light_shadow_buffer{};
+    dir_light_shadow_buffer.bind();
+    dir_light_shadow_buffer.add_depth_attachment(2048, 2048, GL_DEPTH24_STENCIL8);
+    dir_light_shadow_buffer.check();
+    dir_light_shadow_buffer.unbind();
 
     framebuffer lightpass_buffer{};
     lightpass_buffer.bind();
@@ -295,7 +341,7 @@ int main()
     lights.push_back({ {-10.0, 0.0, -10.0}, {0.0, 255.0, 0.0}, 30.0f });
     lights.push_back({ {-10.0, 0.0, 10.0}, {0.0, 0.0, 255.0} , 40.0f});
 
-    constexpr int _3d_tex_res = 256;
+    constexpr int _3d_tex_res = 128;
     constexpr glm::vec3 _3d_tex_res_vec = { _3d_tex_res, _3d_tex_res, _3d_tex_res };
 
     glm::mat4 model = utils::get_model_matrix(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(0.1f));
@@ -379,6 +425,10 @@ int main()
 
         
         handle_gbuffer(gbuffer, history_buffer_position, gbuffer_shader, mvp, model, normal, cam, lights, sponza);
+
+        // shadow pass
+        handle_shadow_pass(dir_light_shadow_buffer, shadow_shader, dir, sponza, model);
+
         lightpass_buffer.bind();
         handle_light_pass(lighting_shader, gbuffer, cam, lights, dir);
         lightpass_buffer.unbind();
@@ -545,7 +595,7 @@ int main()
             ImGui::Separator();
             ImGui::Text("Lights");
             ImGui::ColorEdit3("Dir Light Colour", &dir.colour[0]);
-            ImGui::DragFloat3("Dir Light Rotation", &dir.direction[0]);
+            ImGui::DragFloat3("Dir Light Rotation", &dir.direction[0], 1.0f, 0.0f, 360.0f);
             ImGui::DragFloat("Dir Light Intensity", &dir.intensity);
 
             for (int l = 0; l < lights.size(); l++)

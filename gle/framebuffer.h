@@ -19,4 +19,5 @@ public:
 	gl_handle				m_handle;
 	std::vector<gl_handle>	m_colour_attachments;
 	gl_handle				m_depth_attachment;
+	uint32_t				m_width, m_height;
 };

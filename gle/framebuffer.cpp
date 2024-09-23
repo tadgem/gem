@@ -29,6 +29,8 @@ void framebuffer::add_colour_attachment(GLenum attachment_index, uint32_t width,
 
 	glFramebufferTexture2D(GL_FRAMEBUFFER, attachment_index, GL_TEXTURE_2D, textureColorbuffer, 0);
 	m_colour_attachments.push_back(textureColorbuffer);
+	m_width = width;
+	m_height = height;
 }
 
 void framebuffer::add_depth_attachment(uint32_t width, uint32_t height, GLenum format)
@@ -42,6 +44,8 @@ void framebuffer::add_depth_attachment(uint32_t width, uint32_t height, GLenum f
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
 
 	m_depth_attachment = rbo;
+	m_width = width;
+	m_height = height;
 }
 
 void framebuffer::check()
@@ -54,7 +58,16 @@ void framebuffer::check()
 		attachments.push_back(zero);
 		zero++;
 	}
-	glDrawBuffers(attachments.size(), attachments.data());
+
+	if (attachments.empty())
+	{
+		glDrawBuffer(GL_NONE);
+		glReadBuffer(GL_NONE);
+	}
+	else
+	{
+		glDrawBuffers(attachments.size(), attachments.data());
+	}
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
 		std::cerr << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
