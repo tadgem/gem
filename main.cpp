@@ -182,9 +182,9 @@ float get_aabb_area(aabb& bb)
 
 int main()
 {
-    engine::init();
+    glm::ivec2 window_res{ 1280, 720 };
+    engine::init(window_res);
     custom_orientation = glm::vec3(0, 1, 0);
-    glm::ivec2 window_res{ 1920, 1080 };
     std::string gbuffer_vert = utils::load_string_from_path("assets/shaders/gbuffer.vert.glsl");
     std::string gbuffer_frag = utils::load_string_from_path("assets/shaders/gbuffer.frag.glsl");
     std::string gbuffer_floats_frag = utils::load_string_from_path("assets/shaders/gbuffer_floats.frag.glsl");
@@ -267,7 +267,7 @@ int main()
 
     framebuffer buffer_conetracing{};
     buffer_conetracing.bind();
-    buffer_conetracing.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x , window_res.y, GL_RGBA16F, GL_NEAREST, GL_FLOAT);
+    buffer_conetracing.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x / 2.0, window_res.y / 2.0, GL_RGBA16F, GL_NEAREST, GL_FLOAT);
     buffer_conetracing.check();
     buffer_conetracing.unbind();
 
@@ -295,7 +295,7 @@ int main()
     lights.push_back({ {-10.0, 0.0, -10.0}, {0.0, 255.0, 0.0}, 30.0f });
     lights.push_back({ {-10.0, 0.0, 10.0}, {0.0, 0.0, 255.0} , 40.0f});
 
-    constexpr int _3d_tex_res = 512;
+    constexpr int _3d_tex_res = 256;
     constexpr glm::vec3 _3d_tex_res_vec = { _3d_tex_res, _3d_tex_res, _3d_tex_res };
 
     glm::mat4 model = utils::get_model_matrix(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(0.1f));
@@ -408,7 +408,7 @@ int main()
         {
             glBindTexture(GL_TEXTURE_3D, voxel_data.texture.m_handle);
 
-            //glViewport(0, 0, 1920.0 / 2.0, 1080.0 / 2.0);
+            glViewport(0, 0, window_res.x / 2.0, window_res.y / 2.0);
             shapes::s_screen_quad.use();
             buffer_conetracing.bind();
             voxel_cone_tracing.use();
@@ -427,7 +427,7 @@ int main()
             texture::bind_sampler_handle(0, GL_TEXTURE0);
             texture::bind_sampler_handle(0, GL_TEXTURE1);
             texture::bind_sampler_handle(0, GL_TEXTURE2);
-            //glViewport(0, 0, 1920.0, 1080.0);
+            glViewport(0, 0, window_res.x, window_res.y);
         }
 
         if (draw_direct_lighting)

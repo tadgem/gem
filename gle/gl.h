@@ -11,7 +11,7 @@ GLenum glCheckError_(const char* file, int line);
 
 class engine {
 public:
-	static void init();
+	static void init(glm::ivec2 resolution);
 	static void process_sdl_event();
 	static void engine_pre_frame();
 	static void engine_post_frame();
