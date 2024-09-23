@@ -10,6 +10,8 @@ out vec4 FragColor;
 #define CONSTANT 1
 #define LINEAR 0 /* Looks meh when using gamma correction. */
 #define QUADRATIC 1
+
+
 struct AABB
 {
 	vec3 min;
@@ -24,10 +26,7 @@ uniform AABB		u_aabb;
 uniform vec3	  u_voxel_resolution;
 #define VOXEL_SIZE (1/128.0)
 
-vec3 scaleAndBias(const vec3 p) { return 0.5f * p + vec3(0.5f); }
-// Returns an attenuation factor given a distance.
-float attenuate(float dist) { dist *= DIST_FACTOR; return 1.0f / (CONSTANT + LINEAR * dist + QUADRATIC * dist * dist); }
-// Returns a vector that is orthogonal to u.
+
 vec3 orthogonal(vec3 u) {
 	u = normalize(u);
 	vec3 v = vec3(0.99146, 0.11664, 0.05832); // Pick any normalized vector.
@@ -105,16 +104,76 @@ vec3 trace_cone(vec3 from, vec3 dir, vec3 unit)
 	vec3 pos = from;
 	int steps = 0;
 	float lod = 0.0;
-	while (accum.w < 1.0 && is_in_aabb(pos) && steps < MAX_STEPS)
+	pos += dir * unit;
+	float cone_distance = distance(from, pos);
+
+	while (accum.w < 1.0 && is_in_aabb(pos) && cone_distance < 50.0)
 	{
-		pos += dir * 2.0;
 		vec4 result = get_voxel_colour(pos, unit, lod);
 		accum += result;
-		lod += 1.0;
+		cone_distance = distance(from, pos);
+		lod = remap(cone_distance, 0.0, 100.0, 0.0, 5.0);
 		steps += 1;
+		pos += dir * unit;
+
 	}
 	return accum.xyz;
 }
+
+const int 	DIFFUSE_CONE_COUNT_32	  = 32;
+const float DIFFUSE_CONE_APERTURE_32  = 0.628319;
+const vec3 DIFFUSE_CONE_DIRECTIONS_32[32] = {
+    vec3( 0.898904,   0.435512,   0.0479745),
+    vec3( 0.898904,  -0.435512,  -0.0479745),
+    vec3( 0.898904,   0.0479745, -0.435512 ),
+    vec3( 0.898904,  -0.0479745,  0.435512 ),
+    vec3(-0.898904,   0.435512,  -0.0479745),
+    vec3(-0.898904,  -0.435512,   0.0479745),
+    vec3(-0.898904,   0.0479745,  0.435512 ),
+    vec3(-0.898904,  -0.0479745, -0.435512 ),
+    vec3( 0.0479745,  0.898904,   0.435512 ),
+    vec3(-0.0479745,  0.898904,  -0.435512 ),
+    vec3(-0.435512,   0.898904,   0.0479745),
+    vec3( 0.435512,   0.898904,  -0.0479745),
+    vec3(-0.0479745, -0.898904,   0.435512 ),
+    vec3( 0.0479745, -0.898904,  -0.435512 ),
+    vec3( 0.435512,  -0.898904,   0.0479745),
+    vec3(-0.435512,  -0.898904,  -0.0479745),
+    vec3( 0.435512,   0.0479745,  0.898904 ),
+    vec3(-0.435512,  -0.0479745,  0.898904 ),
+    vec3( 0.0479745, -0.435512,   0.898904 ),
+    vec3(-0.0479745,  0.435512,   0.898904 ),
+    vec3( 0.435512,  -0.0479745, -0.898904 ),
+    vec3(-0.435512,   0.0479745, -0.898904 ),
+    vec3( 0.0479745,  0.435512,  -0.898904 ),
+    vec3(-0.0479745, -0.435512,  -0.898904 ),
+    vec3( 0.57735,    0.57735,    0.57735  ),
+    vec3( 0.57735,    0.57735,   -0.57735  ),
+    vec3( 0.57735,   -0.57735,    0.57735  ),
+    vec3( 0.57735,   -0.57735,   -0.57735  ),
+    vec3(-0.57735,    0.57735,    0.57735  ),
+    vec3(-0.57735,    0.57735,   -0.57735  ),
+    vec3(-0.57735,   -0.57735,    0.57735  ),
+    vec3(-0.57735,   -0.57735,   -0.57735  )
+};
+
+
+
+vec3 trace_cones_v3(vec3 from, vec3 dir, vec3 unit)
+{
+
+	vec3 acc = vec3(0);
+
+	for(int i = 0; i < DIFFUSE_CONE_COUNT_32; i++)
+	{
+	    float sDotN = max(dot(dir, DIFFUSE_CONE_DIRECTIONS_32[i]), 0.0);
+		acc += trace_cone(from, DIFFUSE_CONE_DIRECTIONS_32[i], unit) * sDotN;
+	}
+
+	return acc / 16.0 ; // num traces to get a more usable output for now;
+}
+
+
 
 vec3 trace_cones_v2(vec3 from, vec3 dir, vec3 unit)
 {
@@ -172,6 +231,6 @@ void main()
 	vec3 position = texture(u_position_map, aUV).xyz;
 	vec3 normal = texture(u_normal_map, aUV).xyz;
 	vec3 normalized_n = normalize(normal);
-	vec3 v_diffuse = trace_cones_v2(position, normalized_n, unit);
+	vec3 v_diffuse = trace_cones_v3(position, normalized_n, unit);
 	FragColor = vec4(v_diffuse, 1.0);
 }

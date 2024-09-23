@@ -182,7 +182,7 @@ float get_aabb_area(aabb& bb)
 
 int main()
 {
-    glm::ivec2 window_res{ 1280, 720 };
+    glm::ivec2 window_res{ 1920, 1080};
     engine::init(window_res);
     custom_orientation = glm::vec3(0, 1, 0);
     std::string gbuffer_vert = utils::load_string_from_path("assets/shaders/gbuffer.vert.glsl");
@@ -267,19 +267,19 @@ int main()
 
     framebuffer buffer_conetracing{};
     buffer_conetracing.bind();
-    buffer_conetracing.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x / 2.0, window_res.y / 2.0, GL_RGBA16F, GL_NEAREST, GL_FLOAT);
+    buffer_conetracing.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x / 2.0, window_res.y / 2.0, GL_RGBA16F, GL_LINEAR, GL_FLOAT);
     buffer_conetracing.check();
     buffer_conetracing.unbind();
 
     framebuffer buffer_conetracing_denoise{};
     buffer_conetracing_denoise.bind();
-    buffer_conetracing_denoise.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x, window_res.y, GL_RGBA16F, GL_NEAREST, GL_FLOAT);
+    buffer_conetracing_denoise.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x, window_res.y, GL_RGBA16F, GL_LINEAR, GL_FLOAT);
     buffer_conetracing_denoise.check();
     buffer_conetracing_denoise.unbind();
 
     framebuffer buffer_conetracing_resolve{};
     buffer_conetracing_resolve.bind();
-    buffer_conetracing_resolve.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x, window_res.y, GL_RGBA16F, GL_NEAREST, GL_FLOAT);
+    buffer_conetracing_resolve.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x, window_res.y, GL_RGBA16F, GL_LINEAR, GL_FLOAT);
     buffer_conetracing_resolve.check();
     buffer_conetracing_resolve.unbind();
 
