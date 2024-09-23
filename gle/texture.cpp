@@ -1,6 +1,8 @@
 #include "texture.h"
 #include "texture.h"
 #include "texture.h"
+#include "texture.h"
+#include "texture.h"
 #include <iostream>
 #include "GL/glew.h"
 #include "SOIL/SOIL.h"
@@ -33,15 +35,26 @@ texture::texture(const std::string& path)
 	glGenerateMipmap(GL_TEXTURE_2D);
 }
 
-void texture::bind(GLenum texture_slot, GLenum texture_target)
+void texture::bind_sampler(GLenum texture_slot, GLenum texture_target)
 {
-	bind_handle(m_handle, texture_slot, texture_target);
+	bind_sampler_handle(m_handle, texture_slot, texture_target);
 }
 
-void texture::bind_handle(gl_handle handle, GLenum texture_slot, GLenum texture_target)
+void texture::bind_sampler_handle(gl_handle handle, GLenum texture_slot, GLenum texture_target)
 {
-	glActiveTexture(texture_slot);
-	glBindTexture(texture_target, handle);
+	glAssert(glActiveTexture(texture_slot));
+	glAssert(glBindTexture(texture_target, handle));
+}
+
+void texture::bind_image_handle(gl_handle handle, uint32_t binding, uint32_t mip_level, GLenum format)
+{
+	glAssert(glBindImageTexture(binding, handle, mip_level, GL_TRUE, 0, GL_READ_WRITE, format));
+
+}
+
+void texture::unbind_image(uint32_t binding)
+{
+	glAssert(glBindImageTexture(binding, 0, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA8));
 }
 
 texture texture::from_data(unsigned int* data, unsigned int count, int width, int height, int depth, int nr_channels)
@@ -52,8 +65,8 @@ texture texture::from_data(unsigned int* data, unsigned int count, int width, in
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_NEAREST);
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 	glGenerateMipmap(GL_TEXTURE_2D);
@@ -73,8 +86,8 @@ texture texture::create_3d_texture(glm::ivec3 dim, GLenum format, GLenum pixel_f
 	glAssert(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_BASE_LEVEL, 0));
 	glAssert(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAX_LEVEL, 3));
 
-	glAssert(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
-	glAssert(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR));
+	glAssert(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST));
+	glAssert(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_NEAREST));
 	glAssert(glTexImage3D(GL_TEXTURE_3D, 0, pixel_format, dim.x, dim.y, dim.z, 0, format, data_type, data));
 	glGenerateTextureMipmap(t.m_handle);
 	return t;
@@ -92,8 +105,8 @@ texture texture::create_3d_texture_empty(glm::ivec3 dim, GLenum format, GLenum p
 	glAssert(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_BASE_LEVEL, 0));
 	glAssert(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAX_LEVEL, 3));
 
-	glAssert(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
-	glAssert(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR));
+	glAssert(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST));
+	glAssert(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_NEAREST));
 	GLfloat clear[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 	glAssert(glTexImage3D(GL_TEXTURE_3D, 0, pixel_format, dim.x, dim.y, dim.z, 0, format, data_type, NULL));
 	glAssert(glClearTexImage(GL_TEXTURE_3D, 0, pixel_format, GL_FLOAT, &clear[0]));

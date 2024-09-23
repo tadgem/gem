@@ -59,30 +59,21 @@ vec3 get_texel_from_pos(vec3 position, vec3 unit)
 	return vec3(x/ u_voxel_resolution.x, y / u_voxel_resolution.y, z / u_voxel_resolution.z);
 }
 
-vec4 get_voxel_colour(vec3 position, vec3 unit, int lod)
+vec4 get_voxel_colour(vec3 position, vec3 unit, float lod)
 {
 	return textureLod(u_voxel_map, get_texel_from_pos(position, unit), lod);
 }
 
-
-
-vec3 trace_cone(vec3 from, vec3 dir, vec3 unit)
+vec3 trace_ray(vec3 from, vec3 dir, vec3 unit)
 {
-	const int max_steps = 1000; // should probs be the longest axis of minimum mip dimension
 	vec4 accum = vec4(0.0);
 	vec3 pos = from;
 	int steps = 0;
 	const int MAX_LOD = 5;
 	int lod = 5;
-	while (accum.w < 0.99 && steps < max_steps)
+	while (accum.w < 0.99 && is_in_aabb(pos))
 	{
 		pos += unit * (lod + 1) * dir;
-		if (!is_in_aabb(pos))
-		{
-			steps = max_steps;
-			accum.w = 2.0;
-			continue;
-		}
 		vec4 result = get_voxel_colour(pos, unit, lod);
 		if(result.w > 0.2 && lod > 0)
 		{
@@ -92,7 +83,7 @@ vec3 trace_cone(vec3 from, vec3 dir, vec3 unit)
 		{
 			lod += 1;
 		}
-		if(lod < 2)
+		if(lod == 0)
 		{
 			accum += result * (1.0 - (lod / MAX_LOD));
 		}
@@ -101,72 +92,29 @@ vec3 trace_cone(vec3 from, vec3 dir, vec3 unit)
 	return accum.xyz;
 }
 
-vec3 trace_cones(vec3 from, vec3 dir, vec3 unit)
+float remap(float source, float sourceFrom, float sourceTo, float targetFrom, float targetTo)
 {
-	//float ANGLE_MIX = rand(from.xy + dir.xy);
-	const float ANGLE_MIX = 0.5;
-
-	const float w[3] = { 1.0, 1.0, 1.0 }; // Cone weights.
-
-	const vec3 ortho = normalize(orthogonal(dir));
-	const vec3 ortho2 = normalize(cross(ortho, dir));
-	
-	const vec3 corner1 = 0.5f * (ortho + ortho2);
-	const vec3 corner1_2 = 0.5f * (ortho - ortho2);
-	
-	const vec3 corner2 = 0.25f * (ortho + ortho2);
-	const vec3 corner2_2 = 0.25f * (ortho - ortho2);
-
-	const vec3 corner3 = 0.75f * (ortho + ortho2);
-	const vec3 corner3_2 = 0.75f * (ortho - ortho2);
-
-	vec3 acc = vec3(0);
-
-	acc += w[0] * trace_cone(from, dir, unit);
-
-	const vec3 s1 = mix(dir, ortho, ANGLE_MIX);
-	const vec3 s2 = mix(dir, -ortho, ANGLE_MIX);
-	const vec3 s3 = mix(dir, ortho2, ANGLE_MIX);
-	const vec3 s4 = mix(dir, -ortho2, ANGLE_MIX);
-
-	acc += w[1] * trace_cone(from, s1, unit);
-	acc += w[1] * trace_cone(from, s2, unit);
-	acc += w[1] * trace_cone(from, s3, unit);
-	acc += w[1] * trace_cone(from, s4, unit);
-
-	const vec3 c1_1 = mix(dir, corner1, ANGLE_MIX);
-	const vec3 c1_2 = mix(dir, -corner1, ANGLE_MIX);
-	const vec3 c1_3 = mix(dir, corner1_2, ANGLE_MIX);
-	const vec3 c1_4 = mix(dir, -corner1_2, ANGLE_MIX);
-
-	acc += w[2] * trace_cone(from, c1_1, unit);
-	acc += w[2] * trace_cone(from, c1_2, unit);
-	acc += w[2] * trace_cone(from, c1_3, unit);
-	acc += w[2] * trace_cone(from, c1_4, unit);
-
-	const vec3 c2_1 = mix(dir, corner2, ANGLE_MIX);
-	const vec3 c2_2 = mix(dir, -corner2, ANGLE_MIX);
-	const vec3 c2_3 = mix(dir, corner2_2, ANGLE_MIX);
-	const vec3 c2_4 = mix(dir, -corner2_2, ANGLE_MIX);
-
-	acc += w[2] * trace_cone(from, c2_1, unit);
-	acc += w[2] * trace_cone(from, c2_2, unit);
-	acc += w[2] * trace_cone(from, c2_3, unit);
-	acc += w[2] * trace_cone(from, c2_4, unit);
-
-	const vec3 c3_1 = mix(dir, corner3, ANGLE_MIX);
-	const vec3 c3_2 = mix(dir, -corner3, ANGLE_MIX);
-	const vec3 c3_3 = mix(dir, corner3_2, ANGLE_MIX);
-	const vec3 c3_4 = mix(dir, -corner3_2, ANGLE_MIX);
-
-	acc += w[2] * trace_cone(from, c3_1, unit);
-	acc += w[2] * trace_cone(from, c3_2, unit);
-	acc += w[2] * trace_cone(from, c3_3, unit);
-	acc += w[2] * trace_cone(from, c3_4, unit);
-
-	return acc /17.0; // num traces to get a more usable output for now;
+	return targetFrom + (source-sourceFrom)*(targetTo-targetFrom)/(sourceTo-sourceFrom);
 }
 
+vec3 trace_cone(vec3 from, vec3 dir, vec3 unit)
+{
+	const int max_steps = 2000; // should probs be the longest axis of minimum mip dimension
+	vec4 accum = vec4(0.0);
+	vec3 pos = from;
+	int steps = 0;
+	const int MAX_LOD = 5;
+	float lod = 0.0;
+	while (accum.w < 1.0 && is_in_aabb(pos) && steps < max_steps)
+	{
+		pos += dir * (steps + 1);
+		vec4 result = get_voxel_colour(pos, unit, lod);
+		accum += result;
+		lod += 0.5;
+		steps += 1;
+	}
+	return accum.xyz;
+}
 
 vec3 trace_cones_v2(vec3 from, vec3 dir, vec3 unit)
 {
@@ -211,27 +159,7 @@ vec3 trace_cones_v2(vec3 from, vec3 dir, vec3 unit)
 	acc += w[2] * trace_cone(from, c1_3, unit);
 	acc += w[2] * trace_cone(from, c1_4, unit);
 
-	const vec3 c2_1 = mix(dir, corner2, ANGLE_MIX);
-	const vec3 c2_2 = mix(dir, -corner2, ANGLE_MIX);
-	const vec3 c2_3 = mix(dir, corner2_2, ANGLE_MIX);
-	const vec3 c2_4 = mix(dir, -corner2_2, ANGLE_MIX);
-
-	acc += w[2] * trace_cone(from, c2_1, unit);
-	acc += w[2] * trace_cone(from, c2_2, unit);
-	acc += w[2] * trace_cone(from, c2_3, unit);
-	acc += w[2] * trace_cone(from, c2_4, unit);
-
-	const vec3 c3_1 = mix(dir, corner3, ANGLE_MIX);
-	const vec3 c3_2 = mix(dir, -corner3, ANGLE_MIX);
-	const vec3 c3_3 = mix(dir, corner3_2, ANGLE_MIX);
-	const vec3 c3_4 = mix(dir, -corner3_2, ANGLE_MIX);
-
-	acc += w[2] * trace_cone(from, c3_1, unit);
-	acc += w[2] * trace_cone(from, c3_2, unit);
-	acc += w[2] * trace_cone(from, c3_3, unit);
-	acc += w[2] * trace_cone(from, c3_4, unit);
-
-	return acc /17.0; // num traces to get a more usable output for now;
+	return acc / 9.0; // num traces to get a more usable output for now;
 }
 
 
@@ -244,6 +172,6 @@ void main()
 	vec3 position = texture(u_position_map, aUV).xyz;
 	vec3 normal = texture(u_normal_map, aUV).xyz;
 	vec3 normalized_n = normalize(normal);
-	vec3 v_diffuse = trace_cones(position, normalized_n, unit);
+	vec3 v_diffuse = trace_cones_v2(position, normalized_n, unit);
 	FragColor = vec4(v_diffuse, 1.0);
 }

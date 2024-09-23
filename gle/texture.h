@@ -21,8 +21,10 @@ public:
 	texture() = default;
 	texture(const std::string& path);
 
-	void bind(GLenum texture_slot, GLenum texture_target = GL_TEXTURE_2D);
-	static void bind_handle(gl_handle handle, GLenum texture_slot, GLenum texture_target = GL_TEXTURE_2D);
+	void		bind_sampler(GLenum texture_slot, GLenum texture_target = GL_TEXTURE_2D);
+	static void bind_sampler_handle(gl_handle handle, GLenum texture_slot, GLenum texture_target = GL_TEXTURE_2D);
+	static void bind_image_handle(gl_handle handle, uint32_t binding, uint32_t mip_level, GLenum format);
+	static void unbind_image(uint32_t binding);
 
 	int m_width, m_height, m_depth, m_num_channels;
 

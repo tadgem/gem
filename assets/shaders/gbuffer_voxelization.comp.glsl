@@ -72,16 +72,6 @@ void main() {
 	light.w = 1.0f;
 
 	ivec3 sample_pos = get_texel_from_pos(pos.xyz, u_voxel_resolution);
-	ivec3 sample_pos1 = get_texel_from_pos(pos.xyz, u_voxel_resolution / 2.0);
-	ivec3 sample_pos2 = get_texel_from_pos(pos.xyz, u_voxel_resolution / 4.0);
-	ivec3 sample_pos3 = get_texel_from_pos(pos.xyz, u_voxel_resolution / 8.0);
-	ivec3 sample_pos4 = get_texel_from_pos(pos.xyz, u_voxel_resolution / 16.0);
-	ivec3 sample_pos5 = get_texel_from_pos(pos.xyz, u_voxel_resolution / 32.0);
 	vec4 current = imageLoad(imgOutput, sample_pos);
-	imageStore(imgOutput,sample_pos, mix(light, current, 0.5));
-	imageStore(imgOutput1,sample_pos1, mix(light, current, 0.5));
-	imageStore(imgOutput2,sample_pos2, mix(light, current, 0.5));
-	imageStore(imgOutput3,sample_pos3, mix(light, current, 0.5));
-	imageStore(imgOutput4,sample_pos4, mix(light, current, 0.5));
-	imageStore(imgOutput5,sample_pos5, mix(light, current, 0.5));
+	imageStore(imgOutput,sample_pos, mix(light, current, 0.9));
 }
