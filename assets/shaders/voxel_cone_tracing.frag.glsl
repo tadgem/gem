@@ -155,7 +155,7 @@ vec3 trace_cones_v3(vec3 from, vec3 dir, vec3 unit)
 		acc += trace_cone(from, final_dir, unit) * sDotN;
 	}
 
-	return acc / 8.0 ; // num traces to get a more usable output for now;
+	return acc / 4.0 ; // num traces to get a more usable output for now;
 }
 
 

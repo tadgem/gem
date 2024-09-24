@@ -109,7 +109,7 @@ vec3 handle_dir_light(vec3 normal, float roughness, float metallic, vec3 albedo,
     float NdotL = max(dot(normal, lightDir), 0.0);
     vec3 diffuse = NdotL * albedo;
     // add to outgoing radiance Lo
-    return ((kD + (1.0 - shadow)) * (diffuse / PI + specular)) * (u_dir_light.colour * u_dir_light.intensity) * NdotL;
+    return ((kD * max((1.0 - shadow), 0.1)) * (diffuse / PI + specular)) * (u_dir_light.colour * u_dir_light.intensity) * NdotL;
 }
 
 float ShadowCalculation(vec4 fragPosLightSpace)

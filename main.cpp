@@ -433,8 +433,22 @@ int main()
 
     framebuffer dir_light_shadow_buffer{};
     dir_light_shadow_buffer.bind();
-    dir_light_shadow_buffer.add_depth_attachment(1024, 1024, GL_DEPTH24_STENCIL8);
-    dir_light_shadow_buffer.check();
+    gl_handle depthMap;
+    glGenTextures(1, &depthMap);
+    glBindTexture(GL_TEXTURE_2D, depthMap);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
+        2048, 2048, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    dir_light_shadow_buffer.m_depth_attachment = depthMap;
+    dir_light_shadow_buffer.m_height = 2048;
+    dir_light_shadow_buffer.m_width = 2048;
     dir_light_shadow_buffer.unbind();
 
     framebuffer lightpass_buffer{};
