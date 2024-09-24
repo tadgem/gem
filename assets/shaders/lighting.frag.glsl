@@ -8,6 +8,7 @@ struct DirLight
 {
 	vec3	direction;
 	vec3	colour;
+    mat4    light_space_matrix;
     float   intensity;
 };
 
@@ -26,6 +27,7 @@ uniform sampler2D   u_diffuse_map;
 uniform sampler2D   u_position_map;
 uniform sampler2D   u_normal_map;
 uniform sampler2D   u_pbr_map; // x = metallic, y = roughness, z = AO
+uniform sampler2D   u_dir_light_shadow_map; // x = metallic, y = roughness, z = AO
 uniform vec3        u_cam_pos;
 uniform DirLight    u_dir_light;
 uniform PointLight  u_point_lights[NUM_POINT_LIGHTS];
@@ -78,7 +80,7 @@ float blinnPhongAttenuation(float range, float dist)
     return 1.0 / (1.0 + l * dist + q * (dist * dist));
 }
 
-vec3 handle_dir_light(vec3 normal, float roughness, float metallic, vec3 albedo, vec3 V, vec3 F0)
+vec3 handle_dir_light(vec3 normal, float roughness, float metallic, vec3 albedo, vec3 V, vec3 F0, float shadow)
 {
     vec3 lightDir = normalize(-u_dir_light.direction);
     float diff = max(dot(normal, lightDir), 0.0);
@@ -107,8 +109,19 @@ vec3 handle_dir_light(vec3 normal, float roughness, float metallic, vec3 albedo,
     float NdotL = max(dot(normal, lightDir), 0.0);
     vec3 diffuse = NdotL * albedo;
     // add to outgoing radiance Lo
-    return (kD * (diffuse / PI + specular)) * (u_dir_light.colour * u_dir_light.intensity) * NdotL;
+    return ((kD + (1.0 - shadow)) * (diffuse / PI + specular)) * (u_dir_light.colour * u_dir_light.intensity) * NdotL;
 }
+
+float ShadowCalculation(vec4 fragPosLightSpace)
+{
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    projCoords = projCoords * 0.5 + 0.5; 
+    float closestDepth = texture(u_dir_light_shadow_map, projCoords.xy).r; 
+    float currentDepth = projCoords.z;  
+    float shadow = currentDepth > closestDepth  ? 1.0 : 0.0;  
+    return shadow;
+}
+
 
 void main()
 {
@@ -117,6 +130,8 @@ void main()
    vec3 N = texture(u_normal_map, aUV).xyz;
    vec3 V = normalize(u_cam_pos - WorldPos);
    vec3 pbr = texture(u_pbr_map, aUV).xyz;
+
+   vec4 frag_pos_light_space = u_dir_light.light_space_matrix * vec4(WorldPos, 1.0);
 
    float metallic = pbr.x;
    float roughness = pbr.y;
@@ -128,7 +143,9 @@ void main()
    // reflectance equation
    vec3 Lo = vec3(0.0);
 
-   Lo += handle_dir_light(N, roughness, metallic, albedo, V, F0);
+   float shadow = ShadowCalculation(frag_pos_light_space);
+
+   Lo += handle_dir_light(N, roughness, metallic, albedo, V, F0, shadow);
 
    for (int i = 0; i < NUM_POINT_LIGHTS; ++i)
    {

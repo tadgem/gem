@@ -69,7 +69,7 @@ void main() {
 	// store pixel light value at this voxel
 
 	vec4 light = texture(u_gbuffer_lighting, uv);
-	light.w = 1.0f;
+	light.w = 1.0;
 
 	ivec3 sample_pos = get_texel_from_pos(pos.xyz, u_voxel_resolution);
 	vec4 current = imageLoad(imgOutput, sample_pos);

@@ -98,8 +98,9 @@ float remap(float source, float sourceFrom, float sourceTo, float targetFrom, fl
 
 vec3 trace_cone(vec3 from, vec3 dir, vec3 unit)
 {
-	const int MAX_STEPS = 2000; // should probs be the longest axis of minimum mip dimension
+	const int MAX_STEPS = int(u_voxel_resolution.x); // should probs be the longest axis of minimum mip dimension
 	const int MAX_LOD	= 5;
+	const float MAX_DISTANCE = 50.0;
 	vec4 accum = vec4(0.0);
 	vec3 pos = from;
 	int steps = 0;
@@ -107,71 +108,54 @@ vec3 trace_cone(vec3 from, vec3 dir, vec3 unit)
 	pos += dir * unit;
 	float cone_distance = distance(from, pos);
 
-	while (accum.w < 1.0 && is_in_aabb(pos) && cone_distance < 50.0)
+	while (accum.w < 1.0 && is_in_aabb(pos) && cone_distance < MAX_DISTANCE && steps < MAX_STEPS)
 	{
 		vec4 result = get_voxel_colour(pos, unit, lod);
 		accum += result;
 		cone_distance = distance(from, pos);
-		lod = remap(cone_distance, 0.0, 100.0, 0.0, 5.0);
+		lod = round(remap(cone_distance, 0.0, MAX_DISTANCE, 0.0, 5.0));
 		steps += 1;
-		pos += dir * unit;
-
+		float factor = 1.0 - result.w;
+		pos += dir * (unit * factor);
 	}
+
 	return accum.xyz;
 }
 
-const int 	DIFFUSE_CONE_COUNT_32	  = 32;
-const float DIFFUSE_CONE_APERTURE_32  = 0.628319;
-const vec3 DIFFUSE_CONE_DIRECTIONS_32[32] = {
-    vec3( 0.898904,   0.435512,   0.0479745),
-    vec3( 0.898904,  -0.435512,  -0.0479745),
-    vec3( 0.898904,   0.0479745, -0.435512 ),
-    vec3( 0.898904,  -0.0479745,  0.435512 ),
-    vec3(-0.898904,   0.435512,  -0.0479745),
-    vec3(-0.898904,  -0.435512,   0.0479745),
-    vec3(-0.898904,   0.0479745,  0.435512 ),
-    vec3(-0.898904,  -0.0479745, -0.435512 ),
-    vec3( 0.0479745,  0.898904,   0.435512 ),
-    vec3(-0.0479745,  0.898904,  -0.435512 ),
-    vec3(-0.435512,   0.898904,   0.0479745),
-    vec3( 0.435512,   0.898904,  -0.0479745),
-    vec3(-0.0479745, -0.898904,   0.435512 ),
-    vec3( 0.0479745, -0.898904,  -0.435512 ),
-    vec3( 0.435512,  -0.898904,   0.0479745),
-    vec3(-0.435512,  -0.898904,  -0.0479745),
-    vec3( 0.435512,   0.0479745,  0.898904 ),
-    vec3(-0.435512,  -0.0479745,  0.898904 ),
-    vec3( 0.0479745, -0.435512,   0.898904 ),
-    vec3(-0.0479745,  0.435512,   0.898904 ),
-    vec3( 0.435512,  -0.0479745, -0.898904 ),
-    vec3(-0.435512,   0.0479745, -0.898904 ),
-    vec3( 0.0479745,  0.435512,  -0.898904 ),
-    vec3(-0.0479745, -0.435512,  -0.898904 ),
-    vec3( 0.57735,    0.57735,    0.57735  ),
-    vec3( 0.57735,    0.57735,   -0.57735  ),
-    vec3( 0.57735,   -0.57735,    0.57735  ),
-    vec3( 0.57735,   -0.57735,   -0.57735  ),
-    vec3(-0.57735,    0.57735,    0.57735  ),
-    vec3(-0.57735,    0.57735,   -0.57735  ),
-    vec3(-0.57735,   -0.57735,    0.57735  ),
-    vec3(-0.57735,   -0.57735,   -0.57735  )
+const int 	DIFFUSE_CONE_COUNT_16 		= 16;
+const float DIFFUSE_CONE_APERTURE_16 	= 0.872665;
+const vec3 DIFFUSE_CONE_DIRECTIONS_16[16] = {
+    vec3( 0.57735,   0.57735,   0.57735  ),
+    vec3( 0.57735,  -0.57735,  -0.57735  ),
+    vec3(-0.57735,   0.57735,  -0.57735  ),
+    vec3(-0.57735,  -0.57735,   0.57735  ),
+    vec3(-0.903007, -0.182696, -0.388844 ),
+    vec3(-0.903007,  0.182696,  0.388844 ),
+    vec3( 0.903007, -0.182696,  0.388844 ),
+    vec3( 0.903007,  0.182696, -0.388844 ),
+    vec3(-0.388844, -0.903007, -0.182696 ),
+    vec3( 0.388844, -0.903007,  0.182696 ),
+    vec3( 0.388844,  0.903007, -0.182696 ),
+    vec3(-0.388844,  0.903007,  0.182696 ),
+    vec3(-0.182696, -0.388844, -0.903007 ),
+    vec3( 0.182696,  0.388844, -0.903007 ),
+    vec3(-0.182696,  0.388844,  0.903007 ),
+    vec3( 0.182696, -0.388844,  0.903007 )
 };
-
-
 
 vec3 trace_cones_v3(vec3 from, vec3 dir, vec3 unit)
 {
 
 	vec3 acc = vec3(0);
 
-	for(int i = 0; i < DIFFUSE_CONE_COUNT_32; i++)
+	for(int i = 0; i < DIFFUSE_CONE_COUNT_16; i++)
 	{
-		vec3 final_dir = mix(dir, DIFFUSE_CONE_DIRECTIONS_32[i], 0.5);
+		vec3 final_dir = mix(dir, DIFFUSE_CONE_DIRECTIONS_16[i], 0.5);
 	    float sDotN = max(dot(dir, final_dir), 0.0);
 		acc += trace_cone(from, final_dir, unit) * sDotN;
 	}
 
-	return acc / 16.0 ; // num traces to get a more usable output for now;
+	return acc / 8.0 ; // num traces to get a more usable output for now;
 }
 
 
@@ -189,12 +173,6 @@ vec3 trace_cones_v2(vec3 from, vec3 dir, vec3 unit)
 	const vec3 corner1 = 0.5f * (ortho + ortho2);
 	const vec3 corner1_2 = 0.5f * (ortho - ortho2);
 	
-	const vec3 corner2 = 0.25f * (ortho + ortho2);
-	const vec3 corner2_2 = 0.25f * (ortho - ortho2);
-
-	const vec3 corner3 = 0.75f * (ortho + ortho2);
-	const vec3 corner3_2 = 0.75f * (ortho - ortho2);
-
 	vec3 acc = vec3(0);
 
 	acc += w[0] * trace_cone(from, dir, unit);
