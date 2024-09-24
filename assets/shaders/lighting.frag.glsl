@@ -112,12 +112,13 @@ vec3 handle_dir_light(vec3 normal, float roughness, float metallic, vec3 albedo,
     return ((kD * max((1.0 - shadow), 0.1)) * (diffuse / PI + specular)) * (u_dir_light.colour * u_dir_light.intensity) * NdotL;
 }
 
-float ShadowCalculation(vec4 fragPosLightSpace)
+float ShadowCalculation(vec3 normal, vec4 fragPosLightSpace)
 {
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
     projCoords = projCoords * 0.5 + 0.5; 
     float closestDepth = texture(u_dir_light_shadow_map, projCoords.xy).r; 
     float currentDepth = projCoords.z;  
+    float bias = max(0.05 * (1.0 - dot(normal, u_dir_light.direction)), 0.005);  
     float shadow = currentDepth > closestDepth  ? 1.0 : 0.0;  
     return shadow;
 }
@@ -143,7 +144,7 @@ void main()
    // reflectance equation
    vec3 Lo = vec3(0.0);
 
-   float shadow = ShadowCalculation(frag_pos_light_space);
+   float shadow = ShadowCalculation(N, frag_pos_light_space);
 
    Lo += handle_dir_light(N, roughness, metallic, albedo, V, F0, shadow);
 

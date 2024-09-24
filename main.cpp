@@ -265,7 +265,7 @@ void dispatch_cone_tracing_pass(shader& voxel_cone_tracing, voxel::grid& voxel_d
 {
     glBindTexture(GL_TEXTURE_3D, voxel_data.texture.m_handle);
 
-    glViewport(0, 0, window_res.x / 2.0, window_res.y / 2.0);
+    //glViewport(0, 0, window_res.x / 2.0, window_res.y / 2.0);
     shapes::s_screen_quad.use();
     buffer_conetracing.bind();
     voxel_cone_tracing.use();
@@ -284,7 +284,7 @@ void dispatch_cone_tracing_pass(shader& voxel_cone_tracing, voxel::grid& voxel_d
     texture::bind_sampler_handle(0, GL_TEXTURE0);
     texture::bind_sampler_handle(0, GL_TEXTURE1);
     texture::bind_sampler_handle(0, GL_TEXTURE2);
-    glViewport(0, 0, window_res.x, window_res.y);
+    //glViewport(0, 0, window_res.x, window_res.y);
 }
 
 void dispatch_cone_tracing_pass_taa(shader& taa, shader& denoise, shader& present_shader, framebuffer& buffer_conetracing, framebuffer& buffer_conetracing_resolve, framebuffer& buffer_conetracing_denoise, framebuffer& history_buffer_conetracing, framebuffer& gbuffer, float aSigma, float aThreshold, float aKSigma)
@@ -438,10 +438,10 @@ int main()
     glBindTexture(GL_TEXTURE_2D, depthMap);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
         2048, 2048, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
     glDrawBuffer(GL_NONE);
     glReadBuffer(GL_NONE);
@@ -453,13 +453,13 @@ int main()
 
     framebuffer lightpass_buffer{};
     lightpass_buffer.bind();
-    lightpass_buffer.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x, window_res.y, GL_RGBA16F, GL_NEAREST, GL_FLOAT);
+    lightpass_buffer.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x, window_res.y, GL_RGBA16F, GL_LINEAR, GL_FLOAT);
     lightpass_buffer.check();
     lightpass_buffer.unbind();
 
     framebuffer lightpass_buffer_resolve{};
     lightpass_buffer_resolve.bind();
-    lightpass_buffer_resolve.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x, window_res.y, GL_RGBA16F, GL_NEAREST, GL_FLOAT);
+    lightpass_buffer_resolve.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x, window_res.y, GL_RGBA16F, GL_LINEAR, GL_FLOAT);
     lightpass_buffer_resolve.check();
     lightpass_buffer_resolve.unbind();
 
@@ -471,19 +471,19 @@ int main()
 
     framebuffer history_buffer_position{};
     history_buffer_position.bind();
-    history_buffer_position.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x, window_res.y, GL_RGBA32F, GL_NEAREST, GL_FLOAT);
+    history_buffer_position.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x, window_res.y, GL_RGBA32F, GL_LINEAR, GL_FLOAT);
     history_buffer_position.check();
     history_buffer_position.unbind();
 
     framebuffer history_buffer_conetracing{};
     history_buffer_conetracing.bind();
-    history_buffer_conetracing.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x, window_res.y, GL_RGBA16F, GL_NEAREST, GL_FLOAT);
+    history_buffer_conetracing.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x, window_res.y, GL_RGBA16F, GL_LINEAR, GL_FLOAT);
     history_buffer_conetracing.check();
     history_buffer_conetracing.unbind();
 
     framebuffer buffer_conetracing{};
     buffer_conetracing.bind();
-    buffer_conetracing.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x / 2.0, window_res.y / 2.0, GL_RGBA16F, GL_LINEAR, GL_FLOAT);
+    buffer_conetracing.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x, window_res.y, GL_RGBA16F, GL_LINEAR, GL_FLOAT);
     buffer_conetracing.check();
     buffer_conetracing.unbind();
 
@@ -653,7 +653,7 @@ int main()
             ImGui::Text("Lights");
             ImGui::ColorEdit3("Dir Light Colour", &dir.colour[0]);
             ImGui::DragFloat3("Dir Light Rotation", &dir.direction[0], 1.0f, 0.0f, 360.0f);
-            ImGui::DragFloat("Dir Light Intensity", &dir.intensity);
+            ImGui::DragFloat("Dir Light Intensity", &dir.intensity, 1.0f, 0.0f, 1000.0f);
 
             for (int l = 0; l < lights.size(); l++)
             {
@@ -676,6 +676,7 @@ int main()
         }
         if (draw_im3d)
         {
+            OnIm3D(sponza.m_aabb);
             im3d_gl::end_frame_im3d(im3d_s, {window_res.x, window_res.y}, cam);
         }
         else

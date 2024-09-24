@@ -100,12 +100,12 @@ vec3 trace_cone(vec3 from, vec3 dir, vec3 unit)
 {
 	const int MAX_STEPS = int(u_voxel_resolution.x); // should probs be the longest axis of minimum mip dimension
 	const int MAX_LOD	= 5;
-	const float MAX_DISTANCE = 50.0;
+	const float MAX_DISTANCE = 20.0;
 	vec4 accum = vec4(0.0);
 	vec3 pos = from;
 	int steps = 0;
 	float lod = 0.0;
-	pos += dir * unit;
+	pos += dir * (unit * 1.5);
 	float cone_distance = distance(from, pos);
 
 	while (accum.w < 1.0 && is_in_aabb(pos) && cone_distance < MAX_DISTANCE && steps < MAX_STEPS)
@@ -113,7 +113,7 @@ vec3 trace_cone(vec3 from, vec3 dir, vec3 unit)
 		vec4 result = get_voxel_colour(pos, unit, lod);
 		accum += result;
 		cone_distance = distance(from, pos);
-		lod = round(remap(cone_distance, 0.0, MAX_DISTANCE, 0.0, 5.0));
+		lod = round(remap(cone_distance, 0.0, MAX_DISTANCE, 0.0, MAX_LOD));
 		steps += 1;
 		float factor = 1.0 - result.w;
 		pos += dir * (unit * factor);
@@ -152,6 +152,10 @@ vec3 trace_cones_v3(vec3 from, vec3 dir, vec3 unit)
 	{
 		vec3 final_dir = mix(dir, DIFFUSE_CONE_DIRECTIONS_16[i], 0.5);
 	    float sDotN = max(dot(dir, final_dir), 0.0);
+		if(sDotN <= 0.001)
+		{
+			continue;
+		}
 		acc += trace_cone(from, final_dir, unit) * sDotN;
 	}
 
