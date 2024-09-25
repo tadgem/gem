@@ -17,7 +17,8 @@
 #include "im3d_gl.h"
 #include "gtc/matrix_transform.hpp"
 #include "gtc/quaternion.hpp"
-
+#include "json.hpp"
+using namespace nlohmann;
 static glm::vec3 custom_orientation;
 
 struct dir_light
@@ -374,6 +375,10 @@ float get_aabb_area(aabb& bb)
 
 int main()
 {
+    json test_json;
+
+    test_json["Key"] = 2;
+
     glm::ivec2 window_res{ 1920, 1080};
     engine::init(window_res);
     custom_orientation = glm::vec3(0, 1, 0);
@@ -501,7 +506,7 @@ int main()
 
     dir_light dir
     {
-        {156.0f, -3.0f, 0.0f},
+        {90.01f, 0.0f, 0.0f},
         {1.0f,1.0f,1.0f},
         2.75f
     };

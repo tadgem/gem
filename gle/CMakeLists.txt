@@ -37,7 +37,9 @@ set(GL_SRC
         ${CMAKE_CURRENT_SOURCE_DIR}/utils.h
         ${CMAKE_CURRENT_SOURCE_DIR}/voxelisation.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/voxelisation.h
+        # third party sources
         ${CMAKE_CURRENT_SOURCE_DIR}/stb_image.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/json.hpp
 )
 
 add_library(gle STATIC ${GL_SRC})
