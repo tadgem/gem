@@ -17,6 +17,7 @@ public:
 	static void engine_post_frame();
 	static void engine_shut_down();
 	static float get_frame_time();
+	static void engine_handle_input_events(SDL_Event& input_event);
 	static glm::vec2 get_window_dim();
 
 	inline static SDL_Window*	s_window = nullptr;

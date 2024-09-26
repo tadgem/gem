@@ -15,6 +15,11 @@ public:
 	static glm::vec3	cart_to_spherical(glm::vec3 normal);
 	static glm::vec3	spherical_to_cart(glm::vec3 spherical);
 	static glm::vec3	get_forward(glm::vec3 euler);
+	static glm::vec3	get_right(glm::vec3 euler);
+	static glm::vec3	get_up(glm::vec3 euler);
+	static glm::vec3	get_forward_from_quat(glm::quat rot);
+	static glm::vec3	get_right_from_quat(glm::quat rot);
+	static glm::vec3	get_up_from_quat(glm::quat rot);
 	static float		round_up(float value, int decimal_places);
 	static aabb			transform_aabb(aabb& in, glm::mat4& model);
 	static void			validate_euler_angles(glm::vec3& input);

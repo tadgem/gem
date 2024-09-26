@@ -19,3 +19,13 @@ struct camera
 
 	void update(glm::vec2 screen_dim);
 };
+
+struct debug_camera_controller
+{
+	void update(glm::vec2 screen_dim, camera& cam);
+
+	float movement_speed = 50.0f;
+	float deadzone = 0.003f;
+	float rotational_speed = 45.0f;
+	static constexpr float rotational_factor = 360.0f;
+};

@@ -382,6 +382,7 @@ int main()
     glm::ivec2 window_res{ 1920, 1080};
     engine::init(window_res);
     custom_orientation = glm::vec3(0, 1, 0);
+
     std::string gbuffer_vert = utils::load_string_from_path("assets/shaders/gbuffer.vert.glsl");
     std::string gbuffer_frag = utils::load_string_from_path("assets/shaders/gbuffer.frag.glsl");
     std::string gbuffer_floats_frag = utils::load_string_from_path("assets/shaders/gbuffer_floats.frag.glsl");
@@ -419,6 +420,8 @@ int main()
     shader gi_combine(present_vert, gi_combine_frag);
 
     camera cam{};
+    debug_camera_controller controller{};
+
     //model sponza = model::load_model_from_path("assets/models/tantive/scene.gltf");
     model sponza = model::load_model_from_path("assets/models/sponza/Sponza.gltf");
     framebuffer gbuffer{};
@@ -562,7 +565,9 @@ int main()
         engine::process_sdl_event();
         engine::engine_pre_frame();        
         glm::mat4 mvp = cam.m_proj * cam.m_view * model;
-        cam.update(engine::get_window_dim());
+        glm::vec2 window_dim = engine::get_window_dim();
+        controller.update(window_dim, cam);
+        cam.update(window_dim);
         im3d_gl::new_frame_im3d(im3d_s);
         
         // compute

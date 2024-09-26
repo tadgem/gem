@@ -5,6 +5,8 @@
 #include "utils.h"
 #include "utils.h"
 #include "utils.h"
+#include "utils.h"
+#include "utils.h"
 #include <fstream>
 #include <sstream>
 #define GLM_ENABLE_EXPERIMENTAL
@@ -87,6 +89,40 @@ glm::vec3 utils::get_forward(glm::vec3 euler)
     forward.y = -glm::sin(pitch);
     forward.z = glm::cos(pitch) * glm::cos(yaw);
     return forward;
+}
+
+glm::vec3 utils::get_right(glm::vec3 euler)
+{
+    glm::vec3 right;
+    right.x = glm::cos(glm::radians(euler.y));
+    right.y = 0.0f;
+    right.z = -glm::sin(glm::radians(euler.y));
+    return right;
+}
+
+glm::vec3 utils::get_up(glm::vec3 euler)
+{
+    glm::vec3 up;
+    glm::vec3 eulerRadians = glm::radians(euler);
+    up.x = glm::sin(eulerRadians.x) * glm::sin(eulerRadians.y);
+    up.y = glm::cos(eulerRadians.x);
+    up.z = glm::sin(eulerRadians.x) * glm::cos(eulerRadians.y);
+    return up;
+}
+
+glm::vec3 utils::get_forward_from_quat(glm::quat rot)
+{
+    return glm::rotate(glm::inverse(rot), glm::vec3(0.0, 0.0, -1.0));
+}
+
+glm::vec3 utils::get_right_from_quat(glm::quat rot)
+{
+    return glm::rotate(glm::inverse(rot), glm::vec3(1.0, 0.0, 0.0));
+}
+
+glm::vec3 utils::get_up_from_quat(glm::quat rot)
+{
+    return glm::vec3(0.0, 1.0, 0.0);
 }
 
 float utils::round_up(float value, int decimal_places)

@@ -16,7 +16,9 @@ set(GL_SRC
         ${SUBMODULE_DIR}/im3d/im3d.h
         ${CMAKE_CURRENT_SOURCE_DIR}/gl.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/gl.h
-        ${CMAKE_CURRENT_SOURCE_DIR}/alias.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/input.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/input.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/io.h
         ${CMAKE_CURRENT_SOURCE_DIR}/shader.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/shader.h
         ${CMAKE_CURRENT_SOURCE_DIR}/camera.cpp

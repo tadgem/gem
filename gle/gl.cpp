@@ -1,8 +1,10 @@
 #include "gl.h"
+#include "gl.h"
 #include <iostream>
 #include "imgui.h"
 #include "imgui_impl_sdl2.h"
 #include "imgui_impl_opengl3.h"
+#include "input.h"
 
 #undef main
 #if defined(IMGUI_IMPL_OPENGL_ES2)
@@ -362,10 +364,16 @@ void engine::process_sdl_event()
     while (SDL_PollEvent(&event))
     {
         ImGui_ImplSDL2_ProcessEvent(&event);
-        if (event.type == SDL_QUIT)
+        if (event.type == SDL_QUIT) 
+        {
             s_quit = true;
-        if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(s_window))
+        }
+        if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(s_window)) 
+        {
             s_quit = true;
+        }
+
+        engine_handle_input_events(event);
     }
     if (SDL_GetWindowFlags(s_window) & SDL_WINDOW_MINIMIZED)
     {
@@ -379,7 +387,7 @@ void engine::engine_pre_frame()
     s_last_counter = s_now_counter;
     s_now_counter = SDL_GetPerformanceCounter();
 
-    s_frametime = (float)((s_now_counter - s_last_counter) * 1000 / (float)SDL_GetPerformanceFrequency());
+    s_frametime = (float)((s_now_counter - s_last_counter) / (float)SDL_GetPerformanceFrequency());
 
     glViewport(0, 0, (int)s_imgui_io->DisplaySize.x, (int)s_imgui_io->DisplaySize.y);
     glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
@@ -416,6 +424,96 @@ void engine::engine_shut_down()
 float engine::get_frame_time()
 {
     return s_frametime;
+}
+
+void engine::engine_handle_input_events(SDL_Event& input_event)
+{
+    input::update_last_frame();
+
+    if (input_event.type == SDL_KEYDOWN) {
+        SDL_KeyboardEvent keyEvent = input_event.key;
+        SDL_Keysym keySym = keyEvent.keysym;
+        keyboard_key key = input::get_key_from_sdl(keySym.sym);
+        input::update_keyboard_key(key, true);
+        return;
+    }
+
+    if (input_event.type == SDL_KEYUP) {
+        SDL_KeyboardEvent keyEvent = input_event.key;
+        SDL_Keysym keySym = keyEvent.keysym;
+        keyboard_key key = input::get_key_from_sdl(keySym.sym);
+        input::update_keyboard_key(key, false);
+        return;
+    }
+
+    // Mouse
+    if (input_event.type == SDL_MOUSEMOTION) {
+        SDL_MouseMotionEvent motionEvent = input_event.motion;
+        glm::vec2 currentPosition = glm::vec2(motionEvent.xrel, motionEvent.yrel);
+        input::update_mouse_position(input::get_mouse_position() + currentPosition);
+        return;
+    }
+
+    if (input_event.type == SDL_MOUSEBUTTONDOWN) {
+        SDL_MouseButtonEvent buttonEvent = input_event.button;
+        mouse_button button = buttonEvent.button == 3 ? mouse_button::right : mouse_button::left;
+        input::update_mouse_button(button, true);
+        return;
+    }
+
+    if (input_event.type == SDL_MOUSEBUTTONUP) {
+        SDL_MouseButtonEvent buttonEvent = input_event.button;
+        mouse_button button = buttonEvent.button == 3 ? mouse_button::right : mouse_button::left;
+        input::update_mouse_button(button, false);
+        return;
+    }
+
+    if (input_event.type == SDL_CONTROLLERDEVICEADDED) {
+        SDL_ControllerDeviceEvent d = input_event.cdevice;
+        SDL_GameControllerOpen(d.which);
+    }
+
+    if (input_event.type == SDL_CONTROLLERDEVICEREMOVED) {
+        SDL_ControllerDeviceEvent d = input_event.cdevice;
+        // SDL_GameControllerClose(d.which);
+    }
+
+    if (input_event.type == SDL_CONTROLLERAXISMOTION) {
+        SDL_ControllerAxisEvent axisEvent = input_event.caxis;
+        int index = axisEvent.which;
+        SDL_GameControllerAxis axis = (SDL_GameControllerAxis)axisEvent.axis;
+        float value = (float)axisEvent.value / 32767.0f;
+
+        if (axis == SDL_CONTROLLER_AXIS_TRIGGERRIGHT || axis == SDL_CONTROLLER_AXIS_TRIGGERLEFT) {
+            input::update_gamepad_trigger(index, input::get_trigger_from_sdl(axis), value);
+        }
+        if (axis == SDL_CONTROLLER_AXIS_LEFTX ||
+            axis == SDL_CONTROLLER_AXIS_RIGHTX) {
+            glm::vec2 current = input::get_gamepad_stick(index, input::get_stick_from_sdl(axis));
+            current.x = value;
+            input::update_gamepad_stick(index, input::get_stick_from_sdl(axis), current);
+        }
+        if (axis == SDL_CONTROLLER_AXIS_LEFTY ||
+            axis == SDL_CONTROLLER_AXIS_RIGHTY) {
+            glm::vec2 current = input::get_gamepad_stick(index, input::get_stick_from_sdl(axis));
+            current.y = value;
+            input::update_gamepad_stick(index, input::get_stick_from_sdl(axis), current);
+        }
+    }
+
+    if (input_event.type == SDL_CONTROLLERBUTTONDOWN) {
+        SDL_ControllerButtonEvent buttonEvent = input_event.cbutton;
+
+        input::update_gamepad_button(buttonEvent.which, input::get_button_from_sdl(buttonEvent.button), true);
+        return;
+    }
+
+    if (input_event.type == SDL_CONTROLLERBUTTONUP) {
+        SDL_ControllerButtonEvent buttonEvent = input_event.cbutton;
+
+        input::update_gamepad_button(buttonEvent.which, input::get_button_from_sdl(buttonEvent.button), false);
+        return;
+    }
 }
 
 glm::vec2 engine::get_window_dim()
