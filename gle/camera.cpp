@@ -51,6 +51,10 @@ void debug_camera_controller::update(glm::vec2 screen_dim, camera& cam)
     glm::vec3 up = utils::get_up_from_quat(rotation);
     float frame_time = engine::get_frame_time();
 
+    cam.m_forward = forward;
+    cam.m_right = right;
+    cam.m_up = up;
+
     if (input::get_keyboard_key(keyboard_key::w))
     {
         cam.m_pos += forward * movement_speed * frame_time;

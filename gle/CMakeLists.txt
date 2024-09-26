@@ -21,6 +21,8 @@ set(GL_SRC
         ${CMAKE_CURRENT_SOURCE_DIR}/io.h
         ${CMAKE_CURRENT_SOURCE_DIR}/shader.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/shader.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/material.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/material.h
         ${CMAKE_CURRENT_SOURCE_DIR}/camera.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/camera.h
         ${CMAKE_CURRENT_SOURCE_DIR}/texture.cpp

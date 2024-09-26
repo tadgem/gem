@@ -7,6 +7,7 @@
 #include "utils.h"
 #include "utils.h"
 #include "utils.h"
+#include "utils.h"
 #include <fstream>
 #include <sstream>
 #define GLM_ENABLE_EXPERIMENTAL
@@ -123,6 +124,20 @@ glm::vec3 utils::get_right_from_quat(glm::quat rot)
 glm::vec3 utils::get_up_from_quat(glm::quat rot)
 {
     return glm::vec3(0.0, 1.0, 0.0);
+}
+
+glm::vec3 utils::get_mouse_world_pos(glm::vec2 mouse_pos, glm::vec2 resolution, glm::mat4& proj, glm::mat4& view)
+{
+    using namespace glm;
+    float x = (2.0f * mouse_pos.x) / resolution.x - 1.0f;
+    float y = 1.0f - (2.0f * mouse_pos.y) / resolution.y;
+    float z = 1.0f;
+    vec3 ray_nds = vec3(x, y, z);
+    vec4 ray_clip = vec4(ray_nds.x, ray_nds.y, -1.0, 1.0);
+    vec4 ray_eye = inverse(proj) * ray_clip;
+    ray_eye = vec4(ray_eye.x, ray_eye.y, -1.0, 0.0);
+    vec3 ray_wor = (inverse(view) * ray_eye);
+    return ray_wor;
 }
 
 float utils::round_up(float value, int decimal_places)

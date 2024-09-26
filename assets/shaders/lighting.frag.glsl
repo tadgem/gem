@@ -22,6 +22,7 @@ struct PointLight
 
 const int NUM_POINT_LIGHTS = 16;
 const float PI = 3.14159265359;
+const float SHADOW_AMBIENT = 0.05;
 
 uniform sampler2D   u_diffuse_map;
 uniform sampler2D   u_position_map;
@@ -109,7 +110,7 @@ vec3 handle_dir_light(vec3 normal, float roughness, float metallic, vec3 albedo,
     float NdotL = max(dot(normal, lightDir), 0.0);
     vec3 diffuse = NdotL * albedo;
     // add to outgoing radiance Lo
-    return ((kD * max((1.0 - shadow), 0.1)) * (diffuse / PI + specular)) * (u_dir_light.colour * u_dir_light.intensity) * NdotL;
+    return ((kD * max((1.0 - shadow), SHADOW_AMBIENT)) * (diffuse / PI + specular)) * (u_dir_light.colour * u_dir_light.intensity) * NdotL;
 }
 
 float ShadowCalculation(vec3 normal, vec4 fragPosLightSpace)

@@ -4,6 +4,7 @@
 #include "gl.h"
 #include "texture.h" 
 #include "shader.h"
+#include "material.h"
 #include "vertex.h"
 #include "utils.h"
 #include "model.h"
@@ -17,6 +18,7 @@
 #include "im3d_gl.h"
 #include "gtc/matrix_transform.hpp"
 #include "gtc/quaternion.hpp"
+#include "input.h"
 #include "json.hpp"
 using namespace nlohmann;
 static glm::vec3 custom_orientation;
@@ -44,13 +46,14 @@ Im3d::Vec3 ToIm3D(glm::vec3& input)
 
 static glm::mat4 last_vp = glm::mat4(1.0);
 inline static int frame_index = 0;
+inline static float gi_resolution_scale = 0.4;
 
 void dispatch_gbuffer_voxelization(shader& voxelization, model& _model, voxel::grid& voxel_data, framebuffer& gbuffer, framebuffer& lightpass_buffer, glm::ivec2 window_res)
 {
     voxelization.use();
-    voxelization.setVec2("u_input_resolution", { 1920.0, 1080.0 });
-    voxelization.setVec3("u_aabb.min", _model.m_aabb.min);
-    voxelization.setVec3("u_aabb.max", _model.m_aabb.max);
+    voxelization.set_vec2("u_input_resolution", { 1920.0, 1080.0 });
+    voxelization.set_vec3("u_aabb.min", _model.m_aabb.min);
+    voxelization.set_vec3("u_aabb.max", _model.m_aabb.max);
     texture::bind_image_handle(voxel_data.texture.m_handle, 0, 0, GL_RGBA32F);
     texture::bind_sampler_handle(gbuffer.m_colour_attachments[1], GL_TEXTURE0);
     texture::bind_sampler_handle(lightpass_buffer.m_colour_attachments[0], GL_TEXTURE1);
@@ -70,7 +73,7 @@ void dispatch_gen_voxel_mips(shader& voxelization_mips, voxel::grid& voxel_data,
         glBindTexture(GL_TEXTURE_3D, voxel_data.texture.m_handle);
         texture::bind_image_handle(voxel_data.texture.m_handle, 0, i, GL_RGBA32F);
         texture::bind_image_handle(voxel_data.texture.m_handle, 1, i - 1, GL_RGBA32F);
-        voxelization_mips.setVec3("u_current_resolution", current_mip_resolution);
+        voxelization_mips.set_vec3("u_current_resolution", current_mip_resolution);
         glm::ivec3 dispatch_dims = current_mip_resolution;
         glAssert(glDispatchCompute(dispatch_dims.x / 8, dispatch_dims.y / 8, dispatch_dims.z / 8));
         current_mip_resolution /= 2.0f;
@@ -88,19 +91,19 @@ void dispatch_gbuffer(framebuffer& gbuffer, framebuffer& previous_position_buffe
     glm::mat4 current_vp = cam.m_proj * cam.m_view;
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     gbuffer_shader.use();
-    gbuffer_shader.setVec2("u_resolution", {1920.0, 1080.0});
-    gbuffer_shader.setMat4("u_vp", current_vp);
-    gbuffer_shader.setMat4("u_model", model_mat);
-    gbuffer_shader.setMat4("u_last_vp", last_vp);
-    gbuffer_shader.setMat4("u_last_model", model_mat);
-    gbuffer_shader.setMat4("u_normal", normal);
-    gbuffer_shader.setInt("u_frame_index", frame_index);
-    gbuffer_shader.setInt("u_diffuse_map", 0);
-    gbuffer_shader.setInt("u_normal_map", 1);
-    gbuffer_shader.setInt("u_metallic_map", 2);
-    gbuffer_shader.setInt("u_roughness_map", 3);
-    gbuffer_shader.setInt("u_ao_map", 4);
-    gbuffer_shader.setInt("u_prev_position_map", 5);
+    gbuffer_shader.set_vec2("u_resolution", {1920.0, 1080.0});
+    gbuffer_shader.set_mat4("u_vp", current_vp);
+    gbuffer_shader.set_mat4("u_model", model_mat);
+    gbuffer_shader.set_mat4("u_last_vp", last_vp);
+    gbuffer_shader.set_mat4("u_last_model", model_mat);
+    gbuffer_shader.set_mat4("u_normal", normal);
+    gbuffer_shader.set_int("u_frame_index", frame_index);
+    gbuffer_shader.set_int("u_diffuse_map", 0);
+    gbuffer_shader.set_int("u_normal_map", 1);
+    gbuffer_shader.set_int("u_metallic_map", 2);
+    gbuffer_shader.set_int("u_roughness_map", 3);
+    gbuffer_shader.set_int("u_ao_map", 4);
+    gbuffer_shader.set_int("u_prev_position_map", 5);
 
     texture::bind_sampler_handle(0, GL_TEXTURE0);
     texture::bind_sampler_handle(0, GL_TEXTURE1);
@@ -142,7 +145,7 @@ void dispatch_present_image(shader& present_shader, const std::string& uniform_n
 {
     present_shader.use();
     shapes::s_screen_quad.use();
-    present_shader.setInt(uniform_name.c_str(), texture_slot);
+    present_shader.set_int(uniform_name.c_str(), texture_slot);
     texture::bind_sampler_handle(texture, GL_TEXTURE0 + texture_slot);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     texture::bind_sampler_handle(0, GL_TEXTURE0);
@@ -176,8 +179,8 @@ void dispatch_shadow_pass(framebuffer& shadow_fb, shader& shadow_shader, dir_lig
     glEnable(GL_CULL_FACE);
     glCullFace(GL_FRONT);
     shadow_shader.use();
-    shadow_shader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
-    shadow_shader.setMat4("model", model_mat);
+    shadow_shader.set_mat4("lightSpaceMatrix", lightSpaceMatrix);
+    shadow_shader.set_mat4("model", model_mat);
 
     for (auto& entry : model.m_meshes)
     {
@@ -197,18 +200,18 @@ void dispatch_light_pass(shader& lighting_shader, framebuffer& lighting_buffer, 
     lighting_shader.use();
     shapes::s_screen_quad.use();
 
-    lighting_shader.setInt("u_diffuse_map", 0);
-    lighting_shader.setInt("u_position_map", 1);
-    lighting_shader.setInt("u_normal_map", 2);
-    lighting_shader.setInt("u_pbr_map", 3);
-    lighting_shader.setInt("u_dir_light_shadow_map", 4);
+    lighting_shader.set_int("u_diffuse_map", 0);
+    lighting_shader.set_int("u_position_map", 1);
+    lighting_shader.set_int("u_normal_map", 2);
+    lighting_shader.set_int("u_pbr_map", 3);
+    lighting_shader.set_int("u_dir_light_shadow_map", 4);
 
-    lighting_shader.setVec3("u_cam_pos", cam.m_pos);
+    lighting_shader.set_vec3("u_cam_pos", cam.m_pos);
 
-    lighting_shader.setVec3("u_dir_light.direction", utils::get_forward(sun.direction));
-    lighting_shader.setVec3("u_dir_light.colour", sun.colour);
-    lighting_shader.setMat4("u_dir_light.light_space_matrix", sun.light_space_matrix);
-    lighting_shader.setFloat("u_dir_light.intensity", sun.intensity);
+    lighting_shader.set_vec3("u_dir_light.direction", utils::get_forward(sun.direction));
+    lighting_shader.set_vec3("u_dir_light.colour", sun.colour);
+    lighting_shader.set_mat4("u_dir_light.light_space_matrix", sun.light_space_matrix);
+    lighting_shader.set_float("u_dir_light.intensity", sun.intensity);
 
     int num_point_lights = std::min((int)point_lights.size(), 16);
 
@@ -223,10 +226,10 @@ void dispatch_light_pass(shader& lighting_shader, framebuffer& lighting_buffer, 
         std::stringstream int_name;
         int_name << "u_point_lights[" << i << "].intensity";
 
-        lighting_shader.setVec3(pos_name.str(), point_lights[i].position);
-        lighting_shader.setVec3(col_name.str(), point_lights[i].colour);
-        lighting_shader.setFloat(rad_name.str(), point_lights[i].radius);
-        lighting_shader.setFloat(int_name.str(), point_lights[i].intensity);
+        lighting_shader.set_vec3(pos_name.str(), point_lights[i].position);
+        lighting_shader.set_vec3(col_name.str(), point_lights[i].colour);
+        lighting_shader.set_float(rad_name.str(), point_lights[i].radius);
+        lighting_shader.set_float(int_name.str(), point_lights[i].intensity);
     }
 
     texture::bind_sampler_handle(gbuffer.m_colour_attachments[0], GL_TEXTURE0);
@@ -246,12 +249,12 @@ void dispatch_direct_light_pass_taa(shader& taa, framebuffer& lightpass_buffer_r
     lightpass_buffer_resolve.bind();
     shapes::s_screen_quad.use();
     taa.use();
-    taa.setVec2("u_resolution", { 1920.0, 1080.0 });
-    taa.setInt("u_current_light_buffer", 0);
+    taa.set_vec2("u_resolution", { 1920.0, 1080.0 });
+    taa.set_int("u_current_light_buffer", 0);
     texture::bind_sampler_handle(lightpass_buffer.m_colour_attachments.front(), GL_TEXTURE0);
-    taa.setInt("u_history_light_buffer", 1);
+    taa.set_int("u_history_light_buffer", 1);
     texture::bind_sampler_handle(history_buffer_lighting.m_colour_attachments.front(), GL_TEXTURE1);
-    taa.setInt("u_velocity_buffer", 2);
+    taa.set_int("u_velocity_buffer", 2);
     texture::bind_sampler_handle(gbuffer.m_colour_attachments[4], GL_TEXTURE2);
 
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -266,26 +269,26 @@ void dispatch_cone_tracing_pass(shader& voxel_cone_tracing, voxel::grid& voxel_d
 {
     glBindTexture(GL_TEXTURE_3D, voxel_data.texture.m_handle);
 
-    //glViewport(0, 0, window_res.x / 2.0, window_res.y / 2.0);
+    glViewport(0, 0, window_res.x * gi_resolution_scale, window_res.y * gi_resolution_scale);
     shapes::s_screen_quad.use();
     buffer_conetracing.bind();
     voxel_cone_tracing.use();
-    voxel_cone_tracing.setVec3("u_aabb.min", sponza.m_aabb.min);
-    voxel_cone_tracing.setVec3("u_aabb.max", sponza.m_aabb.max);
-    voxel_cone_tracing.setVec3("u_voxel_resolution", _3d_tex_res);
-    voxel_cone_tracing.setInt("u_position_map", 0);
+    voxel_cone_tracing.set_vec3("u_aabb.min", sponza.m_aabb.min);
+    voxel_cone_tracing.set_vec3("u_aabb.max", sponza.m_aabb.max);
+    voxel_cone_tracing.set_vec3("u_voxel_resolution", _3d_tex_res);
+    voxel_cone_tracing.set_int("u_position_map", 0);
 
     texture::bind_sampler_handle(gbuffer.m_colour_attachments[1], GL_TEXTURE0);
-    voxel_cone_tracing.setInt("u_normal_map", 1);
+    voxel_cone_tracing.set_int("u_normal_map", 1);
     texture::bind_sampler_handle(gbuffer.m_colour_attachments[2], GL_TEXTURE1);
-    voxel_cone_tracing.setInt("u_voxel_map", 2);
+    voxel_cone_tracing.set_int("u_voxel_map", 2);
     texture::bind_sampler_handle(voxel_data.texture.m_handle, GL_TEXTURE2, GL_TEXTURE_3D);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     buffer_conetracing.unbind();
     texture::bind_sampler_handle(0, GL_TEXTURE0);
     texture::bind_sampler_handle(0, GL_TEXTURE1);
     texture::bind_sampler_handle(0, GL_TEXTURE2);
-    //glViewport(0, 0, window_res.x, window_res.y);
+    glViewport(0, 0, window_res.x, window_res.y);
 }
 
 void dispatch_cone_tracing_pass_taa(shader& taa, shader& denoise, shader& present_shader, framebuffer& buffer_conetracing, framebuffer& buffer_conetracing_resolve, framebuffer& buffer_conetracing_denoise, framebuffer& history_buffer_conetracing, framebuffer& gbuffer, float aSigma, float aThreshold, float aKSigma)
@@ -293,11 +296,11 @@ void dispatch_cone_tracing_pass_taa(shader& taa, shader& denoise, shader& presen
     buffer_conetracing_resolve.bind();
     shapes::s_screen_quad.use();
     taa.use();
-    taa.setInt("u_current_light_buffer", 0);
+    taa.set_int("u_current_light_buffer", 0);
     texture::bind_sampler_handle(buffer_conetracing.m_colour_attachments.front(), GL_TEXTURE0);
-    taa.setInt("u_history_light_buffer", 1);
+    taa.set_int("u_history_light_buffer", 1);
     texture::bind_sampler_handle(history_buffer_conetracing.m_colour_attachments.front(), GL_TEXTURE1);
-    taa.setInt("u_velocity_buffer", 2);
+    taa.set_int("u_velocity_buffer", 2);
     texture::bind_sampler_handle(gbuffer.m_colour_attachments[4], GL_TEXTURE2);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     buffer_conetracing_resolve.unbind();
@@ -308,11 +311,11 @@ void dispatch_cone_tracing_pass_taa(shader& taa, shader& denoise, shader& presen
 
     buffer_conetracing_denoise.bind();
     denoise.use();
-    denoise.setInt("imageData", 0);
-    denoise.setFloat("uSigma", aSigma);
-    denoise.setFloat("uThreshold", aThreshold);
-    denoise.setFloat("uKSigma", aKSigma);
-    denoise.setVec2("wSize", { 1920.0, 1080.0 });
+    denoise.set_int("imageData", 0);
+    denoise.set_float("uSigma", aSigma);
+    denoise.set_float("uThreshold", aThreshold);
+    denoise.set_float("uKSigma", aKSigma);
+    denoise.set_vec2("wSize", { 1920.0, 1080.0 });
     texture::bind_sampler_handle(buffer_conetracing_resolve.m_colour_attachments.front(), GL_TEXTURE0);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     buffer_conetracing_denoise.unbind();
@@ -327,12 +330,12 @@ void dispatch_visualize_3d_texture(voxel::grid& voxel_data, voxel::grid_visualis
     voxel_visualiser.texel_shape.use();
     auto& vs = voxel_visualiser.visual_shader;
     vs.use();
-    vs.setMat4("u_view_projection", cam.m_proj * cam.m_view);
-    vs.setIVec3("u_texture_resolution", voxel_data.resolution);
-    vs.setVec3("u_aabb.min", sponza.m_aabb.min);
-    vs.setVec3("u_aabb.max", sponza.m_aabb.max);
-    vs.setIVec3("u_voxel_group_resolution", glm::ivec3(voxel_visualiser.texel_resolution));
-    vs.setInt("u_volume", 0);
+    vs.set_mat4("u_view_projection", cam.m_proj * cam.m_view);
+    vs.set_ivec3("u_texture_resolution", voxel_data.resolution);
+    vs.set_vec3("u_aabb.min", sponza.m_aabb.min);
+    vs.set_vec3("u_aabb.max", sponza.m_aabb.max);
+    vs.set_ivec3("u_voxel_group_resolution", glm::ivec3(voxel_visualiser.texel_resolution));
+    vs.set_int("u_volume", 0);
     texture::bind_sampler_handle(voxel_data.texture.m_handle, GL_TEXTURE0, GL_TEXTURE_3D);
     glDrawElementsInstanced(GL_TRIANGLES, voxel_visualiser.index_count, GL_UNSIGNED_INT, 0, voxel_visualiser.total_invocations);
     texture::bind_sampler_handle(0, GL_TEXTURE0);
@@ -342,9 +345,9 @@ void dispatch_final_pass(shader& gi_combine, framebuffer& lightpass_buffer_resol
 {
     shapes::s_screen_quad.use();
     gi_combine.use();
-    gi_combine.setInt("lighting_pass", 0);
+    gi_combine.set_int("lighting_pass", 0);
     texture::bind_sampler_handle(lightpass_buffer_resolve.m_colour_attachments.front(), GL_TEXTURE0);
-    gi_combine.setInt("cone_tracing_pass", 1);
+    gi_combine.set_int("cone_tracing_pass", 1);
     texture::bind_sampler_handle(buffer_conetracing_denoise.m_colour_attachments.front(), GL_TEXTURE1);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
@@ -359,13 +362,18 @@ void draw_arrow(glm::vec3 pos, glm::vec3 dir)
     Im3d::DrawSphere(ToIm3D(end), 0.25f);
 }
 
-void OnIm3D(aabb& level_bb)
+void OnIm3D(aabb& level_bb, camera& cam )
 {
     //aabb bb = level_bb;
     Im3d::DrawAlignedBox(
         { level_bb.min.x, level_bb.min.y, level_bb.min.z },
         { level_bb.max.x, level_bb.max.y, level_bb.max.z }
     );
+
+    glm::vec3 mouse_world_pos = utils::get_mouse_world_pos(input::get_mouse_position(), { 1920, 1080 }, cam.m_proj, cam.m_view);
+    glm::vec3 ray_end = mouse_world_pos + (cam.m_forward * 50.0f);
+
+    Im3d::DrawLine(ToIm3D(mouse_world_pos), ToIm3D(ray_end), 2.0, Im3d::Color_Cyan);
 }
 
 float get_aabb_area(aabb& bb)
@@ -421,6 +429,8 @@ int main()
 
     camera cam{};
     debug_camera_controller controller{};
+
+    material mat(gbuffer_shader);
 
     //model sponza = model::load_model_from_path("assets/models/tantive/scene.gltf");
     model sponza = model::load_model_from_path("assets/models/sponza/Sponza.gltf");
@@ -491,7 +501,7 @@ int main()
 
     framebuffer buffer_conetracing{};
     buffer_conetracing.bind();
-    buffer_conetracing.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x, window_res.y, GL_RGBA16F, GL_LINEAR, GL_FLOAT);
+    buffer_conetracing.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x * gi_resolution_scale, window_res.y * gi_resolution_scale, GL_RGBA16F, GL_LINEAR, GL_FLOAT);
     buffer_conetracing.check();
     buffer_conetracing.unbind();
 
@@ -535,9 +545,9 @@ int main()
 
 
     voxelization.use();
-    voxelization.setInt("u_gbuffer_pos", 0);
-    voxelization.setInt("u_gbuffer_lighting", 1);
-    voxelization.setVec3("u_voxel_resolution", glm::vec3( _3d_tex_res));
+    voxelization.set_int("u_gbuffer_pos", 0);
+    voxelization.set_int("u_gbuffer_lighting", 1);
+    voxelization.set_vec3("u_voxel_resolution", glm::vec3( _3d_tex_res));
 
     bool draw_debug_3d_texture = false;
     bool draw_direct_lighting = true;
@@ -686,7 +696,7 @@ int main()
         }
         if (draw_im3d)
         {
-            OnIm3D(sponza.m_aabb);
+            OnIm3D(sponza.m_aabb, cam);
             im3d_gl::end_frame_im3d(im3d_s, {window_res.x, window_res.y}, cam);
         }
         else

@@ -7,6 +7,23 @@
 class shader
 {
 public:
+
+    enum class uniform_type
+    {
+        UNKNOWN,
+        _int,
+        _float,
+        vec2,
+        vec3,
+        vec4,
+        mat3,
+        mat4,
+        sampler2D, 
+        sampler3D,
+        image2D,
+        image3D
+    };
+
 	unsigned int m_shader_id;
 
     shader(const std::string& comp);
@@ -15,17 +32,17 @@ public:
 
     void use();
     
-    void setBool(const std::string& name, bool value) const;
-    void setInt(const std::string& name, int value) const;
-    void setFloat(const std::string& name, float value) const;
-    void setVec2(const std::string& name, glm::vec2 value) const;
-    void setVec3(const std::string& name, glm::vec3 value) const;
-    void setVec4(const std::string& name, glm::vec4 value) const;
-    void setIVec2(const std::string& name, glm::ivec2 value) const;
-    void setIVec3(const std::string& name, glm::ivec3 value) const;
-    void setIVec4(const std::string& name, glm::ivec4 value) const;
-    void setMat3(const std::string& name, glm::mat3 value) const;
-    void setMat4(const std::string& name, glm::mat4 value) const;
+    void set_bool(const std::string& name, bool value) const;
+    void set_int(const std::string& name, int value) const;
+    void set_float(const std::string& name, float value) const;
+    void set_vec2(const std::string& name, glm::vec2 value) const;
+    void set_vec3(const std::string& name, glm::vec3 value) const;
+    void set_vec4(const std::string& name, glm::vec4 value) const;
+    void set_ivec2(const std::string& name, glm::ivec2 value) const;
+    void set_ivec3(const std::string& name, glm::ivec3 value) const;
+    void set_ivec4(const std::string& name, glm::ivec4 value) const;
+    void set_mat3(const std::string& name, glm::mat3 value) const;
+    void set_mat4(const std::string& name, glm::mat4 value) const;
 
 
     static gl_handle compile_shader(const std::string& source, GLenum shader_stage);

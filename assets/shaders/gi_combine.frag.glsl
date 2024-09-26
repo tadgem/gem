@@ -11,5 +11,5 @@ void main(void)
 {
     vec4 direct = texture(lighting_pass, aUV);
     vec4 indirect = texture(cone_tracing_pass, aUV);
-    color = mix(direct, indirect, 0.5);
+    color = mix(direct, indirect, (length(indirect) / 2.0)) * 2.0;
 } 

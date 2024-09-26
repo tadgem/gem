@@ -20,6 +20,7 @@ public:
 	static glm::vec3	get_forward_from_quat(glm::quat rot);
 	static glm::vec3	get_right_from_quat(glm::quat rot);
 	static glm::vec3	get_up_from_quat(glm::quat rot);
+	static glm::vec3	get_mouse_world_pos(glm::vec2 mouse_pos, glm::vec2 resolution, glm::mat4& proj, glm::mat4& view);
 	static float		round_up(float value, int decimal_places);
 	static aabb			transform_aabb(aabb& in, glm::mat4& model);
 	static void			validate_euler_angles(glm::vec3& input);

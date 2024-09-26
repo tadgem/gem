@@ -58,6 +58,24 @@ vec3 get_texel_from_pos(vec3 position, vec3 unit)
 	return vec3(x/ u_voxel_resolution.x, y / u_voxel_resolution.y, z / u_voxel_resolution.z);
 }
 
+ivec3 get_absolute_texel_from_pos(vec3 position, vec3 resolution)
+{
+	vec3 aabb_dim = u_aabb.max - u_aabb.min;
+	vec3 unit = vec3((aabb_dim.x / resolution.x), (aabb_dim.y / resolution.y) , (aabb_dim.z / resolution.z));
+
+	/// <summary>
+	/// 0,0,0 is aabb.min
+	/// </summary>
+	vec3 new_pos = position - u_aabb.min;
+	int x = int(new_pos.x / unit.x) ;
+	int y = int(new_pos.y / unit.y) ;
+	int z = int(new_pos.z / unit.z) ;
+
+	return ivec3(x, y, z);
+
+}
+
+
 vec4 get_voxel_colour(vec3 position, vec3 unit, float lod)
 {
 	return textureLod(u_voxel_map, get_texel_from_pos(position, unit), lod);
@@ -104,8 +122,8 @@ vec3 trace_cone(vec3 from, vec3 dir, vec3 unit)
 	vec4 accum = vec4(0.0);
 	vec3 pos = from;
 	int steps = 0;
-	float lod = 0.0;
-	pos += dir * (unit * 1.5);
+	float lod = 1.0;
+	pos += dir * (length(unit));
 	float cone_distance = distance(from, pos);
 
 	while (accum.w < 1.0 && is_in_aabb(pos) && cone_distance < MAX_DISTANCE && steps < MAX_STEPS)
@@ -150,16 +168,16 @@ vec3 trace_cones_v3(vec3 from, vec3 dir, vec3 unit)
 
 	for(int i = 0; i < DIFFUSE_CONE_COUNT_16; i++)
 	{
-		vec3 final_dir = mix(dir, DIFFUSE_CONE_DIRECTIONS_16[i], 0.5);
-	    float sDotN = max(dot(dir, final_dir), 0.0);
+	    float sDotN = max(dot(dir, DIFFUSE_CONE_DIRECTIONS_16[i]), 0.0);
 		if(sDotN <= 0.001)
 		{
 			continue;
 		}
+		vec3 final_dir = mix(dir, DIFFUSE_CONE_DIRECTIONS_16[i], 0.5);
 		acc += trace_cone(from, final_dir, unit) * sDotN;
 	}
 
-	return acc / 4.0 ; // num traces to get a more usable output for now;
+	return acc / 2.0 ; // num traces to get a more usable output for now;
 }
 
 

@@ -4,7 +4,8 @@
 #include "im3d_math.h"
 #include "gtc/type_ptr.hpp"
 #include "imgui.h"
-
+#include "input.h"
+#include "gl.h"
 
 Im3d::Mat4 ToIm3D(const glm::mat4& _m) {
     Im3d::Mat4 m(1.0);
@@ -168,6 +169,12 @@ void im3d_gl::new_frame_im3d(im3d_state& state)
     // update app data e.g. mouse pos, viewport size keys etc.
 	Im3d::AppData& ad = Im3d::GetAppData(); 
 	ad.m_viewportSize = { 1920, 1080};
+    ad.m_keyDown[Im3d::Key::Mouse_Left] = input::get_mouse_button(mouse_button::left);
+    ad.m_keyDown[Im3d::Key::Key_L] = input::get_keyboard_key(keyboard_key::l);
+    ad.m_keyDown[Im3d::Key::Key_R] = input::get_keyboard_key(keyboard_key::r);
+    ad.m_keyDown[Im3d::Key::Key_S] = input::get_keyboard_key(keyboard_key::s);
+    ad.m_keyDown[Im3d::Key::Key_T] = input::get_keyboard_key(keyboard_key::t);
+    ad.m_deltaTime = engine::get_frame_time();
     Im3d::NewFrame();
 }
 
