@@ -21,6 +21,7 @@
 #include "input.h"
 #include "json.hpp"
 #include "scene.h"
+#include "asset.h"
 
 using namespace nlohmann;
 static glm::vec3 custom_orientation;
@@ -434,7 +435,8 @@ int main()
     debug_camera_controller controller{};
     scene scene("test_scene");
     entity e = scene.create_entity("Daddalus");
-
+    e.has_component<entity_data>();
+    entity_data& data = e.get_component<entity_data>();
     material mat(gbuffer_shader);
 
     //model sponza = model::load_model_from_path("assets/models/tantive/scene.gltf");

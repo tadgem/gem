@@ -19,10 +19,15 @@ set(GL_SRC
         ${CMAKE_CURRENT_SOURCE_DIR}/input.h
         ${CMAKE_CURRENT_SOURCE_DIR}/input.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/io.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/asset.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/asset.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/hash_string.h
         ${CMAKE_CURRENT_SOURCE_DIR}/shader.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/shader.h
         ${CMAKE_CURRENT_SOURCE_DIR}/material.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/material.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/transform.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/transform.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/camera.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/camera.h
         ${CMAKE_CURRENT_SOURCE_DIR}/texture.cpp
@@ -59,6 +64,7 @@ set(GLE_INCLUDES
         ${THIRD_PARTY_DIR}/glm
         ${THIRD_PARTY_DIR}/soil/include
         ${THIRD_PARTY_DIR}/entt
+        ${THIRD_PARTY_DIR}
         ${SUBMODULE_DIR}/im3d
         ${CMAKE_CURRENT_SOURCE_DIR}
 CACHE INTERNAL "")
