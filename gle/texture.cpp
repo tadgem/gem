@@ -8,14 +8,51 @@
 #include "SOIL/SOIL.h"
 #include "gl.h"
 #include "stb_image.h"
+
+struct DDS_PIXELFORMAT {
+	unsigned long dwSize;
+	unsigned long dwFlags;
+	unsigned long dwFourCC;
+	unsigned long dwRGBBitCount;
+	unsigned long dwRBitMask;
+	unsigned long dwGBitMask;
+	unsigned long dwBBitMask;
+	unsigned long dwABitMask;
+};
+
+typedef struct {
+	unsigned long           dwSize;
+	unsigned long           dwFlags;
+	unsigned long           dwHeight;
+	unsigned long           dwWidth;
+	unsigned long           dwPitchOrLinearSize;
+	unsigned long           dwDepth;
+	unsigned long           dwMipMapCount;
+	unsigned long           dwReserved1[11];
+	DDS_PIXELFORMAT			ddspf;
+	unsigned long           dwCaps;
+	unsigned long           dwCaps2;
+	unsigned long           dwCaps3;
+	unsigned long           dwCaps4;
+	unsigned long           dwReserved2;
+} DDS_HEADER;
+
 texture::texture(const std::string& path)
 {
 	//unsigned char* data = stbi_load(path.c_str(), & m_width, & m_height, &m_num_channels, 0);
-	unsigned char* data = SOIL_load_image(path.c_str(), &m_width, &m_height, &m_num_channels, 0);
+	unsigned char* data = SOIL_load_image(path.c_str(), &m_width, &m_height, &m_num_channels, SOIL_LOAD_AUTO);
 	if (!data)
 	{
 		std::cerr << "Failed to load texture at path : " << path << std::endl;
 		return;
+	}
+	if (path.find("dds"))
+	{
+		DDS_HEADER* header = new DDS_HEADER();
+		memcpy(header, data, sizeof(DDS_HEADER));
+		int size = header->dwSize;
+		std::cout << "What : " << size << "\n";
+		delete header;
 	}
 
 	// m_handle = SOIL_create_OGL_texture(data, m_width, m_height, m_num_channels, 0, SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y);
@@ -33,6 +70,8 @@ texture::texture(const std::string& path)
 	}
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_width, m_height, 0, format, GL_UNSIGNED_BYTE, data);
 	glGenerateMipmap(GL_TEXTURE_2D);
+
+	SOIL_free_image_data(data);
 }
 
 void texture::bind_sampler(GLenum texture_slot, GLenum texture_target)

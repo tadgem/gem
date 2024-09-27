@@ -46,7 +46,7 @@ Im3d::Vec3 ToIm3D(glm::vec3& input)
 
 static glm::mat4 last_vp = glm::mat4(1.0);
 inline static int frame_index = 0;
-inline static float gi_resolution_scale = 0.66;
+inline static float gi_resolution_scale = 0.77;
 
 void dispatch_gbuffer_voxelization(shader& voxelization, model& _model, voxel::grid& voxel_data, framebuffer& gbuffer, framebuffer& lightpass_buffer, glm::ivec2 window_res)
 {
@@ -433,8 +433,8 @@ int main()
     material mat(gbuffer_shader);
 
     //model sponza = model::load_model_from_path("assets/models/tantive/scene.gltf");
-    // model sponza = model::load_model_from_path("assets/models/sponza/Sponza.gltf");
-    model sponza = model::load_model_from_path("assets/models/bistro/BistroExterior.fbx");
+    model sponza = model::load_model_from_path("assets/models/sponza/Sponza.gltf");
+    //model sponza = model::load_model_from_path("assets/models/bistro/BistroExterior.fbx");
     framebuffer gbuffer{};
     gbuffer.bind();
     gbuffer.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x, window_res.y, GL_RGBA, GL_NEAREST, GL_UNSIGNED_BYTE);
