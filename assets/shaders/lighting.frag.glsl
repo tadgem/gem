@@ -22,7 +22,7 @@ struct PointLight
 
 const int NUM_POINT_LIGHTS = 16;
 const float PI = 3.14159265359;
-const float SHADOW_AMBIENT = 0.05;
+const float SHADOW_AMBIENT = 0.01;
 
 uniform sampler2D   u_diffuse_map;
 uniform sampler2D   u_position_map;

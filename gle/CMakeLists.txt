@@ -35,6 +35,8 @@ set(GL_SRC
         ${CMAKE_CURRENT_SOURCE_DIR}/shape.h
         ${CMAKE_CURRENT_SOURCE_DIR}/vertex.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/vertex.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/scene.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/scene.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/im3d_gl.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/im3d_gl.h
         ${CMAKE_CURRENT_SOURCE_DIR}/utils.cpp
@@ -56,6 +58,7 @@ set(GLE_INCLUDES
         ${THIRD_PARTY_DIR}/imgui/backends
         ${THIRD_PARTY_DIR}/glm
         ${THIRD_PARTY_DIR}/soil/include
+        ${THIRD_PARTY_DIR}/entt
         ${SUBMODULE_DIR}/im3d
         ${CMAKE_CURRENT_SOURCE_DIR}
 CACHE INTERNAL "")

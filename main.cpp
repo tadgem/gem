@@ -20,6 +20,8 @@
 #include "gtc/quaternion.hpp"
 #include "input.h"
 #include "json.hpp"
+#include "scene.h"
+
 using namespace nlohmann;
 static glm::vec3 custom_orientation;
 
@@ -46,7 +48,7 @@ Im3d::Vec3 ToIm3D(glm::vec3& input)
 
 static glm::mat4 last_vp = glm::mat4(1.0);
 inline static int frame_index = 0;
-inline static float gi_resolution_scale = 0.77;
+inline static float gi_resolution_scale = 0.33;
 
 void dispatch_gbuffer_voxelization(shader& voxelization, model& _model, voxel::grid& voxel_data, framebuffer& gbuffer, framebuffer& lightpass_buffer, glm::ivec2 window_res)
 {
@@ -118,10 +120,10 @@ void dispatch_gbuffer(framebuffer& gbuffer, framebuffer& previous_position_buffe
         entry.m_vao.use();
         maps[texture_map_type::diffuse].bind_sampler(GL_TEXTURE0);
 
-        /*if (maps.find(texture_map_type::normal) != maps.end())
+        if (maps.find(texture_map_type::normal) != maps.end())
         {
             texture::bind_sampler_handle(maps[texture_map_type::normal].m_handle, GL_TEXTURE1);
-        }*/
+        }
         if (maps.find(texture_map_type::metallicness) != maps.end())
         {
             texture::bind_sampler_handle(maps[texture_map_type::metallicness].m_handle, GL_TEXTURE2);
@@ -325,7 +327,7 @@ void dispatch_cone_tracing_pass_taa(shader& taa, shader& denoise, shader& presen
     texture::bind_sampler_handle(0, GL_TEXTURE0);
 }
 
-void dispatch_visualize_3d_texture(voxel::grid& voxel_data, voxel::grid_visualiser& voxel_visualiser, camera& cam, model& sponza)
+void dispatch_visualize_3d_texture(voxel::grid& voxel_data, voxel::grid_visualiser& voxel_visualiser, camera& cam, model& sponza, shader& z_prepass_shader, glm::mat4& model)
 {
     voxel_visualiser.texel_shape.use();
     auto& vs = voxel_visualiser.visual_shader;
@@ -339,6 +341,7 @@ void dispatch_visualize_3d_texture(voxel::grid& voxel_data, voxel::grid_visualis
     texture::bind_sampler_handle(voxel_data.texture.m_handle, GL_TEXTURE0, GL_TEXTURE_3D);
     glDrawElementsInstanced(GL_TRIANGLES, voxel_visualiser.index_count, GL_UNSIGNED_INT, 0, voxel_visualiser.total_invocations);
     texture::bind_sampler_handle(0, GL_TEXTURE0);
+
 }
 
 void dispatch_final_pass(shader& gi_combine, framebuffer& lightpass_buffer_resolve, framebuffer& buffer_conetracing_denoise)
@@ -429,11 +432,13 @@ int main()
 
     camera cam{};
     debug_camera_controller controller{};
+    scene scene("test_scene");
+    entity e = scene.create_entity("Daddalus");
 
     material mat(gbuffer_shader);
 
     //model sponza = model::load_model_from_path("assets/models/tantive/scene.gltf");
-    model sponza = model::load_model_from_path("assets/models/sponza/Sponza.gltf");
+     model sponza = model::load_model_from_path("assets/models/sponza/Sponza.gltf");
     //model sponza = model::load_model_from_path("assets/models/bistro/BistroExterior.fbx");
     framebuffer gbuffer{};
     gbuffer.bind();
@@ -534,8 +539,8 @@ int main()
     constexpr glm::vec3 _3d_tex_res_vec = { _3d_tex_res, _3d_tex_res, _3d_tex_res };
 
     glm::vec3 pos = glm::vec3(0.0f);
-    glm::vec3 euler = glm::vec3(0.0f, 90.0f, 90.0f);
-    glm::vec3 scale = glm::vec3(0.03f);
+    glm::vec3 euler = glm::vec3(0.0f, 00.0f, 0.0f);
+    glm::vec3 scale = glm::vec3(0.1f);
     glm::mat4 model = utils::get_model_matrix(pos, euler, scale);
     glm::mat3 normal = utils::get_normal_matrix(model);
     sponza.m_aabb = utils::transform_aabb(sponza.m_aabb, model);
@@ -634,7 +639,7 @@ int main()
 
         if (draw_debug_3d_texture)
         {
-            dispatch_visualize_3d_texture(voxel_data, voxel_visualiser, cam, sponza);
+            dispatch_visualize_3d_texture(voxel_data, voxel_visualiser, cam, sponza, shadow_shader, model);
         }
 
         if (draw_final_pass)
