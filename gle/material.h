@@ -1,10 +1,11 @@
 #pragma once
+#include <string>
+#include <unordered_map>
 #include "shader.h"
-
 class material
 {
 public:
 	material(shader& shader_program);
 
-	static shader::uniform_type get_type_from_gl(GLenum type);
+	std::unordered_map<std::string, shader::uniform_type> m_uniforms;
 };

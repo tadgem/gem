@@ -49,4 +49,6 @@ public:
     static int link_shader(gl_handle comp);
     static int link_shader(gl_handle vert, gl_handle frag);
     static int link_shader(gl_handle vert, gl_handle geom, gl_handle frag);
+
+    static uniform_type get_type_from_gl(GLenum type);
 };

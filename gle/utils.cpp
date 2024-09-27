@@ -137,7 +137,7 @@ glm::vec3 utils::get_mouse_world_pos(glm::vec2 mouse_pos, glm::vec2 resolution, 
     vec4 ray_eye = inverse(proj) * ray_clip;
     ray_eye = vec4(ray_eye.x, ray_eye.y, -1.0, 0.0);
     vec3 ray_wor = (inverse(view) * ray_eye);
-    return ray_wor;
+    return glm::normalize(ray_wor);
 }
 
 float utils::round_up(float value, int decimal_places)

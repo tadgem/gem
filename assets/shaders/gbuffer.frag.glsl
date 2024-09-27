@@ -66,8 +66,13 @@ vec3 getNormalFromMap()
 
 void main()
 {
+    vec4 inDiffuse = texture(u_diffuse_map, aUV);
+    if(inDiffuse.w < 0.25)
+    {
+        discard;
+    }
 
-    oDiffuse = pow(texture(u_diffuse_map, aUV).rgb, vec3(2.2));
+    oDiffuse = pow(inDiffuse.xyz, vec3(2.2));
 	oPosition = aPosition;
     oNormal = getNormalFromMap();
 

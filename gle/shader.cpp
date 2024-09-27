@@ -4,6 +4,7 @@
 #include "shader.h"
 #include "shader.h"
 #include "shader.h"
+#include "shader.h"
 #include "gtc/type_ptr.hpp"
 
 #include <iostream>
@@ -182,4 +183,38 @@ int shader::link_shader(gl_handle vert, gl_handle geom, gl_handle frag)
 	}
 
 	return prog_id;
+}
+
+
+shader::uniform_type shader::get_type_from_gl(GLenum type)
+{
+	switch (type)
+	{
+		case GL_SAMPLER_2D:
+			return uniform_type::sampler2D;
+		case GL_SAMPLER_3D:
+			return uniform_type::sampler3D;
+		case GL_IMAGE_2D:
+			return uniform_type::image2D;
+		case GL_IMAGE_3D:
+			return uniform_type::image3D;
+		case GL_INT:
+			return uniform_type::_int;
+		case GL_FLOAT:
+			return uniform_type::_float;
+		case GL_FLOAT_VEC2:
+			return uniform_type::vec2;
+		case GL_FLOAT_VEC3:
+			return uniform_type::vec3;
+		case GL_FLOAT_VEC4:
+			return uniform_type::vec4;
+		case GL_FLOAT_MAT3:
+			return uniform_type::mat3;
+		case GL_FLOAT_MAT4:
+			return uniform_type::mat4;
+		default:
+			return uniform_type::UNKNOWN;
+	}
+
+	return uniform_type::UNKNOWN;
 }

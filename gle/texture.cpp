@@ -10,8 +10,8 @@
 #include "stb_image.h"
 texture::texture(const std::string& path)
 {
-	unsigned char* data = stbi_load(path.c_str(), & m_width, & m_height, &m_num_channels, 0);
-	//unsigned char* data = SOIL_load_image(path.c_str(), &m_width, &m_height, &m_num_channels, 0);
+	//unsigned char* data = stbi_load(path.c_str(), & m_width, & m_height, &m_num_channels, 0);
+	unsigned char* data = SOIL_load_image(path.c_str(), &m_width, &m_height, &m_num_channels, 0);
 	if (!data)
 	{
 		std::cerr << "Failed to load texture at path : " << path << std::endl;

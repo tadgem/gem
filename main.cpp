@@ -46,7 +46,7 @@ Im3d::Vec3 ToIm3D(glm::vec3& input)
 
 static glm::mat4 last_vp = glm::mat4(1.0);
 inline static int frame_index = 0;
-inline static float gi_resolution_scale = 0.4;
+inline static float gi_resolution_scale = 0.66;
 
 void dispatch_gbuffer_voxelization(shader& voxelization, model& _model, voxel::grid& voxel_data, framebuffer& gbuffer, framebuffer& lightpass_buffer, glm::ivec2 window_res)
 {
@@ -118,10 +118,10 @@ void dispatch_gbuffer(framebuffer& gbuffer, framebuffer& previous_position_buffe
         entry.m_vao.use();
         maps[texture_map_type::diffuse].bind_sampler(GL_TEXTURE0);
 
-        if (maps.find(texture_map_type::normal) != maps.end())
+        /*if (maps.find(texture_map_type::normal) != maps.end())
         {
             texture::bind_sampler_handle(maps[texture_map_type::normal].m_handle, GL_TEXTURE1);
-        }
+        }*/
         if (maps.find(texture_map_type::metallicness) != maps.end())
         {
             texture::bind_sampler_handle(maps[texture_map_type::metallicness].m_handle, GL_TEXTURE2);
@@ -370,7 +370,7 @@ void OnIm3D(aabb& level_bb, camera& cam )
         { level_bb.max.x, level_bb.max.y, level_bb.max.z }
     );
 
-    glm::vec3 mouse_world_pos = utils::get_mouse_world_pos(input::get_mouse_position(), { 1920, 1080 }, cam.m_proj, cam.m_view);
+    glm::vec3 mouse_world_pos = cam.m_pos + utils::get_mouse_world_pos(input::get_mouse_position(), { 1920, 1080 }, cam.m_proj, cam.m_view);
     glm::vec3 ray_end = mouse_world_pos + (cam.m_forward * 50.0f);
 
     Im3d::DrawLine(ToIm3D(mouse_world_pos), ToIm3D(ray_end), 2.0, Im3d::Color_Cyan);
@@ -433,7 +433,8 @@ int main()
     material mat(gbuffer_shader);
 
     //model sponza = model::load_model_from_path("assets/models/tantive/scene.gltf");
-    model sponza = model::load_model_from_path("assets/models/sponza/Sponza.gltf");
+    // model sponza = model::load_model_from_path("assets/models/sponza/Sponza.gltf");
+    model sponza = model::load_model_from_path("assets/models/bistro/BistroExterior.fbx");
     framebuffer gbuffer{};
     gbuffer.bind();
     gbuffer.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x, window_res.y, GL_RGBA, GL_NEAREST, GL_UNSIGNED_BYTE);
@@ -532,7 +533,10 @@ int main()
     constexpr int _3d_tex_res = 384;
     constexpr glm::vec3 _3d_tex_res_vec = { _3d_tex_res, _3d_tex_res, _3d_tex_res };
 
-    glm::mat4 model = utils::get_model_matrix(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(0.1f));
+    glm::vec3 pos = glm::vec3(0.0f);
+    glm::vec3 euler = glm::vec3(0.0f, 90.0f, 90.0f);
+    glm::vec3 scale = glm::vec3(0.03f);
+    glm::mat4 model = utils::get_model_matrix(pos, euler, scale);
     glm::mat3 normal = utils::get_normal_matrix(model);
     sponza.m_aabb = utils::transform_aabb(sponza.m_aabb, model);
 
@@ -570,6 +574,8 @@ int main()
     
     while (!engine::s_quit)
     {
+        glm::mat4 model = utils::get_model_matrix(pos, euler, scale);
+
         glEnable(GL_DEPTH_TEST);
         
         engine::process_sdl_event();
@@ -637,10 +643,12 @@ int main()
         }
 
         {
-            ImGui::Begin("Shadow Debug");
-            ImGui::Image((ImTextureID) dir_light_shadow_buffer.m_depth_attachment, { (float)dir_light_shadow_buffer.m_width, (float)dir_light_shadow_buffer.m_height }, {0,0}, {1,1}, {0,0,0,1});
-            ImGui::End();
+            ImGui::Begin("Transform Debug");
+            ImGui::DragFloat3("Position", &pos[0]);
+            ImGui::DragFloat3("Euler", &euler[0]);
+            ImGui::DragFloat3("Scale", &scale[0]);
 
+            ImGui::End();
 
             ImGui::Begin("Hello, world!");                          
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / engine::s_imgui_io->Framerate, engine::s_imgui_io->Framerate);
@@ -664,8 +672,6 @@ int main()
             ImGui::Separator();
             ImGui::DragFloat3("Orientation Test", &custom_orientation[0]);
             ImGui::Separator();
-            // ImGui::DragFloat3("Level Bounding Box Min", &sponza.m_aabb.min[0]);
-            // ImGui::DragFloat3("Level Bounding Box Max", &sponza.m_aabb.max[0]);
             ImGui::Text("Level Bounding Volume Area %.2f", get_aabb_area(sponza.m_aabb));
             glm::vec3 dim = sponza.m_aabb.max - sponza.m_aabb.min;
             ImGui::Text("Level Bounding Volume Dimensions %.2f,%.2f,%.2f", dim.x, dim.y, dim.z);

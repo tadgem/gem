@@ -14,15 +14,8 @@ material::material(shader& shader_program)
     for (int i = 0; i < uniform_count; i++)
     {
         glGetActiveUniform(shader_program.m_shader_id, (GLuint)i, bufSize, &length, &size, &type, name);
-
-        printf("Uniform #%d Type: %u Name: %s\n", i, type, name);
+        std::string uname = std::string(name);
+        shader::uniform_type utype = shader::get_type_from_gl(type);
+        m_uniforms.emplace(uname, utype);
     }
-}
-
-shader::uniform_type material::get_type_from_gl(GLenum type)
-{
-    switch (type)
-    {
-    }
-    return shader::uniform_type();
 }

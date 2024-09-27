@@ -105,6 +105,7 @@ void get_material_texture(const std::string& directory, aiMaterial* material, mo
         aiString resultPath;
         aiGetMaterialTexture(material, ass_texture_type, 0, &resultPath);
         std::string finalPath = directory + std::string(resultPath.C_Str());
+        std::cout << "Loading Texture at Path : " << finalPath << "\n";
         texture tex(finalPath);
 
         mat.m_material_maps[gl_texture_type] = tex;
