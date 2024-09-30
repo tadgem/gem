@@ -46,10 +46,24 @@ const vec2 halton_seq[16] = vec2[16]
     vec2(0.031250, 0.592593)
 );
 
+vec3 UnpackNormalMap( vec3 TextureSample )
+{
+
+	vec2 NormalXY = TextureSample.rg;
+	
+	NormalXY = NormalXY * vec2(2.0,2.0) - vec2(1.0,1.0);
+	float NormalZ = sqrt( clamp(( 1.0f - dot( NormalXY, NormalXY ) ),0.0,1.0));
+	return vec3( NormalXY.xy, NormalZ);
+}
 
 vec3 getNormalFromMap()
 {
     vec3 tangentNormal = texture(u_normal_map, aUV).xyz * 2.0 - 1.0;
+
+    if(tangentNormal.z == 0.0)
+    {
+        tangentNormal = UnpackNormalMap(tangentNormal);
+    }
 
     vec3 Q1 = dFdx(aPosition.xyz);
     vec3 Q2 = dFdy(aPosition.xyz);

@@ -23,7 +23,8 @@ uniform sampler2D   u_position_map;
 uniform sampler2D   u_normal_map;
 uniform sampler3D   u_voxel_map; // x = metallic, y = roughness, z = AO
 uniform AABB		u_aabb;
-uniform vec3	  u_voxel_resolution;
+uniform vec3		u_voxel_resolution;
+uniform vec3		u_cam_position;
 #define VOXEL_SIZE (1/128.0)
 
 
@@ -85,10 +86,11 @@ vec3 trace_ray(vec3 from, vec3 dir, vec3 unit)
 {
 	vec4 accum = vec4(0.0);
 	vec3 pos = from;
+	const int MAX_STEPS = 512;
 	int steps = 0;
 	const int MAX_LOD = 5;
 	int lod = 5;
-	while (accum.w < 0.99 && is_in_aabb(pos))
+	while (accum.w < 0.99 && is_in_aabb(pos) && steps < MAX_STEPS)
 	{
 		pos += unit * (lod + 1) * dir;
 		vec4 result = get_voxel_colour(pos, unit, lod);
@@ -102,7 +104,7 @@ vec3 trace_ray(vec3 from, vec3 dir, vec3 unit)
 		}
 		if(lod == 0)
 		{
-			accum += result * (1.0 - (lod / MAX_LOD));
+			accum += result;
 		}
 		steps += 1;
 	}
@@ -182,48 +184,6 @@ vec3 trace_cones_v3(vec3 from, vec3 dir, vec3 unit)
 
 
 
-vec3 trace_cones_v2(vec3 from, vec3 dir, vec3 unit)
-{
-	//float ANGLE_MIX = rand(from.xy + dir.xy);
-	const float ANGLE_MIX = 0.5;
-
-	const float w[3] = { 1.0, 1.0, 1.0 }; // Cone weights.
-
-	const vec3 ortho = normalize(orthogonal(dir));
-	const vec3 ortho2 = normalize(cross(ortho, dir));
-	
-	const vec3 corner1 = 0.5f * (ortho + ortho2);
-	const vec3 corner1_2 = 0.5f * (ortho - ortho2);
-	
-	vec3 acc = vec3(0);
-
-	acc += w[0] * trace_cone(from, dir, unit);
-
-	const vec3 s1 = mix(dir, ortho, ANGLE_MIX);
-	const vec3 s2 = mix(dir, -ortho, ANGLE_MIX);
-	const vec3 s3 = mix(dir, ortho2, ANGLE_MIX);
-	const vec3 s4 = mix(dir, -ortho2, ANGLE_MIX);
-
-	acc += w[1] * trace_cone(from, s1, unit);
-	acc += w[1] * trace_cone(from, s2, unit);
-	acc += w[1] * trace_cone(from, s3, unit);
-	acc += w[1] * trace_cone(from, s4, unit);
-
-	const vec3 c1_1 = mix(dir, corner1, ANGLE_MIX);
-	const vec3 c1_2 = mix(dir, -corner1, ANGLE_MIX);
-	const vec3 c1_3 = mix(dir, corner1_2, ANGLE_MIX);
-	const vec3 c1_4 = mix(dir, -corner1_2, ANGLE_MIX);
-
-	acc += w[2] * trace_cone(from, c1_1, unit);
-	acc += w[2] * trace_cone(from, c1_2, unit);
-	acc += w[2] * trace_cone(from, c1_3, unit);
-	acc += w[2] * trace_cone(from, c1_4, unit);
-
-	return acc / 9.0; // num traces to get a more usable output for now;
-}
-
-
-
 void main()
 {
 	vec3 aabb_dim = u_aabb.max - u_aabb.min;
@@ -233,5 +193,7 @@ void main()
 	vec3 normal = texture(u_normal_map, aUV).xyz;
 	vec3 normalized_n = normalize(normal);
 	vec3 v_diffuse = trace_cones_v3(position, normalized_n, unit);
-	FragColor = vec4(v_diffuse, 1.0);
+	vec3 view_dir = position - u_cam_position;
+	vec3 v_spec = trace_ray(position, reflect(view_dir, normalized_n), unit);
+	FragColor = vec4(mix(v_diffuse, v_spec, 0.5), 1.0);
 }

@@ -268,7 +268,7 @@ void dispatch_direct_light_pass_taa(shader& taa, framebuffer& lightpass_buffer_r
 
 }
 
-void dispatch_cone_tracing_pass(shader& voxel_cone_tracing, voxel::grid& voxel_data, framebuffer& buffer_conetracing, framebuffer& gbuffer, glm::ivec2 window_res, model& sponza, glm::vec3 _3d_tex_res)
+void dispatch_cone_tracing_pass(shader& voxel_cone_tracing, voxel::grid& voxel_data, framebuffer& buffer_conetracing, framebuffer& gbuffer, glm::ivec2 window_res, model& sponza, glm::vec3 _3d_tex_res, camera& cam)
 {
     glBindTexture(GL_TEXTURE_3D, voxel_data.texture.m_handle);
 
@@ -280,6 +280,7 @@ void dispatch_cone_tracing_pass(shader& voxel_cone_tracing, voxel::grid& voxel_d
     voxel_cone_tracing.set_vec3("u_aabb.max", sponza.m_aabb.max);
     voxel_cone_tracing.set_vec3("u_voxel_resolution", _3d_tex_res);
     voxel_cone_tracing.set_int("u_position_map", 0);
+    voxel_cone_tracing.set_vec3("u_cam_position", cam.m_pos);
 
     texture::bind_sampler_handle(gbuffer.m_colour_attachments[1], GL_TEXTURE0);
     voxel_cone_tracing.set_int("u_normal_map", 1);
@@ -399,20 +400,15 @@ int main()
     std::string gbuffer_frag = utils::load_string_from_path("assets/shaders/gbuffer.frag.glsl");
     std::string gbuffer_floats_frag = utils::load_string_from_path("assets/shaders/gbuffer_floats.frag.glsl");
     std::string gbuffer_lighting_frag = utils::load_string_from_path("assets/shaders/lighting.frag.glsl");
-
     std::string visualize_3dtex_vert = utils::load_string_from_path("assets/shaders/visualize_3d_tex.vert.glsl");
     std::string visualize_3dtex_frag = utils::load_string_from_path("assets/shaders/visualize_3d_tex.frag.glsl");
-
     std::string present_vert = utils::load_string_from_path("assets/shaders/present.vert.glsl");
     std::string present_frag = utils::load_string_from_path("assets/shaders/present.frag.glsl");
-    
     std::string dir_light_shadow_vert = utils::load_string_from_path("assets/shaders/dir_light_shadow.vert.glsl");
     std::string dir_light_shadow_frag = utils::load_string_from_path("assets/shaders/dir_light_shadow.frag.glsl");
-
     std::string voxelization_compute = utils::load_string_from_path("assets/shaders/gbuffer_voxelization.comp.glsl");
     std::string voxelization_mips_compute = utils::load_string_from_path("assets/shaders/voxel_mips.comp.glsl");
     std::string voxel_cone_tracing_frag = utils::load_string_from_path("assets/shaders/voxel_cone_tracing.frag.glsl");
-
     std::string taa_frag = utils::load_string_from_path("assets/shaders/taa.frag.glsl");
     std::string denoise_frag = utils::load_string_from_path("assets/shaders/denoise.frag.glsl");
     std::string gi_combine_frag = utils::load_string_from_path("assets/shaders/gi_combine.frag.glsl");
@@ -440,8 +436,8 @@ int main()
     material mat(gbuffer_shader);
 
     //model sponza = model::load_model_from_path("assets/models/tantive/scene.gltf");
-     model sponza = model::load_model_from_path("assets/models/sponza/Sponza.gltf");
-    //model sponza = model::load_model_from_path("assets/models/bistro/BistroExterior.fbx");
+    // model sponza = model::load_model_from_path("assets/models/sponza/Sponza.gltf");
+    model sponza = model::load_model_from_path("assets/models/bistro/BistroExterior.fbx");
     framebuffer gbuffer{};
     gbuffer.bind();
     gbuffer.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x, window_res.y, GL_RGBA, GL_NEAREST, GL_UNSIGNED_BYTE);
@@ -541,7 +537,7 @@ int main()
     constexpr glm::vec3 _3d_tex_res_vec = { _3d_tex_res, _3d_tex_res, _3d_tex_res };
 
     glm::vec3 pos = glm::vec3(0.0f);
-    glm::vec3 euler = glm::vec3(0.0f, 00.0f, 0.0f);
+    glm::vec3 euler = glm::vec3(270.0f, 0.0f, 0.0f);
     glm::vec3 scale = glm::vec3(0.1f);
     glm::mat4 model = utils::get_model_matrix(pos, euler, scale);
     glm::mat3 normal = utils::get_normal_matrix(model);
@@ -611,7 +607,7 @@ int main()
 
         if (draw_cone_tracing_pass || draw_cone_tracing_pass_no_taa)
         {
-            dispatch_cone_tracing_pass(voxel_cone_tracing, voxel_data, buffer_conetracing, gbuffer, window_res, sponza, _3d_tex_res_vec);
+            dispatch_cone_tracing_pass(voxel_cone_tracing, voxel_data, buffer_conetracing, gbuffer, window_res, sponza, _3d_tex_res_vec, cam);
         }
 
         if (draw_direct_lighting)

@@ -8,6 +8,7 @@
 #include "utils.h"
 #include "utils.h"
 #include "utils.h"
+#include "utils.h"
 #include <fstream>
 #include <sstream>
 #define GLM_ENABLE_EXPERIMENTAL
@@ -26,6 +27,17 @@ std::string utils::load_string_from_path(const std::string& path)
 
     stream << in.rdbuf();
     return stream.str();
+}
+
+std::vector<u8> utils::load_binary_from_path(const std::string& path)
+{
+    std::ifstream input(path, std::ios::binary);
+
+    std::vector<u8> bytes((std::istreambuf_iterator<char>(input)),
+        (std::istreambuf_iterator<char>()));
+
+    input.close();
+    return bytes;
 }
 
 glm::quat utils::get_quat_from_euler(glm::vec3 euler)

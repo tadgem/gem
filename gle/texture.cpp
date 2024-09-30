@@ -8,11 +8,14 @@
 #include "SOIL/SOIL.h"
 #include "gl.h"
 #include "stb_image.h"
-
+#include "utils.h"
 struct DDS_PIXELFORMAT {
 	unsigned long dwSize;
 	unsigned long dwFlags;
-	unsigned long dwFourCC;
+	union {
+		unsigned long		dwFourCC;
+		char				dwFourCC_Chars[4];
+	};
 	unsigned long dwRGBBitCount;
 	unsigned long dwRBitMask;
 	unsigned long dwGBitMask;
@@ -21,6 +24,7 @@ struct DDS_PIXELFORMAT {
 };
 
 typedef struct {
+	unsigned long			dwMagicNumber;
 	unsigned long           dwSize;
 	unsigned long           dwFlags;
 	unsigned long           dwHeight;
@@ -40,22 +44,27 @@ typedef struct {
 texture::texture(const std::string& path)
 {
 	//unsigned char* data = stbi_load(path.c_str(), & m_width, & m_height, &m_num_channels, 0);
-	unsigned char* data = SOIL_load_image(path.c_str(), &m_width, &m_height, &m_num_channels, SOIL_LOAD_AUTO);
+	std::vector<u8> data_o = utils::load_binary_from_path(path);
+	unsigned char* data = SOIL_load_image_from_memory(data_o.data(), data_o.size(),  & m_width, &m_height, &m_num_channels, SOIL_LOAD_AUTO);
 	if (!data)
 	{
 		std::cerr << "Failed to load texture at path : " << path << std::endl;
 		return;
 	}
+	std::string compressed_format_type = "";
+	int			block_size = -1;
 	if (path.find("dds"))
 	{
-		DDS_HEADER* header = new DDS_HEADER();
-		memcpy(header, data, sizeof(DDS_HEADER));
-		int size = header->dwSize;
-		std::cout << "What : " << size << "\n";
-		delete header;
+		DDS_HEADER header{};
+		memcpy(&header, &data_o[0], sizeof(DDS_HEADER));
+		compressed_format_type = std::string(header.ddspf.dwFourCC_Chars, 4);
+		std::cout << "DDS File, compression format: " << compressed_format_type << "\n";
+		std::cout << "R Mask" << std::hex << header.ddspf.dwRBitMask << ", ";
+		std::cout << "G Mask" << std::hex << header.ddspf.dwGBitMask << ", ";
+		std::cout << "B Mask" << std::hex << header.ddspf.dwBBitMask << ", ";
+		std::cout << "A Mask" << std::hex << header.ddspf.dwABitMask << "\n";
 	}
 
-	// m_handle = SOIL_create_OGL_texture(data, m_width, m_height, m_num_channels, 0, SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y);
 	glGenTextures(1, &m_handle);
 	glBindTexture(GL_TEXTURE_2D, m_handle);
 	
@@ -68,7 +77,35 @@ texture::texture(const std::string& path)
 	{
 		format = GL_RGB;
 	}
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_width, m_height, 0, format, GL_UNSIGNED_BYTE, data);
+	/*if (compressed_format_type == "DXT1")
+	{
+		format = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+		block_size = 8;
+	}
+	if (compressed_format_type == "DXT3")
+	{
+		format = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+		block_size = 16;
+	}
+	if (compressed_format_type == "DXT5")
+	{
+		format = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+		block_size = 16;
+	}*/
+	if (compressed_format_type == "ATI2")
+	{
+		format = GL_COMPRESSED_RED_GREEN_RGTC2_EXT;
+		block_size = 16;
+	}
+	if (format == GL_RGBA || format == GL_RGB)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_width, m_height, 0, format, GL_UNSIGNED_BYTE, data);
+	}
+	else
+	{
+		unsigned int size = ((m_width + 3) / 4) * ((m_height + 3) / 4) * block_size;
+		glCompressedTexImage2D(GL_TEXTURE_2D, 0, format, m_width, m_height, 0, size, data);
+	}
 	glGenerateMipmap(GL_TEXTURE_2D);
 
 	SOIL_free_image_data(data);
