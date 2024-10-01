@@ -82,21 +82,21 @@ texture::texture(const std::string& path)
 	{
 		format = GL_RGB;
 	}
-	//if (compressed_format_type == "DXT1")
-	//{
-	//	format = GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
-	//	block_size = 8;
-	//}
-	//if (compressed_format_type == "DXT3")
-	//{
-	//	format = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
-	//	block_size = 16;
-	//}
-	//if (compressed_format_type == "DXT5")
-	//{
-	//	format = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
-	//	block_size = 16;
-	//}
+	if (compressed_format_type == "DXT1")
+	{
+		format = GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
+		block_size = 8;
+	}
+	if (compressed_format_type == "DXT3")
+	{
+		format = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+		block_size = 16;
+	}
+	if (compressed_format_type == "DXT5")
+	{
+		format = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+		block_size = 16;
+	}
 	if (compressed_format_type == "ATI2")
 	{
 		format = GL_COMPRESSED_RED_GREEN_RGTC2_EXT;
