@@ -60,7 +60,7 @@ vec3 getNormalFromMap()
 {
     vec3 tangentNormal = texture(u_normal_map, aUV).xyz * 2.0 - 1.0;
 
-    if(tangentNormal.z == 0.0)
+    if(abs(tangentNormal.z) < 0.0001)
     {
         tangentNormal = UnpackNormalMap(tangentNormal);
     }

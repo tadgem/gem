@@ -120,7 +120,7 @@ vec3 trace_cone(vec3 from, vec3 dir, vec3 unit)
 {
 	const int MAX_STEPS = int(u_voxel_resolution.x); // should probs be the longest axis of minimum mip dimension
 	const int MAX_LOD	= 5;
-	const float MAX_DISTANCE = 20.0;
+	const float MAX_DISTANCE = length(u_aabb.max - u_aabb.min) / 16.0;
 	vec4 accum = vec4(0.0);
 	vec3 pos = from;
 	int steps = 0;

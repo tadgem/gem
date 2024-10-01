@@ -9,6 +9,14 @@
 #include "gl.h"
 #include "stb_image.h"
 #include "utils.h"
+
+#define DDPS_ALPHAPIXELS 0x1
+#define DDPS_ALPHA 0x2
+#define DDPS_FOURCC 0x4
+#define DDPS_RGB 0x40
+#define DDPS_YUV 0x200
+#define DDPS_LUMINANCE 0x20000
+
 struct DDS_PIXELFORMAT {
 	unsigned long dwSize;
 	unsigned long dwFlags;
@@ -59,10 +67,7 @@ texture::texture(const std::string& path)
 		memcpy(&header, &data_o[0], sizeof(DDS_HEADER));
 		compressed_format_type = std::string(header.ddspf.dwFourCC_Chars, 4);
 		std::cout << "DDS File, compression format: " << compressed_format_type << "\n";
-		std::cout << "R Mask" << std::hex << header.ddspf.dwRBitMask << ", ";
-		std::cout << "G Mask" << std::hex << header.ddspf.dwGBitMask << ", ";
-		std::cout << "B Mask" << std::hex << header.ddspf.dwBBitMask << ", ";
-		std::cout << "A Mask" << std::hex << header.ddspf.dwABitMask << "\n";
+		std::cout << "Has Alpha? " << header.ddspf.dwFlags && DDPS_ALPHAPIXELS;
 	}
 
 	glGenTextures(1, &m_handle);
@@ -77,21 +82,21 @@ texture::texture(const std::string& path)
 	{
 		format = GL_RGB;
 	}
-	/*if (compressed_format_type == "DXT1")
-	{
-		format = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
-		block_size = 8;
-	}
-	if (compressed_format_type == "DXT3")
-	{
-		format = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
-		block_size = 16;
-	}
-	if (compressed_format_type == "DXT5")
-	{
-		format = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
-		block_size = 16;
-	}*/
+	//if (compressed_format_type == "DXT1")
+	//{
+	//	format = GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
+	//	block_size = 8;
+	//}
+	//if (compressed_format_type == "DXT3")
+	//{
+	//	format = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+	//	block_size = 16;
+	//}
+	//if (compressed_format_type == "DXT5")
+	//{
+	//	format = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+	//	block_size = 16;
+	//}
 	if (compressed_format_type == "ATI2")
 	{
 		format = GL_COMPRESSED_RED_GREEN_RGTC2_EXT;
@@ -104,7 +109,7 @@ texture::texture(const std::string& path)
 	else
 	{
 		unsigned int size = ((m_width + 3) / 4) * ((m_height + 3) / 4) * block_size;
-		glCompressedTexImage2D(GL_TEXTURE_2D, 0, format, m_width, m_height, 0, size, data);
+		glCompressedTexImage2D(GL_TEXTURE_2D, 0, format, m_width, m_height, 0, size, &data_o[0]);
 	}
 	glGenerateMipmap(GL_TEXTURE_2D);
 
