@@ -49,8 +49,8 @@ Im3d::Vec3 ToIm3D(glm::vec3& input)
 
 static glm::mat4 last_vp = glm::mat4(1.0);
 inline static int frame_index = 0;
-inline static float gi_resolution_scale = 0.42;
-inline static int shadow_resolution = 4096;
+inline static float gi_resolution_scale = 0.5;
+inline static int shadow_resolution = 2048;
 
 void dispatch_gbuffer_voxelization(shader& voxelization, model& _model, voxel::grid& voxel_data, framebuffer& gbuffer, framebuffer& lightpass_buffer, glm::ivec2 window_res)
 {
@@ -400,7 +400,7 @@ int main()
 
     test_json["Key"] = 2;
 
-    glm::ivec2 window_res{ 1280, 720};
+    glm::ivec2 window_res{ 1920, 1080};
     engine::init(window_res);
     custom_orientation = glm::vec3(0, 1, 0);
 
@@ -547,7 +547,7 @@ int main()
     constexpr glm::vec3 _3d_tex_res_vec = { _3d_tex_res, _3d_tex_res, _3d_tex_res };
 
     glm::vec3 pos = glm::vec3(0.0f);
-    glm::vec3 euler = glm::vec3(270.0f, 0.0f, 0.0f);
+    glm::vec3 euler = glm::vec3(0.0f, 0.0f, 0.0f);
     glm::vec3 scale = glm::vec3(0.03f);
     glm::mat4 model = utils::get_model_matrix(pos, euler, scale);
     glm::mat3 normal = utils::get_normal_matrix(model);

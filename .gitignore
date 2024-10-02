@@ -37,3 +37,4 @@
 CMakeSettings.json
 /swbuild
 /assets/models/bistro
+third-party/glew/glew.pc
