@@ -1,7 +1,4 @@
-#include "texture.h"
-#include "texture.h"
-#include "texture.h"
-#include "texture.h"
+#define GLM_ENABLE_EXPERIMENTAL
 #include "texture.h"
 #include <iostream>
 #include "GL/glew.h"
@@ -9,6 +6,7 @@
 #include "gl.h"
 #include "stb_image.h"
 #include "utils.h"
+#include "gli.hpp"
 
 #define DDPS_ALPHAPIXELS 0x1
 #define DDPS_ALPHA 0x2
@@ -51,69 +49,65 @@ typedef struct {
 
 texture::texture(const std::string& path)
 {
-	//unsigned char* data = stbi_load(path.c_str(), & m_width, & m_height, &m_num_channels, 0);
-	std::vector<u8> data_o = utils::load_binary_from_path(path);
-	unsigned char* data = SOIL_load_image_from_memory(data_o.data(), data_o.size(),  & m_width, &m_height, &m_num_channels, SOIL_LOAD_AUTO);
-	if (!data)
-	{
-		std::cerr << "Failed to load texture at path : " << path << std::endl;
-		return;
-	}
 	std::string compressed_format_type = "";
 	int			block_size = -1;
-	if (path.find("dds"))
-	{
-		DDS_HEADER header{};
-		memcpy(&header, &data_o[0], sizeof(DDS_HEADER));
-		compressed_format_type = std::string(header.ddspf.dwFourCC_Chars, 4);
-		std::cout << "DDS File, compression format: " << compressed_format_type << "\n";
-		std::cout << "Has Alpha? " << header.ddspf.dwFlags && DDPS_ALPHAPIXELS;
-	}
-
-	glGenTextures(1, &m_handle);
-	glBindTexture(GL_TEXTURE_2D, m_handle);
 	
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	GLenum format = GL_RGBA;
-	if (m_num_channels < 4)
+	if (path.find("dds") != std::string::npos)
 	{
-		format = GL_RGB;
-	}
-	if (compressed_format_type == "DXT1")
-	{
-		format = GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
-		block_size = 8;
-	}
-	if (compressed_format_type == "DXT3")
-	{
-		format = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
-		block_size = 16;
-	}
-	if (compressed_format_type == "DXT5")
-	{
-		format = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
-		block_size = 16;
-	}
-	if (compressed_format_type == "ATI2")
-	{
-		format = GL_COMPRESSED_RED_GREEN_RGTC2_EXT;
-		block_size = 16;
-	}
-	if (format == GL_RGBA || format == GL_RGB)
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_width, m_height, 0, format, GL_UNSIGNED_BYTE, data);
-	}
-	else
-	{
-		unsigned int size = ((m_width + 3) / 4) * ((m_height + 3) / 4) * block_size;
-		glCompressedTexImage2D(GL_TEXTURE_2D, 0, format, m_width, m_height, 0, size, &data_o[0]);
-	}
-	glGenerateMipmap(GL_TEXTURE_2D);
+		gli::texture dds_tex_raw = gli::load_dds(path);
+		gli::texture dds_tex = gli::flip(dds_tex_raw);
+		gli::gl GL(gli::gl::PROFILE_GL33);
+		gli::gl::format const format = GL.translate(dds_tex.format(), dds_tex.swizzles());
+		GLenum target = GL.translate(dds_tex.target());
 
-	SOIL_free_image_data(data);
+		m_width = dds_tex.extent().x;
+		m_height = dds_tex.extent().y;
+
+		glGenTextures(1, &m_handle);
+		glBindTexture(target, m_handle);
+		glTexParameteri(target, GL_TEXTURE_BASE_LEVEL, 0);
+		glTexParameteri(target, GL_TEXTURE_MAX_LEVEL, static_cast<GLint>(dds_tex.levels() - 1));
+		glTexParameteriv(target, GL_TEXTURE_SWIZZLE_RGBA, &format.Swizzles[0]);
+		glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexStorage2D(target, static_cast<GLint>(dds_tex.levels()), format.Internal, dds_tex.extent().x, dds_tex.extent().y);
+		for (std::size_t Level = 0; Level < dds_tex.levels(); ++Level)
+		{
+			glm::tvec3<GLsizei> Extent(dds_tex.extent(Level));
+			glCompressedTexSubImage2D(
+				target, static_cast<GLint>(Level), 0, 0, Extent.x, Extent.y,
+				format.Internal, static_cast<GLsizei>(dds_tex.size(Level)), dds_tex.data(0, 0, Level));
+		}
+
+
+	}
+	else {
+		std::vector<u8> data_o = utils::load_binary_from_path(path);
+		unsigned char* data = SOIL_load_image_from_memory(data_o.data(), data_o.size(),  & m_width, &m_height, &m_num_channels, SOIL_LOAD_AUTO);
+		if (!data)
+		{
+			std::cerr << "Failed to load texture at path : " << path << std::endl;
+			return;
+		}
+		glGenTextures(1, &m_handle);
+		glBindTexture(GL_TEXTURE_2D, m_handle);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		GLenum format = GL_RGBA;
+		if (m_num_channels < 4)
+		{
+			format = GL_RGB;
+		}
+		if (format == GL_RGBA || format == GL_RGB)
+		{
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_width, m_height, 0, format, GL_UNSIGNED_BYTE, data);
+		}
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
 }
 
 void texture::bind_sampler(GLenum texture_slot, GLenum texture_target)
@@ -186,8 +180,8 @@ texture texture::create_3d_texture_empty(glm::ivec3 dim, GLenum format, GLenum p
 	glAssert(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_BASE_LEVEL, 0));
 	glAssert(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAX_LEVEL, 5));
 
-	glAssert(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST));
-	glAssert(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_NEAREST));
+	glAssert(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
+	glAssert(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 	GLfloat clear[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 	glAssert(glTexImage3D(GL_TEXTURE_3D, 0, pixel_format, dim.x, dim.y, dim.z, 0, format, data_type, NULL));
 	glAssert(glClearTexImage(GL_TEXTURE_3D, 0, pixel_format, GL_FLOAT, &clear[0]));

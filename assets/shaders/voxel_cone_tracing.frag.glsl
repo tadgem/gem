@@ -195,5 +195,5 @@ void main()
 	vec3 v_diffuse = trace_cones_v3(position, normalized_n, unit);
 	vec3 view_dir = position - u_cam_position;
 	vec3 v_spec = trace_ray(position, reflect(view_dir, normalized_n), unit);
-	FragColor = vec4(mix(v_diffuse, v_spec, 0.5), 1.0);
+	FragColor = vec4(mix(v_diffuse, v_spec, 0.1), 1.0);
 }

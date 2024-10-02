@@ -34,6 +34,7 @@ set(GL_SRC
         ${CMAKE_CURRENT_SOURCE_DIR}/texture.h
         ${CMAKE_CURRENT_SOURCE_DIR}/framebuffer.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/framebuffer.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/mesh.h
         ${CMAKE_CURRENT_SOURCE_DIR}/model.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/model.h
         ${CMAKE_CURRENT_SOURCE_DIR}/shape.cpp
@@ -62,6 +63,7 @@ set(GLE_INCLUDES
         ${THIRD_PARTY_DIR}/assimp/include
         ${THIRD_PARTY_DIR}/imgui/backends
         ${THIRD_PARTY_DIR}/glm
+        ${THIRD_PARTY_DIR}/gli/gli
         ${THIRD_PARTY_DIR}/soil/include
         ${THIRD_PARTY_DIR}/entt
         ${THIRD_PARTY_DIR}

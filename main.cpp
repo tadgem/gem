@@ -49,7 +49,8 @@ Im3d::Vec3 ToIm3D(glm::vec3& input)
 
 static glm::mat4 last_vp = glm::mat4(1.0);
 inline static int frame_index = 0;
-inline static float gi_resolution_scale = 0.25;
+inline static float gi_resolution_scale = 0.42;
+inline static int shadow_resolution = 4096;
 
 void dispatch_gbuffer_voxelization(shader& voxelization, model& _model, voxel::grid& voxel_data, framebuffer& gbuffer, framebuffer& lightpass_buffer, glm::ivec2 window_res)
 {
@@ -93,6 +94,8 @@ void dispatch_gbuffer(framebuffer& gbuffer, framebuffer& previous_position_buffe
     gbuffer.bind();
     glm::mat4 current_vp = cam.m_proj * cam.m_view;
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
     gbuffer_shader.use();
     gbuffer_shader.set_vec2("u_resolution", {win_res.x, win_res.y});
     gbuffer_shader.set_mat4("u_vp", current_vp);
@@ -190,6 +193,7 @@ void dispatch_shadow_pass(framebuffer& shadow_fb, shader& shadow_shader, dir_lig
         entry.m_vao.use();
         glDrawElements(GL_TRIANGLES, entry.m_index_count, GL_UNSIGNED_INT, 0);
     }
+
 
     shadow_fb.unbind();
     glDisable(GL_CULL_FACE);
@@ -297,6 +301,8 @@ void dispatch_cone_tracing_pass(shader& voxel_cone_tracing, voxel::grid& voxel_d
 
 void dispatch_cone_tracing_pass_taa(shader& taa, shader& denoise, shader& present_shader, framebuffer& buffer_conetracing, framebuffer& buffer_conetracing_resolve, framebuffer& buffer_conetracing_denoise, framebuffer& history_buffer_conetracing, framebuffer& gbuffer, float aSigma, float aThreshold, float aKSigma, glm::ivec2 window_res)
 {
+
+    glViewport(0, 0, window_res.x * gi_resolution_scale, window_res.y * gi_resolution_scale);
     buffer_conetracing_resolve.bind();
     shapes::s_screen_quad.use();
     taa.use();
@@ -327,6 +333,8 @@ void dispatch_cone_tracing_pass_taa(shader& taa, shader& denoise, shader& presen
 
     dispatch_present_image(present_shader, "u_image_sampler", 0, buffer_conetracing_denoise.m_colour_attachments.front());
     texture::bind_sampler_handle(0, GL_TEXTURE0);
+    glViewport(0, 0, window_res.x, window_res.y);
+
 }
 
 void dispatch_visualize_3d_texture(voxel::grid& voxel_data, voxel::grid_visualiser& voxel_visualiser, camera& cam, model& sponza, shader& z_prepass_shader, glm::mat4& model)
@@ -453,13 +461,15 @@ int main()
     gbuffer.check();
     gbuffer.unbind();
 
+    
+
     framebuffer dir_light_shadow_buffer{};
     dir_light_shadow_buffer.bind();
     gl_handle depthMap;
     glGenTextures(1, &depthMap);
     glBindTexture(GL_TEXTURE_2D, depthMap);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
-        2048, 2048, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+        shadow_resolution, shadow_resolution, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -469,8 +479,8 @@ int main()
     glReadBuffer(GL_NONE);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     dir_light_shadow_buffer.m_depth_attachment = depthMap;
-    dir_light_shadow_buffer.m_height = 2048;
-    dir_light_shadow_buffer.m_width = 2048;
+    dir_light_shadow_buffer.m_height = shadow_resolution;
+    dir_light_shadow_buffer.m_width = shadow_resolution;
     dir_light_shadow_buffer.unbind();
 
     framebuffer lightpass_buffer{};
@@ -511,13 +521,13 @@ int main()
 
     framebuffer buffer_conetracing_denoise{};
     buffer_conetracing_denoise.bind();
-    buffer_conetracing_denoise.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x, window_res.y, GL_RGBA16F, GL_LINEAR, GL_FLOAT);
+    buffer_conetracing_denoise.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x * gi_resolution_scale, window_res.y* gi_resolution_scale, GL_RGBA16F, GL_LINEAR, GL_FLOAT);
     buffer_conetracing_denoise.check();
     buffer_conetracing_denoise.unbind();
 
     framebuffer buffer_conetracing_resolve{};
     buffer_conetracing_resolve.bind();
-    buffer_conetracing_resolve.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x, window_res.y, GL_RGBA16F, GL_LINEAR, GL_FLOAT);
+    buffer_conetracing_resolve.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x* gi_resolution_scale, window_res.y* gi_resolution_scale, GL_RGBA16F, GL_LINEAR, GL_FLOAT);
     buffer_conetracing_resolve.check();
     buffer_conetracing_resolve.unbind();
 
@@ -537,8 +547,8 @@ int main()
     constexpr glm::vec3 _3d_tex_res_vec = { _3d_tex_res, _3d_tex_res, _3d_tex_res };
 
     glm::vec3 pos = glm::vec3(0.0f);
-    glm::vec3 euler = glm::vec3(0.0f, 0.0f, 0.0f);
-    glm::vec3 scale = glm::vec3(0.1f);
+    glm::vec3 euler = glm::vec3(270.0f, 0.0f, 0.0f);
+    glm::vec3 scale = glm::vec3(0.03f);
     glm::mat4 model = utils::get_model_matrix(pos, euler, scale);
     glm::mat3 normal = utils::get_normal_matrix(model);
     sponza.m_aabb = utils::transform_aabb(sponza.m_aabb, model);
