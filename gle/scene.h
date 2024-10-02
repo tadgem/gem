@@ -3,7 +3,20 @@
 #include <optional>
 #include <memory>
 #include "entt.hpp"
-class scene;
+
+class entity;
+
+class scene
+{
+public:
+
+    scene(const std::string& scene_name);
+
+    entity		create_entity(const std::string& name);
+
+    const std::string	m_name;
+    entt::registry		m_registry;
+};
 
 class entity
 {
@@ -48,16 +61,4 @@ public:
 struct entity_data
 {
 	std::string m_name;
-};
-
-class scene
-{
-public:
-
-	scene(const std::string& scene_name);
-
-	entity		create_entity(const std::string& name);
-
-	const std::string	m_name;
-	entt::registry		m_registry;
 };

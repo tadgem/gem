@@ -10,7 +10,7 @@ class voxel
 public:
 	struct grid
 	{
-		texture		texture;		// 3D Texture (Voxel Data)
+		texture		voxel_texture;		// 3D Texture (Voxel Data)
 		glm::ivec3	resolution;
 		glm::vec3	voxel_unit;		// scale of each texel
 		aabb		bounding_box;
