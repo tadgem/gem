@@ -13,17 +13,12 @@ set(SDL2_DISABLE_UNINSTALL ON CACHE BOOL "Disable SDL Uninstall")
 
 set(THIRD_PARTY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/third-party/ CACHE INTERNAL "")
 set(SUBMODULE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/submodules/ CACHE INTERNAL "")
+set(ASSETS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/assets)
 
 add_subdirectory(third-party/sdl)
 add_subdirectory(third-party/glew/build/cmake)
 add_subdirectory(third-party/glm)
 add_subdirectory(third-party/assimp)
 add_subdirectory(gle)
-
-add_executable(demo main.cpp)
-
-target_link_libraries(demo PRIVATE gle)
-target_include_directories(demo PRIVATE ${GLE_INCLUDES})
-
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/assets DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/assets DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+add_subdirectory(apps/gi_demo)
+add_subdirectory(apps/ecs_demo)
