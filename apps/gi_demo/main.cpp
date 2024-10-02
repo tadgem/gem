@@ -548,7 +548,7 @@ int main()
 
     glm::vec3 pos = glm::vec3(0.0f);
     glm::vec3 euler = glm::vec3(0.0f, 0.0f, 0.0f);
-    glm::vec3 scale = glm::vec3(0.03f);
+    glm::vec3 scale = glm::vec3(0.1f);
     glm::mat4 model = utils::get_model_matrix(pos, euler, scale);
     glm::mat3 normal = utils::get_normal_matrix(model);
     sponza.m_aabb = utils::transform_aabb(sponza.m_aabb, model);
@@ -703,8 +703,8 @@ int main()
                 {
                     ImGui::DragFloat3("Position", &lights[l].position[0]);
                     ImGui::ColorEdit3("Colour", &lights[l].colour[0]);
-                    ImGui::DragFloat("Radius", &lights[l].radius);
-                    ImGui::DragFloat("Intensity", &lights[l].intensity);
+                    ImGui::DragFloat("Radius", &lights[l].radius, 1.0f, 0.0f, 1000.0f);
+                    ImGui::DragFloat("Intensity", &lights[l].intensity, 1.0f, 0.0f, 1000.0f);
                     ImGui::TreePop();
                 }
                 ImGui::PopID();
