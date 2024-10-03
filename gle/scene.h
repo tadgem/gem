@@ -2,9 +2,12 @@
 #include <string>
 #include <optional>
 #include <memory>
+#include <vector>
+#include "alias.h"
 #include "entt.hpp"
-
 class entity;
+class model;
+class shader;
 
 class scene
 {
@@ -12,10 +15,15 @@ public:
 
     scene(const std::string& scene_name);
 
-    entity		create_entity(const std::string& name);
+    entity					create_entity(const std::string& name);
+	std::vector<entity>		create_entity_from_model(model& model_to_load, shader& material_shader);
+
+	void					on_update();
 
     const std::string	m_name;
     entt::registry		m_registry;
+protected:
+	u32					p_created_entity_count;
 };
 
 class entity

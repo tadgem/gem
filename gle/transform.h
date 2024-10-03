@@ -3,13 +3,17 @@
 #include "glm.hpp"
 #include "gtc/quaternion.hpp"
 
+class scene;
+
 struct transform
 {
-	glm::vec3 m_position;
-	glm::vec3 m_euler;
-	glm::vec3 m_scale;
-	glm::quat m_rotation;
+	glm::vec3 m_position	{ 0.0, 0.0, 0.0 };
+	glm::vec3 m_euler		{ 0.0, 0.0, 0.0 };
+	glm::vec3 m_scale		{ 1.0, 1.0, 1.0 };
+	glm::quat m_rotation	= glm::quat();
 
-	glm::mat4 m_model;
-	glm::mat4 m_last_model;
+	glm::mat4 m_model		= glm::mat4(1.0);
+	glm::mat4 m_last_model	= glm::mat4(1.0);
+
+	static void update_transforms(scene& current_scene);
 };

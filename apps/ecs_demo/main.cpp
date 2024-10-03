@@ -22,6 +22,7 @@
 #include "json.hpp"
 #include "scene.h"
 #include "asset.h"
+#include "transform.h"
 
 using namespace nlohmann;
 static glm::vec3 custom_orientation;
@@ -49,15 +50,15 @@ Im3d::Vec3 ToIm3D(glm::vec3& input)
 
 static glm::mat4 last_vp = glm::mat4(1.0);
 inline static int frame_index = 0;
-inline static float gi_resolution_scale = 0.5;
+inline static float gi_resolution_scale = 0.75;
 inline static int shadow_resolution = 2048;
 
-void dispatch_gbuffer_voxelization(shader& voxelization, model& _model, voxel::grid& voxel_data, framebuffer& gbuffer, framebuffer& lightpass_buffer, glm::ivec2 window_res)
+void dispatch_gbuffer_voxelization(shader& voxelization, aabb& voxel_bounding_volume, voxel::grid& voxel_data, framebuffer& gbuffer, framebuffer& lightpass_buffer, glm::ivec2 window_res)
 {
     voxelization.use();
     voxelization.set_vec2("u_input_resolution", { window_res.x, window_res.y });
-    voxelization.set_vec3("u_aabb.min", _model.m_aabb.min);
-    voxelization.set_vec3("u_aabb.max", _model.m_aabb.max);
+    voxelization.set_vec3("u_aabb.min", voxel_bounding_volume.min);
+    voxelization.set_vec3("u_aabb.max", voxel_bounding_volume.max);
     texture::bind_image_handle(voxel_data.voxel_texture.m_handle, 0, 0, GL_RGBA32F);
     texture::bind_sampler_handle(gbuffer.m_colour_attachments[1], GL_TEXTURE0);
     texture::bind_sampler_handle(lightpass_buffer.m_colour_attachments[0], GL_TEXTURE1);
@@ -88,7 +89,7 @@ void dispatch_gen_voxel_mips(shader& voxelization_mips, voxel::grid& voxel_data,
     glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 }
 
-void dispatch_gbuffer(framebuffer& gbuffer, framebuffer& previous_position_buffer, shader& gbuffer_shader, glm::mat4 mvp, glm::mat4 model_mat, glm::mat3 normal, camera& cam, std::vector<point_light>& lights, model& sponza, glm::ivec2 win_res)
+void dispatch_gbuffer(framebuffer& gbuffer, framebuffer& previous_position_buffer, shader& gbuffer_shader, glm::mat3 normal, camera& cam, glm::ivec2 win_res, scene& current_scene)
 {
     frame_index++;
     gbuffer.bind();
@@ -99,9 +100,7 @@ void dispatch_gbuffer(framebuffer& gbuffer, framebuffer& previous_position_buffe
     gbuffer_shader.use();
     gbuffer_shader.set_vec2("u_resolution", {win_res.x, win_res.y});
     gbuffer_shader.set_mat4("u_vp", current_vp);
-    gbuffer_shader.set_mat4("u_model", model_mat);
     gbuffer_shader.set_mat4("u_last_vp", last_vp);
-    gbuffer_shader.set_mat4("u_last_model", model_mat);
     gbuffer_shader.set_mat4("u_normal", normal);
     gbuffer_shader.set_int("u_frame_index", frame_index);
     gbuffer_shader.set_int("u_diffuse_map", 0);
@@ -118,30 +117,16 @@ void dispatch_gbuffer(framebuffer& gbuffer, framebuffer& previous_position_buffe
     texture::bind_sampler_handle(0, GL_TEXTURE4);
 
     texture::bind_sampler_handle(previous_position_buffer.m_colour_attachments.front(), GL_TEXTURE5);
-    for (auto& entry : sponza.m_meshes)
+
+    auto renderables = current_scene.m_registry.view<transform, mesh, material>();
+
+    for (auto& [e, trans, emesh, ematerial] : renderables.each())
     {
-        auto& maps = sponza.m_materials[entry.m_material_index].m_material_maps;
-        entry.m_vao.use();
-        maps[texture_map_type::diffuse].bind_sampler(GL_TEXTURE0);
-
-        if (maps.find(texture_map_type::normal) != maps.end())
-        {
-            texture::bind_sampler_handle(maps[texture_map_type::normal].m_handle, GL_TEXTURE1);
-        }
-        if (maps.find(texture_map_type::metallicness) != maps.end())
-        {
-            texture::bind_sampler_handle(maps[texture_map_type::metallicness].m_handle, GL_TEXTURE2);
-        }
-        if (maps.find(texture_map_type::roughness) != maps.end())
-        {
-            texture::bind_sampler_handle(maps[texture_map_type::roughness].m_handle, GL_TEXTURE3);
-        }
-        if (maps.find(texture_map_type::ao) != maps.end())
-        {
-            texture::bind_sampler_handle(maps[texture_map_type::ao].m_handle, GL_TEXTURE4);
-        }
-
-        glDrawElements(GL_TRIANGLES, entry.m_index_count, GL_UNSIGNED_INT, 0);
+        gbuffer_shader.set_mat4("u_model", trans.m_model);
+        gbuffer_shader.set_mat4("u_last_model", trans.m_last_model);
+        emesh.m_vao.use();
+        ematerial.bind_material_uniforms(gbuffer_shader);
+        glDrawElements(GL_TRIANGLES, emesh.m_index_count, GL_UNSIGNED_INT, 0);
     }
     gbuffer.unbind();
     last_vp = current_vp;
@@ -375,20 +360,6 @@ void draw_arrow(glm::vec3 pos, glm::vec3 dir)
     Im3d::DrawSphere(ToIm3D(end), 0.25f);
 }
 
-void OnIm3D(aabb& level_bb, camera& cam , glm::ivec2 window_res)
-{
-    //aabb bb = level_bb;
-    Im3d::DrawAlignedBox(
-        { level_bb.min.x, level_bb.min.y, level_bb.min.z },
-        { level_bb.max.x, level_bb.max.y, level_bb.max.z }
-    );
-
-    glm::vec3 mouse_world_pos = cam.m_pos + utils::get_mouse_world_pos(input::get_mouse_position(), { window_res.x, window_res.y }, cam.m_proj, cam.m_view);
-    glm::vec3 ray_end = mouse_world_pos + (cam.m_forward * 50.0f);
-
-    Im3d::DrawLine(ToIm3D(mouse_world_pos), ToIm3D(ray_end), 2.0, Im3d::Color_Cyan);
-}
-
 float get_aabb_area(aabb& bb)
 {
     return glm::length(bb.max - bb.min) ;
@@ -396,10 +367,6 @@ float get_aabb_area(aabb& bb)
 
 int main()
 {
-    json test_json;
-
-    test_json["Key"] = 2;
-
     glm::ivec2 window_res{ 1920, 1080};
     engine::init(window_res);
     custom_orientation = glm::vec3(0, 1, 0);
@@ -420,7 +387,6 @@ int main()
     std::string taa_frag = utils::load_string_from_path("assets/shaders/taa.frag.glsl");
     std::string denoise_frag = utils::load_string_from_path("assets/shaders/denoise.frag.glsl");
     std::string gi_combine_frag = utils::load_string_from_path("assets/shaders/gi_combine.frag.glsl");
-
 
     shader gbuffer_shader(gbuffer_vert, gbuffer_frag);
     shader gbuffer_floats_shader(gbuffer_vert, gbuffer_floats_frag);
@@ -443,10 +409,12 @@ int main()
     entity_data& data = e.get_component<entity_data>();
     material mat(gbuffer_shader);
 
-    //model sponza = model::load_model_from_path("assets/models/tantive/scene.gltf");
+    e.add_component<material>(gbuffer_shader);
     model sponza = model::load_model_from_path("assets/models/sponza/Sponza.gltf");
-    //model sponza = model::load_model_from_path("assets/models/bistro/BistroExterior.fbx");
     framebuffer gbuffer{};
+
+    scene.create_entity_from_model(sponza, gbuffer_shader);
+
     gbuffer.bind();
     gbuffer.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x, window_res.y, GL_RGBA, GL_NEAREST, GL_UNSIGNED_BYTE);
     gbuffer.add_colour_attachment(GL_COLOR_ATTACHMENT1, window_res.x, window_res.y, GL_RGBA32F, GL_NEAREST, GL_FLOAT);
@@ -543,12 +511,12 @@ int main()
     lights.push_back({ {-10.0, 0.0, -10.0}, {0.0, 255.0, 0.0}, 30.0f });
     lights.push_back({ {-10.0, 0.0, 10.0}, {0.0, 0.0, 255.0} , 40.0f});
 
-    constexpr int _3d_tex_res = 384;
+    constexpr int _3d_tex_res = 128;
     constexpr glm::vec3 _3d_tex_res_vec = { _3d_tex_res, _3d_tex_res, _3d_tex_res };
 
     glm::vec3 pos = glm::vec3(0.0f);
     glm::vec3 euler = glm::vec3(0.0f, 0.0f, 0.0f);
-    glm::vec3 scale = glm::vec3(0.03f);
+    glm::vec3 scale = glm::vec3(0.1f);
     glm::mat4 model = utils::get_model_matrix(pos, euler, scale);
     glm::mat3 normal = utils::get_normal_matrix(model);
     sponza.m_aabb = utils::transform_aabb(sponza.m_aabb, model);
@@ -581,9 +549,9 @@ int main()
     glm::vec3 aabb_center = sponza.m_aabb.min + aabb_half_extent;
     glm::mat4 aabb_model = utils::get_model_matrix(aabb_center, glm::vec3(0.0f), aabb_half_extent * 2.0f);
 
-    GLfloat aSigma = 1.0f;
-    GLfloat aThreshold = 0.020f;
-    GLfloat aKSigma =  1.0f;
+    GLfloat aSigma = 2.0f;
+    GLfloat aThreshold = 1000.f;
+    GLfloat aKSigma =  2.0f;
     
     while (!engine::s_quit)
     {
@@ -595,16 +563,19 @@ int main()
         engine::engine_pre_frame();        
         glm::mat4 mvp = cam.m_proj * cam.m_view * model;
         glm::vec2 window_dim = engine::get_window_dim();
-        controller.update(window_dim, cam);
-        cam.update(window_dim);
         im3d_gl::new_frame_im3d(im3d_s);
         
+        controller.update(window_dim, cam);
+        cam.update(window_dim);
+        scene.on_update();
+
+
         // compute
-        dispatch_gbuffer_voxelization(voxelization, sponza, voxel_data, gbuffer, lightpass_buffer, window_res);
+        dispatch_gbuffer_voxelization(voxelization, sponza.m_aabb, voxel_data, gbuffer, lightpass_buffer, window_res);
 
         dispatch_gen_voxel_mips(voxelization_mips, voxel_data, _3d_tex_res_vec);
         
-        dispatch_gbuffer(gbuffer, history_buffer_position, gbuffer_shader, mvp, model, normal, cam, lights, sponza, window_res);
+        dispatch_gbuffer(gbuffer, history_buffer_position, gbuffer_shader, normal, cam, window_res, scene);
 
         dispatch_shadow_pass(dir_light_shadow_buffer, shadow_shader, dir, sponza, model, window_res);
 
@@ -715,7 +686,6 @@ int main()
         }
         if (draw_im3d)
         {
-            OnIm3D(sponza.m_aabb, cam, window_res);
             im3d_gl::end_frame_im3d(im3d_s, {window_res.x, window_res.y}, cam);
         }
         else
