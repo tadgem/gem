@@ -19,7 +19,7 @@ entity scene::create_entity(const std::string& name)
 	return entity{ e, this };
 }
 
-std::vector<entity> scene::create_entity_from_model(model& model_to_load, shader& material_shader)
+std::vector<entity> scene::create_entity_from_model(model& model_to_load, shader& material_shader, std::unordered_map<std::string, texture_map_type> known_maps)
 {
 	std::vector<entity> entities{};
 	std::stringstream entity_name;
@@ -32,7 +32,16 @@ std::vector<entity> scene::create_entity_from_model(model& model_to_load, shader
 
 		e.add_component<transform>();
 		e.add_component<mesh>(entry);
-		e.add_component<material>(material_shader);
+		material& current_mat = e.add_component<material>(material_shader);
+
+		for (auto& [uniform_name, map_type] : known_maps)
+		{
+			model::material_entry& material_entry = model_to_load.m_materials[entry.m_material_index];
+			if (material_entry.m_material_maps.find(map_type) != material_entry.m_material_maps.end())
+			{
+				//current_mat.set_sampler(uniform_name, )
+			}
+		}
 
 		entities.push_back(e);
 	}

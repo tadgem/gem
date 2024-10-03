@@ -49,8 +49,8 @@ Im3d::Vec3 ToIm3D(glm::vec3& input)
 
 static glm::mat4 last_vp = glm::mat4(1.0);
 inline static int frame_index = 0;
-inline static float gi_resolution_scale = 0.5;
-inline static int shadow_resolution = 2048;
+inline static float gi_resolution_scale = 1.0;
+inline static int shadow_resolution = 4096;
 
 void dispatch_gbuffer_voxelization(shader& voxelization, model& _model, voxel::grid& voxel_data, framebuffer& gbuffer, framebuffer& lightpass_buffer, glm::ivec2 window_res)
 {

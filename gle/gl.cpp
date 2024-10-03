@@ -344,6 +344,7 @@ void engine::init(glm::ivec2 resolution)
     s_imgui_io = &ImGui::GetIO();
     s_imgui_io->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     s_imgui_io->ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+    s_imgui_io->ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // Enable imgui window docking
 
     // Setup Dear ImGui style
     set_imgui_style();
