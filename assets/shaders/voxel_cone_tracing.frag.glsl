@@ -116,6 +116,9 @@ float remap(float source, float sourceFrom, float sourceTo, float targetFrom, fl
 {
 	return targetFrom + (source-sourceFrom)*(targetTo-targetFrom)/(sourceTo-sourceFrom);
 }
+float easeOutQuart(float x) {
+	return 1.0 - pow(1.0 - x, 4);
+}
 
 vec3 trace_cone(vec3 from, vec3 dir, vec3 unit)
 {
@@ -132,7 +135,7 @@ vec3 trace_cone(vec3 from, vec3 dir, vec3 unit)
 	{
 		vec4 result = get_voxel_colour(pos, unit, lod);
 		cone_distance = distance(from, pos);
-		accum += result * (1.0 - (cone_distance / u_max_trace_distance));
+		accum += result * easeOutQuart((1.0 - (cone_distance / u_max_trace_distance)));
 		lod = round(remap(cone_distance * 1.25, 0.0, u_max_trace_distance, 0.0, MAX_LOD));
 		steps += 1;
 		float factor = 1.0 - result.w;

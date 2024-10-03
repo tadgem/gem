@@ -41,9 +41,9 @@ Im3d::Vec3 ToIm3D(glm::vec3& input)
 
 static glm::mat4 last_vp = glm::mat4(1.0);
 inline static u32 frame_index = 0;
-inline static constexpr float gi_resolution_scale = 0.33;
+inline static constexpr float gi_resolution_scale = 0.5;
 inline static constexpr int shadow_resolution = 2048;
-inline static constexpr int _3d_tex_res = 192;
+inline static constexpr int _3d_tex_res = 256;
 
 
 
@@ -343,7 +343,7 @@ int main()
     GLfloat aSigma = 2.0f;
     GLfloat aThreshold = 0.15f;
     GLfloat aKSigma =  2.0f;
-    GLfloat vxgi_cone_distance = get_aabb_area(sponza.m_aabb) / 9.0;
+    GLfloat vxgi_cone_distance = 40.0;
 
     while (!engine::s_quit)
     {
