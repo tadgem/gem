@@ -1,5 +1,7 @@
 #include "tech/vxgi.h"
 #include "gl.h"
+#include "camera.h"
+
 void tech::vxgi::dispatch_gbuffer_voxelization(shader& voxelization, aabb& volume_bounding_box, voxel::grid& voxel_data, framebuffer& gbuffer, framebuffer& lightpass_buffer, glm::ivec2 window_res)
 {
     voxelization.use();
@@ -34,4 +36,32 @@ void tech::vxgi::dispatch_gen_voxel_mips(shader& voxelization_mips, voxel::grid&
 
     }
     glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+}
+
+void tech::vxgi::dispatch_cone_tracing_pass(shader& voxel_cone_tracing, voxel::grid& voxel_data, framebuffer& buffer_conetracing, framebuffer& gbuffer, glm::ivec2 window_res, aabb& bounding_volume, glm::vec3 _3d_tex_res, camera& cam, float max_trace_distance, float resolution_scale)
+{
+    glBindTexture(GL_TEXTURE_3D, voxel_data.voxel_texture.m_handle);
+
+    glViewport(0, 0, window_res.x* resolution_scale, window_res.y* resolution_scale);
+    shapes::s_screen_quad.use();
+    buffer_conetracing.bind();
+    voxel_cone_tracing.use();
+    voxel_cone_tracing.set_vec3("u_aabb.min", bounding_volume.min);
+    voxel_cone_tracing.set_vec3("u_aabb.max", bounding_volume.max);
+    voxel_cone_tracing.set_vec3("u_voxel_resolution", _3d_tex_res);
+    voxel_cone_tracing.set_int("u_position_map", 0);
+    voxel_cone_tracing.set_vec3("u_cam_position", cam.m_pos);
+    voxel_cone_tracing.set_float("u_max_trace_distance", max_trace_distance);
+
+    texture::bind_sampler_handle(gbuffer.m_colour_attachments[1], GL_TEXTURE0);
+    voxel_cone_tracing.set_int("u_normal_map", 1);
+    texture::bind_sampler_handle(gbuffer.m_colour_attachments[2], GL_TEXTURE1);
+    voxel_cone_tracing.set_int("u_voxel_map", 2);
+    texture::bind_sampler_handle(voxel_data.voxel_texture.m_handle, GL_TEXTURE2, GL_TEXTURE_3D);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    buffer_conetracing.unbind();
+    texture::bind_sampler_handle(0, GL_TEXTURE0);
+    texture::bind_sampler_handle(0, GL_TEXTURE1);
+    texture::bind_sampler_handle(0, GL_TEXTURE2);
+    glViewport(0, 0, window_res.x, window_res.y);
 }

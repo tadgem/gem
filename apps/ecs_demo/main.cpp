@@ -68,34 +68,6 @@ void dispatch_direct_light_pass_taa(shader& taa, framebuffer& lightpass_buffer_r
 
 }
 
-void dispatch_cone_tracing_pass(shader& voxel_cone_tracing, voxel::grid& voxel_data, framebuffer& buffer_conetracing, framebuffer& gbuffer, glm::ivec2 window_res, model& sponza, glm::vec3 _3d_tex_res, camera& cam, float max_trace_distance)
-{
-    glBindTexture(GL_TEXTURE_3D, voxel_data.voxel_texture.m_handle);
-
-    glViewport(0, 0, window_res.x * gi_resolution_scale, window_res.y * gi_resolution_scale);
-    shapes::s_screen_quad.use();
-    buffer_conetracing.bind();
-    voxel_cone_tracing.use();
-    voxel_cone_tracing.set_vec3("u_aabb.min", sponza.m_aabb.min);
-    voxel_cone_tracing.set_vec3("u_aabb.max", sponza.m_aabb.max);
-    voxel_cone_tracing.set_vec3("u_voxel_resolution", _3d_tex_res);
-    voxel_cone_tracing.set_int("u_position_map", 0);
-    voxel_cone_tracing.set_vec3("u_cam_position", cam.m_pos);
-    voxel_cone_tracing.set_float("u_max_trace_distance", max_trace_distance);
-
-    texture::bind_sampler_handle(gbuffer.m_colour_attachments[1], GL_TEXTURE0);
-    voxel_cone_tracing.set_int("u_normal_map", 1);
-    texture::bind_sampler_handle(gbuffer.m_colour_attachments[2], GL_TEXTURE1);
-    voxel_cone_tracing.set_int("u_voxel_map", 2);
-    texture::bind_sampler_handle(voxel_data.voxel_texture.m_handle, GL_TEXTURE2, GL_TEXTURE_3D);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-    buffer_conetracing.unbind();
-    texture::bind_sampler_handle(0, GL_TEXTURE0);
-    texture::bind_sampler_handle(0, GL_TEXTURE1);
-    texture::bind_sampler_handle(0, GL_TEXTURE2);
-    glViewport(0, 0, window_res.x, window_res.y);
-}
-
 void dispatch_cone_tracing_pass_taa(shader& taa, shader& denoise, shader& present_shader, framebuffer& buffer_conetracing, framebuffer& buffer_conetracing_resolve, framebuffer& buffer_conetracing_denoise, framebuffer& history_buffer_conetracing, framebuffer& gbuffer, float aSigma, float aThreshold, float aKSigma, glm::ivec2 window_res)
 {
 
@@ -408,7 +380,7 @@ int main()
 
         if (draw_cone_tracing_pass || draw_cone_tracing_pass_no_taa)
         {
-            dispatch_cone_tracing_pass(voxel_cone_tracing, voxel_data, buffer_conetracing, gbuffer, window_res, sponza, _3d_tex_res_vec, cam, vxgi_cone_distance);
+            tech::vxgi::dispatch_cone_tracing_pass(voxel_cone_tracing, voxel_data, buffer_conetracing, gbuffer, window_res, sponza.m_aabb, _3d_tex_res_vec, cam, vxgi_cone_distance, gi_resolution_scale);
         }
 
         if (draw_direct_lighting)
