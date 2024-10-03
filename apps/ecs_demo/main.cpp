@@ -26,7 +26,9 @@
 #include "transform.h"
 #include "tech/vxgi.h"
 #include "tech/gbuffer.h"
-#include "tech/utils.h"
+#include "tech/shadow.h"
+#include "tech/lighting.h"
+#include "tech/tech_utils.h"
 
 using namespace nlohmann;
 static glm::vec3 custom_orientation;
@@ -44,99 +46,6 @@ inline static constexpr int shadow_resolution = 2048;
 inline static constexpr int _3d_tex_res = 192;
 
 
-void blit_to_fb(framebuffer& fb, shader& present_shader, const std::string& uniform_name, const int texture_slot, gl_handle texture)
-{
-    fb.bind();
-    tech::utils::dispatch_present_image(present_shader, uniform_name, texture_slot, texture);
-    fb.unbind();
-}
-
-void dispatch_shadow_pass(framebuffer& shadow_fb, shader& shadow_shader, dir_light& sun, model& model, glm::mat4 model_mat, glm::ivec2 window_res)
-{
-    float near_plane = 0.01f, far_plane = 1000.0f;
-    glm::mat4 lightProjection = glm::ortho(-200.0f, 200.0f, -200.0f, 200.0f, near_plane, far_plane);
-
-    glm::vec3 dir = glm::quat(glm::radians(sun.direction)) * glm::vec3(0.0f, 0.0f, 1.0f);
-
-    glm::vec3 lightPos = glm::vec3(0.0) - (dir * 100.0f);
-    glm::mat4 lightView = glm::lookAt(lightPos,
-        glm::vec3(0.0f, 0.0f, 0.0f),
-        glm::vec3(0.0f, 1.0f, 0.0f));
-    glm::mat4 lightSpaceMatrix = lightProjection * lightView;
-
-    sun.light_space_matrix = lightSpaceMatrix;
-
-    shadow_fb.bind();
-    glClear(GL_DEPTH_BUFFER_BIT);
-    glViewport(0, 0, shadow_fb.m_width, shadow_fb.m_height);
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_FRONT);
-    shadow_shader.use();
-    shadow_shader.set_mat4("lightSpaceMatrix", lightSpaceMatrix);
-    shadow_shader.set_mat4("model", model_mat);
-
-    for (auto& entry : model.m_meshes)
-    {
-        entry.m_vao.use();
-        glDrawElements(GL_TRIANGLES, entry.m_index_count, GL_UNSIGNED_INT, 0);
-    }
-
-
-    shadow_fb.unbind();
-    glDisable(GL_CULL_FACE);
-    glViewport(0, 0, window_res.x, window_res.y);
-
-}
-
-void dispatch_light_pass(shader& lighting_shader, framebuffer& lighting_buffer, framebuffer& gbuffer, framebuffer& dir_light_shadow_buffer, camera& cam, std::vector<point_light>& point_lights, dir_light& sun)
-{
-    lighting_buffer.bind();
-    lighting_shader.use();
-    shapes::s_screen_quad.use();
-
-    lighting_shader.set_int("u_diffuse_map", 0);
-    lighting_shader.set_int("u_position_map", 1);
-    lighting_shader.set_int("u_normal_map", 2);
-    lighting_shader.set_int("u_pbr_map", 3);
-    lighting_shader.set_int("u_dir_light_shadow_map", 4);
-
-    lighting_shader.set_vec3("u_cam_pos", cam.m_pos);
-
-    lighting_shader.set_vec3("u_dir_light.direction", utils::get_forward(sun.direction));
-    lighting_shader.set_vec3("u_dir_light.colour", sun.colour);
-    lighting_shader.set_mat4("u_dir_light.light_space_matrix", sun.light_space_matrix);
-    lighting_shader.set_float("u_dir_light.intensity", sun.intensity);
-
-    int num_point_lights = std::min((int)point_lights.size(), 16);
-
-    for (int i = 0; i < num_point_lights; i++)
-    {
-        std::stringstream pos_name;
-        pos_name << "u_point_lights[" << i << "].position";
-        std::stringstream col_name;
-        col_name << "u_point_lights[" << i << "].colour";
-        std::stringstream rad_name;
-        rad_name << "u_point_lights[" << i << "].radius";
-        std::stringstream int_name;
-        int_name << "u_point_lights[" << i << "].intensity";
-
-        lighting_shader.set_vec3(pos_name.str(), point_lights[i].position);
-        lighting_shader.set_vec3(col_name.str(), point_lights[i].colour);
-        lighting_shader.set_float(rad_name.str(), point_lights[i].radius);
-        lighting_shader.set_float(int_name.str(), point_lights[i].intensity);
-    }
-
-    texture::bind_sampler_handle(gbuffer.m_colour_attachments[0], GL_TEXTURE0);
-    texture::bind_sampler_handle(gbuffer.m_colour_attachments[1], GL_TEXTURE1);
-    texture::bind_sampler_handle(gbuffer.m_colour_attachments[2], GL_TEXTURE2);
-    texture::bind_sampler_handle(gbuffer.m_colour_attachments[3], GL_TEXTURE3);
-    texture::bind_sampler_handle(dir_light_shadow_buffer.m_depth_attachment, GL_TEXTURE4);
-
-    // bind all maps
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-    lighting_buffer.unbind();
-
-}
 
 void dispatch_direct_light_pass_taa(shader& taa, framebuffer& lightpass_buffer_resolve, framebuffer& lightpass_buffer, framebuffer& history_buffer_lighting, framebuffer& gbuffer, glm::ivec2 window_res)
 {    
@@ -488,9 +397,9 @@ int main()
         
         tech::gbuffer::dispatch_gbuffer(frame_index, gbuffer, history_buffer_position, gbuffer_shader, cam, scene, window_res);
 
-        dispatch_shadow_pass(dir_light_shadow_buffer, shadow_shader, dir, sponza, model, window_res);
+        tech::shadow::dispatch_shadow_pass(dir_light_shadow_buffer, shadow_shader, dir, scene, window_res);
 
-        dispatch_light_pass(lighting_shader, lightpass_buffer, gbuffer, dir_light_shadow_buffer, cam, lights, dir);
+        tech::lighting::dispatch_light_pass(lighting_shader, lightpass_buffer, gbuffer, dir_light_shadow_buffer, cam, lights, dir);
                 
         if (draw_direct_lighting)
         {
@@ -522,9 +431,9 @@ int main()
         }
 
         // copy history buffers
-        blit_to_fb(history_buffer_lighting, present_shader, "u_image_sampler", 0, lightpass_buffer_resolve.m_colour_attachments[0]);
-        blit_to_fb(history_buffer_position, present_shader, "u_image_sampler", 0, gbuffer.m_colour_attachments[1]);
-        blit_to_fb(history_buffer_conetracing, present_shader, "u_image_sampler", 0, buffer_conetracing_denoise.m_colour_attachments.front());
+        tech::utils::blit_to_fb(history_buffer_lighting, present_shader, "u_image_sampler", 0, lightpass_buffer_resolve.m_colour_attachments[0]);
+        tech::utils::blit_to_fb(history_buffer_position, present_shader, "u_image_sampler", 0, gbuffer.m_colour_attachments[1]);
+        tech::utils::blit_to_fb(history_buffer_conetracing, present_shader, "u_image_sampler", 0, buffer_conetracing_denoise.m_colour_attachments.front());
         glClear(GL_DEPTH_BUFFER_BIT);
 
         if (draw_debug_3d_texture)

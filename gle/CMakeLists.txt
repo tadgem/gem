@@ -19,6 +19,7 @@ set(GL_SRC
         ${CMAKE_CURRENT_SOURCE_DIR}/input.h
         ${CMAKE_CURRENT_SOURCE_DIR}/input.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/io.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/lights.h
         ${CMAKE_CURRENT_SOURCE_DIR}/asset.h
         ${CMAKE_CURRENT_SOURCE_DIR}/asset.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/hash_string.h
@@ -46,15 +47,21 @@ set(GL_SRC
         ${CMAKE_CURRENT_SOURCE_DIR}/im3d_gl.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/im3d_gl.h
         ${CMAKE_CURRENT_SOURCE_DIR}/utils.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/utils.h
+        "tech/tech_utils.h"
         ${CMAKE_CURRENT_SOURCE_DIR}/voxelisation.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/voxelisation.h
         ${CMAKE_CURRENT_SOURCE_DIR}/tech/gbuffer.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/tech/gbuffer.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/tech/gbuffer.h                
+        ${CMAKE_CURRENT_SOURCE_DIR}/tech/shadow.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/tech/shadow.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/tech/lighting.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/tech/lighting.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/tech/taa.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/tech/taa.h
         ${CMAKE_CURRENT_SOURCE_DIR}/tech/vxgi.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/tech/vxgi.h        
-        ${CMAKE_CURRENT_SOURCE_DIR}/tech/utils.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/tech/utils.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/tech/tech_utils.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/tech/tech_utils.h
         # third party sources
         ${CMAKE_CURRENT_SOURCE_DIR}/stb_image.h
         ${CMAKE_CURRENT_SOURCE_DIR}/json.hpp

@@ -1,4 +1,4 @@
-#include "vxgi.h"
+#include "tech/vxgi.h"
 #include "gl.h"
 void tech::vxgi::dispatch_gbuffer_voxelization(shader& voxelization, aabb& volume_bounding_box, voxel::grid& voxel_data, framebuffer& gbuffer, framebuffer& lightpass_buffer, glm::ivec2 window_res)
 {
