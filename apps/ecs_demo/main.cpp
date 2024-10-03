@@ -22,27 +22,15 @@
 #include "json.hpp"
 #include "scene.h"
 #include "asset.h"
+#include "lights.h"
 #include "transform.h"
 #include "tech/vxgi.h"
+#include "tech/gbuffer.h"
+#include "tech/utils.h"
 
 using namespace nlohmann;
 static glm::vec3 custom_orientation;
 
-struct dir_light
-{
-    glm::vec3   direction;
-    glm::vec3   colour;
-    glm::mat4   light_space_matrix;
-    float       intensity = 1.0f;
-};
-
-struct point_light
-{
-    glm::vec3   position;
-    glm::vec3   colour;
-    float       radius;
-    float       intensity = 1.0f;
-};
 
 Im3d::Vec3 ToIm3D(glm::vec3& input)
 {
@@ -51,67 +39,15 @@ Im3d::Vec3 ToIm3D(glm::vec3& input)
 
 static glm::mat4 last_vp = glm::mat4(1.0);
 inline static u32 frame_index = 0;
-inline static constexpr float gi_resolution_scale = 0.25;
+inline static constexpr float gi_resolution_scale = 0.33;
 inline static constexpr int shadow_resolution = 2048;
 inline static constexpr int _3d_tex_res = 192;
 
-void dispatch_gbuffer(framebuffer& gbuffer, framebuffer& previous_position_buffer, shader& gbuffer_shader, glm::mat3 normal, camera& cam, glm::ivec2 win_res, scene& current_scene)
-{
-    frame_index++;
-    gbuffer.bind();
-    glm::mat4 current_vp = cam.m_proj * cam.m_view;
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-    gbuffer_shader.use();
-    gbuffer_shader.set_vec2("u_resolution", { win_res.x, win_res.y });
-    gbuffer_shader.set_mat4("u_vp", current_vp);
-    gbuffer_shader.set_mat4("u_last_vp", last_vp);
-    gbuffer_shader.set_mat4("u_normal", normal);
-    gbuffer_shader.set_int("u_frame_index", frame_index);
-    gbuffer_shader.set_int("u_diffuse_map", 0);
-    gbuffer_shader.set_int("u_normal_map", 1);
-    gbuffer_shader.set_int("u_metallic_map", 2);
-    gbuffer_shader.set_int("u_roughness_map", 3);
-    gbuffer_shader.set_int("u_ao_map", 4);
-    gbuffer_shader.set_int("u_prev_position_map", 5);
-
-    texture::bind_sampler_handle(0, GL_TEXTURE0);
-    texture::bind_sampler_handle(0, GL_TEXTURE1);
-    texture::bind_sampler_handle(0, GL_TEXTURE2);
-    texture::bind_sampler_handle(0, GL_TEXTURE3);
-    texture::bind_sampler_handle(0, GL_TEXTURE4);
-
-    texture::bind_sampler_handle(previous_position_buffer.m_colour_attachments.front(), GL_TEXTURE5);
-
-    auto renderables = current_scene.m_registry.view<transform, mesh, material>();
-
-    for (auto& [e, trans, emesh, ematerial] : renderables.each())
-    {
-        ematerial.bind_material_uniforms();
-        gbuffer_shader.set_mat4("u_model", trans.m_model);
-        gbuffer_shader.set_mat4("u_last_model", trans.m_last_model);
-        emesh.m_vao.use();
-        glDrawElements(GL_TRIANGLES, emesh.m_index_count, GL_UNSIGNED_INT, 0);
-    }
-    gbuffer.unbind();
-    last_vp = current_vp;
-}
-
-void dispatch_present_image(shader& present_shader, const std::string& uniform_name, const int texture_slot, gl_handle texture)
-{
-    present_shader.use();
-    shapes::s_screen_quad.use();
-    present_shader.set_int(uniform_name.c_str(), texture_slot);
-    texture::bind_sampler_handle(texture, GL_TEXTURE0 + texture_slot);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-    texture::bind_sampler_handle(0, GL_TEXTURE0);
-}
 
 void blit_to_fb(framebuffer& fb, shader& present_shader, const std::string& uniform_name, const int texture_slot, gl_handle texture)
 {
     fb.bind();
-    dispatch_present_image(present_shader, uniform_name, texture_slot, texture);
+    tech::utils::dispatch_present_image(present_shader, uniform_name, texture_slot, texture);
     fb.unbind();
 }
 
@@ -283,7 +219,7 @@ void dispatch_cone_tracing_pass_taa(shader& taa, shader& denoise, shader& presen
     buffer_conetracing_denoise.unbind();
 
 
-    dispatch_present_image(present_shader, "u_image_sampler", 0, buffer_conetracing_denoise.m_colour_attachments.front());
+    tech::utils::dispatch_present_image(present_shader, "u_image_sampler", 0, buffer_conetracing_denoise.m_colour_attachments.front());
     texture::bind_sampler_handle(0, GL_TEXTURE0);
     glViewport(0, 0, window_res.x, window_res.y);
 
@@ -524,7 +460,7 @@ int main()
     glm::mat4 aabb_model = utils::get_model_matrix(aabb_center, glm::vec3(0.0f), aabb_half_extent * 2.0f);
 
     GLfloat aSigma = 2.0f;
-    GLfloat aThreshold = 1000.f;
+    GLfloat aThreshold = 0.15f;
     GLfloat aKSigma =  2.0f;
     GLfloat vxgi_cone_distance = get_aabb_area(sponza.m_aabb) / 9.0;
 
@@ -550,7 +486,7 @@ int main()
 
         tech::vxgi::dispatch_gen_voxel_mips(voxelization_mips, voxel_data, _3d_tex_res_vec);
         
-        dispatch_gbuffer(gbuffer, history_buffer_position, gbuffer_shader, normal, cam, window_res, scene);
+        tech::gbuffer::dispatch_gbuffer(frame_index, gbuffer, history_buffer_position, gbuffer_shader, cam, scene, window_res);
 
         dispatch_shadow_pass(dir_light_shadow_buffer, shadow_shader, dir, sponza, model, window_res);
 
@@ -568,7 +504,7 @@ int main()
 
         if (draw_direct_lighting)
         {
-            dispatch_present_image(present_shader, "u_image_sampler", 0, lightpass_buffer_resolve.m_colour_attachments.front());
+            tech::utils::dispatch_present_image(present_shader, "u_image_sampler", 0, lightpass_buffer_resolve.m_colour_attachments.front());
         }
 
         if (draw_cone_tracing_pass)
@@ -577,11 +513,11 @@ int main()
         }
         if (draw_cone_tracing_pass_no_taa)
         {
-            dispatch_present_image(present_shader, "u_image_sampler", 0, buffer_conetracing.m_colour_attachments.front());
+            tech::utils::dispatch_present_image(present_shader, "u_image_sampler", 0, buffer_conetracing.m_colour_attachments.front());
         }
         if (draw_direct_lighting_no_taa)
         {
-            dispatch_present_image(present_shader, "u_image_sampler", 0, lightpass_buffer.m_colour_attachments.front());
+            tech::utils::dispatch_present_image(present_shader, "u_image_sampler", 0, lightpass_buffer.m_colour_attachments.front());
 
         }
 

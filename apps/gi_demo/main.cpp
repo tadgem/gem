@@ -22,26 +22,11 @@
 #include "json.hpp"
 #include "scene.h"
 #include "asset.h"
+#include "lights.h"
 #include "tech/vxgi.h"
 
 using namespace nlohmann;
 static glm::vec3 custom_orientation;
-
-struct dir_light
-{
-    glm::vec3   direction;
-    glm::vec3   colour;
-    glm::mat4   light_space_matrix;
-    float       intensity = 1.0f;
-};
-
-struct point_light
-{
-    glm::vec3   position;
-    glm::vec3   colour;
-    float       radius;
-    float       intensity = 1.0f;
-};
 
 Im3d::Vec3 ToIm3D(glm::vec3& input)
 {
