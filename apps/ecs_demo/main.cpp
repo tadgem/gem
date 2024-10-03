@@ -23,6 +23,7 @@
 #include "scene.h"
 #include "asset.h"
 #include "transform.h"
+#include "tech/vxgi.h"
 
 using namespace nlohmann;
 static glm::vec3 custom_orientation;
@@ -49,45 +50,10 @@ Im3d::Vec3 ToIm3D(glm::vec3& input)
 }
 
 static glm::mat4 last_vp = glm::mat4(1.0);
-inline static int frame_index = 0;
-inline static float gi_resolution_scale = 0.75;
-inline static int shadow_resolution = 2048;
-
-void dispatch_gbuffer_voxelization(shader& voxelization, aabb& voxel_bounding_volume, voxel::grid& voxel_data, framebuffer& gbuffer, framebuffer& lightpass_buffer, glm::ivec2 window_res)
-{
-    voxelization.use();
-    voxelization.set_vec2("u_input_resolution", { window_res.x, window_res.y });
-    voxelization.set_vec3("u_aabb.min", voxel_bounding_volume.min);
-    voxelization.set_vec3("u_aabb.max", voxel_bounding_volume.max);
-    texture::bind_image_handle(voxel_data.voxel_texture.m_handle, 0, 0, GL_RGBA32F);
-    texture::bind_sampler_handle(gbuffer.m_colour_attachments[1], GL_TEXTURE0);
-    texture::bind_sampler_handle(lightpass_buffer.m_colour_attachments[0], GL_TEXTURE1);
-    glAssert(glDispatchCompute(window_res.x / 10, window_res.y / 10, 1));
-    glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-}
-
-void dispatch_gen_voxel_mips(shader& voxelization_mips, voxel::grid& voxel_data, glm::vec3 _3d_tex_res_vec)
-{
-    constexpr int MAX_MIPS = 5;
-    voxelization_mips.use();
-    // for each mip in remaining_mipps
-    glm::vec3 last_mip_resolution = _3d_tex_res_vec;
-    glm::vec3 current_mip_resolution = _3d_tex_res_vec / 2.0f;
-    for (int i = 1; i < MAX_MIPS; i++)
-    {
-        glBindTexture(GL_TEXTURE_3D, voxel_data.voxel_texture.m_handle);
-        texture::bind_image_handle(voxel_data.voxel_texture.m_handle, 0, i, GL_RGBA32F);
-        texture::bind_image_handle(voxel_data.voxel_texture.m_handle, 1, i - 1, GL_RGBA32F);
-        voxelization_mips.set_vec3("u_current_resolution", current_mip_resolution);
-        glm::ivec3 dispatch_dims = current_mip_resolution;
-        glAssert(glDispatchCompute(dispatch_dims.x / 8, dispatch_dims.y / 8, dispatch_dims.z / 8));
-        current_mip_resolution /= 2.0f;
-        last_mip_resolution /= 2.0f;
-        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-
-    }
-    glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-}
+inline static u32 frame_index = 0;
+inline static constexpr float gi_resolution_scale = 0.25;
+inline static constexpr int shadow_resolution = 2048;
+inline static constexpr int _3d_tex_res = 192;
 
 void dispatch_gbuffer(framebuffer& gbuffer, framebuffer& previous_position_buffer, shader& gbuffer_shader, glm::mat3 normal, camera& cam, glm::ivec2 win_res, scene& current_scene)
 {
@@ -98,7 +64,7 @@ void dispatch_gbuffer(framebuffer& gbuffer, framebuffer& previous_position_buffe
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     gbuffer_shader.use();
-    gbuffer_shader.set_vec2("u_resolution", {win_res.x, win_res.y});
+    gbuffer_shader.set_vec2("u_resolution", { win_res.x, win_res.y });
     gbuffer_shader.set_mat4("u_vp", current_vp);
     gbuffer_shader.set_mat4("u_last_vp", last_vp);
     gbuffer_shader.set_mat4("u_normal", normal);
@@ -122,10 +88,10 @@ void dispatch_gbuffer(framebuffer& gbuffer, framebuffer& previous_position_buffe
 
     for (auto& [e, trans, emesh, ematerial] : renderables.each())
     {
+        ematerial.bind_material_uniforms();
         gbuffer_shader.set_mat4("u_model", trans.m_model);
         gbuffer_shader.set_mat4("u_last_model", trans.m_last_model);
         emesh.m_vao.use();
-        ematerial.bind_material_uniforms(gbuffer_shader);
         glDrawElements(GL_TRIANGLES, emesh.m_index_count, GL_UNSIGNED_INT, 0);
     }
     gbuffer.unbind();
@@ -257,7 +223,7 @@ void dispatch_direct_light_pass_taa(shader& taa, framebuffer& lightpass_buffer_r
 
 }
 
-void dispatch_cone_tracing_pass(shader& voxel_cone_tracing, voxel::grid& voxel_data, framebuffer& buffer_conetracing, framebuffer& gbuffer, glm::ivec2 window_res, model& sponza, glm::vec3 _3d_tex_res, camera& cam)
+void dispatch_cone_tracing_pass(shader& voxel_cone_tracing, voxel::grid& voxel_data, framebuffer& buffer_conetracing, framebuffer& gbuffer, glm::ivec2 window_res, model& sponza, glm::vec3 _3d_tex_res, camera& cam, float max_trace_distance)
 {
     glBindTexture(GL_TEXTURE_3D, voxel_data.voxel_texture.m_handle);
 
@@ -270,6 +236,7 @@ void dispatch_cone_tracing_pass(shader& voxel_cone_tracing, voxel::grid& voxel_d
     voxel_cone_tracing.set_vec3("u_voxel_resolution", _3d_tex_res);
     voxel_cone_tracing.set_int("u_position_map", 0);
     voxel_cone_tracing.set_vec3("u_cam_position", cam.m_pos);
+    voxel_cone_tracing.set_float("u_max_trace_distance", max_trace_distance);
 
     texture::bind_sampler_handle(gbuffer.m_colour_attachments[1], GL_TEXTURE0);
     voxel_cone_tracing.set_int("u_normal_map", 1);
@@ -367,7 +334,7 @@ float get_aabb_area(aabb& bb)
 
 int main()
 {
-    glm::ivec2 window_res{ 1920, 1080};
+    glm::ivec2 window_res{ 1920, 1080 };
     engine::init(window_res);
     custom_orientation = glm::vec3(0, 1, 0);
 
@@ -413,7 +380,14 @@ int main()
     model sponza = model::load_model_from_path("assets/models/sponza/Sponza.gltf");
     framebuffer gbuffer{};
 
-    scene.create_entity_from_model(sponza, gbuffer_shader);
+    scene.create_entity_from_model(sponza, gbuffer_shader, glm::vec3(0.1),
+        {
+            {"u_diffuse_map", texture_map_type::diffuse},
+            {"u_normal_map", texture_map_type::normal},
+            {"u_metallic_map", texture_map_type::metallicness},
+            {"u_roughness_map", texture_map_type::roughness},
+            {"u_ao_map", texture_map_type::ao}
+        });
 
     gbuffer.bind();
     gbuffer.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x, window_res.y, GL_RGBA, GL_NEAREST, GL_UNSIGNED_BYTE);
@@ -511,7 +485,7 @@ int main()
     lights.push_back({ {-10.0, 0.0, -10.0}, {0.0, 255.0, 0.0}, 30.0f });
     lights.push_back({ {-10.0, 0.0, 10.0}, {0.0, 0.0, 255.0} , 40.0f});
 
-    constexpr int _3d_tex_res = 128;
+
     constexpr glm::vec3 _3d_tex_res_vec = { _3d_tex_res, _3d_tex_res, _3d_tex_res };
 
     glm::vec3 pos = glm::vec3(0.0f);
@@ -552,7 +526,8 @@ int main()
     GLfloat aSigma = 2.0f;
     GLfloat aThreshold = 1000.f;
     GLfloat aKSigma =  2.0f;
-    
+    GLfloat vxgi_cone_distance = get_aabb_area(sponza.m_aabb) / 9.0;
+
     while (!engine::s_quit)
     {
         glm::mat4 model = utils::get_model_matrix(pos, euler, scale);
@@ -571,9 +546,9 @@ int main()
 
 
         // compute
-        dispatch_gbuffer_voxelization(voxelization, sponza.m_aabb, voxel_data, gbuffer, lightpass_buffer, window_res);
+        tech::vxgi::dispatch_gbuffer_voxelization(voxelization, sponza.m_aabb, voxel_data, gbuffer, lightpass_buffer, window_res);
 
-        dispatch_gen_voxel_mips(voxelization_mips, voxel_data, _3d_tex_res_vec);
+        tech::vxgi::dispatch_gen_voxel_mips(voxelization_mips, voxel_data, _3d_tex_res_vec);
         
         dispatch_gbuffer(gbuffer, history_buffer_position, gbuffer_shader, normal, cam, window_res, scene);
 
@@ -588,7 +563,7 @@ int main()
 
         if (draw_cone_tracing_pass || draw_cone_tracing_pass_no_taa)
         {
-            dispatch_cone_tracing_pass(voxel_cone_tracing, voxel_data, buffer_conetracing, gbuffer, window_res, sponza, _3d_tex_res_vec, cam);
+            dispatch_cone_tracing_pass(voxel_cone_tracing, voxel_data, buffer_conetracing, gbuffer, window_res, sponza, _3d_tex_res_vec, cam, vxgi_cone_distance);
         }
 
         if (draw_direct_lighting)
@@ -645,7 +620,10 @@ int main()
             ImGui::Checkbox("Render Cone Tracing Pass NO TAA", &draw_cone_tracing_pass_no_taa);
             ImGui::Checkbox("Render IM3D", &draw_im3d);
             ImGui::Separator();
-            ImGui::Text("Denoise properties");
+            ImGui::Text("VXGI Settings");
+            ImGui::DragFloat("Trace Distance", &vxgi_cone_distance);
+            ImGui::Separator();
+            ImGui::Text("Denoise Settings");
             ImGui::DragFloat("Sigma", &aSigma);
             ImGui::DragFloat("Threshold", &aThreshold);
             ImGui::DragFloat("KSigma", &aKSigma);

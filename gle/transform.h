@@ -15,5 +15,7 @@ struct transform
 	glm::mat4 m_model		= glm::mat4(1.0);
 	glm::mat4 m_last_model	= glm::mat4(1.0);
 
+	glm::mat3 m_normal_matrix;
+
 	static void update_transforms(scene& current_scene);
 };

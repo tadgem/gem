@@ -37,3 +37,10 @@ public:
 	inline static texture* white;
 	inline static texture* black;
 };
+
+struct sampler_info
+{
+	GLenum      sampler_slot;
+	GLenum      texture_target;
+	gl_handle   texture_handle;
+};

@@ -9,6 +9,7 @@
 
 void camera::update(glm::vec2 screen_dim)
 {
+    m_last_vp = m_proj * m_view;
     glm::quat qPitch = glm::angleAxis(glm::radians(-m_euler.x), glm::vec3(1, 0, 0));
     glm::quat qYaw = glm::angleAxis(glm::radians(m_euler.y), glm::vec3(0, 1, 0));
     // omit roll

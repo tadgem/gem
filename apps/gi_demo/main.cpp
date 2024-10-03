@@ -22,6 +22,7 @@
 #include "json.hpp"
 #include "scene.h"
 #include "asset.h"
+#include "tech/vxgi.h"
 
 using namespace nlohmann;
 static glm::vec3 custom_orientation;
@@ -49,44 +50,10 @@ Im3d::Vec3 ToIm3D(glm::vec3& input)
 
 static glm::mat4 last_vp = glm::mat4(1.0);
 inline static int frame_index = 0;
-inline static float gi_resolution_scale = 1.0;
-inline static int shadow_resolution = 4096;
+inline static constexpr float gi_resolution_scale = 0.5;
+inline static constexpr int shadow_resolution = 2048;
+inline static constexpr int _3d_tex_res = 128;
 
-void dispatch_gbuffer_voxelization(shader& voxelization, model& _model, voxel::grid& voxel_data, framebuffer& gbuffer, framebuffer& lightpass_buffer, glm::ivec2 window_res)
-{
-    voxelization.use();
-    voxelization.set_vec2("u_input_resolution", { window_res.x, window_res.y });
-    voxelization.set_vec3("u_aabb.min", _model.m_aabb.min);
-    voxelization.set_vec3("u_aabb.max", _model.m_aabb.max);
-    texture::bind_image_handle(voxel_data.voxel_texture.m_handle, 0, 0, GL_RGBA32F);
-    texture::bind_sampler_handle(gbuffer.m_colour_attachments[1], GL_TEXTURE0);
-    texture::bind_sampler_handle(lightpass_buffer.m_colour_attachments[0], GL_TEXTURE1);
-    glAssert(glDispatchCompute(window_res.x / 10, window_res.y / 10, 1));
-    glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-}
-
-void dispatch_gen_voxel_mips(shader& voxelization_mips, voxel::grid& voxel_data, glm::vec3 _3d_tex_res_vec)
-{
-    constexpr int MAX_MIPS = 5;
-    voxelization_mips.use();
-    // for each mip in remaining_mipps
-    glm::vec3 last_mip_resolution = _3d_tex_res_vec;
-    glm::vec3 current_mip_resolution = _3d_tex_res_vec / 2.0f;
-    for (int i = 1; i < MAX_MIPS; i++)
-    {
-        glBindTexture(GL_TEXTURE_3D, voxel_data.voxel_texture.m_handle);
-        texture::bind_image_handle(voxel_data.voxel_texture.m_handle, 0, i, GL_RGBA32F);
-        texture::bind_image_handle(voxel_data.voxel_texture.m_handle, 1, i - 1, GL_RGBA32F);
-        voxelization_mips.set_vec3("u_current_resolution", current_mip_resolution);
-        glm::ivec3 dispatch_dims = current_mip_resolution;
-        glAssert(glDispatchCompute(dispatch_dims.x / 8, dispatch_dims.y / 8, dispatch_dims.z / 8));
-        current_mip_resolution /= 2.0f;
-        last_mip_resolution /= 2.0f;
-        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-
-    }
-    glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-}
 
 void dispatch_gbuffer(framebuffer& gbuffer, framebuffer& previous_position_buffer, shader& gbuffer_shader, glm::mat4 mvp, glm::mat4 model_mat, glm::mat3 normal, camera& cam, std::vector<point_light>& lights, model& sponza, glm::ivec2 win_res)
 {
@@ -543,7 +510,7 @@ int main()
     lights.push_back({ {-10.0, 0.0, -10.0}, {0.0, 255.0, 0.0}, 30.0f });
     lights.push_back({ {-10.0, 0.0, 10.0}, {0.0, 0.0, 255.0} , 40.0f});
 
-    constexpr int _3d_tex_res = 384;
+
     constexpr glm::vec3 _3d_tex_res_vec = { _3d_tex_res, _3d_tex_res, _3d_tex_res };
 
     glm::vec3 pos = glm::vec3(0.0f);
@@ -600,9 +567,9 @@ int main()
         im3d_gl::new_frame_im3d(im3d_s);
         
         // compute
-        dispatch_gbuffer_voxelization(voxelization, sponza, voxel_data, gbuffer, lightpass_buffer, window_res);
+        tech::vxgi::dispatch_gbuffer_voxelization(voxelization, sponza.m_aabb, voxel_data, gbuffer, lightpass_buffer, window_res);
 
-        dispatch_gen_voxel_mips(voxelization_mips, voxel_data, _3d_tex_res_vec);
+        tech::vxgi::dispatch_gen_voxel_mips(voxelization_mips, voxel_data, _3d_tex_res_vec);
         
         dispatch_gbuffer(gbuffer, history_buffer_position, gbuffer_shader, mvp, model, normal, cam, lights, sponza, window_res);
 
