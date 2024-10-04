@@ -38,7 +38,7 @@ void tech::vxgi::dispatch_gen_voxel_mips(shader& voxelization_mips, voxel::grid&
     glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 }
 
-void tech::vxgi::dispatch_cone_tracing_pass(shader& voxel_cone_tracing, voxel::grid& voxel_data, framebuffer& buffer_conetracing, framebuffer& gbuffer, glm::ivec2 window_res, aabb& bounding_volume, glm::vec3 _3d_tex_res, camera& cam, float max_trace_distance, float resolution_scale)
+void tech::vxgi::dispatch_cone_tracing_pass(shader& voxel_cone_tracing, voxel::grid& voxel_data, framebuffer& buffer_conetracing, framebuffer& gbuffer, glm::ivec2 window_res, aabb& bounding_volume, glm::vec3 _3d_tex_res, camera& cam, float max_trace_distance, float resolution_scale, float diffuse_spec_mix)
 {
     glBindTexture(GL_TEXTURE_3D, voxel_data.voxel_texture.m_handle);
 
@@ -52,6 +52,7 @@ void tech::vxgi::dispatch_cone_tracing_pass(shader& voxel_cone_tracing, voxel::g
     voxel_cone_tracing.set_int("u_position_map", 0);
     voxel_cone_tracing.set_vec3("u_cam_position", cam.m_pos);
     voxel_cone_tracing.set_float("u_max_trace_distance", max_trace_distance);
+    voxel_cone_tracing.set_float("u_diffuse_spec_mix", diffuse_spec_mix);
 
     texture::bind_sampler_handle(gbuffer.m_colour_attachments[1], GL_TEXTURE0);
     voxel_cone_tracing.set_int("u_normal_map", 1);

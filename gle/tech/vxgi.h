@@ -15,6 +15,6 @@ namespace tech {
 		static void dispatch_cone_tracing_pass(
 			shader& voxel_cone_tracing, voxel::grid& voxel_data, framebuffer& buffer_conetracing, 
 			framebuffer& gbuffer, glm::ivec2 window_res, aabb& bounding_volume, glm::vec3 _3d_tex_res, 
-			camera& cam, float max_trace_distance, float resolution_scale);
+			camera& cam, float max_trace_distance, float resolution_scale, float diffuse_spec_mix);
 	};
 }

@@ -26,6 +26,7 @@ uniform AABB		u_aabb;
 uniform vec3		u_voxel_resolution;
 uniform vec3		u_cam_position;
 uniform float		u_max_trace_distance;
+uniform float		u_diffuse_spec_mix;
 #define VOXEL_SIZE (1/128.0)
 
 
@@ -123,12 +124,13 @@ float easeOutQuart(float x) {
 vec3 trace_cone(vec3 from, vec3 dir, vec3 unit)
 {
 	const int MAX_STEPS = int(u_voxel_resolution.x); // should probs be the longest axis of minimum mip dimension
+	const int MIN_LOD	= 2;
 	const int MAX_LOD	= 5;
 	vec4 accum = vec4(0.0);
 	vec3 pos = from;
 	int steps = 0;
-	float lod = 1.0;
-	pos += dir * (length(unit));
+	float lod = MIN_LOD;
+	pos += dir * (length(unit * lod));
 	float cone_distance = distance(from, pos);
 
 	while (accum.w < 1.0 && is_in_aabb(pos) && cone_distance < u_max_trace_distance && steps < MAX_STEPS)
@@ -136,9 +138,9 @@ vec3 trace_cone(vec3 from, vec3 dir, vec3 unit)
 		vec4 result = get_voxel_colour(pos, unit, lod);
 		cone_distance = distance(from, pos);
 		accum += result * easeOutQuart((1.0 - (cone_distance / u_max_trace_distance)));
-		lod = round(remap(cone_distance * 1.25, 0.0, u_max_trace_distance, 0.0, MAX_LOD));
+		lod = round(remap(cone_distance * 1.25, 0.0, u_max_trace_distance, MIN_LOD, MAX_LOD));
 		steps += 1;
-		float factor = 1.0 - result.w;
+		float factor = (1.0 - result.w) * lod;
 		pos += dir * (unit * factor);
 	}
 
@@ -197,7 +199,6 @@ void main()
 	vec3 normal = texture(u_normal_map, aUV).xyz;
 	vec3 normalized_n = normalize(normal);
 	vec3 v_diffuse = trace_cones_v3(position, normalized_n, unit);
-	vec3 view_dir = position - u_cam_position;
-	vec3 v_spec = trace_ray(position, reflect(view_dir, normalized_n), unit);
-	FragColor = vec4(mix(v_diffuse, v_spec, 0.1), 1.0);
+	vec3 v_spec = trace_ray(position, reflect(normalize(position - u_cam_position), normalized_n), unit);
+	FragColor = vec4(mix(v_diffuse, v_spec, u_diffuse_spec_mix), 1.0);
 }

@@ -15,7 +15,7 @@ entity scene::create_entity(const std::string& name)
 	entt::entity e = m_registry.create();
 	m_registry.emplace<entity_data>(e, entity_data{ name });
 	p_created_entity_count++;
-	return entity{ e, this };
+	return entity(this, e);
 }
 
 std::vector<entity> scene::create_entity_from_model(model& model_to_load, shader& material_shader, glm::vec3 scale, std::map<std::string, texture_map_type> known_maps)
@@ -61,3 +61,6 @@ void scene::on_update()
 	transform::update_transforms(*this);
 }
 
+entity::entity(scene* escene, entt::entity e) : m_scene(escene), m_handle(e)
+{
+}

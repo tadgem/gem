@@ -32,7 +32,9 @@ class entity
 {
 public:
 	entt::entity	m_handle;
-	scene*			m_scene;
+	scene *    m_scene;
+
+	entity(scene* escene, entt::entity e);
 
 	template<typename _Ty, typename ... Args>
 	_Ty&				add_component(Args&& ... args)

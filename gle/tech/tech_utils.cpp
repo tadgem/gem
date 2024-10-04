@@ -4,6 +4,21 @@
 #include "texture.h"
 #include "framebuffer.h"
 
+void tech::utils::dispatch_denoise_image(shader& denoise_shader, framebuffer& input, framebuffer& denoised, float aSigma, float aThreshold, float aKSigma, glm::ivec2 window_res)
+{
+    denoised.bind();
+    denoise_shader.use();
+    denoise_shader.set_int("imageData", 0);
+    denoise_shader.set_float("uSigma", aSigma);
+    denoise_shader.set_float("uThreshold", aThreshold);
+    denoise_shader.set_float("uKSigma", aKSigma);
+    denoise_shader.set_vec2("wSize", { window_res.x, window_res.y });
+    texture::bind_sampler_handle(input.m_colour_attachments.front(), GL_TEXTURE0);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    denoised.unbind();
+
+}
+
 void tech::utils::dispatch_present_image(shader& present_shader, const std::string& uniform_name, const int texture_slot, gl_handle texture)
 {
     present_shader.use();

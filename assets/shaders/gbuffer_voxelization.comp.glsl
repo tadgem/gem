@@ -78,5 +78,6 @@ void main() {
 	{
 		return;
 	}
+
 	imageStore(imgOutput,sample_pos, val);
 }
