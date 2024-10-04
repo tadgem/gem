@@ -25,7 +25,7 @@ void camera::update(glm::vec2 screen_dim)
     switch (m_projection_type )
     {
     case perspective:
-        m_proj = glm::perspectiveFov(glm::radians(m_fov), screen_dim.x, screen_dim.y, m_near, m_far);
+        m_proj = glm::perspective(glm::radians(m_fov), screen_dim.x / screen_dim.y, m_near, m_far);
         break;
     case orthographic:
         // todo
