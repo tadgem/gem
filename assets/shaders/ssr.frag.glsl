@@ -9,10 +9,11 @@ uniform sampler2D depthMap;
 
 uniform float SCR_WIDTH;
 uniform float SCR_HEIGHT;
-uniform mat4 invProjection;
-uniform mat4 projection;
+uniform mat4  invProjection;
+uniform mat4  projection;
+uniform mat4  rotation;
 
-bool rayIsOutofScreen(vec2 ray){
+bool rayIsOutofScreen(vec2 ray) {
 	return (ray.x > 1 || ray.y > 1 || ray.x < 0 || ray.y < 0) ? true : false;
 }
 
@@ -39,15 +40,15 @@ vec3 TraceRay(vec3 rayPos, vec3 dir, int iterationCount){
 }
 
 void main(){
-	float maxRayDistance = 300.0;
+	float maxRayDistance = 100.0;
 
 	//View Space ray calculation
 	vec3 pixelPositionTexture;
 	pixelPositionTexture.xy = aUV;
-	vec3 normalView = texture(gNormal, pixelPositionTexture.xy).rgb;	
+	vec3 normalView = (rotation * texture(gNormal, pixelPositionTexture.xy)).rgb;	
 	float pixelDepth = texture(depthMap, pixelPositionTexture.xy).r;	// 0< <1
 	pixelPositionTexture.z = pixelDepth;		
-	vec4 positionView = invProjection * vec4(pixelPositionTexture * 2 - vec3(1), 1);
+	vec4 positionView = invProjection *  vec4(pixelPositionTexture * 2 - vec3(1), 1);
 	positionView /= positionView.w;
 	vec3 reflectionView = normalize(reflect(positionView.xyz, normalView));
 	if(reflectionView.z > 0){

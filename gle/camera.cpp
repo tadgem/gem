@@ -10,12 +10,7 @@
 void camera::update(glm::vec2 screen_dim)
 {
     m_last_vp = m_proj * m_view;
-    glm::quat qPitch = glm::angleAxis(glm::radians(-m_euler.x), glm::vec3(1, 0, 0));
-    glm::quat qYaw = glm::angleAxis(glm::radians(m_euler.y), glm::vec3(0, 1, 0));
-    // omit roll
-    glm::quat Rotation = qPitch * qYaw;
-    Rotation = glm::normalize(Rotation);
-    glm::mat4 rotate = glm::mat4_cast(Rotation);
+    glm::mat4 rotate = get_rotation_matrix();
     glm::mat4 translate = glm::mat4(1.0f);
     translate = glm::translate(translate, -m_pos);
 
@@ -33,15 +28,35 @@ void camera::update(glm::vec2 screen_dim)
     }
 }
 
+glm::mat4 camera::get_rotation_matrix()
+{
+    glm::quat qPitch = glm::angleAxis(glm::radians(-m_euler.x), glm::vec3(1, 0, 0));
+    glm::quat qYaw = glm::angleAxis(glm::radians(m_euler.y), glm::vec3(0, 1, 0));
+    // omit roll
+    glm::quat Rotation = qPitch * qYaw;
+    Rotation = glm::normalize(Rotation);
+    return glm::mat4_cast(Rotation);
+}
+
 void debug_camera_controller::update(glm::vec2 screen_dim, camera& cam)
 {
-    if (!input::get_mouse_button(mouse_button::right))
+    if (!input::get_mouse_button(mouse_button::right) && !show_mouse)
     {
         SDL_ShowCursor(SDL_ENABLE);
+        show_mouse = true;
         return;
     }
 
-    SDL_ShowCursor(SDL_DISABLE);
+    if (!input::get_mouse_button(mouse_button::right))
+    {
+        return;
+    }
+
+    if (show_mouse)
+    {
+        show_mouse = false;
+        SDL_ShowCursor(SDL_DISABLE);
+    }
 
     glm::quat q_pitch = glm::angleAxis(glm::radians(-cam.m_euler.x), glm::vec3(1, 0, 0));
     glm::quat q_yaw = glm::angleAxis(glm::radians(cam.m_euler.y), glm::vec3(0, 1, 0));

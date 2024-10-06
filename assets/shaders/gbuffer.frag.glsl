@@ -56,17 +56,16 @@ vec3 UnpackNormalMap( vec3 TextureSample )
 	return vec3( NormalXY.xy, NormalZ);
 }
 
-vec3 getNormalFromMap()
-{
+vec3 getNormalFromMap() {
     vec3 tangentNormal = texture(u_normal_map, aUV).xyz * 2.0 - 1.0;
 
-    if(abs(tangentNormal.z) < 0.0001)
-    {
+    if(abs(tangentNormal.z) < 0.0001) {
         tangentNormal = UnpackNormalMap(tangentNormal);
     }
 
     vec3 Q1 = dFdx(aPosition.xyz);
     vec3 Q2 = dFdy(aPosition.xyz);
+
     vec2 st1 = dFdx(aUV);
     vec2 st2 = dFdy(aUV);
 

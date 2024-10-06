@@ -257,6 +257,19 @@ int main()
     buffer_ssr.check();
     buffer_ssr.unbind();
 
+    framebuffer buffer_ssr_resolve{};
+    buffer_ssr_resolve.bind();
+    buffer_ssr_resolve.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x, window_res.y, GL_RGBA8, GL_NEAREST, GL_FLOAT);
+    buffer_ssr_resolve.check();
+    buffer_ssr_resolve.unbind();
+
+
+    framebuffer history_buffer_ssr{};
+    history_buffer_ssr.bind();
+    history_buffer_ssr.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x, window_res.y, GL_RGBA8, GL_NEAREST, GL_FLOAT);
+    history_buffer_ssr.check();
+    history_buffer_ssr.unbind();
+
 
     framebuffer final_pass{};
     final_pass.bind();
@@ -376,6 +389,7 @@ int main()
             ssr.set_float("SCR_HEIGHT", 1080.0);
             ssr.set_mat4("projection", cam.m_proj);
             ssr.set_mat4("invProjection", glm::inverse(cam.m_proj));
+            ssr.set_mat4("rotation", cam.get_rotation_matrix());
 
             ssr.set_int("gNormal", 0);
             texture::bind_sampler_handle(gbuffer.m_colour_attachments[2], GL_TEXTURE0);
@@ -392,6 +406,7 @@ int main()
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); 
             glDepthMask(GL_TRUE);
 
+            tech::taa::dispatch_taa_pass(taa, buffer_ssr, buffer_ssr_resolve, history_buffer_ssr, gbuffer.m_colour_attachments[4], window_res);
         }
 
         if (draw_cone_tracing_pass)
@@ -422,7 +437,7 @@ int main()
         if (draw_final_pass)
         {
             final_pass.bind();
-            dispatch_final_pass(gi_combine, lightpass_buffer_resolve, buffer_conetracing_denoise, buffer_ssr);
+            dispatch_final_pass(gi_combine, lightpass_buffer_resolve, buffer_conetracing_denoise, buffer_ssr_resolve);
             final_pass.unbind();
             tech::utils::dispatch_present_image(present_shader, "u_image_sampler", 0, final_pass.m_colour_attachments.front());
         }

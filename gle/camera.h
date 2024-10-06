@@ -19,6 +19,8 @@ struct camera
 	projection_type m_projection_type = projection_type::perspective;
 
 	void update(glm::vec2 screen_dim);
+
+	glm::mat4 get_rotation_matrix();
 };
 
 struct debug_camera_controller
@@ -26,7 +28,9 @@ struct debug_camera_controller
 	void update(glm::vec2 screen_dim, camera& cam);
 
 	float movement_speed = 50.0f;
-	float deadzone = 0.003f;
+	float deadzone = 0.002f;
 	float rotational_speed = 45.0f;
 	static constexpr float rotational_factor = 360.0f;
+
+	bool show_mouse = true;
 };
