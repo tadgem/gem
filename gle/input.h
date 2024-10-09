@@ -164,14 +164,14 @@ protected:
     };
 
     struct mouse_state {
-        std::unordered_map<mouse_button, bool>          current_frame_mouse_button_state{};
-        std::unordered_map<mouse_button, bool>          last_frame_mouses_button_state{};
-        float                                           current_frame_scroll = 0.0f;
-        float                                           last_frame_scroll = 0.0f;
-        glm::vec2                                       current_frame_mouse_location {};
-        glm::vec2                                       last_frame_mouse_location {};
-        glm::vec2                                       current_frame_mouse_velocity{};
-        glm::vec2                                       last_frame_mouse_velocity{};
+        std::unordered_map<mouse_button, bool>          current_frame_mouse_button_state;
+        std::unordered_map<mouse_button, bool>          last_frame_mouses_button_state;
+        float                                           current_frame_scroll;
+        float                                           last_frame_scroll;
+        glm::vec2                                       current_frame_mouse_location ;
+        glm::vec2                                       last_frame_mouse_location ;
+        glm::vec2                                       current_frame_mouse_velocity;
+        glm::vec2                                       last_frame_mouse_velocity;
     };
 
     struct keyboard_state {

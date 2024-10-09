@@ -26,7 +26,7 @@ public:
 			return false;
 		}
 #endif
-		p_uniform_values[name] = val;
+		m_uniform_values[name] = val;
 		return true;
 	}
 

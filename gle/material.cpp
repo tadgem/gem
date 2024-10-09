@@ -52,7 +52,7 @@ void material::bind_material_uniforms()
             case shader::uniform_type::sampler2D:
             case shader::uniform_type::sampler3D:
             {
-                sampler_info& info = std::any_cast<sampler_info>(m_uniform_values[name]);
+                sampler_info info = std::any_cast<sampler_info>(m_uniform_values[name]);
                 int loc = info.sampler_slot - GL_TEXTURE0;
                 m_prog.set_int(name, loc);
                 texture::bind_sampler_handle(info.texture_handle, info.sampler_slot);
@@ -70,31 +70,31 @@ void material::bind_material_uniforms()
                 break;
             }
             case shader::uniform_type::vec2: {
-                glm::vec2& v2 = std::any_cast<glm::vec2>(m_uniform_values[name]);
+                glm::vec2 v2 = std::any_cast<glm::vec2>(m_uniform_values[name]);
                 m_prog.set_vec2(name, v2);
                 break;
             }
             case shader::uniform_type::vec3:
             {
-                glm::vec3& v3 = std::any_cast<glm::vec3>(m_uniform_values[name]);
+                glm::vec3 v3 = std::any_cast<glm::vec3>(m_uniform_values[name]);
                 m_prog.set_vec3(name, v3);
                 break;
             }
             case shader::uniform_type::vec4:
             {
-                glm::vec4& v4 = std::any_cast<glm::vec4>(m_uniform_values[name]);
+                glm::vec4 v4 = std::any_cast<glm::vec4>(m_uniform_values[name]);
                 m_prog.set_vec4(name, v4);
                 break;
             }
             case shader::uniform_type::mat3:
             {
-                glm::mat3& m3 = std::any_cast<glm::mat3>(m_uniform_values[name]);
+                glm::mat3 m3 = std::any_cast<glm::mat3>(m_uniform_values[name]);
                 m_prog.set_mat3(name, m3);
                 break;
             }
             case shader::uniform_type::mat4:
             {
-                glm::mat4& m4 = std::any_cast<glm::mat4>(m_uniform_values[name]);
+                glm::mat4 m4 = std::any_cast<glm::mat4>(m_uniform_values[name]);
                 m_prog.set_mat4(name, m4);
                 break;
             }

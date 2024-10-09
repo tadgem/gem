@@ -45,6 +45,8 @@ inline static u32 frame_index = 0;
 inline static constexpr float gi_resolution_scale = 0.5;
 inline static constexpr int shadow_resolution = 2048;
 inline static constexpr int _3d_tex_res = 256;
+const float SCREEN_W = 1280.0;
+const float SCREEN_H = 720.0;
 
 
 
@@ -110,7 +112,7 @@ float get_aabb_area(aabb& bb)
 
 int main()
 {
-    glm::ivec2 window_res{ 1920, 1080 };
+    glm::ivec2 window_res{ SCREEN_W, SCREEN_H };
     engine::init(window_res);
     custom_orientation = glm::vec3(0, 1, 0);
 
@@ -253,20 +255,20 @@ int main()
 
     framebuffer buffer_ssr{};
     buffer_ssr.bind();
-    buffer_ssr.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x, window_res.y, GL_RGBA8, GL_NEAREST, GL_FLOAT);
+    buffer_ssr.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x * gi_resolution_scale, window_res.y * gi_resolution_scale, GL_RGBA8, GL_NEAREST, GL_FLOAT);
     buffer_ssr.check();
     buffer_ssr.unbind();
 
     framebuffer buffer_ssr_resolve{};
     buffer_ssr_resolve.bind();
-    buffer_ssr_resolve.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x, window_res.y, GL_RGBA8, GL_NEAREST, GL_FLOAT);
+    buffer_ssr_resolve.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x * gi_resolution_scale, window_res.y * gi_resolution_scale, GL_RGBA8, GL_NEAREST, GL_FLOAT);
     buffer_ssr_resolve.check();
     buffer_ssr_resolve.unbind();
 
 
     framebuffer history_buffer_ssr{};
     history_buffer_ssr.bind();
-    history_buffer_ssr.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x, window_res.y, GL_RGBA8, GL_NEAREST, GL_FLOAT);
+    history_buffer_ssr.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x * gi_resolution_scale, window_res.y * gi_resolution_scale, GL_RGBA8, GL_NEAREST, GL_FLOAT);
     history_buffer_ssr.check();
     history_buffer_ssr.unbind();
 
@@ -381,12 +383,13 @@ int main()
         {
             shapes::s_screen_quad.use();
             buffer_ssr.bind();
+            glViewport(0, 0, window_res.x * gi_resolution_scale, window_res.y * gi_resolution_scale);
             glClearColor(0, 0, 0, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
             glDepthMask(GL_FALSE);
             ssr.use();
-            ssr.set_float("SCR_WIDTH", 1920.0);
-            ssr.set_float("SCR_HEIGHT", 1080.0);
+            ssr.set_float("SCR_WIDTH", SCREEN_W);
+            ssr.set_float("SCR_HEIGHT", SCREEN_H);
             ssr.set_mat4("projection", cam.m_proj);
             ssr.set_mat4("invProjection", glm::inverse(cam.m_proj));
             ssr.set_mat4("rotation", cam.get_rotation_matrix());
@@ -407,6 +410,7 @@ int main()
             glDepthMask(GL_TRUE);
 
             tech::taa::dispatch_taa_pass(taa, buffer_ssr, buffer_ssr_resolve, history_buffer_ssr, gbuffer.m_colour_attachments[4], window_res);
+            glViewport(0, 0, window_res.x, window_res.y);
         }
 
         if (draw_cone_tracing_pass)

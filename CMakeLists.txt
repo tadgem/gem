@@ -10,10 +10,14 @@ set(CMAKE_SUPPRESS_REGENERATION true)
 set(SDL2_DISABLE_SDL2MAIN ON CACHE BOOL "Disable SDL Entrypoint")
 set(SDL2_DISABLE_INSTALL ON CACHE BOOL "Disable SDL Install")
 set(SDL2_DISABLE_UNINSTALL ON CACHE BOOL "Disable SDL Uninstall")
+set(OpenGL_GL_PREFERENCE "GLVND")
 
 set(THIRD_PARTY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/third-party/ CACHE INTERNAL "")
 set(SUBMODULE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/submodules/ CACHE INTERNAL "")
 set(ASSETS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/assets)
+
+set(SDL_THREADS_ENABLED_BY_DEFAULT ON)
+set(SDL_THREADS ON)
 
 add_subdirectory(third-party/sdl)
 add_subdirectory(third-party/glew/build/cmake)

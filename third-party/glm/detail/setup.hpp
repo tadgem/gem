@@ -340,7 +340,7 @@
 #endif
 
 // [nodiscard]
-#if GLM_LANG & GLM_LANG_CXX17_FLAG
+#if GLM_LANG & GLM_LANG_CXX17_FLAG & __WIN32__
 #	define GLM_NODISCARD [[nodiscard]]
 #else
 #	define GLM_NODISCARD

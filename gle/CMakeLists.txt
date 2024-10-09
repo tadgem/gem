@@ -67,6 +67,8 @@ set(GL_SRC
         ${CMAKE_CURRENT_SOURCE_DIR}/json.hpp
 )
 
+set(CMAKE_CXX_STANDARD 17)
+
 add_library(gle STATIC ${GL_SRC})
 
 set(GLE_INCLUDES 

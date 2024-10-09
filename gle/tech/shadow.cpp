@@ -32,7 +32,7 @@ void tech::shadow::dispatch_shadow_pass(framebuffer& shadow_fb, shader& shadow_s
 
     auto renderables = current_scene.m_registry.view<transform, mesh, material>();
 
-    for (auto& [e, trans, emesh, ematerial] : renderables.each())
+    for (auto [e, trans, emesh, ematerial] : renderables.each())
     {
         shadow_shader.set_mat4("model", trans.m_model);
         emesh.draw();

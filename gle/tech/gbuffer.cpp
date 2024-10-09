@@ -34,7 +34,7 @@ void tech::gbuffer::dispatch_gbuffer(u32 frame_index, framebuffer& gbuffer, fram
 
     auto renderables = current_scene.m_registry.view<transform, mesh, material>();
 
-    for (auto& [e, trans, emesh, ematerial] : renderables.each())
+    for (auto [e, trans, emesh, ematerial] : renderables.each())
     {
         ematerial.bind_material_uniforms();
         gbuffer_shader.set_mat4("u_model", trans.m_model);
