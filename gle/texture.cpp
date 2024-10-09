@@ -2,8 +2,8 @@
 #include "texture.h"
 #include <iostream>
 #include "GL/glew.h"
-#include "SOIL/SOIL.h"
 #include "gl.h"
+#define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 #include "utils.h"
 #include "gli.hpp"
@@ -84,8 +84,10 @@ texture::texture(const std::string& path)
 
 	}
 	else {
+
 		std::vector<u8> data_o = utils::load_binary_from_path(path);
-		unsigned char* data = SOIL_load_image_from_memory(data_o.data(), data_o.size(),  & m_width, &m_height, &m_num_channels, SOIL_LOAD_AUTO);
+		stbi_set_flip_vertically_on_load(1);
+		unsigned char* data = stbi_load_from_memory(data_o.data(), data_o.size(), &m_width, &m_height, &m_num_channels, 0);
 		if (!data)
 		{
 			std::cerr << "Failed to load texture at path : " << path << std::endl;

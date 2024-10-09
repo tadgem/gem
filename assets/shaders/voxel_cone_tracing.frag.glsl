@@ -104,10 +104,8 @@ vec3 trace_ray(vec3 from, vec3 dir, vec3 unit)
 		{
 			lod += 1;
 		}
-		if(lod == 0)
-		{
-			accum += result;
-		}
+		accum += result;
+		
 		steps += 1;
 	}
 	return accum.xyz;
@@ -199,6 +197,6 @@ void main()
 	vec3 normal = texture(u_normal_map, aUV).xyz;
 	vec3 normalized_n = normalize(normal);
 	vec3 v_diffuse = trace_cones_v3(position, normalized_n, unit);
-	vec3 v_spec = trace_ray(position, reflect(normalize(position - u_cam_position), normalized_n), unit);
+	vec3 v_spec = trace_ray(position, reflect(position, normalized_n), unit);
 	FragColor = vec4(mix(v_diffuse, v_spec, u_diffuse_spec_mix), 1.0);
 }

@@ -3,13 +3,13 @@
 
 bool input::get_gamepad_button(int index, gamepad_button button)
 {
-    AASSERT(index < MAX_SUPPORTED_GAMEPADS, "Invalid Gamepad Index Provided");
+    // AASSERT(index < MAX_SUPPORTED_GAMEPADS, "Invalid Gamepad Index Provided");
     return s_gamepad_state[index].current_frame_gamepad_button_state[button];
 }
 
 glm::vec2 input::get_gamepad_stick(int index, gamepad_stick stick)
 {
-    AASSERT(index < MAX_SUPPORTED_GAMEPADS, "Invalid Gamepad Index Provided");
+    // AASSERT(index < MAX_SUPPORTED_GAMEPADS, "Invalid Gamepad Index Provided");
     return s_gamepad_state[index].current_frame_stick_state[stick];
 }
 
@@ -182,19 +182,19 @@ keyboard_key input::get_key_from_sdl(SDL_Keycode keyCode)
 
 void input::update_gamepad_button(int gamepad_index, gamepad_button b, bool value)
 {
-    AASSERT(gamepad_index < MAX_SUPPORTED_GAMEPADS, "Invalid Gamepad Index Provided");
+    // AASSERT(gamepad_index < MAX_SUPPORTED_GAMEPADS, "Invalid Gamepad Index Provided");
     s_gamepad_state->current_frame_gamepad_button_state[b] = value;
 }
 
 void input::update_gamepad_trigger(int gamepad_index, gamepad_trigger b, float value)
 {
-    AASSERT(gamepad_index < MAX_SUPPORTED_GAMEPADS, "Invalid Gamepad Index Provided");
+    //AASSERT(gamepad_index < MAX_SUPPORTED_GAMEPADS, "Invalid Gamepad Index Provided");
     s_gamepad_state->current_frame_trigger_state[b] = value;
 }
 
 void input::update_gamepad_stick(int gamepad_index, gamepad_stick b, glm::vec2 value)
 {
-    AASSERT(gamepad_index < MAX_SUPPORTED_GAMEPADS, "Invalid Gamepad Index Provided");
+    //AASSERT(gamepad_index < MAX_SUPPORTED_GAMEPADS, "Invalid Gamepad Index Provided");
     s_gamepad_state->current_frame_stick_state[b] = value;
 }
 
