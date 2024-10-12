@@ -164,7 +164,7 @@ void im3d_gl::shutdown_im3d(im3d_state& state)
     glDeleteProgram(state.tris_shader.m_shader_id);
 }
 
-void im3d_gl::new_frame_im3d(im3d_state& state)
+void im3d_gl::new_frame_im3d(im3d_state& state, glm::vec2 screen_dim, camera& cam)
 {
     // update app data e.g. mouse pos, viewport size keys etc.
 	Im3d::AppData& ad = Im3d::GetAppData(); 
@@ -175,6 +175,15 @@ void im3d_gl::new_frame_im3d(im3d_state& state)
     ad.m_keyDown[Im3d::Key::Key_S] = input::get_keyboard_key(keyboard_key::s);
     ad.m_keyDown[Im3d::Key::Key_T] = input::get_keyboard_key(keyboard_key::t);
     ad.m_deltaTime = engine::get_frame_time();
+
+    glm::vec2 cursor_pos = input::get_mouse_position();
+
+    glm::vec3 rayOrigin = utils::screen_to_world_pos(cursor_pos, screen_dim, glm::inverse(cam.m_view), glm::inverse(cam.m_proj));;
+    glm::vec3 rayDirection = glm::normalize(rayOrigin - cam.m_pos);
+
+    ad.m_cursorRayOrigin = Im3d::Vec3(rayOrigin.x, rayOrigin.y, rayOrigin.z);
+    ad.m_cursorRayDirection = Im3d::Vec3(rayDirection.x, rayDirection.y, rayDirection.z);
+    
     Im3d::NewFrame();
 }
 

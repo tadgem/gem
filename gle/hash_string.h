@@ -1,8 +1,12 @@
 #pragma once
 #include "alias.h"
-
 #include "ctti/type_id.hpp"
+
 #define TRACK_HASH_STRING_ORIGINALS
+
+#ifdef TRACK_HASH_STRING_ORIGINALS
+#include <unordered_map>
+#endif
 
 template <typename T>
 std::string get_type_name() { return ctti::type_id<T>().name(); }
@@ -21,9 +25,16 @@ u64 get_string_hash(const std::string& str) {
 
 struct hash_string
 {
+#ifdef TRACK_HASH_STRING_ORIGINALS
+    inline static std::unordered_map<u64, std::string> s_hash_string_originals;
+#endif
     hash_string() { m_value = 0; }
 
-    hash_string(const std::string& input) : m_value(get_string_hash(input)) {}
+    hash_string(const std::string& input) : m_value(get_string_hash(input)) {
+#ifdef TRACK_HASH_STRING_ORIGINALS
+        s_hash_string_originals[m_value] = input;
+#endif
+    }
 
     hash_string(u64 value) : m_value(value) {}
 

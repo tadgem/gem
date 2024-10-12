@@ -329,7 +329,7 @@ void engine::init(glm::ivec2 resolution)
         return;
     }
 
-    SDL_GL_SetSwapInterval(1); // Enable vsync
+    SDL_GL_SetSwapInterval(0); // Enable vsync
 
 #ifdef __DEBUG__
     glEnable(GL_DEBUG_OUTPUT);
@@ -357,6 +357,7 @@ void engine::init(glm::ivec2 resolution)
     s_last_counter  = 0;    
 
     init_built_in_assets();
+
 }
 
 void engine::process_sdl_event()
@@ -394,6 +395,11 @@ void engine::engine_pre_frame()
     glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
     glClear(GL_COLOR_BUFFER_BIT);
     glClear(GL_DEPTH_BUFFER_BIT);
+
+
+    int mouse_x, mouse_y;
+    SDL_GetMouseState(&mouse_x, &mouse_y);
+    input::update_mouse_position(get_window_dim(), glm::vec2(mouse_x, mouse_y));
 
     // Start the Dear ImGui frame
     ImGui_ImplOpenGL3_NewFrame();
@@ -448,24 +454,16 @@ void engine::engine_handle_input_events(SDL_Event& input_event)
     }
 
     // Mouse
-    if (input_event.type == SDL_MOUSEMOTION) {
-        SDL_MouseMotionEvent motionEvent = input_event.motion;
-        glm::vec2 currentPosition = glm::vec2(motionEvent.xrel, motionEvent.yrel);
-        input::update_mouse_position(input::get_mouse_position() + currentPosition);
-        return;
-    }
-
-    if (input_event.type == SDL_MOUSEBUTTONDOWN) {
-        SDL_MouseButtonEvent buttonEvent = input_event.button;
-        mouse_button button = buttonEvent.button == 3 ? mouse_button::right : mouse_button::left;
-        input::update_mouse_button(button, true);
-        return;
-    }
-
     if (input_event.type == SDL_MOUSEBUTTONUP) {
         SDL_MouseButtonEvent buttonEvent = input_event.button;
         mouse_button button = buttonEvent.button == 3 ? mouse_button::right : mouse_button::left;
         input::update_mouse_button(button, false);
+        return;
+    }
+    if (input_event.type == SDL_MOUSEBUTTONDOWN) {
+        SDL_MouseButtonEvent buttonEvent = input_event.button;
+        mouse_button button = buttonEvent.button == 3 ? mouse_button::right : mouse_button::left;
+        input::update_mouse_button(button, true);
         return;
     }
 

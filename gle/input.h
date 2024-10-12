@@ -150,7 +150,7 @@ protected:
     static void update_gamepad_stick(int gamepad_index, gamepad_stick b, glm::vec2 value);
     static void update_mouse_button(mouse_button b, bool value);
     static void update_mouse_scroll(float value);
-    static void update_mouse_position(glm::vec2 value);
+    static void update_mouse_position(glm::vec2 screen_dim, glm::vec2 value);
     static void update_keyboard_key(keyboard_key k, bool value);
     static void update_last_frame();
 

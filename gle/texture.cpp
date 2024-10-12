@@ -54,8 +54,9 @@ texture::texture(const std::string& path)
 	
 	if (path.find("dds") != std::string::npos)
 	{
-		gli::texture dds_tex_raw = gli::load_dds(path);
-		gli::texture dds_tex = gli::flip(dds_tex_raw);
+		//gli::texture dds_tex_raw = gli::load_dds(path);
+		//gli::texture dds_tex = gli::flip(dds_tex_raw);
+		gli::texture dds_tex = gli::load_dds(path);
 		gli::gl GL(gli::gl::PROFILE_GL33);
 		gli::gl::format const format = GL.translate(dds_tex.format(), dds_tex.swizzles());
 		GLenum target = GL.translate(dds_tex.target());
@@ -106,7 +107,7 @@ texture::texture(const std::string& path)
 		}
 		if (format == GL_RGBA || format == GL_RGB)
 		{
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_width, m_height, 0, format, GL_UNSIGNED_BYTE, data);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_width, m_height, 0, format, GL_UNSIGNED_BYTE, data);
 		}
 		glGenerateMipmap(GL_TEXTURE_2D);
 	}

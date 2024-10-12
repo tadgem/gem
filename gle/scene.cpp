@@ -18,7 +18,7 @@ entity scene::create_entity(const std::string& name)
 	return entity(this, e);
 }
 
-std::vector<entity> scene::create_entity_from_model(model& model_to_load, shader& material_shader, glm::vec3 scale, std::map<std::string, texture_map_type> known_maps)
+std::vector<entity> scene::create_entity_from_model(model& model_to_load, shader& material_shader, glm::vec3 scale, glm::vec3 euler, std::map<std::string, texture_map_type> known_maps)
 {
 	std::vector<entity> entities{};
 	std::stringstream entity_name;
@@ -31,7 +31,7 @@ std::vector<entity> scene::create_entity_from_model(model& model_to_load, shader
 
 		transform& trans = e.add_component<transform>();
 		trans.m_scale = scale;
-
+		trans.m_euler = euler;
 		e.add_component<mesh>(entry);
 		material& current_mat = e.add_component<material>(material_shader);
 

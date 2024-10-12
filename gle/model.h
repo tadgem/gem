@@ -3,7 +3,7 @@
 #include <unordered_map>
 #include "mesh.h"
 #include "texture.h"
-
+#include "asset.h"
 
 class model
 {
@@ -19,3 +19,5 @@ public:
 
 	static model load_model_from_path(const std::string& path);
 };
+
+using model_asset = asset_t<model, asset_type::model>;

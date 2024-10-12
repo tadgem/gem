@@ -32,3 +32,11 @@ public:
     const std::string   m_path;
     const asset_handle  m_handle;
 };
+
+template<typename _Ty, asset_type _AssetType>
+class asset_t : public asset
+{
+public:
+    _Ty*    m_data;
+    asset_t(const _Ty* data, const std::string& path) : asset(path, _AssetType), m_data(data) {}
+};

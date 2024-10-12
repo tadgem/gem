@@ -154,11 +154,11 @@ model model::load_model_from_path(const std::string& path)
 
         material_entry mat{};
 
-        for (int p = 0; p < material->mNumProperties; p++)
+        /*for (int p = 0; p < material->mNumProperties; p++)
         {
             auto* prop = material->mProperties[p];
             std::cout << "Key : " << prop->mKey.C_Str() << "\n";
-        }
+        }*/
 
         get_material_texture(directory, material, mat, aiTextureType_DIFFUSE, texture_map_type::diffuse);
         get_material_texture(directory, material, mat, aiTextureType_NORMALS, texture_map_type::normal);

@@ -10,8 +10,7 @@ void tech::gbuffer::dispatch_gbuffer(u32 frame_index, framebuffer& gbuffer, fram
     gbuffer.bind();
     glm::mat4 current_vp = cam.m_proj * cam.m_view;
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
+
     gbuffer_shader.use();
     gbuffer_shader.set_vec2("u_resolution", { win_res.x, win_res.y });
     gbuffer_shader.set_mat4("u_vp", current_vp);

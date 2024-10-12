@@ -205,3 +205,21 @@ void utils::validate_euler_angles(glm::vec3& input)
         input.z += 0.0001f;
     }
 }
+
+glm::vec3 utils::screen_to_world_ray(glm::vec3 eye_pos, glm::vec2 mouse_pos, glm::vec2 screen_dim, glm::mat4 inverse_view, glm::mat4 inverse_proj)
+{
+    glm::vec3 rayOrigin = utils::screen_to_world_pos(mouse_pos, screen_dim, inverse_view, inverse_proj);;
+    return glm::normalize(rayOrigin - eye_pos);
+}
+
+glm::vec3 utils::screen_to_world_pos(glm::vec2 mouse_pos, glm::vec2 screen_dim, glm::mat4 inverse_view, glm::mat4 inverse_proj)
+{
+    float mouse_x = glm::max(0.0f, mouse_pos.x);
+    float ndc_x = (2 * mouse_x - screen_dim.x) / screen_dim.x;
+    float ndc_y = (screen_dim.y - 2 * mouse_pos.y) / screen_dim.y;
+
+    glm::vec4 point = inverse_proj * glm::vec4(ndc_x, ndc_y, -1.f, 1.f);
+    point = point / point.w;
+    glm::vec3 world = inverse_view * point;
+    return world;
+}

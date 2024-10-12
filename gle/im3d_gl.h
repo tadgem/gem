@@ -16,7 +16,7 @@ class im3d_gl
 public:
     static im3d_state  load_im3d();
     static void        shutdown_im3d(im3d_state& state);
-    static void        new_frame_im3d(im3d_state& state);
+    static void        new_frame_im3d(im3d_state& state, glm::vec2 screen_dim, camera& cam);
     static void        end_frame_im3d(im3d_state& state, glm::ivec2 screen_dim, camera& cam);
 };
 

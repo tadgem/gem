@@ -22,6 +22,7 @@
 #include "json.hpp"
 #include "scene.h"
 #include "asset.h"
+#include "events.h"
 #include "lights.h"
 #include "transform.h"
 #include "tech/vxgi.h"
@@ -30,7 +31,7 @@
 #include "tech/lighting.h"
 #include "tech/tech_utils.h"
 #include "tech/taa.h"
-
+#include "im3d_math.h"
 using namespace nlohmann;
 static glm::vec3 custom_orientation;
 
@@ -42,11 +43,12 @@ Im3d::Vec3 ToIm3D(glm::vec3& input)
 
 static glm::mat4 last_vp = glm::mat4(1.0);
 inline static u32 frame_index = 0;
-inline static constexpr float gi_resolution_scale = 0.5;
-inline static constexpr int shadow_resolution = 2048;
+inline static constexpr float gi_resolution_scale = 0.75;
+inline static constexpr float ssr_resolution_scale = 0.75;
+inline static constexpr int shadow_resolution = 4096;
 inline static constexpr int _3d_tex_res = 256;
-const float SCREEN_W = 1280.0;
-const float SCREEN_H = 720.0;
+const float SCREEN_W = 1920.0;
+const float SCREEN_H = 1080.0;
 
 
 
@@ -105,9 +107,58 @@ void draw_arrow(glm::vec3 pos, glm::vec3 dir)
     Im3d::DrawSphere(ToIm3D(end), 0.25f);
 }
 
+void on_im3d_old(scene& current_scene, camera& cam)
+{
+    auto view = current_scene.m_registry.view<transform, mesh, material>();
+
+    auto& ad =  Im3d::GetAppData();
+    Im3d::Vec3 cam_pos = ToIm3D(cam.m_pos);
+    Im3d::PushColor();
+    Im3d::SetColor(Im3d::Color_Cyan);
+    Im3d::Vec3 end = cam_pos + ( ad.m_cursorRayDirection * 300.0);
+    Im3d::DrawLine(cam_pos, end, 2.0f, 2.0f);
+    Im3d::DrawSphere(end, 2.0);
+    Im3d::Ray ray{ cam_pos, ad.m_cursorRayDirection };
+    glm::vec2 mouse = input::get_mouse_position();
+
+    if (ImGui::Begin("Picker Debugging"))
+    {
+        ImGui::Text("Mouse Coord %.2f %.2f", mouse.x, mouse.y);
+        ImGui::Text("Cam Position %.2f %.2f %.2f", cam.m_pos.x, cam.m_pos.y, cam.m_pos.z);
+        ImGui::Text("Cam Forward %.2f %.2f %.2f", cam.m_forward.x, cam.m_forward.y, cam.m_forward.z);
+        ImGui::Text("Mouse Cursor Ray Origin %.2f %.2f %.2f", ad.m_cursorRayOrigin.x, ad.m_cursorRayOrigin.y, ad.m_cursorRayOrigin.z);
+        ImGui::Text("Mouse Cursor Ray Dir %.2f %.2f %.2f", ad.m_cursorRayDirection.x, ad.m_cursorRayDirection.y, ad.m_cursorRayDirection.z);
+        ImGui::End();
+    }
+    Im3d::SetColor(Im3d::Color_White);
+
+
+    for (auto [e, trans, meshc, materialc] : view.each())
+    {
+        Im3d::AABB aabb{ ToIm3D(meshc.m_transformed_aabb.min), ToIm3D(meshc.m_transformed_aabb.max) };
+        if (Im3d::Contains(cam_pos, aabb))
+        {
+            continue;
+        }
+        float t0, t1;
+        if (Im3d::Intersect(ray, aabb, t0, t1))
+        {
+            Im3d::DrawSphere(ray.m_origin + (ray.m_direction * t0), 3.0f);
+        }
+        Im3d::DrawAlignedBox(ToIm3D(meshc.m_transformed_aabb.min), ToIm3D(meshc.m_transformed_aabb.max));
+    }
+
+    Im3d::PopColor();
+}
+
 float get_aabb_area(aabb& bb)
 {
     return glm::length(bb.max - bb.min) ;
+}
+
+void on_asset_loaded(asset_loaded_data asset_data)
+{
+    std::cout << asset_data.m_handle_loaded.m_path_hash << "\n";
 }
 
 int main()
@@ -115,6 +166,13 @@ int main()
     glm::ivec2 window_res{ SCREEN_W, SCREEN_H };
     engine::init(window_res);
     custom_orientation = glm::vec3(0, 1, 0);
+
+    event_handler events; 
+
+    events.add_subscription(on_asset_loaded);
+    events.invoke(asset_loaded_data());
+    events.remove_subscription(on_asset_loaded);
+
 
     std::string gbuffer_vert = utils::load_string_from_path("assets/shaders/gbuffer.vert.glsl");
     std::string gbuffer_frag = utils::load_string_from_path("assets/shaders/gbuffer.frag.glsl");
@@ -157,10 +215,14 @@ int main()
     material mat(gbuffer_shader);
 
     e.add_component<material>(gbuffer_shader);
-    model sponza = model::load_model_from_path("assets/models/sponza/Sponza.gltf");
+
+    model sponza_geo = model::load_model_from_path("assets/models/sponza/Sponza.gltf");
+    //model sponza_geo = model::load_model_from_path("assets/models/sponza22/NewSponza_Main_glTF_003.gltf");
+    //model sponza_geo = model::load_model_from_path("assets/models/bistro/BistroExterior.fbx");
+    //model sponza_curtains = model::load_model_from_path("assets/models/sponza22/NewSponza_Curtains_glTF.gltf");
     framebuffer gbuffer{};
 
-    scene.create_entity_from_model(sponza, gbuffer_shader, glm::vec3(0.1),
+    scene.create_entity_from_model(sponza_geo, gbuffer_shader, glm::vec3(0.03), glm::vec3(0.0, 0.0, 0.0),
         {
             {"u_diffuse_map", texture_map_type::diffuse},
             {"u_normal_map", texture_map_type::normal},
@@ -168,6 +230,15 @@ int main()
             {"u_roughness_map", texture_map_type::roughness},
             {"u_ao_map", texture_map_type::ao}
         });
+
+    //scene.create_entity_from_model(sponza_curtains, gbuffer_shader, glm::vec3(3.0), glm::vec3(90.0, 0.0, 0.0),
+    //    {
+    //        {"u_diffuse_map", texture_map_type::diffuse},
+    //        {"u_normal_map", texture_map_type::normal},
+    //        {"u_metallic_map", texture_map_type::metallicness},
+    //        {"u_roughness_map", texture_map_type::roughness},
+    //        {"u_ao_map", texture_map_type::ao}
+    //    });
 
     gbuffer.bind();
     gbuffer.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x, window_res.y, GL_RGBA, GL_NEAREST, GL_UNSIGNED_BYTE);
@@ -194,8 +265,11 @@ int main()
         shadow_resolution, shadow_resolution, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
     glDrawBuffer(GL_NONE);
     glReadBuffer(GL_NONE);
@@ -255,20 +329,26 @@ int main()
 
     framebuffer buffer_ssr{};
     buffer_ssr.bind();
-    buffer_ssr.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x * gi_resolution_scale, window_res.y * gi_resolution_scale, GL_RGBA8, GL_NEAREST, GL_FLOAT);
+    buffer_ssr.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x * ssr_resolution_scale, window_res.y * ssr_resolution_scale, GL_RGBA8, GL_NEAREST, GL_FLOAT);
     buffer_ssr.check();
     buffer_ssr.unbind();
 
+    framebuffer buffer_ssr_denoise{};
+    buffer_ssr_denoise.bind();
+    buffer_ssr_denoise.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x* ssr_resolution_scale, window_res.y* ssr_resolution_scale, GL_RGBA8, GL_NEAREST, GL_FLOAT);
+    buffer_ssr_denoise.check();
+    buffer_ssr_denoise.unbind();
+
     framebuffer buffer_ssr_resolve{};
     buffer_ssr_resolve.bind();
-    buffer_ssr_resolve.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x * gi_resolution_scale, window_res.y * gi_resolution_scale, GL_RGBA8, GL_NEAREST, GL_FLOAT);
+    buffer_ssr_resolve.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x * ssr_resolution_scale, window_res.y * ssr_resolution_scale, GL_RGBA8, GL_NEAREST, GL_FLOAT);
     buffer_ssr_resolve.check();
     buffer_ssr_resolve.unbind();
 
 
     framebuffer history_buffer_ssr{};
     history_buffer_ssr.bind();
-    history_buffer_ssr.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x * gi_resolution_scale, window_res.y * gi_resolution_scale, GL_RGBA8, GL_NEAREST, GL_FLOAT);
+    history_buffer_ssr.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x * ssr_resolution_scale, window_res.y * ssr_resolution_scale, GL_RGBA8, GL_NEAREST, GL_FLOAT);
     history_buffer_ssr.check();
     history_buffer_ssr.unbind();
 
@@ -299,12 +379,12 @@ int main()
     glm::vec3 scale = glm::vec3(0.1f);
     glm::mat4 model = utils::get_model_matrix(pos, euler, scale);
     glm::mat3 normal = utils::get_normal_matrix(model);
-    sponza.m_aabb = utils::transform_aabb(sponza.m_aabb, model);
+    sponza_geo.m_aabb = utils::transform_aabb(sponza_geo.m_aabb, model);
 
-    voxel::grid              voxel_data = voxel::create_grid(_3d_tex_res_vec, sponza.m_aabb);
+    voxel::grid              voxel_data = voxel::create_grid(_3d_tex_res_vec, sponza_geo.m_aabb);
     voxel::grid_visualiser   voxel_visualiser = voxel::create_grid_visualiser(voxel_data, visualize_3dtex, 8);
 
-    glm::vec3 aabb_dim = sponza.m_aabb.max - sponza.m_aabb.min;
+    glm::vec3 aabb_dim = sponza_geo.m_aabb.max - sponza_geo.m_aabb.min;
     glm::vec3 unit = glm::vec3((aabb_dim.x / _3d_tex_res), (aabb_dim.y / _3d_tex_res), (aabb_dim.z / _3d_tex_res));
     glm::vec3 n_unit = glm::normalize(unit);
 
@@ -326,8 +406,8 @@ int main()
 
     auto im3d_s =  im3d_gl::load_im3d();
 
-    glm::vec3 aabb_half_extent = (sponza.m_aabb.max - sponza.m_aabb.min) / 2.0f;
-    glm::vec3 aabb_center = sponza.m_aabb.min + aabb_half_extent;
+    glm::vec3 aabb_half_extent = (sponza_geo.m_aabb.max - sponza_geo.m_aabb.min) / 2.0f;
+    glm::vec3 aabb_center = sponza_geo.m_aabb.min + aabb_half_extent;
     glm::mat4 aabb_model = utils::get_model_matrix(aabb_center, glm::vec3(0.0f), aabb_half_extent * 2.0f);
 
     GLfloat aSigma = 2.0f;
@@ -346,7 +426,7 @@ int main()
         engine::engine_pre_frame();        
         glm::mat4 mvp = cam.m_proj * cam.m_view * model;
         glm::vec2 window_dim = engine::get_window_dim();
-        im3d_gl::new_frame_im3d(im3d_s);
+        im3d_gl::new_frame_im3d(im3d_s, window_dim, cam);
         
         controller.update(window_dim, cam);
         cam.update(window_dim);
@@ -354,7 +434,7 @@ int main()
 
 
         // compute
-        tech::vxgi::dispatch_gbuffer_voxelization(voxelization, sponza.m_aabb, voxel_data, gbuffer, lightpass_buffer_resolve, window_res);
+        tech::vxgi::dispatch_gbuffer_voxelization(voxelization, sponza_geo.m_aabb, voxel_data, gbuffer, lightpass_buffer_resolve, window_res);
 
         tech::vxgi::dispatch_gen_voxel_mips(voxelization_mips, voxel_data, _3d_tex_res_vec);
         
@@ -371,7 +451,7 @@ int main()
 
         if (draw_cone_tracing_pass || draw_cone_tracing_pass_no_taa)
         {
-            tech::vxgi::dispatch_cone_tracing_pass(voxel_cone_tracing, voxel_data, buffer_conetracing, gbuffer, window_res, sponza.m_aabb, _3d_tex_res_vec, cam, vxgi_cone_distance, gi_resolution_scale, diffuse_spec_mix);
+            tech::vxgi::dispatch_cone_tracing_pass(voxel_cone_tracing, voxel_data, buffer_conetracing, gbuffer, window_res, sponza_geo.m_aabb, _3d_tex_res_vec, cam, vxgi_cone_distance, gi_resolution_scale, diffuse_spec_mix);
         }
 
         if (draw_direct_lighting)
@@ -383,7 +463,7 @@ int main()
         {
             shapes::s_screen_quad.use();
             buffer_ssr.bind();
-            glViewport(0, 0, window_res.x * gi_resolution_scale, window_res.y * gi_resolution_scale);
+            glViewport(0, 0, window_res.x * ssr_resolution_scale, window_res.y * ssr_resolution_scale);
             glClearColor(0, 0, 0, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
             glDepthMask(GL_FALSE);
@@ -409,7 +489,9 @@ int main()
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); 
             glDepthMask(GL_TRUE);
 
-            tech::taa::dispatch_taa_pass(taa, buffer_ssr, buffer_ssr_resolve, history_buffer_ssr, gbuffer.m_colour_attachments[4], window_res);
+            tech::utils::dispatch_denoise_image(denoise, buffer_ssr, buffer_ssr_denoise, aSigma, aThreshold, aKSigma, window_res);
+
+            tech::taa::dispatch_taa_pass(taa, buffer_ssr_denoise, buffer_ssr_resolve, history_buffer_ssr, gbuffer.m_colour_attachments[4], window_res);
             glViewport(0, 0, window_res.x, window_res.y);
         }
 
@@ -435,7 +517,7 @@ int main()
 
         if (draw_debug_3d_texture)
         {
-            dispatch_visualize_3d_texture(voxel_data, voxel_visualiser, cam, sponza, shadow_shader, model);
+            dispatch_visualize_3d_texture(voxel_data, voxel_visualiser, cam, sponza_geo, shadow_shader, model);
         }
 
         if (draw_final_pass)
@@ -481,8 +563,8 @@ int main()
             ImGui::Separator();
             ImGui::DragFloat3("Orientation Test", &custom_orientation[0]);
             ImGui::Separator();
-            ImGui::Text("Level Bounding Volume Area %.2f", get_aabb_area(sponza.m_aabb));
-            glm::vec3 dim = sponza.m_aabb.max - sponza.m_aabb.min;
+            ImGui::Text("Level Bounding Volume Area %.2f", get_aabb_area(sponza_geo.m_aabb));
+            glm::vec3 dim = sponza_geo.m_aabb.max - sponza_geo.m_aabb.min;
             ImGui::Text("Level Bounding Volume Dimensions %.2f,%.2f,%.2f", dim.x, dim.y, dim.z);
             ImGui::Separator();
             ImGui::Text("Lights");

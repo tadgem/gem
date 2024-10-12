@@ -208,8 +208,13 @@ void input::update_mouse_scroll(float value)
     s_mouse_state.current_frame_scroll = value;
 }
 
-void input::update_mouse_position(glm::vec2 value)
+void input::update_mouse_position(glm::vec2 screen_dim, glm::vec2 value)
 {
+    glm::vec2 val = value;
+    val.x = glm::min(value.x, screen_dim.x);
+    val.x = glm::max(value.x, 0.0f);
+    val.y = glm::min(value.y, screen_dim.y);
+    val.y = glm::max(value.y, 0.0f);
     s_mouse_state.current_frame_mouse_location = value;
     s_mouse_state.current_frame_mouse_velocity = value - s_mouse_state.last_frame_mouse_location;
 }
