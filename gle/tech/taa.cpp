@@ -2,6 +2,7 @@
 #include "framebuffer.h"
 #include "texture.h"
 #include "shape.h"
+#include "tech/tech_utils.h"
 
 void tech::taa::dispatch_taa_pass(shader& taa, framebuffer& pass_buffer, framebuffer pass_resolve_buffer, framebuffer& pass_history_buffer, gl_handle& velocity_buffer_attachment, glm::ivec2 window_res)
 {
@@ -21,5 +22,4 @@ void tech::taa::dispatch_taa_pass(shader& taa, framebuffer& pass_buffer, framebu
     texture::bind_sampler_handle(0, GL_TEXTURE0);
     texture::bind_sampler_handle(0, GL_TEXTURE1);
     texture::bind_sampler_handle(0, GL_TEXTURE2);
-
 }
