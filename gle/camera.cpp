@@ -26,6 +26,8 @@ void camera::update(glm::vec2 screen_dim)
         // todo
         break;
     }
+
+    m_frustum_planes.m_planes = utils::get_planes_from_view_proj(m_proj * m_view);
 }
 
 glm::mat4 camera::get_rotation_matrix()

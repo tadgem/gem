@@ -94,6 +94,25 @@ void framebuffer::check()
 	}
 }
 
+framebuffer framebuffer::create(glm::vec2 resolution, std::vector<attachment_info> attachments, bool add_depth)
+{
+	GLenum attachment = GL_COLOR_ATTACHMENT0;
+	framebuffer fb {};
+	fb.bind();
+	for (auto& info : attachments)
+	{
+		fb.add_colour_attachment(attachment, resolution.x, resolution.y, info.m_format, info.m_filter, info.m_pixel_format);
+		attachment++;
+	}
+	if (add_depth)
+	{
+		fb.add_depth_attachment_sampler_friendly(resolution.x, resolution.y, GL_DEPTH24_STENCIL8);
+	}
+	fb.check();
+	fb.unbind();
+	return fb;
+}
+
 void framebuffer::bind()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, m_handle);

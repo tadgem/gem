@@ -30,6 +30,7 @@
 #include "tech/shadow.h"
 #include "tech/lighting.h"
 #include "tech/tech_utils.h"
+#include "tech/ssr.h"
 #include "tech/taa.h"
 #include "im3d_math.h"
 using namespace nlohmann;
@@ -44,22 +45,22 @@ Im3d::Vec3 ToIm3D(glm::vec3& input)
 static glm::mat4 last_vp = glm::mat4(1.0);
 inline static u32 frame_index = 0;
 inline static constexpr float gi_resolution_scale = 0.75;
-inline static constexpr float ssr_resolution_scale = 0.75;
-inline static constexpr int shadow_resolution = 4096;
+inline static constexpr float ssr_resolution_scale = 1.0;
+inline static constexpr int shadow_resolution = 2048;
 inline static constexpr int _3d_tex_res = 256;
 const float SCREEN_W = 1920.0;
 const float SCREEN_H = 1080.0;
 
 
 
-void dispatch_cone_tracing_pass_taa(shader& taa, shader& denoise, shader& present_shader, framebuffer& buffer_conetracing, framebuffer& buffer_conetracing_resolve, framebuffer& buffer_conetracing_denoise, framebuffer& history_buffer_conetracing, framebuffer& gbuffer, float aSigma, float aThreshold, float aKSigma, glm::ivec2 window_res)
+void dispatch_cone_tracing_pass_taa(shader& taa, shader& denoise, shader& present_shader, framebuffer& conetracing_buffer, framebuffer& conetracing_buffer_resolve, framebuffer& conetracing_buffer_denoise, framebuffer& history_conetracing_buffer, framebuffer& gbuffer, float aSigma, float aThreshold, float aKSigma, glm::ivec2 window_res)
 {
     
     glViewport(0, 0, window_res.x * gi_resolution_scale, window_res.y * gi_resolution_scale);
 
-    tech::taa::dispatch_taa_pass(taa, buffer_conetracing, buffer_conetracing_resolve, history_buffer_conetracing, gbuffer.m_colour_attachments[4], window_res);
-    tech::utils::dispatch_denoise_image(denoise, buffer_conetracing_resolve, buffer_conetracing_denoise, aSigma, aThreshold, aKSigma, window_res);
-    tech::utils::dispatch_present_image(present_shader, "u_image_sampler", 0, buffer_conetracing_denoise.m_colour_attachments.front());
+    tech::taa::dispatch_taa_pass(taa, conetracing_buffer, conetracing_buffer_resolve, history_conetracing_buffer, gbuffer.m_colour_attachments[4], window_res);
+    tech::utils::dispatch_denoise_image(denoise, conetracing_buffer_resolve, conetracing_buffer_denoise, aSigma, aThreshold, aKSigma, window_res);
+    tech::utils::dispatch_present_image(present_shader, "u_image_sampler", 0, conetracing_buffer_denoise.m_colour_attachments.front());
     
     texture::bind_sampler_handle(0, GL_TEXTURE0);
     
@@ -84,14 +85,14 @@ void dispatch_visualize_3d_texture(voxel::grid& voxel_data, voxel::grid_visualis
 
 }
 
-void dispatch_final_pass(shader& gi_combine, framebuffer& lightpass_buffer_resolve, framebuffer& buffer_conetracing_denoise, framebuffer& ssr_buffer)
+void dispatch_final_pass(shader& gi_combine, framebuffer& lightpass_buffer_resolve, framebuffer& conetracing_buffer_denoise, framebuffer& ssr_buffer)
 {
     shapes::s_screen_quad.use();
     gi_combine.use();
     gi_combine.set_int("lighting_pass", 0);
     texture::bind_sampler_handle(lightpass_buffer_resolve.m_colour_attachments.front(), GL_TEXTURE0);
     gi_combine.set_int("cone_tracing_pass", 1);
-    texture::bind_sampler_handle(buffer_conetracing_denoise.m_colour_attachments.front(), GL_TEXTURE1);
+    texture::bind_sampler_handle(conetracing_buffer_denoise.m_colour_attachments.front(), GL_TEXTURE1);
     gi_combine.set_int("ssr_pass", 2);
     texture::bind_sampler_handle(ssr_buffer.m_colour_attachments.front(), GL_TEXTURE2);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -191,6 +192,7 @@ int main()
     std::string taa_frag = utils::load_string_from_path("assets/shaders/taa.frag.glsl");
     std::string denoise_frag = utils::load_string_from_path("assets/shaders/denoise.frag.glsl");
     std::string gi_combine_frag = utils::load_string_from_path("assets/shaders/gi_combine.frag.glsl");
+    std::string downsample_frag = utils::load_string_from_path("assets/shaders/downsample.frag.glsl");
 
     shader gbuffer_shader(gbuffer_vert, gbuffer_frag);
     shader gbuffer_floats_shader(gbuffer_vert, gbuffer_floats_frag);
@@ -205,6 +207,7 @@ int main()
     shader taa(present_vert, taa_frag);
     shader denoise(present_vert, denoise_frag);
     shader gi_combine(present_vert, gi_combine_frag);
+    shader downsample(present_vert, downsample_frag);
 
     camera cam{};
     debug_camera_controller controller{};
@@ -217,10 +220,6 @@ int main()
     e.add_component<material>(gbuffer_shader);
 
     model sponza_geo = model::load_model_from_path("assets/models/sponza/Sponza.gltf");
-    //model sponza_geo = model::load_model_from_path("assets/models/sponza22/NewSponza_Main_glTF_003.gltf");
-    //model sponza_geo = model::load_model_from_path("assets/models/bistro/BistroExterior.fbx");
-    //model sponza_curtains = model::load_model_from_path("assets/models/sponza22/NewSponza_Curtains_glTF.gltf");
-    framebuffer gbuffer{};
 
     scene.create_entity_from_model(sponza_geo, gbuffer_shader, glm::vec3(0.03), glm::vec3(0.0, 0.0, 0.0),
         {
@@ -231,133 +230,73 @@ int main()
             {"u_ao_map", texture_map_type::ao}
         });
 
-    //scene.create_entity_from_model(sponza_curtains, gbuffer_shader, glm::vec3(3.0), glm::vec3(90.0, 0.0, 0.0),
-    //    {
-    //        {"u_diffuse_map", texture_map_type::diffuse},
-    //        {"u_normal_map", texture_map_type::normal},
-    //        {"u_metallic_map", texture_map_type::metallicness},
-    //        {"u_roughness_map", texture_map_type::roughness},
-    //        {"u_ao_map", texture_map_type::ao}
-    //    });
-
-    gbuffer.bind();
-    gbuffer.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x, window_res.y, GL_RGBA, GL_NEAREST, GL_UNSIGNED_BYTE);
-    gbuffer.add_colour_attachment(GL_COLOR_ATTACHMENT1, window_res.x, window_res.y, GL_RGBA32F, GL_NEAREST, GL_FLOAT);
-    gbuffer.add_colour_attachment(GL_COLOR_ATTACHMENT2, window_res.x, window_res.y, GL_RGBA16F, GL_NEAREST, GL_FLOAT);
-    gbuffer.add_colour_attachment(GL_COLOR_ATTACHMENT3, window_res.x, window_res.y, GL_RGBA16F, GL_NEAREST, GL_FLOAT);
-    gbuffer.add_colour_attachment(GL_COLOR_ATTACHMENT4, window_res.x, window_res.y, GL_RG16F, GL_NEAREST, GL_FLOAT);
-    gbuffer.add_colour_attachment(GL_COLOR_ATTACHMENT5, window_res.x, window_res.y, GL_RGBA16F, GL_NEAREST, GL_FLOAT);
-    gbuffer.add_colour_attachment(GL_COLOR_ATTACHMENT6, window_res.x, window_res.y, GL_RGBA16F, GL_NEAREST, GL_FLOAT);
+    framebuffer gbuffer = framebuffer::create(window_res, {
+        {GL_RGBA16F, GL_LINEAR, GL_FLOAT},
+        {GL_RGBA16F, GL_LINEAR, GL_FLOAT},
+        {GL_RGBA16F, GL_LINEAR, GL_FLOAT},
+        {GL_RGBA16F, GL_LINEAR, GL_FLOAT},
+        {GL_RGBA16F, GL_LINEAR, GL_FLOAT},
+        {GL_RGBA16F, GL_LINEAR, GL_FLOAT},
+        {GL_RGBA16F, GL_LINEAR, GL_FLOAT}
+        }, true);
 
 
-    gbuffer.add_depth_attachment_sampler_friendly(window_res.x, window_res.y);
-    gbuffer.check();
-    gbuffer.unbind();
+    framebuffer dir_light_shadow_buffer = framebuffer::create({shadow_resolution, shadow_resolution}, {}, true);
 
+    framebuffer lightpass_buffer = framebuffer::create(window_res, {
+        {GL_RGBA16F, GL_LINEAR, GL_FLOAT},
+        }, false);
+
+    framebuffer lightpass_buffer_resolve = framebuffer::create(window_res, {
+        {GL_RGBA16F, GL_LINEAR, GL_FLOAT},
+        }, false);
+
+    framebuffer lightpass_buffer_history = framebuffer::create(window_res, {
+        {GL_RGBA16F, GL_LINEAR, GL_FLOAT},
+        }, false);
     
+    framebuffer position_buffer_history = framebuffer::create(window_res, {
+        {GL_RGBA32F, GL_LINEAR, GL_FLOAT},
+            }, false);
+    
+    glm::vec2 gi_res = { window_res.x * gi_resolution_scale, window_res.y * gi_resolution_scale };
+    framebuffer conetracing_buffer = framebuffer::create(gi_res, {
+        {GL_RGBA16F, GL_LINEAR, GL_FLOAT},
+        }, false);
 
-    framebuffer dir_light_shadow_buffer{};
-    dir_light_shadow_buffer.bind();
-    gl_handle depthMap;
-    glGenTextures(1, &depthMap);
-    glBindTexture(GL_TEXTURE_2D, depthMap);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
-        shadow_resolution, shadow_resolution, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-    float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+    framebuffer conetracing_buffer_denoise = framebuffer::create(gi_res, {
+        {GL_RGBA16F, GL_LINEAR, GL_FLOAT},
+        }, false);
 
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
-    glDrawBuffer(GL_NONE);
-    glReadBuffer(GL_NONE);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    dir_light_shadow_buffer.m_depth_attachment = depthMap;
-    dir_light_shadow_buffer.m_height = shadow_resolution;
-    dir_light_shadow_buffer.m_width = shadow_resolution;
-    dir_light_shadow_buffer.unbind();
+    framebuffer conetracing_buffer_resolve = framebuffer::create(gi_res, {
+        {GL_RGBA16F, GL_LINEAR, GL_FLOAT},
+        }, false);
 
-    framebuffer lightpass_buffer{};
-    lightpass_buffer.bind();
-    lightpass_buffer.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x, window_res.y, GL_RGBA16F, GL_LINEAR, GL_FLOAT);
-    lightpass_buffer.check();
-    lightpass_buffer.unbind();
+    framebuffer conetracing_buffer_history = framebuffer::create(gi_res, {
+        {GL_RGBA16F, GL_LINEAR, GL_FLOAT},
+        }, false);
 
-    framebuffer lightpass_buffer_resolve{};
-    lightpass_buffer_resolve.bind();
-    lightpass_buffer_resolve.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x, window_res.y, GL_RGBA16F, GL_LINEAR, GL_FLOAT);
-    lightpass_buffer_resolve.check();
-    lightpass_buffer_resolve.unbind();
+    glm::vec2 ssr_res = { window_res.x * ssr_resolution_scale, window_res.y * ssr_resolution_scale };
+    framebuffer ssr_buffer = framebuffer::create(ssr_res, {
+    {GL_RGBA16F, GL_LINEAR, GL_FLOAT},
+        }, false);
 
-    framebuffer history_buffer_lighting{};
-    history_buffer_lighting.bind();
-    history_buffer_lighting.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x, window_res.y, GL_RGBA16F, GL_LINEAR, GL_FLOAT);
-    history_buffer_lighting.check();
-    history_buffer_lighting.unbind();
+    framebuffer ssr_buffer_denoise = framebuffer::create(ssr_res, {
+        {GL_RGBA16F, GL_LINEAR, GL_FLOAT},
+        }, false);
 
-    framebuffer history_buffer_position{};
-    history_buffer_position.bind();
-    history_buffer_position.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x, window_res.y, GL_RGBA32F, GL_LINEAR, GL_FLOAT);
-    history_buffer_position.check();
-    history_buffer_position.unbind();
+    framebuffer ssr_buffer_resolve = framebuffer::create(ssr_res, {
+        {GL_RGBA16F, GL_LINEAR, GL_FLOAT},
+        }, false);
 
-    framebuffer history_buffer_conetracing{};
-    history_buffer_conetracing.bind();
-    history_buffer_conetracing.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x, window_res.y, GL_RGBA16F, GL_LINEAR, GL_FLOAT);
-    history_buffer_conetracing.check();
-    history_buffer_conetracing.unbind();
+    framebuffer ssr_buffer_history = framebuffer::create(ssr_res, {
+    {GL_RGBA16F, GL_LINEAR, GL_FLOAT},
+        }, false);
 
-    framebuffer buffer_conetracing{};
-    buffer_conetracing.bind();
-    buffer_conetracing.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x * gi_resolution_scale, window_res.y * gi_resolution_scale, GL_RGBA16F, GL_LINEAR, GL_FLOAT);
-    buffer_conetracing.check();
-    buffer_conetracing.unbind();
+    framebuffer final_pass = framebuffer::create(window_res, {
+        {GL_RGBA16F, GL_LINEAR, GL_FLOAT},
+        }, false);
 
-    framebuffer buffer_conetracing_denoise{};
-    buffer_conetracing_denoise.bind();
-    buffer_conetracing_denoise.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x * gi_resolution_scale, window_res.y* gi_resolution_scale, GL_RGBA16F, GL_LINEAR, GL_FLOAT);
-    buffer_conetracing_denoise.check();
-    buffer_conetracing_denoise.unbind();
-
-    framebuffer buffer_conetracing_resolve{};
-    buffer_conetracing_resolve.bind();
-    buffer_conetracing_resolve.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x* gi_resolution_scale, window_res.y* gi_resolution_scale, GL_RGBA16F, GL_LINEAR, GL_FLOAT);
-    buffer_conetracing_resolve.check();
-    buffer_conetracing_resolve.unbind();
-
-    framebuffer buffer_ssr{};
-    buffer_ssr.bind();
-    buffer_ssr.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x * ssr_resolution_scale, window_res.y * ssr_resolution_scale, GL_RGBA8, GL_NEAREST, GL_FLOAT);
-    buffer_ssr.check();
-    buffer_ssr.unbind();
-
-    framebuffer buffer_ssr_denoise{};
-    buffer_ssr_denoise.bind();
-    buffer_ssr_denoise.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x* ssr_resolution_scale, window_res.y* ssr_resolution_scale, GL_RGBA8, GL_NEAREST, GL_FLOAT);
-    buffer_ssr_denoise.check();
-    buffer_ssr_denoise.unbind();
-
-    framebuffer buffer_ssr_resolve{};
-    buffer_ssr_resolve.bind();
-    buffer_ssr_resolve.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x * ssr_resolution_scale, window_res.y * ssr_resolution_scale, GL_RGBA8, GL_NEAREST, GL_FLOAT);
-    buffer_ssr_resolve.check();
-    buffer_ssr_resolve.unbind();
-
-
-    framebuffer history_buffer_ssr{};
-    history_buffer_ssr.bind();
-    history_buffer_ssr.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x * ssr_resolution_scale, window_res.y * ssr_resolution_scale, GL_RGBA8, GL_NEAREST, GL_FLOAT);
-    history_buffer_ssr.check();
-    history_buffer_ssr.unbind();
-
-
-    framebuffer final_pass{};
-    final_pass.bind();
-    final_pass.add_colour_attachment(GL_COLOR_ATTACHMENT0, window_res.x, window_res.y, GL_RGBA16F, GL_LINEAR, GL_FLOAT);
-    final_pass.check();
-    final_pass.unbind();
 
     dir_light dir
     {
@@ -438,20 +377,25 @@ int main()
 
         tech::vxgi::dispatch_gen_voxel_mips(voxelization_mips, voxel_data, _3d_tex_res_vec);
         
-        tech::gbuffer::dispatch_gbuffer(frame_index, gbuffer, history_buffer_position, gbuffer_shader, cam, scene, window_res);
+        tech::gbuffer::dispatch_gbuffer(frame_index, gbuffer, position_buffer_history, gbuffer_shader, cam, scene, window_res);
+        frame_index++;
 
         tech::shadow::dispatch_shadow_pass(dir_light_shadow_buffer, shadow_shader, dir, scene, window_res);
 
         tech::lighting::dispatch_light_pass(lighting_shader, lightpass_buffer, gbuffer, dir_light_shadow_buffer, cam, lights, dir);
-                
+
+        //gbuffer_downsample.bind();
+        //tech::utils::dispatch_present_image(denoise, "u_prev_mip", 0, gbuffer.m_colour_attachments[2]);
+        //gbuffer_downsample.unbind();
+
         if (draw_direct_lighting)
         {
-            tech::taa::dispatch_taa_pass(taa, lightpass_buffer, lightpass_buffer_resolve, history_buffer_lighting, gbuffer.m_colour_attachments[4], window_res);
+            tech::taa::dispatch_taa_pass(taa, lightpass_buffer, lightpass_buffer_resolve, lightpass_buffer_history, gbuffer.m_colour_attachments[4], window_res);
         }
 
         if (draw_cone_tracing_pass || draw_cone_tracing_pass_no_taa)
         {
-            tech::vxgi::dispatch_cone_tracing_pass(voxel_cone_tracing, voxel_data, buffer_conetracing, gbuffer, window_res, sponza_geo.m_aabb, _3d_tex_res_vec, cam, vxgi_cone_distance, gi_resolution_scale, diffuse_spec_mix);
+            tech::vxgi::dispatch_cone_tracing_pass(voxel_cone_tracing, voxel_data, conetracing_buffer, gbuffer, window_res, sponza_geo.m_aabb, _3d_tex_res_vec, cam, vxgi_cone_distance, gi_resolution_scale, diffuse_spec_mix);
         }
 
         if (draw_direct_lighting)
@@ -461,47 +405,20 @@ int main()
 
         if (draw_ssr)
         {
-            shapes::s_screen_quad.use();
-            buffer_ssr.bind();
             glViewport(0, 0, window_res.x * ssr_resolution_scale, window_res.y * ssr_resolution_scale);
-            glClearColor(0, 0, 0, 1.0f);
-            glClear(GL_COLOR_BUFFER_BIT);
-            glDepthMask(GL_FALSE);
-            ssr.use();
-            ssr.set_float("SCR_WIDTH", SCREEN_W);
-            ssr.set_float("SCR_HEIGHT", SCREEN_H);
-            ssr.set_mat4("projection", cam.m_proj);
-            ssr.set_mat4("invProjection", glm::inverse(cam.m_proj));
-            ssr.set_mat4("rotation", cam.get_rotation_matrix());
-
-            ssr.set_int("gNormal", 0);
-            texture::bind_sampler_handle(gbuffer.m_colour_attachments[2], GL_TEXTURE0);
-
-            ssr.set_int("colorBuffer", 1);
-            texture::bind_sampler_handle(lightpass_buffer_resolve.m_colour_attachments.front(), GL_TEXTURE1);
-            
-            ssr.set_int("depthMap", 2);
-            texture::bind_sampler_handle(gbuffer.m_depth_attachment, GL_TEXTURE2);
-
-            glStencilFunc(GL_EQUAL, 1, 0xFF);
-            glStencilMask(0x00);
-
-            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); 
-            glDepthMask(GL_TRUE);
-
-            tech::utils::dispatch_denoise_image(denoise, buffer_ssr, buffer_ssr_denoise, aSigma, aThreshold, aKSigma, window_res);
-
-            tech::taa::dispatch_taa_pass(taa, buffer_ssr_denoise, buffer_ssr_resolve, history_buffer_ssr, gbuffer.m_colour_attachments[4], window_res);
+            tech::ssr::dispatch_ssr_pass(ssr, cam, ssr_buffer, gbuffer, lightpass_buffer, window_dim);
+            tech::utils::dispatch_denoise_image(denoise, ssr_buffer, ssr_buffer_denoise, aSigma, aThreshold, aKSigma, window_res);
+            tech::taa::dispatch_taa_pass(taa, ssr_buffer_denoise, ssr_buffer_resolve, ssr_buffer_history, gbuffer.m_colour_attachments[4], window_res);
             glViewport(0, 0, window_res.x, window_res.y);
         }
 
         if (draw_cone_tracing_pass)
         {
-            dispatch_cone_tracing_pass_taa(taa, denoise, present_shader, buffer_conetracing, buffer_conetracing_resolve, buffer_conetracing_denoise, history_buffer_conetracing, gbuffer, aSigma, aThreshold, aKSigma, window_res);
+            dispatch_cone_tracing_pass_taa(taa, denoise, present_shader, conetracing_buffer, conetracing_buffer_resolve, conetracing_buffer_denoise, conetracing_buffer_history, gbuffer, aSigma, aThreshold, aKSigma, window_res);
         }
         if (draw_cone_tracing_pass_no_taa)
         {
-            tech::utils::dispatch_present_image(present_shader, "u_image_sampler", 0, buffer_conetracing.m_colour_attachments.front());
+            tech::utils::dispatch_present_image(present_shader, "u_image_sampler", 0, conetracing_buffer.m_colour_attachments.front());
         }
         if (draw_direct_lighting_no_taa)
         {
@@ -510,9 +427,9 @@ int main()
         }
 
         // copy history buffers
-        tech::utils::blit_to_fb(history_buffer_lighting, present_shader, "u_image_sampler", 0, lightpass_buffer_resolve.m_colour_attachments[0]);
-        tech::utils::blit_to_fb(history_buffer_position, present_shader, "u_image_sampler", 0, gbuffer.m_colour_attachments[1]);
-        tech::utils::blit_to_fb(history_buffer_conetracing, present_shader, "u_image_sampler", 0, buffer_conetracing_denoise.m_colour_attachments.front());
+        tech::utils::blit_to_fb(lightpass_buffer_history, present_shader, "u_image_sampler", 0, lightpass_buffer_resolve.m_colour_attachments[0]);
+        tech::utils::blit_to_fb(position_buffer_history, present_shader, "u_image_sampler", 0, gbuffer.m_colour_attachments[1]);
+        tech::utils::blit_to_fb(conetracing_buffer_history, present_shader, "u_image_sampler", 0, conetracing_buffer_denoise.m_colour_attachments.front());
         glClear(GL_DEPTH_BUFFER_BIT);
 
         if (draw_debug_3d_texture)
@@ -523,7 +440,7 @@ int main()
         if (draw_final_pass)
         {
             final_pass.bind();
-            dispatch_final_pass(gi_combine, lightpass_buffer_resolve, buffer_conetracing_denoise, buffer_ssr_resolve);
+            dispatch_final_pass(gi_combine, lightpass_buffer_resolve, conetracing_buffer_denoise, ssr_buffer_resolve);
             final_pass.unbind();
             tech::utils::dispatch_present_image(present_shader, "u_image_sampler", 0, final_pass.m_colour_attachments.front());
         }

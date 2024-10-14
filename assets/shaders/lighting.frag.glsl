@@ -29,6 +29,7 @@ uniform sampler2D   u_position_map;
 uniform sampler2D   u_normal_map;
 uniform sampler2D   u_pbr_map; // x = metallic, y = roughness, z = AO
 uniform sampler2D   u_dir_light_shadow_map; // x = metallic, y = roughness, z = AO
+uniform vec3        u_dir_light_pos;
 uniform vec3        u_cam_pos;
 uniform DirLight    u_dir_light;
 uniform PointLight  u_point_lights[NUM_POINT_LIGHTS];
@@ -124,6 +125,43 @@ float ShadowCalculation(vec3 normal, vec4 fragPosLightSpace)
     return shadow;
 }
 
+float ShadowCalculationV2(vec3 f_normal, vec4 fragPosLightSpace)
+{
+    // perform perspective divide
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    // transform to [0,1] range
+    projCoords = projCoords * 0.5 + 0.5;
+    // get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
+    float closestDepth = texture(u_dir_light_shadow_map, projCoords.xy).r; 
+    // get depth of current fragment from light's perspective
+    float currentDepth = projCoords.z;
+    // calculate bias (based on depth map resolution and slope)
+    vec3 normal = normalize(f_normal);
+    vec3 frag_pos = texture(u_position_map, projCoords.xy).xyz;
+    vec3 lightDir = normalize(u_dir_light_pos - frag_pos);
+    float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
+    // check whether current frag pos is in shadow
+    // float shadow = currentDepth - bias > closestDepth  ? 1.0 : 0.0;
+    // PCF
+    float shadow = 0.0;
+    vec2 texelSize = 1.0 / textureSize(u_dir_light_shadow_map, 0);
+    for(int x = -1; x <= 1; ++x)
+    {
+        for(int y = -1; y <= 1; ++y)
+        {
+            float pcfDepth = texture(u_dir_light_shadow_map, projCoords.xy + vec2(x, y) * texelSize).r; 
+            shadow += currentDepth - bias > pcfDepth  ? 1.0 : 0.0;        
+        }    
+    }
+    shadow /= 9.0;
+    
+    // keep the shadow at 0.0 when outside the far_plane region of the light's frustum.
+    if(projCoords.z > 1.0)
+        shadow = 0.0;
+        
+    return shadow;
+}
+
 
 void main()
 {
@@ -145,7 +183,7 @@ void main()
    // reflectance equation
    vec3 Lo = vec3(0.0);
 
-   float shadow = ShadowCalculation(N, frag_pos_light_space);
+   float shadow = ShadowCalculationV2(N, frag_pos_light_space);
 
    Lo += handle_dir_light(N, roughness, metallic, albedo, V, F0, shadow);
 

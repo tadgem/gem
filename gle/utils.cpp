@@ -223,3 +223,17 @@ glm::vec3 utils::screen_to_world_pos(glm::vec2 mouse_pos, glm::vec2 screen_dim, 
     glm::vec3 world = inverse_view * point;
     return world;
 }
+
+std::array<glm::vec4, 6> utils::get_planes_from_view_proj(glm::mat4 view_proj)
+{
+    std::array<glm::vec4, 6> arr = std::array<glm::vec4, 6>();
+
+    for (int i = 4; i--; ) { arr[0][i] = view_proj[i][3] + view_proj[i][0]; }
+    for (int i = 4; i--; ) { arr[1][i] = view_proj[i][3] - view_proj[i][0]; }
+    for (int i = 4; i--; ) { arr[2][i] = view_proj[i][3] + view_proj[i][1]; }
+    for (int i = 4; i--; ) { arr[3][i] = view_proj[i][3] - view_proj[i][1]; }
+    for (int i = 4; i--; ) { arr[4][i] = view_proj[i][3] + view_proj[i][2]; }
+    for (int i = 4; i--; ) { arr[5][i] = view_proj[i][3] - view_proj[i][2]; }
+
+    return arr;
+}

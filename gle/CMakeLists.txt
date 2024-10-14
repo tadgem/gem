@@ -48,7 +48,6 @@ set(GL_SRC
         ${CMAKE_CURRENT_SOURCE_DIR}/im3d_gl.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/im3d_gl.h
         ${CMAKE_CURRENT_SOURCE_DIR}/utils.cpp
-        "tech/tech_utils.h"
         ${CMAKE_CURRENT_SOURCE_DIR}/voxelisation.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/voxelisation.h
         ${CMAKE_CURRENT_SOURCE_DIR}/tech/gbuffer.cpp
@@ -63,6 +62,8 @@ set(GL_SRC
         ${CMAKE_CURRENT_SOURCE_DIR}/tech/vxgi.h        
         ${CMAKE_CURRENT_SOURCE_DIR}/tech/tech_utils.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/tech/tech_utils.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/tech/ssr.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/tech/ssr.h
         # third party sources
         ${CMAKE_CURRENT_SOURCE_DIR}/stb_image.h
         ${CMAKE_CURRENT_SOURCE_DIR}/json.hpp

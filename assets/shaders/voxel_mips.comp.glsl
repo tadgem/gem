@@ -55,7 +55,7 @@ void main() {
 	colour  +=  imageLoad(last_mip, lod_pix13);
 
 	ivec3 lod_pix14 = center + ivec3(0,-1,0);
-	colour  +=  imageLoad(last_mip, lod_pix14);
+	colour  +=  imageLoad(last_mip, lod_pix14);https://www.youtube.com/watch?v=hCwuuW-8dp8
 
 	ivec3 lod_pix15 = center + ivec3(-1,0,-1);
 	colour  +=  imageLoad(last_mip, lod_pix15);

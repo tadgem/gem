@@ -1,5 +1,11 @@
 #pragma once
 #include "glm.hpp"
+#include <array>
+
+struct frustum_planes
+{
+	std::array<glm::vec4, 6>	m_planes; // L,R,B,T,N,F
+};
 
 struct camera
 {
@@ -15,6 +21,8 @@ struct camera
 
 	glm::vec3	m_pos, m_euler, m_forward, m_right, m_up;
 	float		m_fov = 60.0f, m_aspect = 1.666f, m_near = 0.01f, m_far = 300.0f;
+
+	frustum_planes	m_frustum_planes;
 
 	projection_type m_projection_type = projection_type::perspective;
 

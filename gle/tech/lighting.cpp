@@ -5,6 +5,9 @@
 #include "texture.h"
 #include "camera.h"
 #include "utils.h"
+#include "gtc/quaternion.hpp"
+
+
 void tech::lighting::dispatch_light_pass(shader& lighting_shader, framebuffer& lighting_buffer, framebuffer& gbuffer, framebuffer& dir_light_shadow_buffer, camera& cam, std::vector<point_light>& point_lights, dir_light& sun)
 {
     lighting_buffer.bind();
@@ -17,7 +20,11 @@ void tech::lighting::dispatch_light_pass(shader& lighting_shader, framebuffer& l
     lighting_shader.set_int("u_pbr_map", 3);
     lighting_shader.set_int("u_dir_light_shadow_map", 4);
 
+    glm::vec3 dir = glm::quat(glm::radians(sun.direction)) * glm::vec3(0.0f, 0.0f, 1.0f);
+    glm::vec3 lightPos = glm::vec3(0.0) - (dir * 100.0f);
+
     lighting_shader.set_vec3("u_cam_pos", cam.m_pos);
+    lighting_shader.set_vec3("u_dir_light_pos", lightPos);
 
     lighting_shader.set_vec3("u_dir_light.direction", utils::get_forward(sun.direction));
     lighting_shader.set_vec3("u_dir_light.colour", sun.colour);
