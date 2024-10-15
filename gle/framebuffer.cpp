@@ -17,12 +17,12 @@ void framebuffer::cleanup()
 }
 
 
-void framebuffer::add_colour_attachment(GLenum attachment_index, uint32_t width, uint32_t height, GLenum format, GLenum filter, GLenum pixel_format)
+void framebuffer::add_colour_attachment(GLenum attachment_index, uint32_t width, uint32_t height, GLenum internal_format, GLenum format, GLenum filter, GLenum pixel_format)
 {
 	gl_handle textureColorbuffer;
 	glGenTextures(1, &textureColorbuffer);
 	glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
-	glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, GL_RGBA, pixel_format, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, internal_format, pixel_format, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -101,7 +101,7 @@ framebuffer framebuffer::create(glm::vec2 resolution, std::vector<attachment_inf
 	fb.bind();
 	for (auto& info : attachments)
 	{
-		fb.add_colour_attachment(attachment, resolution.x, resolution.y, info.m_format, info.m_filter, info.m_pixel_format);
+		fb.add_colour_attachment(attachment, resolution.x, resolution.y, info.m_internal_format, info.m_format, info.m_filter, info.m_pixel_format);
 		attachment++;
 	}
 	if (add_depth)

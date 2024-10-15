@@ -56,6 +56,11 @@ std::vector<entity> scene::create_entity_from_model(model& model_to_load, shader
 	return entities;
 }
 
+bool scene::does_entity_exist(u32 index)
+{
+	return m_registry.valid(entt::entity {index});
+}
+
 void scene::on_update()
 {
 	transform::update_transforms(*this);

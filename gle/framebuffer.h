@@ -14,7 +14,7 @@ public:
 	void	unbind();
 	void	cleanup();
 
-	void	add_colour_attachment(GLenum attachment_index, uint32_t width, uint32_t height, GLenum format, GLenum filter = GL_LINEAR, GLenum pixel_format = GL_UNSIGNED_BYTE);
+	void	add_colour_attachment(GLenum attachment_index, uint32_t width, uint32_t height, GLenum internal_format, GLenum format, GLenum filter = GL_LINEAR, GLenum pixel_format = GL_UNSIGNED_BYTE);
 	void	add_depth_attachment(uint32_t width, uint32_t height, GLenum format = GL_DEPTH24_STENCIL8);
 	void	add_depth_attachment_sampler_friendly(uint32_t width, uint32_t height, GLenum format = GL_DEPTH24_STENCIL8);
 	void	check();
@@ -24,13 +24,16 @@ public:
 	{
 		std::array<_Ty, w * h> out_data{};
 		bind();
+		glReadBuffer(GL_COLOR_ATTACHMENT0 + attachment_index);
 		glReadPixels(x, y, w, h, pixel_format, pixel_type, &out_data[0]);
+		glReadBuffer(GL_COLOR_ATTACHMENT0);
 		unbind();
 		return out_data;
 	}
 
 	struct attachment_info
 	{
+		GLenum m_internal_format;
 		GLenum m_format;
 		GLenum m_filter;
 		GLenum m_pixel_format;

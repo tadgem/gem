@@ -1,9 +1,11 @@
 #include "tech/vxgi.h"
 #include "gl.h"
+#include "debug.h"
 #include "camera.h"
 
 void tech::vxgi::dispatch_gbuffer_voxelization(shader& voxelization, aabb& volume_bounding_box, voxel::grid& voxel_data, framebuffer& gbuffer, framebuffer& lightpass_buffer, glm::ivec2 window_res)
 {
+    GPU_MARKER("GBuffer Voxelisation");
     voxelization.use();
     voxelization.set_vec2("u_input_resolution", { window_res.x, window_res.y });
     voxelization.set_vec3("u_aabb.min", volume_bounding_box.min);
@@ -17,6 +19,7 @@ void tech::vxgi::dispatch_gbuffer_voxelization(shader& voxelization, aabb& volum
 
 void tech::vxgi::dispatch_gen_voxel_mips(shader& voxelization_mips, voxel::grid& voxel_data, glm::vec3 _3d_tex_res_vec)
 {
+    GPU_MARKER("Voxel Mips Generation");
     constexpr int MAX_MIPS = 5;
     voxelization_mips.use();
     // for each mip in remaining_mipps
@@ -40,6 +43,8 @@ void tech::vxgi::dispatch_gen_voxel_mips(shader& voxelization_mips, voxel::grid&
 
 void tech::vxgi::dispatch_cone_tracing_pass(shader& voxel_cone_tracing, voxel::grid& voxel_data, framebuffer& buffer_conetracing, framebuffer& gbuffer, glm::ivec2 window_res, aabb& bounding_volume, glm::vec3 _3d_tex_res, camera& cam, float max_trace_distance, float resolution_scale, float diffuse_spec_mix)
 {
+    GPU_MARKER("Cone Tracing Pass");
+
     glBindTexture(GL_TEXTURE_3D, voxel_data.voxel_texture.m_handle);
 
     glViewport(0, 0, window_res.x* resolution_scale, window_res.y* resolution_scale);

@@ -13,8 +13,7 @@ layout(location = 1) out vec4 oPosition;
 layout(location = 2) out vec3 oNormal;
 layout(location = 3) out vec3 oPBR;
 layout(location = 4) out vec2 oVelocity;
-layout(location = 5) out vec4 oCurrentClip;
-layout(location = 6) out vec4 oLastClip;
+layout(location = 5) out vec3 oEntityID;
 
 uniform sampler2D u_diffuse_map;
 uniform sampler2D u_normal_map;
@@ -23,8 +22,9 @@ uniform sampler2D u_roughness_map;
 uniform sampler2D u_ao_map;
 uniform sampler2D u_prev_position_map;
 
-uniform mat4 u_last_vp;
-uniform int u_frame_index;
+uniform mat4    u_last_vp;
+uniform int     u_frame_index;
+uniform int     u_entity_index;
 
 const vec2 halton_seq[16] = vec2[16] 
 (
@@ -89,9 +89,11 @@ void main()
 	oPosition = aPosition;
     oNormal = getNormalFromMap();
 
-    oCurrentClip = aClipPos;
-    oLastClip = aLastClipPos;
+    float r = ((u_entity_index & 0x000000FF) >>  0);
+    float g = ((u_entity_index & 0x0000FF00) >>  8);
+    float b = ((u_entity_index & 0x00FF0000) >> 16);
 
+    oEntityID = vec3(r,g,b);
 
     vec2 currentPosNDC = aClipPos.xy / aClipPos.z;
     vec2 previousPosNDC = aLastClipPos.xy / aLastClipPos.z;

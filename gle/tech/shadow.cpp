@@ -6,9 +6,11 @@
 #include "transform.h"
 #include "mesh.h"
 #include "material.h"
+#include "debug.h"
 
 void tech::shadow::dispatch_shadow_pass(framebuffer& shadow_fb, shader& shadow_shader, dir_light& sun, scene& current_scene, glm::ivec2 window_res)
 {
+    GPU_MARKER("Shadow Map Pass");
     float near_plane = 0.01f, far_plane = 1000.0f;
     glm::mat4 lightProjection = glm::ortho(-100.0f, 100.0f, -100.0f, 100.0f, near_plane, far_plane);
 

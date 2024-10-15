@@ -45,27 +45,28 @@ Im3d::Vec3 ToIm3D(glm::vec3& input)
 static glm::mat4 last_vp = glm::mat4(1.0);
 inline static u32 frame_index = 0;
 inline static constexpr float gi_resolution_scale = 0.5;
-inline static constexpr float ssr_resolution_scale = 0.66;
+inline static constexpr float ssr_resolution_scale = 0.75;
 inline static constexpr int shadow_resolution = 2048;
 inline static constexpr int _3d_tex_res = 256;
 const float SCREEN_W = 1920.0;
 const float SCREEN_H = 1080.0;
-
+inline static int selected_entity = -1;
 
 
 void dispatch_cone_tracing_pass_taa(shader& taa, shader& denoise, shader& present_shader, framebuffer& conetracing_buffer, framebuffer& conetracing_buffer_resolve, framebuffer& conetracing_buffer_denoise, framebuffer& history_conetracing_buffer, framebuffer& gbuffer, float aSigma, float aThreshold, float aKSigma, glm::ivec2 window_res, float resolution_scale)
 {
-    
-
     tech::taa::dispatch_taa_pass(taa, conetracing_buffer, conetracing_buffer_resolve, history_conetracing_buffer, gbuffer.m_colour_attachments[4], window_res);
     glViewport(0, 0, window_res.x * resolution_scale, window_res.y * resolution_scale);
     tech::utils::dispatch_denoise_image(denoise, conetracing_buffer_resolve, conetracing_buffer_denoise, aSigma, aThreshold, aKSigma, window_res);
-    glViewport(0, 0, window_res.x, window_res.y);
-    tech::utils::dispatch_present_image(present_shader, "u_image_sampler", 0, conetracing_buffer_denoise.m_colour_attachments.front());
-    
     texture::bind_sampler_handle(0, GL_TEXTURE0);
-    
+    glViewport(0, 0, window_res.x , window_res.y);
 
+}
+
+void dispatch_ssr_pass_taa(shader& taa, shader& present_shader, framebuffer& conetracing_buffer, framebuffer& conetracing_buffer_resolve, framebuffer& history_conetracing_buffer, framebuffer& gbuffer, float aSigma, float aThreshold, float aKSigma, glm::ivec2 window_res, float resolution_scale)
+{
+    tech::taa::dispatch_taa_pass(taa, conetracing_buffer, conetracing_buffer_resolve, history_conetracing_buffer, gbuffer.m_colour_attachments[4], window_res);
+    texture::bind_sampler_handle(0, GL_TEXTURE0);
 }
 
 void dispatch_visualize_3d_texture(voxel::grid& voxel_data, voxel::grid_visualiser& voxel_visualiser, camera& cam, model& sponza, shader& z_prepass_shader, glm::mat4& model)
@@ -152,6 +153,25 @@ void on_im3d_old(scene& current_scene, camera& cam)
     Im3d::PopColor();
 }
 
+void on_im3d(scene& current_scene, camera& cam, int& selected_entity)
+{
+    if (!current_scene.does_entity_exist(selected_entity))
+    {
+        selected_entity = -1;
+        return;
+    }
+
+    entt::entity e = static_cast<entt::entity>(selected_entity);
+    if (!current_scene.m_registry.any_of<mesh>(e))
+    {
+        selected_entity = -1;
+        return;
+    }
+    mesh& meshc = current_scene.m_registry.get<mesh>(e);
+
+    Im3d::DrawAlignedBox(ToIm3D(meshc.m_transformed_aabb.min), ToIm3D(meshc.m_transformed_aabb.max));
+}
+
 float get_aabb_area(aabb& bb)
 {
     return glm::length(bb.max - bb.min) ;
@@ -231,73 +251,72 @@ int main()
         });
 
     framebuffer gbuffer = framebuffer::create(window_res, {
-        {GL_RGBA32F, GL_LINEAR, GL_FLOAT},
-        {GL_RGBA32F, GL_LINEAR, GL_FLOAT},
-        {GL_RGBA32F, GL_LINEAR, GL_FLOAT},
-        {GL_RGBA32F, GL_LINEAR, GL_FLOAT},
-        {GL_RGBA32F, GL_LINEAR, GL_FLOAT},
-        {GL_RGBA32F, GL_LINEAR, GL_FLOAT},
-        {GL_RGBA32F, GL_LINEAR, GL_FLOAT}
+        {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
+        {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
+        {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
+        {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
+        {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
+        {GL_RGB, GL_RGB16F, GL_NEAREST, GL_FLOAT},
         }, true);
 
     framebuffer gbuffer_downsample = framebuffer::create(window_res, {
-        {GL_RGBA16F, GL_LINEAR, GL_FLOAT},
+        {GL_RGBA,GL_RGBA16F, GL_LINEAR, GL_FLOAT},
         }, false);
 
     framebuffer dir_light_shadow_buffer = framebuffer::create({shadow_resolution, shadow_resolution}, {}, true);
 
     framebuffer lightpass_buffer = framebuffer::create(window_res, {
-        {GL_RGBA16F, GL_LINEAR, GL_FLOAT},
+        {GL_RGBA,GL_RGBA16F, GL_LINEAR, GL_FLOAT},
         }, false);
 
     framebuffer lightpass_buffer_resolve = framebuffer::create(window_res, {
-        {GL_RGBA16F, GL_LINEAR, GL_FLOAT},
+        {GL_RGBA,GL_RGBA16F, GL_LINEAR, GL_FLOAT},
         }, false);
 
     framebuffer lightpass_buffer_history = framebuffer::create(window_res, {
-        {GL_RGBA16F, GL_LINEAR, GL_FLOAT},
+        {GL_RGBA,GL_RGBA16F, GL_LINEAR, GL_FLOAT},
         }, false);
     
     framebuffer position_buffer_history = framebuffer::create(window_res, {
-        {GL_RGBA32F, GL_LINEAR, GL_FLOAT},
+        {GL_RGBA,GL_RGBA32F, GL_LINEAR, GL_FLOAT},
             }, false);
     
     glm::vec2 gi_res = { window_res.x * gi_resolution_scale, window_res.y * gi_resolution_scale };
     framebuffer conetracing_buffer = framebuffer::create(gi_res, {
-        {GL_RGBA16F, GL_LINEAR, GL_FLOAT},
+        {GL_RGBA,GL_RGBA16F, GL_LINEAR, GL_FLOAT},
         }, false);
 
     framebuffer conetracing_buffer_denoise = framebuffer::create(gi_res, {
-        {GL_RGBA16F, GL_LINEAR, GL_FLOAT},
+        {GL_RGBA,GL_RGBA16F, GL_LINEAR, GL_FLOAT},
         }, false);
 
     framebuffer conetracing_buffer_resolve = framebuffer::create(window_res, {
-        {GL_RGBA16F, GL_LINEAR, GL_FLOAT},
+        {GL_RGBA,GL_RGBA16F, GL_LINEAR, GL_FLOAT},
         }, false);
 
     framebuffer conetracing_buffer_history = framebuffer::create(window_res, {
-        {GL_RGBA16F, GL_LINEAR, GL_FLOAT},
+        {GL_RGBA,GL_RGBA16F, GL_LINEAR, GL_FLOAT},
         }, false);
 
     glm::vec2 ssr_res = { window_res.x * ssr_resolution_scale, window_res.y * ssr_resolution_scale };
     framebuffer ssr_buffer = framebuffer::create(ssr_res, {
-    {GL_RGBA16F, GL_LINEAR, GL_FLOAT},
+    {GL_RGBA,GL_RGBA16F, GL_LINEAR, GL_FLOAT},
         }, false);
 
     framebuffer ssr_buffer_denoise = framebuffer::create(ssr_res, {
-        {GL_RGBA16F, GL_LINEAR, GL_FLOAT},
+        {GL_RGBA,GL_RGBA16F, GL_LINEAR, GL_FLOAT},
         }, false);
 
     framebuffer ssr_buffer_resolve = framebuffer::create(window_res, {
-        {GL_RGBA16F, GL_LINEAR, GL_FLOAT},
+        {GL_RGBA,GL_RGBA16F, GL_LINEAR, GL_FLOAT},
         }, false);
 
     framebuffer ssr_buffer_history = framebuffer::create(window_res, {
-    {GL_RGBA16F, GL_LINEAR, GL_FLOAT},
+    {GL_RGBA,GL_RGBA16F, GL_LINEAR, GL_FLOAT},
         }, false);
 
     framebuffer final_pass = framebuffer::create(window_res, {
-        {GL_RGBA16F, GL_LINEAR, GL_FLOAT},
+        {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
         }, false);
 
 
@@ -380,7 +399,7 @@ int main()
 
         tech::vxgi::dispatch_gen_voxel_mips(voxelization_mips, voxel_data, _3d_tex_res_vec);
         
-        tech::gbuffer::dispatch_gbuffer(frame_index, gbuffer, position_buffer_history, gbuffer_shader, cam, scene, window_res);
+        tech::gbuffer::dispatch_gbuffer_with_id(frame_index, gbuffer, position_buffer_history, gbuffer_shader, cam, scene, window_res);
         frame_index++;
 
         tech::shadow::dispatch_shadow_pass(dir_light_shadow_buffer, shadow_shader, dir, scene, window_res);
@@ -414,7 +433,7 @@ int main()
             glViewport(0, 0, window_res.x * ssr_resolution_scale, window_res.y * ssr_resolution_scale);
             tech::ssr::dispatch_ssr_pass(ssr, cam, ssr_buffer, gbuffer, lightpass_buffer, window_dim);
             glViewport(0, 0, window_res.x, window_res.y);
-            dispatch_cone_tracing_pass_taa(taa, denoise, present_shader, ssr_buffer, ssr_buffer_resolve, ssr_buffer_denoise, ssr_buffer_history, gbuffer, aSigma, aThreshold, aKSigma, window_res, ssr_resolution_scale);
+            dispatch_ssr_pass_taa(taa, present_shader, ssr_buffer, ssr_buffer_resolve, ssr_buffer_history, gbuffer, aSigma, aThreshold, aKSigma, window_res, ssr_resolution_scale);
 
         }
 
@@ -436,7 +455,7 @@ int main()
         tech::utils::blit_to_fb(lightpass_buffer_history, present_shader, "u_image_sampler", 0, lightpass_buffer_resolve.m_colour_attachments[0]);
         tech::utils::blit_to_fb(position_buffer_history, present_shader, "u_image_sampler", 0, gbuffer.m_colour_attachments[1]);
         tech::utils::blit_to_fb(conetracing_buffer_history, present_shader, "u_image_sampler", 0, conetracing_buffer_denoise.m_colour_attachments.front());
-        tech::utils::blit_to_fb(ssr_buffer_history, present_shader, "u_image_sampler", 0, ssr_buffer_denoise.m_colour_attachments.front());
+        tech::utils::blit_to_fb(ssr_buffer_history, present_shader, "u_image_sampler", 0, ssr_buffer_resolve.m_colour_attachments.front());
         glClear(GL_DEPTH_BUFFER_BIT);
 
         if (draw_debug_3d_texture)
@@ -447,19 +466,27 @@ int main()
         if (draw_final_pass)
         {
             final_pass.bind();
-            dispatch_final_pass(gi_combine, lightpass_buffer_resolve, conetracing_buffer_denoise, ssr_buffer_denoise);
+            dispatch_final_pass(gi_combine, lightpass_buffer_resolve, conetracing_buffer_denoise, ssr_buffer_resolve);
             final_pass.unbind();
             tech::utils::dispatch_present_image(present_shader, "u_image_sampler", 0, final_pass.m_colour_attachments.front());
         }
 
         glm::vec2 mouse_pos = input::get_mouse_position();
-        auto pixels = final_pass.read_pixels<glm::vec4, 1, 1>(mouse_pos.x, window_res.y - mouse_pos.y, 5, GL_RGBA, GL_FLOAT);
+
+        if (input::get_mouse_button(mouse_button::left))
+        {
+            auto pixels = gbuffer.read_pixels<glm::vec4, 1, 1>(mouse_pos.x, window_res.y - mouse_pos.y, 5, GL_RGBA, GL_FLOAT);
+            selected_entity =
+                pixels[0][0] +
+                pixels[0][1] * 256 +
+                pixels[0][2] * 256 * 256;
+        }
 
 
         {
             ImGui::Begin("VXGI Debug");
             ImGui::Text("Mouse Pos : %.3f, %.3f", mouse_pos.x, mouse_pos.y);
-            ImGui::Text("Mouse Pixel Colour : %.3f, %.3f, %.3f", pixels[0].x, pixels[0].y, pixels[0].z);
+            ImGui::Text("Selected Entity ID : %d", selected_entity);
             ImGui::Separator();
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / engine::s_imgui_io->Framerate, engine::s_imgui_io->Framerate);
             ImGui::Separator();
@@ -517,6 +544,7 @@ int main()
         }
         if (draw_im3d)
         {
+            on_im3d(scene, cam, selected_entity);
             im3d_gl::end_frame_im3d(im3d_s, {window_res.x, window_res.y}, cam);
         }
         else

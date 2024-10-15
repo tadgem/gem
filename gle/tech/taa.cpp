@@ -3,9 +3,11 @@
 #include "texture.h"
 #include "shape.h"
 #include "tech/tech_utils.h"
+#include "debug.h"
 
 void tech::taa::dispatch_taa_pass(shader& taa, framebuffer& pass_buffer, framebuffer pass_resolve_buffer, framebuffer& pass_history_buffer, gl_handle& velocity_buffer_attachment, glm::ivec2 window_res)
 {
+    GPU_MARKER("TAA Pass");
     pass_resolve_buffer.bind();
     shapes::s_screen_quad.use();
     taa.use();

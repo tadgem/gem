@@ -1,5 +1,7 @@
 #version 450
 
+// need to replace this with something a bit more "smart"
+
 layout(location = 0) in vec2 aUV;
 out vec4 color;
 
@@ -54,78 +56,6 @@ vec4 smartDeNoise(sampler2D tex, vec2 uv, float sigma, float kSigma, float thres
     }
     return aBuff/zBuff;
 }
-
-//  About Standard Deviations (watch Gauss curve)
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//
-//  kSigma = 1*sigma cover 68% of data
-//  kSigma = 2*sigma cover 95% of data - but there are over 3 times 
-//                   more points to compute
-//  kSigma = 3*sigma cover 99.7% of data - but needs more than double 
-//                   the calculations of 2*sigma
-
-
-//  Optimizations (description)
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//
-//  fX = exp( -(x*x) * invSigmaSqx2 ) * invSigmaxSqrt2PI; 
-//  fY = exp( -(y*y) * invSigmaSqx2 ) * invSigmaxSqrt2PI; 
-//  where...
-//      invSigmaSqx2     = 1.0 / (sigma^2 * 2.0)
-//      invSigmaxSqrt2PI = 1.0 / (sqrt(2 * PI) * sigma)
-//
-//  now, fX*fY can be written in unique expression...
-//
-//      e^(a*X) * e^(a*Y) * c*c
-//
-//      where:
-//        a = invSigmaSqx2, X = (x*x), Y = (y*y), c = invSigmaxSqrt2PI
-//
-//           -[(x*x) * 1/(2 * sigma^2)]             -[(y*y) * 1/(2 * sigma^2)] 
-//          e                                      e
-//  fX = -------------------------------    fY = -------------------------------
-//                ________                               ________
-//              \/ 2 * PI  * sigma                     \/ 2 * PI  * sigma
-//
-//      now with... 
-//        a = 1/(2 * sigma^2), 
-//        X = (x*x) 
-//        Y = (y*y) ________
-//        c = 1 / \/ 2 * PI  * sigma
-//
-//      we have...
-//              -[aX]              -[aY]
-//        fX = e      * c;   fY = e      * c;
-//
-//      and...
-//                 -[aX + aY]    [2]     -[a(X + Y)]    [2]
-//        fX*fY = e           * c     = e            * c   
-//
-//      well...
-//
-//                    -[(x*x + y*y) * 1/(2 * sigma^2)]
-//                   e                                
-//        fX*fY = --------------------------------------
-//                                        [2]           
-//                          2 * PI * sigma           
-//      
-//      now with assigned constants...
-//
-//          invSigmaQx2   = 1/(2 * sigma^2)
-//          invSigmaQx2PI = 1/(2 * PI * sigma^2) = invSigmaQx2 * INV_PI 
-//
-//      and the kernel vector 
-//
-//          k = vec2(x,y)
-//
-//      we can write:
-//
-//          fXY = exp( -dot(k,k) * invSigmaQx2) * invSigmaQx2PI
-
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//  End glslSmartDeNoise
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 void main(void)

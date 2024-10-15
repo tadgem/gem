@@ -3,9 +3,11 @@
 #include "framebuffer.h"
 #include "texture.h"
 #include "camera.h"
+#include "debug.h"
 
 void tech::ssr::dispatch_ssr_pass(shader& ssr, camera& cam,framebuffer& ssr_buffer, framebuffer& gbuffer, framebuffer& lighting_buffer, glm::vec2 screen_dim)
 {
+    GPU_MARKER("SSR Pass");
     shapes::s_screen_quad.use();
     ssr_buffer.bind();
     glClearColor(0, 0, 0, 1.0f);

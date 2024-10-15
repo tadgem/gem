@@ -51,6 +51,7 @@ static void glDebugOutput(GLenum source,
 {
     // ignore non-significant error/warning codes
     if (id == 131169 || id == 131185 || id == 131218 || id == 131204) return;
+    if (severity == GL_DEBUG_SEVERITY_NOTIFICATION) return; // GPU Markers count as notifications
 
     std::cout << "---------------" << std::endl;
     std::cout << "Debug message (" << id << "): " << message << std::endl;
@@ -329,7 +330,7 @@ void engine::init(glm::ivec2 resolution)
         return;
     }
 
-    SDL_GL_SetSwapInterval(1); // Enable vsync
+    SDL_GL_SetSwapInterval(0); // Enable vsync
 
 #ifdef __DEBUG__
     glEnable(GL_DEBUG_OUTPUT);
