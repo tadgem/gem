@@ -109,49 +109,6 @@ void draw_arrow(glm::vec3 pos, glm::vec3 dir)
     Im3d::DrawSphere(ToIm3D(end), 0.25f);
 }
 
-void on_im3d_old(scene& current_scene, camera& cam)
-{
-    auto view = current_scene.m_registry.view<transform, mesh, material>();
-
-    auto& ad =  Im3d::GetAppData();
-    Im3d::Vec3 cam_pos = ToIm3D(cam.m_pos);
-    Im3d::PushColor();
-    Im3d::SetColor(Im3d::Color_Cyan);
-    Im3d::Vec3 end = cam_pos + ( ad.m_cursorRayDirection * 300.0);
-    Im3d::DrawLine(cam_pos, end, 2.0f, 2.0f);
-    Im3d::DrawSphere(end, 2.0);
-    Im3d::Ray ray{ cam_pos, ad.m_cursorRayDirection };
-    glm::vec2 mouse = input::get_mouse_position();
-
-    if (ImGui::Begin("Picker Debugging"))
-    {
-        ImGui::Text("Mouse Coord %.2f %.2f", mouse.x, mouse.y);
-        ImGui::Text("Cam Position %.2f %.2f %.2f", cam.m_pos.x, cam.m_pos.y, cam.m_pos.z);
-        ImGui::Text("Cam Forward %.2f %.2f %.2f", cam.m_forward.x, cam.m_forward.y, cam.m_forward.z);
-        ImGui::Text("Mouse Cursor Ray Origin %.2f %.2f %.2f", ad.m_cursorRayOrigin.x, ad.m_cursorRayOrigin.y, ad.m_cursorRayOrigin.z);
-        ImGui::Text("Mouse Cursor Ray Dir %.2f %.2f %.2f", ad.m_cursorRayDirection.x, ad.m_cursorRayDirection.y, ad.m_cursorRayDirection.z);
-        ImGui::End();
-    }
-    Im3d::SetColor(Im3d::Color_White);
-
-
-    for (auto [e, trans, meshc, materialc] : view.each())
-    {
-        Im3d::AABB aabb{ ToIm3D(meshc.m_transformed_aabb.min), ToIm3D(meshc.m_transformed_aabb.max) };
-        if (Im3d::Contains(cam_pos, aabb))
-        {
-            continue;
-        }
-        float t0, t1;
-        if (Im3d::Intersect(ray, aabb, t0, t1))
-        {
-            Im3d::DrawSphere(ray.m_origin + (ray.m_direction * t0), 3.0f);
-        }
-        Im3d::DrawAlignedBox(ToIm3D(meshc.m_transformed_aabb.min), ToIm3D(meshc.m_transformed_aabb.max));
-    }
-
-    Im3d::PopColor();
-}
 
 void on_im3d(scene& current_scene, camera& cam, int& selected_entity)
 {
