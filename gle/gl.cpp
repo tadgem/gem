@@ -329,7 +329,7 @@ void engine::init(glm::ivec2 resolution)
         return;
     }
 
-    SDL_GL_SetSwapInterval(0); // Enable vsync
+    SDL_GL_SetSwapInterval(1); // Enable vsync
 
 #ifdef __DEBUG__
     glEnable(GL_DEBUG_OUTPUT);

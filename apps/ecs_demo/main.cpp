@@ -44,8 +44,8 @@ Im3d::Vec3 ToIm3D(glm::vec3& input)
 
 static glm::mat4 last_vp = glm::mat4(1.0);
 inline static u32 frame_index = 0;
-inline static constexpr float gi_resolution_scale = 0.75;
-inline static constexpr float ssr_resolution_scale = 1.0;
+inline static constexpr float gi_resolution_scale = 0.5;
+inline static constexpr float ssr_resolution_scale = 0.66;
 inline static constexpr int shadow_resolution = 2048;
 inline static constexpr int _3d_tex_res = 256;
 const float SCREEN_W = 1920.0;
@@ -53,18 +53,18 @@ const float SCREEN_H = 1080.0;
 
 
 
-void dispatch_cone_tracing_pass_taa(shader& taa, shader& denoise, shader& present_shader, framebuffer& conetracing_buffer, framebuffer& conetracing_buffer_resolve, framebuffer& conetracing_buffer_denoise, framebuffer& history_conetracing_buffer, framebuffer& gbuffer, float aSigma, float aThreshold, float aKSigma, glm::ivec2 window_res)
+void dispatch_cone_tracing_pass_taa(shader& taa, shader& denoise, shader& present_shader, framebuffer& conetracing_buffer, framebuffer& conetracing_buffer_resolve, framebuffer& conetracing_buffer_denoise, framebuffer& history_conetracing_buffer, framebuffer& gbuffer, float aSigma, float aThreshold, float aKSigma, glm::ivec2 window_res, float resolution_scale)
 {
     
-    glViewport(0, 0, window_res.x * gi_resolution_scale, window_res.y * gi_resolution_scale);
 
-    tech::taa::dispatch_taa_pass(taa, conetracing_buffer, conetracing_buffer_resolve, history_conetracing_buffer, gbuffer.m_colour_attachments[5], window_res);
+    tech::taa::dispatch_taa_pass(taa, conetracing_buffer, conetracing_buffer_resolve, history_conetracing_buffer, gbuffer.m_colour_attachments[4], window_res);
+    glViewport(0, 0, window_res.x * resolution_scale, window_res.y * resolution_scale);
     tech::utils::dispatch_denoise_image(denoise, conetracing_buffer_resolve, conetracing_buffer_denoise, aSigma, aThreshold, aKSigma, window_res);
+    glViewport(0, 0, window_res.x, window_res.y);
     tech::utils::dispatch_present_image(present_shader, "u_image_sampler", 0, conetracing_buffer_denoise.m_colour_attachments.front());
     
     texture::bind_sampler_handle(0, GL_TEXTURE0);
     
-    glViewport(0, 0, window_res.x, window_res.y);
 
 }
 
@@ -231,13 +231,13 @@ int main()
         });
 
     framebuffer gbuffer = framebuffer::create(window_res, {
-        {GL_RGBA16F, GL_LINEAR, GL_FLOAT},
-        {GL_RGBA16F, GL_LINEAR, GL_FLOAT},
-        {GL_RGBA16F, GL_LINEAR, GL_FLOAT},
-        {GL_RGBA16F, GL_LINEAR, GL_FLOAT},
-        {GL_RGBA16F, GL_LINEAR, GL_FLOAT},
-        {GL_RGBA16F, GL_LINEAR, GL_FLOAT},
-        {GL_RGBA16F, GL_LINEAR, GL_FLOAT}
+        {GL_RGBA32F, GL_LINEAR, GL_FLOAT},
+        {GL_RGBA32F, GL_LINEAR, GL_FLOAT},
+        {GL_RGBA32F, GL_LINEAR, GL_FLOAT},
+        {GL_RGBA32F, GL_LINEAR, GL_FLOAT},
+        {GL_RGBA32F, GL_LINEAR, GL_FLOAT},
+        {GL_RGBA32F, GL_LINEAR, GL_FLOAT},
+        {GL_RGBA32F, GL_LINEAR, GL_FLOAT}
         }, true);
 
     framebuffer gbuffer_downsample = framebuffer::create(window_res, {
@@ -271,11 +271,11 @@ int main()
         {GL_RGBA16F, GL_LINEAR, GL_FLOAT},
         }, false);
 
-    framebuffer conetracing_buffer_resolve = framebuffer::create(gi_res, {
+    framebuffer conetracing_buffer_resolve = framebuffer::create(window_res, {
         {GL_RGBA16F, GL_LINEAR, GL_FLOAT},
         }, false);
 
-    framebuffer conetracing_buffer_history = framebuffer::create(gi_res, {
+    framebuffer conetracing_buffer_history = framebuffer::create(window_res, {
         {GL_RGBA16F, GL_LINEAR, GL_FLOAT},
         }, false);
 
@@ -288,11 +288,11 @@ int main()
         {GL_RGBA16F, GL_LINEAR, GL_FLOAT},
         }, false);
 
-    framebuffer ssr_buffer_resolve = framebuffer::create(ssr_res, {
+    framebuffer ssr_buffer_resolve = framebuffer::create(window_res, {
         {GL_RGBA16F, GL_LINEAR, GL_FLOAT},
         }, false);
 
-    framebuffer ssr_buffer_history = framebuffer::create(ssr_res, {
+    framebuffer ssr_buffer_history = framebuffer::create(window_res, {
     {GL_RGBA16F, GL_LINEAR, GL_FLOAT},
         }, false);
 
@@ -355,8 +355,8 @@ int main()
     GLfloat aSigma = 2.0f;
     GLfloat aThreshold = 0.1f;
     GLfloat aKSigma =  2.0f;
-    GLfloat vxgi_cone_distance = 70.0;
-    GLfloat diffuse_spec_mix = 0.5;
+    GLfloat vxgi_cone_distance = get_aabb_area(sponza_geo.m_aabb) / 10.0f;
+    GLfloat diffuse_spec_mix = 0.0;
 
     while (!engine::s_quit)
     {
@@ -393,7 +393,7 @@ int main()
 
         if (draw_direct_lighting)
         {
-            tech::taa::dispatch_taa_pass(taa, lightpass_buffer, lightpass_buffer_resolve, lightpass_buffer_history, gbuffer.m_colour_attachments[5], window_res);
+            tech::taa::dispatch_taa_pass(taa, lightpass_buffer, lightpass_buffer_resolve, lightpass_buffer_history, gbuffer.m_colour_attachments[4], window_res);
         }
 
         if (draw_cone_tracing_pass || draw_cone_tracing_pass_no_taa)
@@ -406,18 +406,21 @@ int main()
             tech::utils::dispatch_present_image(present_shader, "u_image_sampler", 0, lightpass_buffer_resolve.m_colour_attachments.front());
         }
 
+        ssr_buffer_resolve.bind();
+        glClear(GL_COLOR_BUFFER_BIT);
+        ssr_buffer_resolve.unbind();
         if (draw_ssr)
         {
             glViewport(0, 0, window_res.x * ssr_resolution_scale, window_res.y * ssr_resolution_scale);
             tech::ssr::dispatch_ssr_pass(ssr, cam, ssr_buffer, gbuffer, lightpass_buffer, window_dim);
-            tech::utils::dispatch_denoise_image(denoise, ssr_buffer, ssr_buffer_denoise, aSigma, aThreshold, aKSigma, window_res);
-            tech::taa::dispatch_taa_pass(taa, ssr_buffer_denoise, ssr_buffer_resolve, ssr_buffer_history, gbuffer.m_colour_attachments[5], window_res);
             glViewport(0, 0, window_res.x, window_res.y);
+            dispatch_cone_tracing_pass_taa(taa, denoise, present_shader, ssr_buffer, ssr_buffer_resolve, ssr_buffer_denoise, ssr_buffer_history, gbuffer, aSigma, aThreshold, aKSigma, window_res, ssr_resolution_scale);
+
         }
 
         if (draw_cone_tracing_pass)
         {
-            dispatch_cone_tracing_pass_taa(taa, denoise, present_shader, conetracing_buffer, conetracing_buffer_resolve, conetracing_buffer_denoise, conetracing_buffer_history, gbuffer, aSigma, aThreshold, aKSigma, window_res);
+            dispatch_cone_tracing_pass_taa(taa, denoise, present_shader, conetracing_buffer, conetracing_buffer_resolve, conetracing_buffer_denoise, conetracing_buffer_history, gbuffer, aSigma, aThreshold, aKSigma, window_res, gi_resolution_scale);
         }
         if (draw_cone_tracing_pass_no_taa)
         {
@@ -444,20 +447,20 @@ int main()
         if (draw_final_pass)
         {
             final_pass.bind();
-            dispatch_final_pass(gi_combine, lightpass_buffer_resolve, conetracing_buffer_denoise, ssr_buffer_resolve);
+            dispatch_final_pass(gi_combine, lightpass_buffer_resolve, conetracing_buffer_denoise, ssr_buffer_denoise);
             final_pass.unbind();
             tech::utils::dispatch_present_image(present_shader, "u_image_sampler", 0, final_pass.m_colour_attachments.front());
         }
 
+        glm::vec2 mouse_pos = input::get_mouse_position();
+        auto pixels = final_pass.read_pixels<glm::vec4, 1, 1>(mouse_pos.x, window_res.y - mouse_pos.y, 5, GL_RGBA, GL_FLOAT);
+
+
         {
-            ImGui::Begin("Transform Debug");
-            ImGui::DragFloat3("Position", &pos[0]);
-            ImGui::DragFloat3("Euler", &euler[0]);
-            ImGui::DragFloat3("Scale", &scale[0]);
-
-            ImGui::End();
-
-            ImGui::Begin("Hello, world!");                          
+            ImGui::Begin("VXGI Debug");
+            ImGui::Text("Mouse Pos : %.3f, %.3f", mouse_pos.x, mouse_pos.y);
+            ImGui::Text("Mouse Pixel Colour : %.3f, %.3f, %.3f", pixels[0].x, pixels[0].y, pixels[0].z);
+            ImGui::Separator();
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / engine::s_imgui_io->Framerate, engine::s_imgui_io->Framerate);
             ImGui::Separator();
             ImGui::Checkbox("Render 3D Voxel Grid", &draw_debug_3d_texture);

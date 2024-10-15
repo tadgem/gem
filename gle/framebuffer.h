@@ -4,6 +4,7 @@
 #include "glm.hpp"
 #include <cstdint>
 #include <vector>
+#include <array>
 class framebuffer
 {
 public:
@@ -17,6 +18,16 @@ public:
 	void	add_depth_attachment(uint32_t width, uint32_t height, GLenum format = GL_DEPTH24_STENCIL8);
 	void	add_depth_attachment_sampler_friendly(uint32_t width, uint32_t height, GLenum format = GL_DEPTH24_STENCIL8);
 	void	check();
+
+	template<typename _Ty, size_t w, size_t h>
+	std::array<_Ty, w * h> read_pixels(u32 x, u32 y, u32 attachment_index, GLenum pixel_format, GLenum pixel_type)
+	{
+		std::array<_Ty, w * h> out_data{};
+		bind();
+		glReadPixels(x, y, w, h, pixel_format, pixel_type, &out_data[0]);
+		unbind();
+		return out_data;
+	}
 
 	struct attachment_info
 	{

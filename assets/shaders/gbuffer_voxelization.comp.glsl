@@ -13,12 +13,12 @@ uniform sampler2D u_gbuffer_lighting;
 uniform AABB	  u_aabb;
 uniform vec3	  u_voxel_resolution;
 uniform vec2	  u_input_resolution;
-layout(binding = 0, rgba32f) uniform image3D imgOutput;
-layout(binding = 1, rgba32f) uniform image3D imgOutput1;
-layout(binding = 2, rgba32f) uniform image3D imgOutput2;
-layout(binding = 3, rgba32f) uniform image3D imgOutput3;
-layout(binding = 4, rgba32f) uniform image3D imgOutput4;
-layout(binding = 5, rgba32f) uniform image3D imgOutput5;
+layout(binding = 0, rgba16f) uniform image3D imgOutput;
+layout(binding = 1, rgba16f) uniform image3D imgOutput1;
+layout(binding = 2, rgba16f) uniform image3D imgOutput2;
+layout(binding = 3, rgba16f) uniform image3D imgOutput3;
+layout(binding = 4, rgba16f) uniform image3D imgOutput4;
+layout(binding = 5, rgba16f) uniform image3D imgOutput5;
 
 bool is_in_aabb(vec3 pos)
 {

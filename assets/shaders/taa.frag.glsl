@@ -78,5 +78,5 @@ void main()
       // Clamp previous color to min/max bounding box
       vec4 previousColorClamped = vec4(history_colour.xyz, 1.0);
  
-      FragColor = mix(current_colour, previousColorClamped, 0.9);
+      FragColor = mix(current_colour, previousColorClamped, 0.95);
 }

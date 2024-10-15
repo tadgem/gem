@@ -3,8 +3,8 @@
 layout(local_size_x = 8, local_size_y = 8, local_size_z = 8) in;
 
 
-layout(binding = 0, rgba32f) uniform image3D current_mip;
-layout(binding = 1, rgba32f) uniform image3D last_mip;
+layout(binding = 0, rgba16f) uniform image3D current_mip;
+layout(binding = 1, rgba16f) uniform image3D last_mip;
 
 uniform vec3 u_current_resolution;
 
@@ -55,7 +55,7 @@ void main() {
 	colour  +=  imageLoad(last_mip, lod_pix13);
 
 	ivec3 lod_pix14 = center + ivec3(0,-1,0);
-	colour  +=  imageLoad(last_mip, lod_pix14);https://www.youtube.com/watch?v=hCwuuW-8dp8
+	colour  +=  imageLoad(last_mip, lod_pix14);
 
 	ivec3 lod_pix15 = center + ivec3(-1,0,-1);
 	colour  +=  imageLoad(last_mip, lod_pix15);
