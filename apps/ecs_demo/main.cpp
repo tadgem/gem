@@ -151,7 +151,6 @@ int main()
     events.invoke(asset_loaded_data());
     events.remove_subscription(on_asset_loaded);
 
-
     std::string gbuffer_vert = utils::load_string_from_path("assets/shaders/gbuffer.vert.glsl");
     std::string gbuffer_frag = utils::load_string_from_path("assets/shaders/gbuffer.frag.glsl");
     std::string gbuffer_floats_frag = utils::load_string_from_path("assets/shaders/gbuffer_floats.frag.glsl");
@@ -342,7 +341,6 @@ int main()
         
         engine::process_sdl_event();
         engine::engine_pre_frame();        
-        glm::mat4 mvp = cam.m_proj * cam.m_view * model;
         glm::vec2 window_dim = engine::get_window_dim();
         im3d_gl::new_frame_im3d(im3d_s, window_dim, cam);
         
