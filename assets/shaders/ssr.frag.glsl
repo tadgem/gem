@@ -6,6 +6,8 @@ layout (location = 0) out vec4 reflectionColor;
 uniform sampler2D gNormal;
 uniform sampler2D colorBuffer;
 uniform sampler2D depthMap;
+uniform sampler2D pbrMap;
+
 
 uniform float SCR_WIDTH;
 uniform float SCR_HEIGHT;
@@ -45,6 +47,14 @@ void main(){
 	//View Space ray calculation
 	vec3 pixelPositionTexture;
 	pixelPositionTexture.xy = aUV;
+
+	vec3 pbr_props = texture(pbrMap, pixelPositionTexture.xy).rgb;
+
+	if(pbr_props.y > 0.75)
+	{
+		return;
+	}
+
 	vec3 normalView = (rotation * texture(gNormal, pixelPositionTexture.xy)).rgb;	
 	float pixelDepth = texture(depthMap, pixelPositionTexture.xy).r;	// 0< <1
 	pixelPositionTexture.z = pixelDepth;		
@@ -73,5 +83,5 @@ void main(){
 
 	//trace the ray
 	vec3 outColor = TraceRay(pixelPositionTexture, rayDirectionTexture, screenSpaceMaxDistance);
-	reflectionColor = vec4(outColor, 1);
+	reflectionColor = vec4(outColor, 1) * (1.0 - pbr_props.y);
 }

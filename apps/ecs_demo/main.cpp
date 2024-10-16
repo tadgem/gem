@@ -86,10 +86,11 @@ void dispatch_visualize_3d_texture(voxel::grid& voxel_data, voxel::grid_visualis
 
 }
 
-void dispatch_final_pass(shader& gi_combine, framebuffer& lightpass_buffer_resolve, framebuffer& conetracing_buffer_denoise, framebuffer& ssr_buffer)
+void dispatch_final_pass(shader& gi_combine, framebuffer& lightpass_buffer_resolve, framebuffer& conetracing_buffer_denoise, framebuffer& ssr_buffer, float exposure)
 {
     shapes::s_screen_quad.use();
     gi_combine.use();
+    gi_combine.set_float("u_exposure", exposure);
     gi_combine.set_int("lighting_pass", 0);
     texture::bind_sampler_handle(lightpass_buffer_resolve.m_colour_attachments.front(), GL_TEXTURE0);
     gi_combine.set_int("cone_tracing_pass", 1);
@@ -207,9 +208,9 @@ int main()
         });
 
     framebuffer gbuffer = framebuffer::create(window_res, {
-        {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
-        {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
-        {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
+        {GL_RGBA, GL_RGBA32F, GL_LINEAR, GL_FLOAT},
+        {GL_RGBA, GL_RGBA32F, GL_LINEAR, GL_FLOAT},
+        {GL_RGBA, GL_RGBA32F, GL_LINEAR, GL_FLOAT},
         {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
         {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
         {GL_RGB, GL_RGB16F, GL_NEAREST, GL_FLOAT},
@@ -332,7 +333,7 @@ int main()
     GLfloat aKSigma =  2.0f;
     GLfloat vxgi_cone_distance = get_aabb_area(sponza_geo.m_aabb) / 10.0f;
     GLfloat diffuse_spec_mix = 0.0;
-
+    float exposure = 1.0f;
     while (!engine::s_quit)
     {
         glm::mat4 model = utils::get_model_matrix(pos, euler, scale);
@@ -421,20 +422,30 @@ int main()
         if (draw_final_pass)
         {
             final_pass.bind();
-            dispatch_final_pass(gi_combine, lightpass_buffer_resolve, conetracing_buffer_denoise, ssr_buffer_resolve);
+            dispatch_final_pass(gi_combine, lightpass_buffer_resolve, conetracing_buffer_resolve, ssr_buffer_resolve, exposure);
             final_pass.unbind();
             tech::utils::dispatch_present_image(present_shader, "u_image_sampler", 0, final_pass.m_colour_attachments.front());
         }
 
         glm::vec2 mouse_pos = input::get_mouse_position();
 
-        if (input::get_mouse_button(mouse_button::left))
+        if (input::get_mouse_button(mouse_button::left) && !ImGui::GetIO().WantCaptureMouse)
         {
             auto pixels = gbuffer.read_pixels<glm::vec4, 1, 1>(mouse_pos.x, window_res.y - mouse_pos.y, 5, GL_RGBA, GL_FLOAT);
             selected_entity =
                 pixels[0][0] +
                 pixels[0][1] * 256 +
                 pixels[0][2] * 256 * 256;
+        }
+
+        if (selected_entity > 0)
+        {
+            entity_data& data = scene.m_registry.get<entity_data>((entt::entity)selected_entity);
+            ImGui::Begin(data.m_name.c_str());
+
+            // do each component ImGui
+
+            ImGui::End();
         }
 
 
@@ -453,6 +464,9 @@ int main()
             ImGui::Checkbox("Render SSR", &draw_ssr);
             ImGui::Checkbox("Render Cone Tracing Pass NO TAA", &draw_cone_tracing_pass_no_taa);
             ImGui::Checkbox("Render IM3D", &draw_im3d);
+            ImGui::Separator();
+            ImGui::Text("Brightness / Contrast");
+            ImGui::DragFloat("Exposure", &exposure);
             ImGui::Separator();
             ImGui::Text("VXGI Settings");
             ImGui::DragFloat("Trace Distance", &vxgi_cone_distance);

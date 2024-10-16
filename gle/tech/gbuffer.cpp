@@ -29,7 +29,7 @@ void tech::gbuffer::dispatch_gbuffer(u32 frame_index, framebuffer& gbuffer, fram
     texture::bind_sampler_handle(0, GL_TEXTURE0);
     texture::bind_sampler_handle(0, GL_TEXTURE1);
     texture::bind_sampler_handle(0, GL_TEXTURE2);
-    texture::bind_sampler_handle(0, GL_TEXTURE3);
+    texture::bind_sampler_handle(texture::white->m_handle, GL_TEXTURE3);
     texture::bind_sampler_handle(0, GL_TEXTURE4);
 
     texture::bind_sampler_handle(previous_position_buffer.m_colour_attachments.front(), GL_TEXTURE5);

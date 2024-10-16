@@ -21,14 +21,13 @@ entity scene::create_entity(const std::string& name)
 std::vector<entity> scene::create_entity_from_model(model& model_to_load, shader& material_shader, glm::vec3 scale, glm::vec3 euler, std::map<std::string, texture_map_type> known_maps)
 {
 	std::vector<entity> entities{};
-	std::stringstream entity_name;
 
 	for (auto& entry : model_to_load.m_meshes)
 	{
+		std::stringstream entity_name;
 		entity_name << "Entity " << p_created_entity_count;
 		entity e = create_entity(entity_name.str());
-		entity_name.clear();
-
+		
 		transform& trans = e.add_component<transform>();
 		trans.m_scale = scale;
 		trans.m_euler = euler;

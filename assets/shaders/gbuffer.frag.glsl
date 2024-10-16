@@ -101,7 +101,13 @@ void main()
     // velocity 
     oVelocity = currentPosNDC - previousPosNDC;
     float metallic = texture(u_metallic_map, aUV).r;
-    float roughness = texture(u_roughness_map, aUV).r;
+
+    float roughness = 1.0;
+    if(textureSize(u_roughness_map, 0).x > 0)
+    {
+        roughness = texture(u_roughness_map, aUV).g;
+    }
+
     float ao = texture(u_ao_map, aUV).r;
     oPBR = vec3(metallic, roughness, ao);
 }

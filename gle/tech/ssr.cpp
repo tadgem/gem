@@ -29,6 +29,9 @@ void tech::ssr::dispatch_ssr_pass(shader& ssr, camera& cam,framebuffer& ssr_buff
     ssr.set_int("depthMap", 2);
     texture::bind_sampler_handle(gbuffer.m_depth_attachment, GL_TEXTURE2);
 
+    ssr.set_int("pbrMap", 3);
+    texture::bind_sampler_handle(gbuffer.m_colour_attachments[3], GL_TEXTURE3);
+
     glStencilFunc(GL_EQUAL, 1, 0xFF);
     glStencilMask(0x00);
 
