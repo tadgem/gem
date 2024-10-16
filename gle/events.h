@@ -87,7 +87,7 @@ public:
 			p_subscriptions.emplace(ec, std::vector<void*>());
 		}
 
-		p_subscriptions[ec].emplace_back(static_cast<void*>(callback));
+		p_subscriptions[ec].emplace_back((void*)(callback));
 	}
 
 	template<typename _EventData>
@@ -103,7 +103,7 @@ public:
 			return;
 		}
 
-		void* callback_addr = static_cast<void*>(callback);
+		void* callback_addr = (void*)(callback);
 
 		int index = -1;
 
@@ -135,7 +135,7 @@ public:
 
 		for (void* subscription : p_subscriptions[ec])
 		{
-			void(*callback) (_EventData) = static_cast<void(*)(_EventData)>(subscription);
+			void(*callback) (_EventData) = (void(*)(_EventData))(subscription);
 			callback(data);
 		}
 	}

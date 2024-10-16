@@ -48,8 +48,8 @@ inline static constexpr float gi_resolution_scale = 0.5;
 inline static constexpr float ssr_resolution_scale = 0.75;
 inline static constexpr int shadow_resolution = 2048;
 inline static constexpr int _3d_tex_res = 256;
-const float SCREEN_W = 1920.0;
-const float SCREEN_H = 1080.0;
+const float SCREEN_W = 1280.0;
+const float SCREEN_H = 800.0;
 inline static int selected_entity = -1;
 
 
