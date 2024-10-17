@@ -105,13 +105,6 @@ void dispatch_final_pass(shader& gi_combine, framebuffer& lightpass_buffer_resol
     texture::bind_sampler_handle(0, GL_TEXTURE1);
 }
 
-void draw_arrow(glm::vec3 pos, glm::vec3 dir)
-{
-    glm::vec3 end = pos + dir;
-    Im3d::DrawArrow(ToIm3D(pos), ToIm3D(end));
-    Im3d::DrawSphere(ToIm3D(end), 0.25f);
-}
-
 
 void on_im3d(scene& current_scene, camera& cam, int& selected_entity)
 {
