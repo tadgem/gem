@@ -7,40 +7,49 @@ uniform sampler2D lighting_pass;
 uniform sampler2D cone_tracing_pass;
 uniform sampler2D ssr_pass;
 
-uniform float u_exposure;
+uniform float u_brightness;
+uniform float u_contrast;
+uniform float u_saturation;
 
-const float GAMMA = 2.2;
-vec3 standard_gamma_tone_mapping(vec3 color, float exposure)
+
+mat4 brightnessMatrix( float brightness )
 {
-    // exposure tone mapping
-    vec3 mapped = vec3(1.0) - exp(-color.rgb * exposure);
-    // gamma correction 
-    return pow(mapped, vec3(1.0 / GAMMA));
+    return mat4( 1, 0, 0, 0,
+                 0, 1, 0, 0,
+                 0, 0, 1, 0,
+                 brightness, brightness, brightness, 1 );
 }
 
-vec3 filmic_tone_mapping(vec3 color)
+mat4 contrastMatrix( float contrast )
 {
-	color = max(vec3(0.), color - vec3(0.004));
-	color = (color * (6.2 * color + .5)) / (color * (6.2 * color + 1.7) + 0.06);
-	return color;
+	float t = ( 1.0 - contrast ) / 2.0;
+    
+    return mat4( contrast, 0, 0, 0,
+                 0, contrast, 0, 0,
+                 0, 0, contrast, 0,
+                 t, t, t, 1 );
+
 }
 
-vec3 Uncharted2ToneMapping(vec3 color)
+mat4 saturationMatrix( float saturation )
 {
-	float A = 0.15;
-	float B = 0.50;
-	float C = 0.10;
-	float D = 0.20;
-	float E = 0.02;
-	float F = 0.30;
-	float W = 11.2;
-	float exposure = 2.;
-	color *= exposure;
-	color = ((color * (A * color + C * B) + D * E) / (color * (A * color + B) + D * F)) - E / F;
-	float white = ((W * (A * W + C * B) + D * E) / (W * (A * W + B) + D * F)) - E / F;
-	color /= white;
-	color = pow(color, vec3(1. / GAMMA));
-	return color;
+    vec3 luminance = vec3( 0.3086, 0.6094, 0.0820 );
+    
+    float oneMinusSat = 1.0 - saturation;
+    
+    vec3 red = vec3( luminance.x * oneMinusSat );
+    red+= vec3( saturation, 0, 0 );
+    
+    vec3 green = vec3( luminance.y * oneMinusSat );
+    green += vec3( 0, saturation, 0 );
+    
+    vec3 blue = vec3( luminance.z * oneMinusSat );
+    blue += vec3( 0, 0, saturation );
+    
+    return mat4( red,     0,
+                 green,   0,
+                 blue,    0,
+                 0, 0, 0, 1 );
 }
 
 void main(void)
@@ -48,9 +57,10 @@ void main(void)
     vec4 direct = texture(lighting_pass, aUV);
     vec4 indirect = texture(cone_tracing_pass, aUV);
     vec4 ssr = texture(ssr_pass, aUV);
-    vec4 final_color = direct + (direct * indirect) + ssr;
-
-    // gamma correction 
-    //color = vec4(filmic_tone_mapping(final_color.rgb), 1.0);
-	color = mix(direct, indirect + ssr, (length(indirect) / 2.0)) * 2.0;
+    vec4 final_color = mix(direct, indirect + ssr, (length(indirect) / 2.0)) * 2.0;
+ 
+    color =     brightnessMatrix( u_brightness ) *
+        		contrastMatrix( u_contrast ) * 
+        		saturationMatrix( u_saturation ) *
+        		final_color;
 } 

@@ -20,6 +20,7 @@ struct AABB
 
 
 uniform sampler2D   u_position_map;
+uniform sampler2D   u_colour_map;
 uniform sampler2D   u_normal_map;
 uniform sampler3D   u_voxel_map; // x = metallic, y = roughness, z = AO
 uniform AABB		u_aabb;
@@ -183,7 +184,7 @@ vec3 trace_cones_v3(vec3 from, vec3 dir, vec3 unit)
 		acc += trace_cone(from, final_dir, unit) * sDotN;
 	}
 
-	return acc / 2.0 ; // num traces to get a more usable output for now;
+	return acc; // num traces to get a more usable output for now;
 }
 
 
@@ -192,11 +193,11 @@ void main()
 {
 	vec3 aabb_dim = u_aabb.max - u_aabb.min;
 	vec3 unit = vec3((aabb_dim.x / u_voxel_resolution.x), (aabb_dim.y / u_voxel_resolution.y), (aabb_dim.z / u_voxel_resolution.z));
-	vec3 diffuse = vec3(1.0);
+	vec3 diffuse = texture(u_colour_map, aUV).xyz;
 	vec3 position = texture(u_position_map, aUV).xyz;
 	vec3 normal = texture(u_normal_map, aUV).xyz;
 	vec3 normalized_n = normalize(normal);
 	vec3 v_diffuse = trace_cones_v3(position, normalized_n, unit);
 	vec3 v_spec = trace_ray(position, reflect(position, normalized_n), unit);
-	FragColor = vec4(mix(v_diffuse, v_spec, u_diffuse_spec_mix), 1.0);
+	FragColor = vec4(mix(diffuse * v_diffuse, v_spec, u_diffuse_spec_mix), 1.0);
 }

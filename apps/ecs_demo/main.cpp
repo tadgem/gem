@@ -44,8 +44,8 @@ Im3d::Vec3 ToIm3D(glm::vec3& input)
 
 static glm::mat4 last_vp = glm::mat4(1.0);
 inline static u32 frame_index = 0;
-inline static constexpr float gi_resolution_scale = 0.66;
-inline static constexpr float ssr_resolution_scale = 0.66;
+inline static constexpr float gi_resolution_scale = 1.0;
+inline static constexpr float ssr_resolution_scale = 1.0;
 inline static constexpr int shadow_resolution = 2048;
 inline static constexpr int _3d_tex_res = 256;
 const float SCREEN_W = 1920.0;
@@ -86,11 +86,13 @@ void dispatch_visualize_3d_texture(voxel::grid& voxel_data, voxel::grid_visualis
 
 }
 
-void dispatch_final_pass(shader& gi_combine, framebuffer& lightpass_buffer_resolve, framebuffer& conetracing_buffer_denoise, framebuffer& ssr_buffer, float exposure)
+void dispatch_final_pass(shader& gi_combine, framebuffer& lightpass_buffer_resolve, framebuffer& conetracing_buffer_denoise, framebuffer& ssr_buffer, float brightness, float contrast, float saturation)
 {
     shapes::s_screen_quad.use();
     gi_combine.use();
-    gi_combine.set_float("u_exposure", exposure);
+    gi_combine.set_float("u_brightness", brightness);
+    gi_combine.set_float("u_contrast", contrast);
+    gi_combine.set_float("u_saturation", saturation);
     gi_combine.set_int("lighting_pass", 0);
     texture::bind_sampler_handle(lightpass_buffer_resolve.m_colour_attachments.front(), GL_TEXTURE0);
     gi_combine.set_int("cone_tracing_pass", 1);
@@ -273,7 +275,7 @@ int main()
         }, false);
 
     framebuffer final_pass = framebuffer::create(window_res, {
-        {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
+        {GL_RGBA, GL_RGBA8, GL_LINEAR, GL_FLOAT},
         }, false);
 
 
@@ -333,7 +335,9 @@ int main()
     GLfloat aKSigma =  2.0f;
     GLfloat vxgi_cone_distance = get_aabb_area(sponza_geo.m_aabb) / 10.0f;
     GLfloat diffuse_spec_mix = 0.0;
-    float exposure = 1.0f;
+    float brightness = 0.0f;
+    float contrast = 1.0f;
+    float saturation = 1.05f;
     while (!engine::s_quit)
     {
         glm::mat4 model = utils::get_model_matrix(pos, euler, scale);
@@ -425,7 +429,7 @@ int main()
         if (draw_final_pass)
         {
             final_pass.bind();
-            dispatch_final_pass(gi_combine, lightpass_buffer_resolve, conetracing_buffer_resolve, ssr_buffer_resolve, exposure);
+            dispatch_final_pass(gi_combine, lightpass_buffer_resolve, conetracing_buffer_resolve, ssr_buffer_resolve, brightness, contrast, saturation);
             final_pass.unbind();
             tech::utils::dispatch_present_image(present_shader, "u_image_sampler", 0, final_pass.m_colour_attachments.front());
         }
@@ -468,8 +472,10 @@ int main()
             ImGui::Checkbox("Render Cone Tracing Pass NO TAA", &draw_cone_tracing_pass_no_taa);
             ImGui::Checkbox("Render IM3D", &draw_im3d);
             ImGui::Separator();
-            ImGui::Text("Brightness / Contrast");
-            ImGui::DragFloat("Exposure", &exposure);
+            ImGui::Text("Brightness / Contrast / Saturation");
+            ImGui::DragFloat("Brightness", &brightness);
+            ImGui::DragFloat("Contrast", &contrast);
+            ImGui::DragFloat("Saturation", &saturation);
             ImGui::Separator();
             ImGui::Text("VXGI Settings");
             ImGui::DragFloat("Trace Distance", &vxgi_cone_distance);

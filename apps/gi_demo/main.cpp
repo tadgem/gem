@@ -235,19 +235,22 @@ void dispatch_cone_tracing_pass(shader& voxel_cone_tracing, voxel::grid& voxel_d
     voxel_cone_tracing.set_vec3("u_aabb.min", sponza.m_aabb.min);
     voxel_cone_tracing.set_vec3("u_aabb.max", sponza.m_aabb.max);
     voxel_cone_tracing.set_vec3("u_voxel_resolution", _3d_tex_res);
-    voxel_cone_tracing.set_int("u_position_map", 0);
     voxel_cone_tracing.set_vec3("u_cam_position", cam.m_pos);
 
+    voxel_cone_tracing.set_int("u_position_map", 0);
     texture::bind_sampler_handle(gbuffer.m_colour_attachments[1], GL_TEXTURE0);
     voxel_cone_tracing.set_int("u_normal_map", 1);
     texture::bind_sampler_handle(gbuffer.m_colour_attachments[2], GL_TEXTURE1);
     voxel_cone_tracing.set_int("u_voxel_map", 2);
     texture::bind_sampler_handle(voxel_data.voxel_texture.m_handle, GL_TEXTURE2, GL_TEXTURE_3D);
+    voxel_cone_tracing.set_int("u_colour_map", 3);
+    texture::bind_sampler_handle(gbuffer.m_colour_attachments[0], GL_TEXTURE3);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     buffer_conetracing.unbind();
     texture::bind_sampler_handle(0, GL_TEXTURE0);
     texture::bind_sampler_handle(0, GL_TEXTURE1);
     texture::bind_sampler_handle(0, GL_TEXTURE2);
+    texture::bind_sampler_handle(0, GL_TEXTURE3);
     glViewport(0, 0, window_res.x, window_res.y);
 }
 

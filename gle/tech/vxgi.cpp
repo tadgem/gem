@@ -64,10 +64,13 @@ void tech::vxgi::dispatch_cone_tracing_pass(shader& voxel_cone_tracing, voxel::g
     texture::bind_sampler_handle(gbuffer.m_colour_attachments[2], GL_TEXTURE1);
     voxel_cone_tracing.set_int("u_voxel_map", 2);
     texture::bind_sampler_handle(voxel_data.voxel_texture.m_handle, GL_TEXTURE2, GL_TEXTURE_3D);
+    voxel_cone_tracing.set_int("u_colour_map", 3);
+    texture::bind_sampler_handle(gbuffer.m_colour_attachments[0], GL_TEXTURE3);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     buffer_conetracing.unbind();
     texture::bind_sampler_handle(0, GL_TEXTURE0);
     texture::bind_sampler_handle(0, GL_TEXTURE1);
     texture::bind_sampler_handle(0, GL_TEXTURE2);
+    texture::bind_sampler_handle(0, GL_TEXTURE3);
     glViewport(0, 0, window_res.x, window_res.y);
 }
