@@ -173,8 +173,8 @@ void main()
 
    vec4 frag_pos_light_space = u_dir_light.light_space_matrix * vec4(WorldPos, 1.0);
 
-   float metallic = pbr.x;
-   float roughness = pbr.y;
+   float metallic = 0.0;
+   float roughness = 0.0;
    float ao = pbr.z;
 
    vec3 F0 = vec3(0.04);

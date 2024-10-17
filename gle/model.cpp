@@ -119,7 +119,7 @@ model model::load_model_from_path(const std::string& path)
     const aiScene* scene = importer.ReadFile(path.c_str(),
         aiProcess_Triangulate |
         aiProcess_CalcTangentSpace |
-        //aiProcess_OptimizeMeshes |
+        aiProcess_OptimizeMeshes |
         aiProcess_GenSmoothNormals |
         aiProcess_OptimizeGraph |
         aiProcess_FixInfacingNormals |

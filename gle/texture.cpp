@@ -54,9 +54,9 @@ texture::texture(const std::string& path)
 	
 	if (path.find("dds") != std::string::npos)
 	{
-		//gli::texture dds_tex_raw = gli::load_dds(path);
-		//gli::texture dds_tex = gli::flip(dds_tex_raw);
-		gli::texture dds_tex = gli::load_dds(path);
+		gli::texture dds_tex_raw = gli::load_dds(path);
+		gli::texture dds_tex = gli::flip(dds_tex_raw);
+		//gli::texture dds_tex = gli::load_dds(path);
 		gli::gl GL(gli::gl::PROFILE_GL33);
 		gli::gl::format const format = GL.translate(dds_tex.format(), dds_tex.swizzles());
 		GLenum target = GL.translate(dds_tex.target());

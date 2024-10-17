@@ -47,7 +47,7 @@ inline static u32 frame_index = 0;
 inline static constexpr float gi_resolution_scale = 0.66;
 inline static constexpr float ssr_resolution_scale = 0.66;
 inline static constexpr int shadow_resolution = 2048;
-inline static constexpr int _3d_tex_res = 384;
+inline static constexpr int _3d_tex_res = 256;
 const float SCREEN_W = 1920.0;
 const float SCREEN_H = 1080.0;
 inline static int selected_entity = -1;
@@ -366,10 +366,7 @@ int main()
         tech::utils::dispatch_present_image(downsample, "u_prev_mip", 0, gbuffer.m_colour_attachments[2]);
         gbuffer_downsample.unbind();
 
-        if (draw_direct_lighting)
-        {
-            tech::taa::dispatch_taa_pass(taa, lightpass_buffer, lightpass_buffer_resolve, lightpass_buffer_history, gbuffer.m_colour_attachments[4], window_res);
-        }
+        tech::taa::dispatch_taa_pass(taa, lightpass_buffer, lightpass_buffer_resolve, lightpass_buffer_history, gbuffer.m_colour_attachments[4], window_res);
 
         if (draw_cone_tracing_pass || draw_cone_tracing_pass_no_taa)
         {
@@ -404,6 +401,12 @@ int main()
         if (draw_direct_lighting_no_taa)
         {
             tech::utils::dispatch_present_image(present_shader, "u_image_sampler", 0, lightpass_buffer.m_colour_attachments.front());
+
+        }
+
+        if (draw_ssr)
+        {
+            tech::utils::dispatch_present_image(present_shader, "u_image_sampler", 0, ssr_buffer_resolve.m_colour_attachments.front());
 
         }
 

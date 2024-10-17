@@ -122,7 +122,7 @@ float easeOutQuart(float x) {
 vec3 trace_cone(vec3 from, vec3 dir, vec3 unit)
 {
 	const int MAX_STEPS = int(u_voxel_resolution.x); // should probs be the longest axis of minimum mip dimension
-	const int MIN_LOD	= 1;
+	const int MIN_LOD	= 2;
 	const int MAX_LOD	= 5;
 	vec4 accum = vec4(0.0);
 	vec3 pos = from;
