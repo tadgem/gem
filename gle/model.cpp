@@ -1,4 +1,5 @@
 #include "model.h"
+#include "hash_string.h"
 #include "glm.hpp"
 #include "assimp/Importer.hpp"
 #include "assimp/postprocess.h"
@@ -17,7 +18,7 @@ static glm::vec2 AssimpToGLM(aiVector2D aiVec) {
 
 
 
-void ProcessMesh(model& model, aiMesh* m, aiNode* node, const aiScene* scene) {
+void ProcessMesh(model& model, aiMesh* m, aiNode* node, const aiScene* scene, bool use_entries) {
     bool hasPositions = m->HasPositions();
     bool hasUVs = m->HasTextureCoords(0);
     bool hasNormals = m->HasNormals();
@@ -78,13 +79,13 @@ void ProcessMesh(model& model, aiMesh* m, aiNode* node, const aiScene* scene) {
     model.m_meshes.push_back(new_mesh);
 }
 
-void ProcessNode(model& model, aiNode* node, const aiScene* scene) {
+void ProcessNode(model& model, aiNode* node, const aiScene* scene, bool use_entries) {
 
     if (node->mNumMeshes > 0) {
         for (unsigned int i = 0; i < node->mNumMeshes; i++) {
             unsigned int sceneIndex = node->mMeshes[i];
             aiMesh* mesh = scene->mMeshes[sceneIndex];
-            ProcessMesh(model, mesh, node, scene);
+            ProcessMesh(model, mesh, node, scene, use_entries);
         }
     }
 
@@ -93,7 +94,7 @@ void ProcessNode(model& model, aiNode* node, const aiScene* scene) {
     }
 
     for (unsigned int i = 0; i < node->mNumChildren; i++) {
-        ProcessNode(model, node->mChildren[i], scene);
+        ProcessNode(model, node->mChildren[i], scene, use_entries);
     }
 }
 
@@ -106,9 +107,27 @@ void get_material_texture(const std::string& directory, aiMaterial* material, mo
         aiGetMaterialTexture(material, ass_texture_type, 0, &resultPath);
         std::string finalPath = directory + std::string(resultPath.C_Str());
         std::cout << "Loading Texture at Path: " << finalPath << "\n";
-        texture tex(finalPath);
+        texture* tex = new texture(finalPath);
 
         mat.m_material_maps[gl_texture_type] = tex;
+    }
+
+}
+
+void get_material_texture_entry(const std::string& directory, aiMaterial* material, model::material_entry& mat, aiTextureType ass_texture_type, texture_map_type gl_texture_type, std::vector<model::texture_entry>& texture_entries)
+{
+    uint32_t tex_count = aiGetMaterialTextureCount(material, ass_texture_type);
+    if (tex_count > 0)
+    {
+        aiString resultPath;
+        aiGetMaterialTexture(material, ass_texture_type, 0, &resultPath);
+        std::string final_path = directory + std::string(resultPath.C_Str());
+        std::cout << "Loading Texture at Path: " << final_path << "\n";
+
+        mat.m_material_maps[gl_texture_type] = nullptr;
+        asset_handle h{asset_type::texture, get_string_hash(final_path)};
+        model::texture_entry texture_entry{ gl_texture_type, h, final_path, nullptr };
+        texture_entries.push_back(texture_entry);
     }
 
 }
@@ -133,7 +152,7 @@ model model::load_model_and_textures_from_path(const std::string& path)
 
     model m{};
     aabb  model_aabb{};
-    ProcessNode(m, scene->mRootNode, scene);
+    ProcessNode(m, scene->mRootNode, scene, false);
 
     for (auto& mesh : m.m_meshes)
     {
@@ -151,14 +170,7 @@ model model::load_model_and_textures_from_path(const std::string& path)
     for (int i = 0; i < scene->mNumMaterials; i++)
     {
         auto* material = scene->mMaterials[i];
-
         material_entry mat{};
-
-        /*for (int p = 0; p < material->mNumProperties; p++)
-        {
-            auto* prop = material->mProperties[p];
-            std::cout << "Key : " << prop->mKey.C_Str() << "\n";
-        }*/
 
         get_material_texture(directory, material, mat, aiTextureType_DIFFUSE, texture_map_type::diffuse);
         get_material_texture(directory, material, mat, aiTextureType_NORMALS, texture_map_type::normal);
@@ -174,4 +186,58 @@ model model::load_model_and_textures_from_path(const std::string& path)
     }
 
 	return m;
+}
+
+model model::load_model_from_path_entries(const std::string& path, std::vector<texture_entry>& texture_entries)
+{
+    Assimp::Importer importer;
+    const aiScene* scene = importer.ReadFile(path.c_str(),
+        aiProcess_Triangulate |
+        aiProcess_CalcTangentSpace |
+        aiProcess_OptimizeMeshes |
+        aiProcess_GenSmoothNormals |
+        aiProcess_OptimizeGraph |
+        aiProcess_FixInfacingNormals |
+        aiProcess_FindInvalidData |
+        aiProcess_GenBoundingBoxes
+    );
+    //
+    if (scene == nullptr) {
+        return {};
+    }
+
+    model m{};
+    aabb  model_aabb{};
+    ProcessNode(m, scene->mRootNode, scene, true);
+
+    for (auto& mesh : m.m_meshes)
+    {
+        if (mesh.m_original_aabb.min.x < model_aabb.min.x) { model_aabb.min.x = mesh.m_original_aabb.min.x; }
+        if (mesh.m_original_aabb.min.y < model_aabb.min.y) { model_aabb.min.y = mesh.m_original_aabb.min.y; }
+        if (mesh.m_original_aabb.min.z < model_aabb.min.z) { model_aabb.min.z = mesh.m_original_aabb.min.z; }
+
+        if (mesh.m_original_aabb.max.x > model_aabb.max.x) { model_aabb.max.x = mesh.m_original_aabb.max.x; }
+        if (mesh.m_original_aabb.max.y > model_aabb.max.y) { model_aabb.max.y = mesh.m_original_aabb.max.y; }
+        if (mesh.m_original_aabb.max.z > model_aabb.max.z) { model_aabb.max.z = mesh.m_original_aabb.max.z; }
+    }
+    m.m_aabb = model_aabb;
+
+    std::string directory = path.substr(0, path.find_last_of('/') + 1);
+    for (int i = 0; i < scene->mNumMaterials; i++)
+    {
+        auto* material = scene->mMaterials[i];
+        material_entry mat{};
+
+        get_material_texture_entry(directory, material, mat, aiTextureType_DIFFUSE, texture_map_type::diffuse, texture_entries);
+        get_material_texture_entry(directory, material, mat, aiTextureType_NORMALS, texture_map_type::normal, texture_entries);
+        get_material_texture_entry(directory, material, mat, aiTextureType_DISPLACEMENT, texture_map_type::normal, texture_entries);
+        get_material_texture_entry(directory, material, mat, aiTextureType_SPECULAR, texture_map_type::specular, texture_entries);
+        get_material_texture_entry(directory, material, mat, aiTextureType_AMBIENT_OCCLUSION, texture_map_type::ao, texture_entries);
+        get_material_texture_entry(directory, material, mat, aiTextureType_DIFFUSE_ROUGHNESS, texture_map_type::roughness, texture_entries);
+        get_material_texture_entry(directory, material, mat, aiTextureType_METALNESS, texture_map_type::metallicness, texture_entries);
+
+        m.m_materials.push_back(mat);
+    }
+
+    return m;
 }

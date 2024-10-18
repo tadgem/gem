@@ -44,7 +44,7 @@ std::vector<entity> scene::create_entity_from_model(model& model_to_load, shader
 			model::material_entry& material_entry = model_to_load.m_materials[entry.m_material_index];
 			if (material_entry.m_material_maps.find(map_type) != material_entry.m_material_maps.end())
 			{
-				current_mat.set_sampler(uniform_name, texture_slot, material_entry.m_material_maps[map_type], GL_TEXTURE_2D);
+				current_mat.set_sampler(uniform_name, texture_slot, *material_entry.m_material_maps[map_type], GL_TEXTURE_2D);
 				texture_slot++;
 			}
 		}

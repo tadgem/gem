@@ -109,12 +109,12 @@ void asset_manager::update()
     for (auto& handle : finished) {
         asset_load_return asyncReturn = p_pending_load_tasks[handle].get();
         // enqueue new loads
-        for (auto& newLoad : asyncReturn.m_NewAssetsToLoad) {
+        for (auto& newLoad : asyncReturn.m_new_assets_to_load) {
             load_asset(newLoad.m_path, newLoad.m_type);
         }
 
-        if (asyncReturn.m_AssetLoadTasks.empty()) {
-            p_loaded_assets.emplace(handle, std::move(std::unique_ptr<asset>(asyncReturn.m_LoadedAsset)));
+        if (asyncReturn.m_asset_load_tasks.empty()) {
+            p_loaded_assets.emplace(handle, std::move(std::unique_ptr<asset>(asyncReturn.m_loaded_asset)));
         }
         else {
             p_pending_load_callbacks.emplace(handle, asyncReturn);
@@ -141,18 +141,18 @@ void asset_manager::handle_load_and_unload_callbacks()
         if (processedCallbacks == p_callback_tasks_per_tick) break;
 
         for (u16 i = 0; i < p_callback_tasks_per_tick - processedCallbacks; i++) {
-            if (i >= asset.m_AssetLoadTasks.size()) break;
-            asset.m_AssetLoadTasks.back()(asset.m_LoadedAsset);
-            asset.m_AssetLoadTasks.pop_back();
+            if (i >= asset.m_asset_load_tasks.size()) break;
+            asset.m_asset_load_tasks.back()(asset.m_loaded_asset);
+            asset.m_asset_load_tasks.pop_back();
             processedCallbacks++;
         }
 
-        if (asset.m_AssetLoadTasks.empty()) {
+        if (asset.m_asset_load_tasks.empty()) {
             clears.push_back(handle);
         }
     }
     for (auto& handle : clears) {
-        p_loaded_assets.emplace(handle, std::move(std::unique_ptr<asset>(p_pending_load_callbacks[handle].m_LoadedAsset)));
+        p_loaded_assets.emplace(handle, std::move(std::unique_ptr<asset>(p_pending_load_callbacks[handle].m_loaded_asset)));
         p_pending_load_callbacks.erase(handle);
     }
     clears.clear();
@@ -179,12 +179,23 @@ void asset_manager::handle_pending_loads()
     }
 }
 
-asset_load_return load_model(const std::string& path)
+asset_load_return load_model_asset_manager(const std::string& path)
 {
-    auto model = model::load_model_and_textures_from_path(path);
+    std::vector < model::texture_entry> associated_textures;
+    // move this into a heap allocated object
+    model* m = new model(std::move(model::load_model_from_path_entries(path, associated_textures)));
+    asset_t<model, asset_type::model>* model_asset = new asset_t<model, asset_type::model>(m, path);
+
+    std::vector<asset_load_info> new_assets_to_load{};
+    for (auto& tex : associated_textures)
+    {
+        new_assets_to_load.push_back(asset_load_info {tex.m_path, asset_type::texture});
+    }
 
     asset_load_return ret{};
-
+    ret.m_loaded_asset = static_cast<asset*>(model_asset);
+    ret.m_asset_load_tasks = {};
+    ret.m_new_assets_to_load = new_assets_to_load;
     return ret;
 }
 
@@ -193,7 +204,7 @@ void asset_manager::dispatch_asset_load_task(const asset_handle& handle, asset_l
     switch (info.m_type)
     {
     case asset_type::model:
-        //p_pending_load_tasks.emplace(handle, std::move(std::async(std::launch::async, model::load_model_and_textures_from_path, info.m_path)));
+        p_pending_load_tasks.emplace(handle, std::move(std::async(std::launch::async, load_model_asset_manager, info.m_path)));
         break;
     case asset_type::texture:
         break;

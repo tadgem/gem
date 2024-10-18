@@ -38,10 +38,9 @@ class asset_t : public asset
 {
 public:
     _Ty*    m_data;
-    asset_t(const _Ty* data, const std::string& path) : asset(path, _AssetType), m_data(data) {}
+    asset_t(_Ty* data, const std::string& path) : asset(path, _AssetType), m_data(data) {}
 };
 
-/* required to hash a container */
 template<>
 struct std::hash<asset_handle> {
     std::size_t operator()(const asset_handle& ah) const {

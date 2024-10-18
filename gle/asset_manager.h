@@ -38,9 +38,13 @@ struct asset_load_info {
 };
 
 struct asset_load_return {
-    asset* m_LoadedAsset;
-    std::vector<asset_load_info> m_NewAssetsToLoad;
-    std::vector<asset_load_callback> m_AssetLoadTasks;
+    asset* m_loaded_asset;
+    // additional assets that may be required for this asset
+    // e.g. textures for a model
+    std::vector<asset_load_info> m_new_assets_to_load;
+    // tasks associated with this asset to be performed. 
+    // e.g. submit mesh / texture to GPU. 
+    std::vector<asset_load_callback> m_asset_load_tasks;
 };
 
 class asset_manager {
