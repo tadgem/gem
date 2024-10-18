@@ -57,8 +57,8 @@ void main(void)
     vec4 direct = texture(lighting_pass, aUV);
     vec4 indirect = texture(cone_tracing_pass, aUV);
     vec4 ssr = texture(ssr_pass, aUV);
-    vec4 final_color = mix(direct, indirect + ssr, (length(indirect) / 2.0)) * 2.0;
- 
+    //vec4 final_color = mix(direct, indirect + ssr, (length(indirect) / 2.0)) * 2.0;
+    vec4 final_color = direct + indirect + ssr;
     color =     brightnessMatrix( u_brightness ) *
         		contrastMatrix( u_contrast ) * 
         		saturationMatrix( u_saturation ) *

@@ -24,6 +24,8 @@ set(GL_SRC
         ${CMAKE_CURRENT_SOURCE_DIR}/lights.h
         ${CMAKE_CURRENT_SOURCE_DIR}/asset.h
         ${CMAKE_CURRENT_SOURCE_DIR}/asset.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/asset_manager.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/asset_manager.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/hash_string.h
         ${CMAKE_CURRENT_SOURCE_DIR}/shader.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/shader.h
@@ -37,6 +39,8 @@ set(GL_SRC
         ${CMAKE_CURRENT_SOURCE_DIR}/texture.h
         ${CMAKE_CURRENT_SOURCE_DIR}/framebuffer.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/framebuffer.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/renderer.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/renderer.h
         ${CMAKE_CURRENT_SOURCE_DIR}/mesh.h
         ${CMAKE_CURRENT_SOURCE_DIR}/model.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/model.h

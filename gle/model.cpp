@@ -113,7 +113,7 @@ void get_material_texture(const std::string& directory, aiMaterial* material, mo
 
 }
 
-model model::load_model_from_path(const std::string& path)
+model model::load_model_and_textures_from_path(const std::string& path)
 {
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(path.c_str(),

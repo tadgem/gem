@@ -45,8 +45,8 @@ Im3d::Vec3 ToIm3D(glm::vec3& input)
 static glm::mat4 last_vp = glm::mat4(1.0);
 inline static u32 frame_index = 0;
 inline static constexpr float gi_resolution_scale = 1.0;
-inline static constexpr float ssr_resolution_scale = 1.0;
-inline static constexpr int shadow_resolution = 2048;
+inline static constexpr float ssr_resolution_scale = 0.75;
+inline static constexpr int shadow_resolution = 4096;
 inline static constexpr int _3d_tex_res = 256;
 const float SCREEN_W = 1920.0;
 const float SCREEN_H = 1080.0;
@@ -121,6 +121,7 @@ void on_im3d(scene& current_scene, camera& cam, int& selected_entity)
         return;
     }
     mesh& meshc = current_scene.m_registry.get<mesh>(e);
+    transform& trans = current_scene.m_registry.get<transform>(e);
 
     Im3d::DrawAlignedBox(ToIm3D(meshc.m_transformed_aabb.min), ToIm3D(meshc.m_transformed_aabb.max));
 }
@@ -191,7 +192,7 @@ int main()
 
     e.add_component<material>(gbuffer_shader);
 
-    model sponza_geo = model::load_model_from_path("assets/models/sponza/Sponza.gltf");
+    model sponza_geo = model::load_model_and_textures_from_path("assets/models/sponza/Sponza.gltf");
 
     scene.create_entity_from_model(sponza_geo, gbuffer_shader, glm::vec3(0.03), glm::vec3(0.0, 0.0, 0.0),
         {
@@ -203,9 +204,9 @@ int main()
         });
 
     framebuffer gbuffer = framebuffer::create(window_res, {
-        {GL_RGBA, GL_RGBA32F, GL_LINEAR, GL_FLOAT},
-        {GL_RGBA, GL_RGBA32F, GL_LINEAR, GL_FLOAT},
-        {GL_RGBA, GL_RGBA32F, GL_LINEAR, GL_FLOAT},
+        {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
+        {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
+        {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
         {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
         {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
         {GL_RGB, GL_RGB16F, GL_NEAREST, GL_FLOAT},
@@ -230,7 +231,7 @@ int main()
         }, false);
     
     framebuffer position_buffer_history = framebuffer::create(window_res, {
-        {GL_RGBA,GL_RGBA32F, GL_LINEAR, GL_FLOAT},
+        {GL_RGBA,GL_RGBA16F, GL_LINEAR, GL_FLOAT},
             }, false);
     
     glm::vec2 gi_res = { window_res.x * gi_resolution_scale, window_res.y * gi_resolution_scale };

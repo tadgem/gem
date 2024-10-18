@@ -1,0 +1,80 @@
+#pragma once
+#include <map>
+#include <future>
+#include <memory>
+#include "asset.h"
+#include "hash_string.h"
+
+using asset_load_callback = void(*) (asset*);
+
+enum class asset_load_progress {
+    not_loaded,
+    loading,
+    loaded,
+    unloading
+};
+
+struct asset_load_info {
+    std::string m_path;
+    asset_type m_type;
+
+    bool operator==(const asset_load_info& o) const {
+        return m_path == o.m_path && m_type == o.m_type;
+    }
+
+    bool operator<(const asset_load_info& o) const {
+        return m_path.size() < o.m_path.size();
+    }
+
+    template<typename Archive>
+    void serialize(Archive& ar) {
+        ZoneScoped;
+        ar(m_Path, m_Type);
+    }
+
+    asset_handle to_handle() {
+        return asset_handle{ m_type, get_string_hash(m_path) };
+    }
+};
+
+struct asset_load_return {
+    asset* m_LoadedAsset;
+    std::vector<asset_load_info> m_NewAssetsToLoad;
+    std::vector<asset_load_callback> m_AssetLoadTasks;
+};
+
+class asset_manager {
+public:
+
+    asset_handle            load_asset(const std::string& path, const asset_type& assetType);
+    void                    unload_asset(const asset_handle& handle);
+    asset*                  get_asset(asset_handle& handle);
+
+    asset_load_progress     get_asset_load_progress(const asset_handle& handle);
+    bool                    any_assets_loading();
+    bool                    any_assets_unloading();
+
+    void                    wait_all_assets();
+    void                    wait_all_unloads();
+    void                    unload_all_assets();
+
+    void                    update();
+    void                    shutdown();
+   
+protected:
+    // Move the Asset* into a UPtr once returned from the future
+    std::unordered_map<asset_handle, std::future<asset_load_return>>    p_pending_load_tasks;
+    std::unordered_map<asset_handle, std::unique_ptr<asset>>            p_loaded_assets;
+    std::unordered_map<asset_handle, asset_load_return>                 p_pending_load_callbacks;
+    std::unordered_map<asset_handle, asset_load_callback>               p_pending_unload_callbacks;
+    std::vector<asset_load_info>                                        p_queued_loads;
+
+    const uint16_t p_callback_tasks_per_tick = 6;
+    const uint16_t p_max_async_tasks_in_flight = 3;
+
+    void handle_load_and_unload_callbacks();
+
+    void handle_pending_loads();
+
+    void dispatch_asset_load_task(const asset_handle& handle, asset_load_info& info);
+};

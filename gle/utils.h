@@ -2,6 +2,7 @@
 
 #include <string>
 #include <array>
+#include <future>
 #include "glm.hpp"
 #include "shape.h"
 #include "alias.h"
@@ -30,4 +31,10 @@ public:
 	static glm::vec3					screen_to_world_ray(glm::vec3 eye_pos, glm::vec2 mouse_pos, glm::vec2 screen_dim, glm::mat4 inverse_view, glm::mat4 inverse_proj);
 	static glm::vec3					screen_to_world_pos(glm::vec2 mouse_pos, glm::vec2 screen_dim, glm::mat4 inverse_view, glm::mat4 inverse_proj);
 	static std::array<glm::vec4, 6>		get_planes_from_view_proj(glm::mat4 view_proj);
+
+	// template utils
+	template<typename _Ty>
+	static bool							is_future_ready(std::future<_Ty> const& o) {
+		return o.wait_for(std::chrono::seconds(0)) == std::future_status::ready;
+	}
 };
