@@ -179,6 +179,52 @@ void asset_manager::handle_pending_loads()
     }
 }
 
+void submit_meshes_to_gpu(asset* model_asset)
+{
+    // cast to model asset
+    asset_t<model, asset_type::model>* ma = static_cast<asset_t<model, asset_type::model>*>(model_asset);
+    // go through each entry
+    for (auto& entry : ma->m_data->m_mesh_entries)
+    {
+        vao_builder mesh_builder{};
+        mesh_builder.begin();
+        std::vector<float> buffer;
+        for (int i = 0; i < entry.m_positions.size(); i++)
+        {
+            buffer.push_back(entry.m_positions[i].x);
+            buffer.push_back(entry.m_positions[i].y);
+            buffer.push_back(entry.m_positions[i].z);
+            buffer.push_back(entry.m_normals[i].x);
+            buffer.push_back(entry.m_normals[i].y);
+            buffer.push_back(entry.m_normals[i].z);
+            buffer.push_back(entry.m_uvs[i].x);
+            buffer.push_back(entry.m_uvs[i].y);
+        }
+
+        mesh_builder.add_vertex_buffer(buffer);
+        mesh_builder.add_vertex_attribute(0, 8 * sizeof(float), 3);
+        mesh_builder.add_vertex_attribute(1, 8 * sizeof(float), 3);
+        mesh_builder.add_vertex_attribute(2, 8 * sizeof(float), 2);
+
+        std::vector<u32> indices;
+        for (int i = 0; i < entry.m_indices.size(); i++)
+        {
+            indices.push_back(entry.m_indices[i]);
+        }
+
+        mesh_builder.add_index_buffer(indices);
+        mesh m{};
+        m.m_index_count = indices.size();
+        m.m_material_index = entry.m_material_index;
+        m.m_original_aabb = entry.m_mesh_aabb;
+        m.m_vao = mesh_builder.build();
+        // create real mesh object on gpu
+
+        ma->m_data->m_meshes.push_back(m);
+        
+    }
+}
+
 asset_load_return load_model_asset_manager(const std::string& path)
 {
     std::vector < model::texture_entry> associated_textures;
@@ -186,16 +232,14 @@ asset_load_return load_model_asset_manager(const std::string& path)
     model* m = new model(std::move(model::load_model_from_path_entries(path, associated_textures)));
     asset_t<model, asset_type::model>* model_asset = new asset_t<model, asset_type::model>(m, path);
 
-    std::vector<asset_load_info> new_assets_to_load{};
+    asset_load_return ret{};
     for (auto& tex : associated_textures)
     {
-        new_assets_to_load.push_back(asset_load_info {tex.m_path, asset_type::texture});
+        ret.m_new_assets_to_load.push_back(asset_load_info {tex.m_path, asset_type::texture});
     }
 
-    asset_load_return ret{};
+    ret.m_asset_load_tasks.push_back(submit_meshes_to_gpu);
     ret.m_loaded_asset = static_cast<asset*>(model_asset);
-    ret.m_asset_load_tasks = {};
-    ret.m_new_assets_to_load = new_assets_to_load;
     return ret;
 }
 

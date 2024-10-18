@@ -439,7 +439,7 @@ int main()
                 pixels[0][2] * 256 * 256;
         }
 
-        if (selected_entity > 0)
+        if (scene.does_entity_exist(selected_entity))
         {
             entity_data& data = scene.m_registry.get<entity_data>((entt::entity)selected_entity);
             ImGui::Begin(data.m_name.c_str());

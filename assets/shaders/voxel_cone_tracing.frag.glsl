@@ -143,7 +143,7 @@ vec3 trace_cone(vec3 from, vec3 dir, vec3 unit)
 		pos += dir * (unit * factor);
 	}
 
-	return accum.xyz;
+	return accum.xyz * 2.0;
 }
 
 const int 	DIFFUSE_CONE_COUNT_16 		= 16;

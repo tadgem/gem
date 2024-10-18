@@ -73,8 +73,8 @@ protected:
     std::unordered_map<asset_handle, asset_load_callback>               p_pending_unload_callbacks;
     std::vector<asset_load_info>                                        p_queued_loads;
 
-    const uint16_t p_callback_tasks_per_tick = 6;
-    const uint16_t p_max_async_tasks_in_flight = 3;
+    const uint16_t p_callback_tasks_per_tick = 1;
+    const uint16_t p_max_async_tasks_in_flight = 2;
 
     void handle_load_and_unload_callbacks();
 

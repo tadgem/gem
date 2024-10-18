@@ -15,6 +15,8 @@ public:
 		std::vector<glm::vec3>	m_normals;
 		std::vector<glm::vec2>	m_uvs;
 		std::vector<u32>		m_indices;
+		aabb					m_mesh_aabb;
+		u32						m_material_index;
 	};
 
 	struct texture_entry

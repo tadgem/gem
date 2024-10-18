@@ -32,51 +32,86 @@ void ProcessMesh(model& model, aiMesh* m, aiNode* node, const aiScene* scene, bo
         aiMaterialProperty* prop = mMaterial->mProperties[i];
         properties.push_back(prop);
     }
-    std::vector<float> verts;
-    vao_builder mesh_builder{};
-    mesh_builder.begin();
 
-    if (hasPositions && hasUVs && hasNormals) {
-        for (unsigned int i = 0; i < m->mNumVertices; i++) {
-            verts.push_back(m->mVertices[i].x);
-            verts.push_back(m->mVertices[i].y);
-            verts.push_back(m->mVertices[i].z);
-            verts.push_back(m->mNormals[i].x);
-            verts.push_back(m->mNormals[i].y);
-            verts.push_back(m->mNormals[i].z);
-            verts.push_back(m->mTextureCoords[0][i].x);
-            verts.push_back(m->mTextureCoords[0][i].y);            
-        }
-        mesh_builder.add_vertex_buffer(verts);
-        mesh_builder.add_vertex_attribute(0, 8 * sizeof(float), 3);
-        mesh_builder.add_vertex_attribute(1, 8 * sizeof(float), 3);
-        mesh_builder.add_vertex_attribute(2, 8 * sizeof(float), 2);
-    }
-
-    std::vector<uint32_t> indices;
-    if (hasIndices) {
-        for (unsigned int i = 0; i < m->mNumFaces; i++) {
-            aiFace currentFace = m->mFaces[i];
-            if (currentFace.mNumIndices != 3) {
-                std::cerr << "Attempting to import a m with non triangular face structure! cannot load this m." << std::endl;
-                return;
-            }
-            for (unsigned int index = 0; index < m->mFaces[i].mNumIndices; index++) {
-                indices.push_back(static_cast<uint32_t>(m->mFaces[i].mIndices[index]));
+    if (use_entries)
+    {
+        model::mesh_entry entry{};
+        if (hasPositions && hasUVs && hasNormals) {
+            for (unsigned int i = 0; i < m->mNumVertices; i++) {
+                entry.m_positions.push_back({ m->mVertices[i].x , m->mVertices[i].y, m->mVertices[i].z });
+                entry.m_normals.push_back({ m->mNormals[i].x,m->mNormals[i].y, m->mNormals[i].z });
+                entry.m_uvs.push_back({ m->mTextureCoords[0][i].x,m->mTextureCoords[0][i].y});
             }
         }
-        mesh_builder.add_index_buffer(indices);
+
+        if (hasIndices) {
+            for (unsigned int i = 0; i < m->mNumFaces; i++) {
+                aiFace currentFace = m->mFaces[i];
+                if (currentFace.mNumIndices != 3) {
+                    std::cerr << "Attempting to import a m with non triangular face structure! cannot load this m." << std::endl;
+                    return;
+                }
+                for (unsigned int index = 0; index < m->mFaces[i].mNumIndices; index++) {
+                    entry.m_indices.push_back(static_cast<uint32_t>(m->mFaces[i].mIndices[index]));
+                }
+            }
+        }
+        aabb bb = { {m->mAABB.mMin.x, m->mAABB.mMin.y, m->mAABB.mMin.z},
+                    {m->mAABB.mMax.x, m->mAABB.mMax.y, m->mAABB.mMax.z} };
+        entry.m_mesh_aabb = bb;
+        entry.m_material_index = m->mMaterialIndex;
+        model.m_mesh_entries.push_back(entry);
     }
-    aabb bb= { {m->mAABB.mMin.x, m->mAABB.mMin.y, m->mAABB.mMin.z},
-                {m->mAABB.mMax.x, m->mAABB.mMax.y, m->mAABB.mMax.z} };
+    else
+    {
 
-    mesh new_mesh{};
-    new_mesh.m_vao = mesh_builder.build();
-    new_mesh.m_index_count = indices.size();
-    new_mesh.m_original_aabb = bb;
-    new_mesh.m_material_index = m->mMaterialIndex;
 
-    model.m_meshes.push_back(new_mesh);
+        std::vector<float> verts;
+        vao_builder mesh_builder{};
+        mesh_builder.begin();
+
+        if (hasPositions && hasUVs && hasNormals) {
+            for (unsigned int i = 0; i < m->mNumVertices; i++) {
+                verts.push_back(m->mVertices[i].x);
+                verts.push_back(m->mVertices[i].y);
+                verts.push_back(m->mVertices[i].z);
+                verts.push_back(m->mNormals[i].x);
+                verts.push_back(m->mNormals[i].y);
+                verts.push_back(m->mNormals[i].z);
+                verts.push_back(m->mTextureCoords[0][i].x);
+                verts.push_back(m->mTextureCoords[0][i].y);
+            }
+            mesh_builder.add_vertex_buffer(verts);
+            mesh_builder.add_vertex_attribute(0, 8 * sizeof(float), 3);
+            mesh_builder.add_vertex_attribute(1, 8 * sizeof(float), 3);
+            mesh_builder.add_vertex_attribute(2, 8 * sizeof(float), 2);
+        }
+
+        std::vector<uint32_t> indices;
+        if (hasIndices) {
+            for (unsigned int i = 0; i < m->mNumFaces; i++) {
+                aiFace currentFace = m->mFaces[i];
+                if (currentFace.mNumIndices != 3) {
+                    std::cerr << "Attempting to import a m with non triangular face structure! cannot load this m." << std::endl;
+                    return;
+                }
+                for (unsigned int index = 0; index < m->mFaces[i].mNumIndices; index++) {
+                    indices.push_back(static_cast<uint32_t>(m->mFaces[i].mIndices[index]));
+                }
+            }
+            mesh_builder.add_index_buffer(indices);
+        }
+        aabb bb = { {m->mAABB.mMin.x, m->mAABB.mMin.y, m->mAABB.mMin.z},
+                    {m->mAABB.mMax.x, m->mAABB.mMax.y, m->mAABB.mMax.z} };
+
+        mesh new_mesh{};
+        new_mesh.m_vao = mesh_builder.build();
+        new_mesh.m_index_count = indices.size();
+        new_mesh.m_original_aabb = bb;
+        new_mesh.m_material_index = m->mMaterialIndex;
+
+        model.m_meshes.push_back(new_mesh);
+    }
 }
 
 void ProcessNode(model& model, aiNode* node, const aiScene* scene, bool use_entries) {
