@@ -20,6 +20,7 @@ public:
 
 	texture() = default;
 	texture(const std::string& path);
+	texture(const std::string& path, std::vector<unsigned char> data);
 
 	void		bind_sampler(GLenum texture_slot, GLenum texture_target = GL_TEXTURE_2D);
 	static void bind_sampler_handle(gl_handle handle, GLenum texture_slot, GLenum texture_target = GL_TEXTURE_2D);
@@ -33,6 +34,9 @@ public:
 	static texture from_data(unsigned int* data, unsigned int count, int width, int height, int depth, int nr_channels);
 	static texture create_3d_texture(glm::ivec3 dim, GLenum format, GLenum pixel_format, GLenum data_type, void* data, GLenum filter = GL_LINEAR, GLenum wrap_mode = GL_REPEAT);
 	static texture create_3d_texture_empty(glm::ivec3 dim, GLenum format, GLenum pixel_format, GLenum data_type, GLenum filter = GL_LINEAR, GLenum wrap_mode = GL_REPEAT);
+
+	void	load_texture_stbi(std::vector<unsigned char> data);
+	void	load_texture_gli(std::vector<unsigned char> data);
 
 	inline static texture* white;
 	inline static texture* black;

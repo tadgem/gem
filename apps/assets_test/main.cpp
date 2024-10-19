@@ -62,17 +62,26 @@ int main()
 
             if (ImGui::CollapsingHeader("Loaded Assets"))
             {
-                for (auto& [handle, u_asset] : am.p_loaded_assets)
+                for (const auto& [handle, u_asset] : am.p_loaded_assets)
                 {
-                    ImGui::Text("%s : %s", u_asset->m_path.c_str(), get_asset_type_name(handle.m_type));
+                    if (!u_asset) { continue; }
+                    ImGui::Text("%s : %s", u_asset->m_path.c_str(), get_asset_type_name(handle.m_type).c_str());
                 }
             }
 
             if (ImGui::CollapsingHeader("Enqueued Loads"))
             {
-                for (auto& info : am.p_queued_loads)
+                for (const auto& info : am.p_queued_loads)
                 {
                     ImGui::Text("%s : %s", info.m_path.c_str(), get_asset_type_name(info.m_type));
+                }
+            }
+
+            if (ImGui::CollapsingHeader("In Progress Loads"))
+            {
+                for (const auto& [handle , info ]: am.p_pending_load_callbacks)
+                {
+                    ImGui::Text("%s : %s", info.m_loaded_asset->m_path.c_str(), get_asset_type_name(handle.m_type));
                 }
             }
 
@@ -85,7 +94,8 @@ int main()
 
         if (ifd::FileDialog::Instance().IsDone("ModelOpenDialog")) {
             if (ifd::FileDialog::Instance().HasResult()) {
-                std::string res = ifd::FileDialog::Instance().GetResult().u8string();
+                std::filesystem::path p = ifd::FileDialog::Instance().GetResult();
+                std::string res = p.u8string();
                 printf("OPEN[%s]\n", res.c_str());
                 am.load_asset(res, asset_type::model);
             }

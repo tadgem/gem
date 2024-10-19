@@ -237,3 +237,9 @@ std::array<glm::vec4, 6> utils::get_planes_from_view_proj(glm::mat4 view_proj)
 
     return arr;
 }
+
+std::string utils::get_directory_from_path(const std::string& path)
+{
+    size_t pos = path.find_last_of("\\/");
+    return (std::string::npos == pos) ? "" : path.substr(0, pos);
+}

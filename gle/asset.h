@@ -43,6 +43,17 @@ public:
     asset_t(_Ty* data, const std::string& path) : asset(path, _AssetType), m_data(data) {}
 };
 
+// should move all assets that have a secondary submission stage (mesh, texture) to this format
+template<typename _MainType, typename _IntermediateType, asset_type _AssetType>
+class asset_t_intermediate : public asset
+{
+public:
+    _MainType*          m_data;
+    _IntermediateType   m_intermediate;
+
+    asset_t_intermediate(_MainType* data, _IntermediateType inter, const std::string& path) : asset(path, _AssetType), m_data(data), m_intermediate(inter) {}
+};
+
 template<>
 struct std::hash<asset_handle> {
     std::size_t operator()(const asset_handle& ah) const {

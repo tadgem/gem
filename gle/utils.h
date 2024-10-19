@@ -31,6 +31,7 @@ public:
 	static glm::vec3					screen_to_world_ray(glm::vec3 eye_pos, glm::vec2 mouse_pos, glm::vec2 screen_dim, glm::mat4 inverse_view, glm::mat4 inverse_proj);
 	static glm::vec3					screen_to_world_pos(glm::vec2 mouse_pos, glm::vec2 screen_dim, glm::mat4 inverse_view, glm::mat4 inverse_proj);
 	static std::array<glm::vec4, 6>		get_planes_from_view_proj(glm::mat4 view_proj);
+	static std::string					get_directory_from_path(const std::string& path);
 
 	// template utils
 	template<typename _Ty>

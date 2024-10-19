@@ -51,58 +51,19 @@ texture::texture(const std::string& path)
 	std::string compressed_format_type = "";
 	int			block_size = -1;
 	
+	std::vector<unsigned char> data = utils::load_binary_from_path(path);
+
 	if (path.find("dds") != std::string::npos)
 	{
-		gli::texture dds_tex_raw = gli::load_dds(path);
-		gli::texture dds_tex = gli::flip(dds_tex_raw);
-		//gli::texture dds_tex = gli::load_dds(path);
-		gli::gl GL(gli::gl::PROFILE_GL33);
-		gli::gl::format const format = GL.translate(dds_tex.format(), dds_tex.swizzles());
-		GLenum target = GL.translate(dds_tex.target());
-
-		m_width = dds_tex.extent().x;
-		m_height = dds_tex.extent().y;
-
-		glGenTextures(1, &m_handle);
-		glBindTexture(target, m_handle);
-		glTexParameteri(target, GL_TEXTURE_BASE_LEVEL, 0);
-		glTexParameteri(target, GL_TEXTURE_MAX_LEVEL, static_cast<GLint>(dds_tex.levels() - 1));
-		glTexParameteriv(target, GL_TEXTURE_SWIZZLE_RGBA, &format.Swizzles[0]);
-		glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexStorage2D(target, static_cast<GLint>(dds_tex.levels()), format.Internal, dds_tex.extent().x, dds_tex.extent().y);
-		for (std::size_t Level = 0; Level < dds_tex.levels(); ++Level)
-		{
-			glm::tvec3<GLsizei> Extent(dds_tex.extent(Level));
-			glCompressedTexSubImage2D(
-				target, static_cast<GLint>(Level), 0, 0, Extent.x, Extent.y,
-				format.Internal, static_cast<GLsizei>(dds_tex.size(Level)), dds_tex.data(0, 0, Level));
-		}
-
-
+		load_texture_gli(data);
 	}
 	else {
-
-		std::vector<u8> data_o = utils::load_binary_from_path(path);
-		stbi_set_flip_vertically_on_load(1);
-		unsigned char* data = stbi_load_from_memory(data_o.data(), data_o.size(), &m_width, &m_height, &m_num_channels, 0);
-		if (!data)
-		{
-			std::cerr << "Failed to load texture at path : " << path << std::endl;
-			return;
-		}
-		glGenTextures(1, &m_handle);
-		glBindTexture(GL_TEXTURE_2D, m_handle);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		GLenum format = m_num_channels == 4 ? GL_RGBA : GL_RGB;
-		glTexImage2D(GL_TEXTURE_2D, 0, format, m_width, m_height, 0, format, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
+		load_texture_stbi(data);
 	}
+}
+
+texture::texture(const std::string& path, std::vector<unsigned char> data)
+{
 }
 
 void texture::bind_sampler(GLenum texture_slot, GLenum texture_target)
@@ -182,4 +143,55 @@ texture texture::create_3d_texture_empty(glm::ivec3 dim, GLenum format, GLenum p
 	glAssert(glClearTexImage(GL_TEXTURE_3D, 0, pixel_format, GL_FLOAT, &clear[0]));
 	glGenerateTextureMipmap(t.m_handle);
 	return t;
+}
+
+void texture::load_texture_stbi(std::vector<unsigned char> data)
+{
+	stbi_set_flip_vertically_on_load(1);
+	unsigned char* stbi_data = stbi_load_from_memory(data.data(), data.size(), &m_width, &m_height, &m_num_channels, 0);
+	if (!stbi_data)
+	{
+		return;
+	}
+	glGenTextures(1, &m_handle);
+	glBindTexture(GL_TEXTURE_2D, m_handle);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	GLenum format = m_num_channels == 4 ? GL_RGBA : GL_RGB;
+	glTexImage2D(GL_TEXTURE_2D, 0, format, m_width, m_height, 0, format, GL_UNSIGNED_BYTE, stbi_data);
+	glGenerateMipmap(GL_TEXTURE_2D);
+}
+
+void texture::load_texture_gli(std::vector<unsigned char> data)
+{
+	gli::texture dds_tex_raw = gli::load_dds((const char*) data.data(), data.size());
+	gli::texture dds_tex = gli::flip(dds_tex_raw);
+	//gli::texture dds_tex = gli::load_dds(path);
+	gli::gl GL(gli::gl::PROFILE_GL33);
+	gli::gl::format const format = GL.translate(dds_tex.format(), dds_tex.swizzles());
+	GLenum target = GL.translate(dds_tex.target());
+
+	m_width = dds_tex.extent().x;
+	m_height = dds_tex.extent().y;
+	m_num_channels = dds_tex.extent().z;
+
+	glGenTextures(1, &m_handle);
+	glBindTexture(target, m_handle);
+	glTexParameteri(target, GL_TEXTURE_BASE_LEVEL, 0);
+	glTexParameteri(target, GL_TEXTURE_MAX_LEVEL, static_cast<GLint>(dds_tex.levels() - 1));
+	glTexParameteriv(target, GL_TEXTURE_SWIZZLE_RGBA, &format.Swizzles[0]);
+	glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexStorage2D(target, static_cast<GLint>(dds_tex.levels()), format.Internal, dds_tex.extent().x, dds_tex.extent().y);
+	for (std::size_t Level = 0; Level < dds_tex.levels(); ++Level)
+	{
+		glm::tvec3<GLsizei> Extent(dds_tex.extent(Level));
+		glCompressedTexSubImage2D(
+			target, static_cast<GLint>(Level), 0, 0, Extent.x, Extent.y,
+			format.Internal, static_cast<GLsizei>(dds_tex.size(Level)), dds_tex.data(0, 0, Level));
+	}
 }

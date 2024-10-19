@@ -2,6 +2,10 @@
 #include "utils.h"
 #include "model.h"
 #include "hash_string.h"
+#include <iostream>
+
+
+using texture_intermediate_asset = asset_t_intermediate<texture, std::vector<unsigned char>, asset_type::texture>;
 
 asset_handle asset_manager::load_asset(const std::string& path, const asset_type& assetType)
 {
@@ -222,7 +226,22 @@ void submit_meshes_to_gpu(asset* model_asset)
         // create real mesh object on gpu
 
         ma->m_data->m_meshes.push_back(m);
-        
+
+    }
+}
+
+void submit_texture_to_gpu(asset* texture_asset)
+{
+    // cast to model asset
+    texture_intermediate_asset* ta = static_cast<texture_intermediate_asset*>(texture_asset);
+
+    if (ta->m_path.find("dds") != std::string::npos)
+    {
+        ta->m_data->load_texture_gli(ta->m_intermediate);
+    }
+    else {
+        ta->m_data->load_texture_stbi(ta->m_intermediate);
+
     }
 }
 
@@ -233,14 +252,31 @@ asset_load_return load_model_asset_manager(const std::string& path)
     model* m = new model(std::move(model::load_model_from_path_entries(path, associated_textures)));
     asset_t<model, asset_type::model>* model_asset = new asset_t<model, asset_type::model>(m, path);
 
+    std::string directory = utils::get_directory_from_path(path);
+
     asset_load_return ret{};
     for (auto& tex : associated_textures)
     {
-        ret.m_new_assets_to_load.push_back(asset_load_info {tex.m_path, asset_type::texture});
+        std::string final_path = directory + "/" + tex.m_path;
+        ret.m_new_assets_to_load.push_back(asset_load_info {final_path, asset_type::texture});
     }
 
     ret.m_asset_load_tasks.push_back(submit_meshes_to_gpu);
     ret.m_loaded_asset = static_cast<asset*>(model_asset);
+    return ret;
+}
+
+asset_load_return load_texture_asset_manager(const std::string& path)
+{
+    asset_load_return ret{};
+    ret.m_new_assets_to_load = {};
+    ret.m_asset_load_tasks.push_back(submit_texture_to_gpu);
+
+    texture* t = new texture();
+    std::vector<unsigned char> binary = utils::load_binary_from_path(path);
+    texture_intermediate_asset* ta = new texture_intermediate_asset(t, binary, path);
+
+    ret.m_loaded_asset = ta;
     return ret;
 }
 
@@ -252,6 +288,7 @@ void asset_manager::dispatch_asset_load_task(const asset_handle& handle, asset_l
         p_pending_load_tasks.emplace(handle, std::move(std::async(std::launch::async, load_model_asset_manager, info.m_path)));
         break;
     case asset_type::texture:
+        p_pending_load_tasks.emplace(handle, std::move(std::async(std::launch::async, load_texture_asset_manager, info.m_path)));
         break;
     }
 }
