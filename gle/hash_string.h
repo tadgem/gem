@@ -8,20 +8,23 @@
 #include <unordered_map>
 #endif
 
-template <typename T>
-std::string get_type_name() { return ctti::type_id<T>().name(); }
+class hash_utils {
+public:
+    template <typename T>
+    static std::string get_type_name() { return ctti::type_id<T>().name(); }
 
-template <typename T>
-u64 get_type_hash() { return ctti::type_id<T>().hash(); }
+    template <typename T>
+    static u64 get_type_hash() { return ctti::type_id<T>().hash(); }
 
-u64 get_string_hash(const std::string& str) {
-    u64 ret = 0;
-    for (auto& c : str)
-    {
-        ret ^= 2305 * c;
+    static u64 get_string_hash(const std::string& str) {
+        u64 ret = 0;
+        for (auto& c : str)
+        {
+            ret ^= 2305 * c;
+        }
+        return ret;
     }
-    return ret;
-}
+};
 
 struct hash_string
 {
@@ -30,7 +33,7 @@ struct hash_string
 #endif
     hash_string() { m_value = 0; }
 
-    hash_string(const std::string& input) : m_value(get_string_hash(input)) {
+    hash_string(const std::string& input) : m_value(hash_utils::get_string_hash(input)) {
 #ifdef TRACK_HASH_STRING_ORIGINALS
         s_hash_string_originals[m_value] = input;
 #endif

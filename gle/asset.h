@@ -10,6 +10,8 @@ enum class asset_type  {
     binary
 };
 
+std::string get_asset_type_name(const asset_type& t);
+
 struct asset_handle
 {
     asset_type  m_type;

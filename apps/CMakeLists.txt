@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.16)
+
+add_executable(ecs-demo main.cpp)
+
+target_link_libraries(ecs-demo PRIVATE gle)
+target_include_directories(ecs-demo PRIVATE ${GLE_INCLUDES})
+
+file(COPY ${ASSETS_DIR} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

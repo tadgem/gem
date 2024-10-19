@@ -3,7 +3,7 @@
 #include <future>
 #include <memory>
 #include "asset.h"
-#include "hash_string.h"
+
 
 using asset_load_callback = void(*) (asset*);
 
@@ -32,9 +32,7 @@ struct asset_load_info {
         ar(m_Path, m_Type);
     }
 
-    asset_handle to_handle() {
-        return asset_handle{ m_type, get_string_hash(m_path) };
-    }
+    asset_handle to_handle();
 };
 
 struct asset_load_return {
@@ -65,7 +63,8 @@ public:
     void                    update();
     void                    shutdown();
    
-protected:
+// todo: make private after debugging and testing
+// protected:
     // Move the Asset* into a UPtr once returned from the future
     std::unordered_map<asset_handle, std::future<asset_load_return>>    p_pending_load_tasks;
     std::unordered_map<asset_handle, std::unique_ptr<asset>>            p_loaded_assets;

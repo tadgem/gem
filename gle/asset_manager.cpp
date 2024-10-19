@@ -1,10 +1,11 @@
 #include "asset_manager.h"
 #include "utils.h"
 #include "model.h"
+#include "hash_string.h"
 
 asset_handle asset_manager::load_asset(const std::string& path, const asset_type& assetType)
 {
-	asset_handle handle{ assetType, get_string_hash(path)};
+	asset_handle handle{ assetType, hash_utils::get_string_hash(path)};
 	p_queued_loads.push_back(asset_load_info{ path, assetType });
 	return handle;
 }
@@ -255,3 +256,7 @@ void asset_manager::dispatch_asset_load_task(const asset_handle& handle, asset_l
     }
 }
 
+asset_handle asset_load_info::to_handle()
+{
+    return asset_handle{ m_type, hash_utils::get_string_hash(m_path) };
+}

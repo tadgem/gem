@@ -3,7 +3,6 @@
 #include <iostream>
 #include "GL/glew.h"
 #include "gl.h"
-#define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 #include "utils.h"
 #include "gli.hpp"

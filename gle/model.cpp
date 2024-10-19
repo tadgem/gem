@@ -160,7 +160,7 @@ void get_material_texture_entry(const std::string& directory, aiMaterial* materi
         std::cout << "Loading Texture at Path: " << final_path << "\n";
 
         mat.m_material_maps[gl_texture_type] = nullptr;
-        asset_handle h{asset_type::texture, get_string_hash(final_path)};
+        asset_handle h{asset_type::texture, hash_utils::get_string_hash(final_path)};
         model::texture_entry texture_entry{ gl_texture_type, h, final_path, nullptr };
         texture_entries.push_back(texture_entry);
     }
