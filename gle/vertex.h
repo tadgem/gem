@@ -6,8 +6,11 @@
 struct VAO
 {
 	gl_handle m_vao_id;
+        gl_handle m_ibo =0;
+        std::vector<gl_handle> m_vbos;
 
 	void	use();
+        void    free();
 };
 
 class vao_builder

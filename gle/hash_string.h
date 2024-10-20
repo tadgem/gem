@@ -11,7 +11,7 @@
 class hash_utils {
 public:
     template <typename T>
-    static std::string get_type_name() { return ctti::type_id<T>().name(); }
+    static std::string get_type_name() { return ctti::type_id<T>().name().str(); }
 
     template <typename T>
     static u64 get_type_hash() { return ctti::type_id<T>().hash(); }

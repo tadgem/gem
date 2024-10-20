@@ -17,6 +17,8 @@ public:
 		std::vector<u32>		m_indices;
 		aabb					m_mesh_aabb;
 		u32						m_material_index;
+
+		void free();
 	};
 
 	struct texture_entry
@@ -33,12 +35,13 @@ public:
 	};
 
 	std::vector<mesh>				m_meshes;
-	std::vector<material_entry>		m_materials;
-	std::vector<mesh_entry>			m_mesh_entries;
-	aabb							m_aabb;
+	std::vector<material_entry>		        m_materials;
+        aabb						m_aabb;
+
+        void free();
 
 	static model load_model_and_textures_from_path(const std::string& path);
-	static model load_model_from_path_entries(const std::string& path, std::vector<texture_entry>& texture_entries);
+	static model load_model_from_path_entries(const std::string& path, std::vector<texture_entry>& texture_entries, std::vector<mesh_entry>& mesh_entries);
 };
 
 using model_asset = asset_t<model, asset_type::model>;

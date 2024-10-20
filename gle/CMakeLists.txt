@@ -91,8 +91,9 @@ set(GLE_INCLUDES
         ${THIRD_PARTY_DIR}/entt
         ${THIRD_PARTY_DIR}
         ${SUBMODULE_DIR}/im3d
+        ${SUBMODULE_DIR}/cpptrace/include
         ${CMAKE_CURRENT_SOURCE_DIR}
 CACHE INTERNAL "")
 
-target_link_libraries(gle PRIVATE glew_s SDL2-static glm assimp)
+target_link_libraries(gle PRIVATE glew_s SDL2-static glm assimp cpptrace::cpptrace)
 target_include_directories(gle PUBLIC ${GLE_INCLUDES})

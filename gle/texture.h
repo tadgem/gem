@@ -38,6 +38,8 @@ public:
 	void	load_texture_stbi(std::vector<unsigned char> data);
 	void	load_texture_gli(std::vector<unsigned char> data);
 
+        void    free();
+
 	inline static texture* white;
 	inline static texture* black;
 };

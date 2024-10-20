@@ -16,9 +16,15 @@ static glm::vec2 AssimpToGLM(aiVector2D aiVec) {
     return glm::vec2(aiVec.x, aiVec.y);
 }
 
+void model::mesh_entry::free()
+{
+    m_indices.clear();
+    m_positions.clear();
+    m_normals.clear();
+    m_uvs.clear();
+}
 
-
-void ProcessMesh(model& model, aiMesh* m, aiNode* node, const aiScene* scene, bool use_entries) {
+void ProcessMesh(model& model, aiMesh* m, aiNode* node, const aiScene* scene, bool use_entries, std::vector<model::mesh_entry>& mesh_entries) {
     bool hasPositions = m->HasPositions();
     bool hasUVs = m->HasTextureCoords(0);
     bool hasNormals = m->HasNormals();
@@ -60,7 +66,7 @@ void ProcessMesh(model& model, aiMesh* m, aiNode* node, const aiScene* scene, bo
                     {m->mAABB.mMax.x, m->mAABB.mMax.y, m->mAABB.mMax.z} };
         entry.m_mesh_aabb = bb;
         entry.m_material_index = m->mMaterialIndex;
-        model.m_mesh_entries.push_back(entry);
+        mesh_entries.push_back(entry);
     }
     else
     {
@@ -114,13 +120,13 @@ void ProcessMesh(model& model, aiMesh* m, aiNode* node, const aiScene* scene, bo
     }
 }
 
-void ProcessNode(model& model, aiNode* node, const aiScene* scene, bool use_entries) {
+void ProcessNode(model& model, aiNode* node, const aiScene* scene, bool use_entries, std::vector<model::mesh_entry>& mesh_entries) {
 
     if (node->mNumMeshes > 0) {
         for (unsigned int i = 0; i < node->mNumMeshes; i++) {
             unsigned int sceneIndex = node->mMeshes[i];
             aiMesh* mesh = scene->mMeshes[sceneIndex];
-            ProcessMesh(model, mesh, node, scene, use_entries);
+            ProcessMesh(model, mesh, node, scene, use_entries, mesh_entries);
         }
     }
 
@@ -129,7 +135,7 @@ void ProcessNode(model& model, aiNode* node, const aiScene* scene, bool use_entr
     }
 
     for (unsigned int i = 0; i < node->mNumChildren; i++) {
-        ProcessNode(model, node->mChildren[i], scene, use_entries);
+        ProcessNode(model, node->mChildren[i], scene, use_entries, mesh_entries);
     }
 }
 
@@ -184,10 +190,12 @@ model model::load_model_and_textures_from_path(const std::string& path)
     if (scene == nullptr) {
         return {};
     }
+    
+    std::vector<model::mesh_entry> mesh_entries{};
 
     model m{};
     aabb  model_aabb{};
-    ProcessNode(m, scene->mRootNode, scene, false);
+    ProcessNode(m, scene->mRootNode, scene, false, mesh_entries);
 
     for (auto& mesh : m.m_meshes)
     {
@@ -220,10 +228,12 @@ model model::load_model_and_textures_from_path(const std::string& path)
         m.m_materials.push_back(mat);
     }
 
+    delete scene;
+
 	return m;
 }
 
-model model::load_model_from_path_entries(const std::string& path, std::vector<texture_entry>& texture_entries)
+model model::load_model_from_path_entries(const std::string& path, std::vector<texture_entry>& texture_entries, std::vector<mesh_entry>& mesh_entries)
 {
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(path.c_str(),
@@ -243,7 +253,7 @@ model model::load_model_from_path_entries(const std::string& path, std::vector<t
 
     model m{};
     aabb  model_aabb{};
-    ProcessNode(m, scene->mRootNode, scene, true);
+    ProcessNode(m, scene->mRootNode, scene, true, mesh_entries);
 
     for (auto& mesh : m.m_meshes)
     {
@@ -275,4 +285,10 @@ model model::load_model_from_path_entries(const std::string& path, std::vector<t
     }
 
     return m;
+}
+void model::free() {
+    for(mesh& m : m_meshes)
+    {
+        m.m_vao.free();
+    }
 }

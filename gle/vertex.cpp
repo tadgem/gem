@@ -5,6 +5,16 @@ void VAO::use()
 {
 	glBindVertexArray(m_vao_id);
 }
+void VAO::free() {
+        if(m_ibo > 0)
+        {
+          glDeleteBuffers(1, &m_ibo);
+        }
+        if(!m_vbos.empty()) {
+          glDeleteBuffers(m_vbos.size(), m_vbos.data());
+        }
+        glDeleteVertexArrays(1, &m_vao_id);
+}
 
 void vao_builder::begin()
 {
@@ -40,6 +50,6 @@ void vao_builder::add_vertex_attribute(uint32_t binding, uint32_t total_vertex_s
 
 VAO vao_builder::build()
 {
-	return VAO{ m_vao };
+	return VAO{ m_vao, m_ibo, m_vbos };
 }
 

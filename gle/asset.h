@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 #include "alias.h"
-
+#include "hash_string.h"
 enum class asset_type  {
     model,
     texture,
@@ -31,6 +31,8 @@ class asset
 public:
     asset(const std::string& path, asset_type type);
 
+    virtual ~asset() {};
+
     const std::string   m_path;
     const asset_handle  m_handle;
 };
@@ -39,19 +41,44 @@ template<typename _Ty, asset_type _AssetType>
 class asset_t : public asset
 {
 public:
-    _Ty*    m_data;
-    asset_t(_Ty* data, const std::string& path) : asset(path, _AssetType), m_data(data) {}
+    _Ty    m_data;
+    asset_t(_Ty data, const std::string& path) : asset(path, _AssetType), m_data(data) {}
+
+    ~asset_t()
+    {
+        std::cout << "Destructor called for asset_t<" << hash_utils::get_type_name<_Ty>() << "\n";
+    }
 };
 
-// should move all assets that have a secondary submission stage (mesh, texture) to this format
-template<typename _MainType, typename _IntermediateType, asset_type _AssetType>
-class asset_t_intermediate : public asset
+class asset_intermediate
 {
 public:
-    _MainType*          m_data;
+    asset* m_asset_data;
+
+    asset_intermediate(asset* asset) : m_asset_data(asset) {};
+
+    virtual ~asset_intermediate() {};
+
+};
+
+template<typename _AssetType, typename _IntermediateType, asset_type _AssetTypeEnum>
+class asset_t_intermediate : public asset_intermediate
+{
+public:
     _IntermediateType   m_intermediate;
 
-    asset_t_intermediate(_MainType* data, _IntermediateType inter, const std::string& path) : asset(path, _AssetType), m_data(data), m_intermediate(inter) {}
+    asset_t_intermediate(asset* data, _IntermediateType inter, const std::string& path) : asset_intermediate(data), m_intermediate(inter) {}
+
+    ~asset_t_intermediate()
+    {
+        std::cout << "Destructor called for asset_t_intermediate<" << hash_utils::get_type_name<_AssetType>() << "\n";
+    }
+
+    asset_t<_AssetType, _AssetTypeEnum>* get_concrete_asset()
+    {
+        return static_cast<asset_t<_AssetType, _AssetTypeEnum>*>(m_asset_data);
+    }
+
 };
 
 template<>

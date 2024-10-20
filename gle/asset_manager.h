@@ -5,7 +5,8 @@
 #include "asset.h"
 
 
-using asset_load_callback = void(*) (asset*);
+using asset_load_callback = void(*) (asset_intermediate*);
+using asset_unload_callback = void(*) (asset*);
 
 enum class asset_load_progress {
     not_loaded,
@@ -36,13 +37,13 @@ struct asset_load_info {
 };
 
 struct asset_load_return {
-    asset* m_loaded_asset;
+    asset_intermediate*                     m_loaded_asset_intermediate;
     // additional assets that may be required for this asset
     // e.g. textures for a model
-    std::vector<asset_load_info> m_new_assets_to_load;
+    std::vector<asset_load_info>            m_new_assets_to_load;
     // tasks associated with this asset to be performed. 
     // e.g. submit mesh / texture to GPU. 
-    std::vector<asset_load_callback> m_asset_load_tasks;
+    std::vector<asset_load_callback>        m_asset_load_sync_callbacks;
 };
 
 class asset_manager {
@@ -69,11 +70,11 @@ public:
     std::unordered_map<asset_handle, std::future<asset_load_return>>    p_pending_load_tasks;
     std::unordered_map<asset_handle, std::unique_ptr<asset>>            p_loaded_assets;
     std::unordered_map<asset_handle, asset_load_return>                 p_pending_load_callbacks;
-    std::unordered_map<asset_handle, asset_load_callback>               p_pending_unload_callbacks;
+    std::unordered_map<asset_handle, asset_unload_callback>             p_pending_unload_callbacks;
     std::vector<asset_load_info>                                        p_queued_loads;
 
     const uint16_t p_callback_tasks_per_tick = 1;
-    const uint16_t p_max_async_tasks_in_flight = 3;
+    const uint16_t p_max_async_tasks_in_flight = 2;
 
     void handle_load_and_unload_callbacks();
 

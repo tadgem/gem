@@ -65,7 +65,14 @@ int main()
                 for (const auto& [handle, u_asset] : am.p_loaded_assets)
                 {
                     if (!u_asset) { continue; }
+                    ImGui::PushID(handle.m_path_hash);
                     ImGui::Text("%s : %s", u_asset->m_path.c_str(), get_asset_type_name(handle.m_type).c_str());
+                    ImGui::SameLine();
+                    if (ImGui::Button("Unload"))
+                    {
+                        am.unload_asset(handle);
+                    }
+                    ImGui::PopID();
                 }
             }
 
@@ -81,7 +88,7 @@ int main()
             {
                 for (const auto& [handle , info ]: am.p_pending_load_callbacks)
                 {
-                    ImGui::Text("%s : %s", info.m_loaded_asset->m_path.c_str(), get_asset_type_name(handle.m_type));
+                    ImGui::Text("%s : %s", info.m_loaded_asset_intermediate->m_asset_data->m_path.c_str(), get_asset_type_name(handle.m_type));
                 }
             }
 

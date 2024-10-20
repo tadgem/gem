@@ -195,3 +195,6 @@ void texture::load_texture_gli(std::vector<unsigned char> data)
 			format.Internal, static_cast<GLsizei>(dds_tex.size(Level)), dds_tex.data(0, 0, Level));
 	}
 }
+void texture::free() {
+    glDeleteTextures(1, &m_handle);
+}
