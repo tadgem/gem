@@ -6,7 +6,7 @@
 #include "assimp/cimport.h"
 #include "assimp/mesh.h"
 #include "assimp/scene.h"
-#include <iostream>
+#include "spdlog/spdlog.h"
 
 static glm::vec3 AssimpToGLM(aiVector3D aiVec) {
     return glm::vec3(aiVec.x, aiVec.y, aiVec.z);
@@ -46,7 +46,7 @@ void ProcessMesh(model& model, aiMesh* m, aiNode* node, const aiScene* scene, bo
             for (unsigned int i = 0; i < m->mNumFaces; i++) {
                 aiFace currentFace = m->mFaces[i];
                 if (currentFace.mNumIndices != 3) {
-                    std::cerr << "Attempting to import a m with non triangular face structure! cannot load this m." << std::endl;
+                    spdlog::error("Attempting to import a m with non triangular face structure! cannot load this model");
                     return;
                 }
                 for (unsigned int index = 0; index < m->mFaces[i].mNumIndices; index++) {
@@ -90,7 +90,7 @@ void ProcessMesh(model& model, aiMesh* m, aiNode* node, const aiScene* scene, bo
             for (unsigned int i = 0; i < m->mNumFaces; i++) {
                 aiFace currentFace = m->mFaces[i];
                 if (currentFace.mNumIndices != 3) {
-                    std::cerr << "Attempting to import a m with non triangular face structure! cannot load this m." << std::endl;
+                    spdlog::error("Attempting to import a m with non triangular face structure! cannot load this m.");
                     return;
                 }
                 for (unsigned int index = 0; index < m->mFaces[i].mNumIndices; index++) {
@@ -139,7 +139,7 @@ void get_material_texture(const std::string& directory, aiMaterial* material, mo
         aiString resultPath;
         aiGetMaterialTexture(material, ass_texture_type, 0, &resultPath);
         std::string finalPath = directory + std::string(resultPath.C_Str());
-        std::cout << "Loading Texture at Path: " << finalPath << "\n";
+        spdlog::info("Loading Texture at Path: {}" , finalPath);
         texture* tex = new texture(finalPath);
 
         mat.m_material_maps[gl_texture_type] = tex;
@@ -155,7 +155,6 @@ void get_material_texture_entry(const std::string& directory, aiMaterial* materi
         aiString resultPath;
         aiGetMaterialTexture(material, ass_texture_type, 0, &resultPath);
         std::string final_path = directory + std::string(resultPath.C_Str());
-        std::cout << "Loading Texture at Path: " << final_path << "\n";
 
         mat.m_material_maps[gl_texture_type] = nullptr;
         asset_handle h{asset_type::texture, hash_utils::get_string_hash(final_path)};
@@ -219,8 +218,6 @@ model model::load_model_and_textures_from_path(const std::string& path)
 
         m.m_materials.push_back(mat);
     }
-
-    delete scene;
 
 	return m;
 }

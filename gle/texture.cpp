@@ -48,7 +48,6 @@ typedef struct {
 
 texture::texture()
 {
-	std::cout << "Texture Default Constructor called\n";
 
 }
 
@@ -70,12 +69,10 @@ texture::texture(const std::string& path)
 
 texture::texture(const std::string& path, std::vector<unsigned char> data)
 {
-	std::cout << "Texture Constructor called for path " << path << "\n";
 }
 
 texture::~texture()
 {
-	std::cout << "Texture Destructor called\n";
 }
 
 void texture::bind_sampler(GLenum texture_slot, GLenum texture_target)
@@ -157,7 +154,7 @@ texture texture::create_3d_texture_empty(glm::ivec3 dim, GLenum format, GLenum p
 	return t;
 }
 
-void texture::load_texture_stbi(std::vector<unsigned char> data)
+void texture::load_texture_stbi(std::vector<unsigned char>& data)
 {
 	stbi_set_flip_vertically_on_load(1);
 	unsigned char* stbi_data = stbi_load_from_memory(data.data(), data.size(), &m_width, &m_height, &m_num_channels, 0);
@@ -177,7 +174,7 @@ void texture::load_texture_stbi(std::vector<unsigned char> data)
 	stbi_image_free(stbi_data);
 }
 
-void texture::load_texture_gli(std::vector<unsigned char> data)
+void texture::load_texture_gli(std::vector<unsigned char>& data)
 {
 	gli::texture dds_tex_raw = gli::load_dds((const char*) data.data(), data.size());
 	gli::texture dds_tex = gli::flip(dds_tex_raw);

@@ -20,7 +20,7 @@ set(GL_SRC
         ${CMAKE_CURRENT_SOURCE_DIR}/debug.h
         ${CMAKE_CURRENT_SOURCE_DIR}/input.h
         ${CMAKE_CURRENT_SOURCE_DIR}/input.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/io.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/dbg_assert.h
         ${CMAKE_CURRENT_SOURCE_DIR}/events.h
         ${CMAKE_CURRENT_SOURCE_DIR}/lights.h
         ${CMAKE_CURRENT_SOURCE_DIR}/dbg_memory.h
@@ -93,9 +93,10 @@ set(GLE_INCLUDES
         ${THIRD_PARTY_DIR}/entt
         ${THIRD_PARTY_DIR}
         ${SUBMODULE_DIR}/im3d
+        ${SUBMODULE_DIR}/spdlog/include
         ${SUBMODULE_DIR}/cpptrace/include
         ${CMAKE_CURRENT_SOURCE_DIR}
 CACHE INTERNAL "")
 
-target_link_libraries(gle PRIVATE glew_s SDL2-static glm assimp cpptrace::cpptrace)
+target_link_libraries(gle PRIVATE glew_s SDL2-static glm assimp cpptrace::cpptrace spdlog)
 target_include_directories(gle PUBLIC ${GLE_INCLUDES})

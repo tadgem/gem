@@ -20,6 +20,7 @@ set(SDL_THREADS_ENABLED_BY_DEFAULT ON)
 set(SDL_THREADS ON)
 
 add_subdirectory(submodules/cpptrace)
+add_subdirectory(submodules/spdlog)
 add_subdirectory(third-party/sdl)
 add_subdirectory(third-party/glew/build/cmake)
 add_subdirectory(third-party/glm)

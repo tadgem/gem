@@ -66,6 +66,9 @@ int main()
             }
             ImGui::Separator();
             ImGui::Text("Any Assets Loading? : %s", am.any_assets_loading() ? "true" : "false");
+            ImGui::Text("Any Pending Async Tasks : %d", am.p_pending_load_tasks.size());
+            ImGui::Text("Any Pending Synchronous Callbacks : %d", am.p_pending_load_callbacks.size());
+            ImGui::Text("Any Pending Unload Tasks: %d", am.p_pending_unload_callbacks.size());
 
             if (ImGui::CollapsingHeader("Loaded Assets"))
             {

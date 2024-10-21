@@ -7,3 +7,6 @@
 [submodule "submodules/cpptrace"]
 	path = submodules/cpptrace
 	url = https://github.com/jeremy-rifkin/cpptrace.git
+[submodule "submodules/spdlog"]
+	path = submodules/spdlog
+	url = https://github.com/gabime/spdlog.git

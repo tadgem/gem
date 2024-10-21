@@ -36,8 +36,8 @@ public:
 	static texture create_3d_texture(glm::ivec3 dim, GLenum format, GLenum pixel_format, GLenum data_type, void* data, GLenum filter = GL_LINEAR, GLenum wrap_mode = GL_REPEAT);
 	static texture create_3d_texture_empty(glm::ivec3 dim, GLenum format, GLenum pixel_format, GLenum data_type, GLenum filter = GL_LINEAR, GLenum wrap_mode = GL_REPEAT);
 
-	void	load_texture_stbi(std::vector<unsigned char> data);
-	void	load_texture_gli(std::vector<unsigned char> data);
+	void	load_texture_stbi(std::vector<unsigned char>& data);
+	void	load_texture_gli(std::vector<unsigned char>& data);
 
     void    release();
 
