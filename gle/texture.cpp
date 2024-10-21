@@ -46,6 +46,12 @@ typedef struct {
 	unsigned long           dwReserved2;
 } DDS_HEADER;
 
+texture::texture()
+{
+	std::cout << "Texture Default Constructor called\n";
+
+}
+
 texture::texture(const std::string& path)
 {
 	std::string compressed_format_type = "";
@@ -64,6 +70,12 @@ texture::texture(const std::string& path)
 
 texture::texture(const std::string& path, std::vector<unsigned char> data)
 {
+	std::cout << "Texture Constructor called for path " << path << "\n";
+}
+
+texture::~texture()
+{
+	std::cout << "Texture Destructor called\n";
 }
 
 void texture::bind_sampler(GLenum texture_slot, GLenum texture_target)
@@ -162,6 +174,7 @@ void texture::load_texture_stbi(std::vector<unsigned char> data)
 	GLenum format = m_num_channels == 4 ? GL_RGBA : GL_RGB;
 	glTexImage2D(GL_TEXTURE_2D, 0, format, m_width, m_height, 0, format, GL_UNSIGNED_BYTE, stbi_data);
 	glGenerateMipmap(GL_TEXTURE_2D);
+	stbi_image_free(stbi_data);
 }
 
 void texture::load_texture_gli(std::vector<unsigned char> data)
@@ -195,6 +208,6 @@ void texture::load_texture_gli(std::vector<unsigned char> data)
 			format.Internal, static_cast<GLsizei>(dds_tex.size(Level)), dds_tex.data(0, 0, Level));
 	}
 }
-void texture::free() {
+void texture::release() {
     glDeleteTextures(1, &m_handle);
 }

@@ -243,7 +243,6 @@ void submit_meshes_to_gpu(asset_intermediate* model_asset)
     // create real mesh object on gpu
 
     ma->m_data.m_meshes.push_back(m);
-    inter->m_intermediate[0].free();
     inter->m_intermediate.erase(inter->m_intermediate.begin());
 }
 
@@ -292,7 +291,7 @@ asset_load_return load_model_asset_manager(const std::string& path)
 void unload_model_asset_manager(asset* _asset)
 {
     asset_t<model, asset_type::model>* ma = static_cast<asset_t<model, asset_type::model>*>(_asset);
-    ma->m_data.free();
+    ma->m_data.release();
 }
 
 asset_load_return load_texture_asset_manager(const std::string& path)
@@ -313,7 +312,7 @@ asset_load_return load_texture_asset_manager(const std::string& path)
 void unload_texture_asset_manager(asset* _asset)
 {
     asset_t<texture, asset_type::texture>* ta = static_cast<asset_t<texture, asset_type::texture>*>(_asset);
-    ta->m_data.free();
+    ta->m_data.release();
 }
 
 void asset_manager::dispatch_asset_load_task(const asset_handle& handle, asset_load_info& info)

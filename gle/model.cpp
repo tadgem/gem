@@ -16,14 +16,6 @@ static glm::vec2 AssimpToGLM(aiVector2D aiVec) {
     return glm::vec2(aiVec.x, aiVec.y);
 }
 
-void model::mesh_entry::free()
-{
-    m_indices.clear();
-    m_positions.clear();
-    m_normals.clear();
-    m_uvs.clear();
-}
-
 void ProcessMesh(model& model, aiMesh* m, aiNode* node, const aiScene* scene, bool use_entries, std::vector<model::mesh_entry>& mesh_entries) {
     bool hasPositions = m->HasPositions();
     bool hasUVs = m->HasTextureCoords(0);
@@ -286,7 +278,7 @@ model model::load_model_from_path_entries(const std::string& path, std::vector<t
 
     return m;
 }
-void model::free() {
+void model::release() {
     for(mesh& m : m_meshes)
     {
         m.m_vao.free();

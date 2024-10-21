@@ -58,6 +58,13 @@ int main()
         if (ImGui::Begin("Assets Debug"))
         {
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / engine::s_imgui_io->Framerate, engine::s_imgui_io->Framerate);
+            if (ImGui::CollapsingHeader("CPU Memory")) {
+                ImGui::Text("Untracked : %.4f KB", (float)debug_memory_tracker::s_UntrackedSize / 1024.0f);
+                for (auto& [k, v] : debug_memory_tracker::s_instance->s_allocation_info) {
+                    ImGui::Text("%s : %zu KB", k.c_str(), (v.size * v.count) / 1024);
+                }
+            }
+            ImGui::Separator();
             ImGui::Text("Any Assets Loading? : %s", am.any_assets_loading() ? "true" : "false");
 
             if (ImGui::CollapsingHeader("Loaded Assets"))

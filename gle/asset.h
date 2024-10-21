@@ -2,6 +2,8 @@
 #include <string>
 #include "alias.h"
 #include "hash_string.h"
+#include "dbg_memory.h"
+
 enum class asset_type  {
     model,
     texture,
@@ -46,8 +48,21 @@ public:
 
     ~asset_t()
     {
+        m_data.~_Ty();
         std::cout << "Destructor called for asset_t<" << hash_utils::get_type_name<_Ty>() << "\n";
     }
+
+    void* operator new(size_t size) {
+        std::string type_name = hash_utils::get_type_name<asset_t<_Ty, _AssetType>>();
+        if (debug_memory_tracker::s_instance->s_allocation_info.find(type_name) == debug_memory_tracker::s_instance->s_allocation_info.end()) {
+            debug_memory_tracker::s_instance->s_allocation_info.emplace(type_name, alloc_info{ 0,0 });
+        } debug_memory_tracker::s_instance->s_allocation_info[type_name].count++; debug_memory_tracker::s_instance->s_allocation_info[type_name].size += size; return malloc(size);
+    };
+
+    void operator delete(void* p) {
+        std::string type_name = hash_utils::get_type_name<asset_t<_Ty, _AssetType>>();
+        free(p); if (!debug_memory_tracker::s_instance) return; debug_memory_tracker::s_instance->s_allocation_info[type_name].count--; debug_memory_tracker::s_instance->s_allocation_info[type_name].size -= sizeof(asset_t<_Ty, _AssetType>);
+    };
 };
 
 class asset_intermediate
@@ -71,6 +86,7 @@ public:
 
     ~asset_t_intermediate()
     {
+        m_intermediate.~_IntermediateType();
         std::cout << "Destructor called for asset_t_intermediate<" << hash_utils::get_type_name<_AssetType>() << "\n";
     }
 
@@ -78,6 +94,18 @@ public:
     {
         return static_cast<asset_t<_AssetType, _AssetTypeEnum>*>(m_asset_data);
     }
+
+    void* operator new(size_t size) {
+        std::string type_name = hash_utils::get_type_name<asset_t_intermediate<_AssetType, _IntermediateType, _AssetTypeEnum>>();
+        if (debug_memory_tracker::s_instance->s_allocation_info.find(type_name) == debug_memory_tracker::s_instance->s_allocation_info.end()) {
+            debug_memory_tracker::s_instance->s_allocation_info.emplace(type_name, alloc_info{ 0,0 });
+        } debug_memory_tracker::s_instance->s_allocation_info[type_name].count++; debug_memory_tracker::s_instance->s_allocation_info[type_name].size += size; return malloc(size);
+    };
+
+    void operator delete(void* p) {
+        std::string type_name = hash_utils::get_type_name<asset_t_intermediate<_AssetType, _IntermediateType, _AssetTypeEnum>>();
+        free(p); if (!debug_memory_tracker::s_instance) return; debug_memory_tracker::s_instance->s_allocation_info[type_name].count--; debug_memory_tracker::s_instance->s_allocation_info[type_name].size -= sizeof(asset_t_intermediate<_AssetType, _IntermediateType, _AssetTypeEnum>);
+    };
 
 };
 

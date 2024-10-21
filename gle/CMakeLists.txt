@@ -23,6 +23,8 @@ set(GL_SRC
         ${CMAKE_CURRENT_SOURCE_DIR}/io.h
         ${CMAKE_CURRENT_SOURCE_DIR}/events.h
         ${CMAKE_CURRENT_SOURCE_DIR}/lights.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/dbg_memory.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/dbg_memory.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/asset.h
         ${CMAKE_CURRENT_SOURCE_DIR}/asset.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/asset_manager.h

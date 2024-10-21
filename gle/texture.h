@@ -2,7 +2,7 @@
 #include <string>
 #include "vertex.h"
 #include "glm.hpp"
-
+#include "dbg_memory.h"
 enum class texture_map_type
 {
 	diffuse,
@@ -18,9 +18,10 @@ class texture
 {
 public:
 
-	texture() = default;
+	texture();
 	texture(const std::string& path);
 	texture(const std::string& path, std::vector<unsigned char> data);
+	~texture();
 
 	void		bind_sampler(GLenum texture_slot, GLenum texture_target = GL_TEXTURE_2D);
 	static void bind_sampler_handle(gl_handle handle, GLenum texture_slot, GLenum texture_target = GL_TEXTURE_2D);
@@ -38,10 +39,12 @@ public:
 	void	load_texture_stbi(std::vector<unsigned char> data);
 	void	load_texture_gli(std::vector<unsigned char> data);
 
-        void    free();
+    void    release();
 
 	inline static texture* white;
 	inline static texture* black;
+
+	DEBUG_IMPL_ALLOC(texture);
 };
 
 struct sampler_info

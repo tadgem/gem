@@ -6,6 +6,7 @@
 #include "imgui_impl_opengl3.h"
 #include "input.h"
 #include "ImFileDialog.h"
+#include "dbg_memory.h"
 
 #undef main
 #if defined(IMGUI_IMPL_OPENGL_ES2)
@@ -295,6 +296,9 @@ void init_imgui_file_dialog()
 
 void engine::init(glm::ivec2 resolution)
 {
+#ifdef ENABLE_MEMORY_TRACKING
+    debug_memory_tracker::s_instance = new debug_memory_tracker();
+#endif
     // Setup SDL
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0)
     {
