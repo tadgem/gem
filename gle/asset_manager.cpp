@@ -122,37 +122,9 @@ void asset_manager::update()
     if (!any_assets_loading()) {
         return;
     }
-
-    // process any synchronous tasks that must be performed
     handle_load_and_unload_callbacks();
-
-    // enqueue pending loads
     handle_pending_loads();
-
-    std::vector<asset_handle> finished;
-    for (auto& [handle, future] : p_pending_load_tasks) {
-        if (utils::is_future_ready(future)) {
-            finished.push_back(handle);
-        }
-    }
-
-    for (auto& handle : finished) {
-        asset_load_return asyncReturn = p_pending_load_tasks[handle].get();
-        // enqueue new loads
-        for (auto& newLoad : asyncReturn.m_new_assets_to_load) {
-            load_asset(newLoad.m_path, newLoad.m_type);
-        }
-
-        if (asyncReturn.m_asset_load_sync_callbacks.empty()) {
-            p_loaded_assets.emplace(handle, std::move(std::unique_ptr<asset>(asyncReturn.m_loaded_asset_intermediate->m_asset_data)));
-            delete asyncReturn.m_loaded_asset_intermediate;
-        }
-        else {
-            p_pending_load_callbacks.emplace(handle, asyncReturn);
-        }
-
-        p_pending_load_tasks.erase(handle);
-    }
+    handle_async_tasks();
 }
 
 
@@ -209,6 +181,34 @@ void asset_manager::handle_pending_loads()
         auto& info = p_queued_loads.front();
         dispatch_asset_load_task(info.to_handle(), info);
         p_queued_loads.erase(p_queued_loads.begin());
+    }
+}
+
+void asset_manager::handle_async_tasks()
+{
+    std::vector<asset_handle> finished;
+    for (auto& [handle, future] : p_pending_load_tasks) {
+        if (utils::is_future_ready(future)) {
+            finished.push_back(handle);
+        }
+    }
+
+    for (auto& handle : finished) {
+        asset_load_return asyncReturn = p_pending_load_tasks[handle].get();
+        // enqueue new loads
+        for (auto& newLoad : asyncReturn.m_new_assets_to_load) {
+            load_asset(newLoad.m_path, newLoad.m_type);
+        }
+
+        if (asyncReturn.m_asset_load_sync_callbacks.empty()) {
+            p_loaded_assets.emplace(handle, std::move(std::unique_ptr<asset>(asyncReturn.m_loaded_asset_intermediate->m_asset_data)));
+            delete asyncReturn.m_loaded_asset_intermediate;
+        }
+        else {
+            p_pending_load_callbacks.emplace(handle, asyncReturn);
+        }
+
+        p_pending_load_tasks.erase(handle);
     }
 }
 

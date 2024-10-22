@@ -80,5 +80,7 @@ public:
 
     void handle_pending_loads();
 
+    void handle_async_tasks();
+
     void dispatch_asset_load_task(const asset_handle& handle, asset_load_info& info);
 };
