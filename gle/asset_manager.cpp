@@ -28,8 +28,8 @@ asset_handle asset_manager::load_asset(const std::string& path, const asset_type
         }
     }
 
-	asset_handle handle{ assetType, hash_string(path)};
-    asset_load_info load_info{ path, assetType };
+	asset_handle handle{ assetType, hash_string(tmp_path)};
+    asset_load_info load_info{ tmp_path, assetType };
 
     auto it = std::find(p_queued_loads.begin(), p_queued_loads.end(), load_info);
 
@@ -38,7 +38,7 @@ asset_handle asset_manager::load_asset(const std::string& path, const asset_type
         return *&it->to_handle();
     }
 
-    spdlog::info("Enqueing Load : {}", path);
+    spdlog::info("Enqueing Load : {}", tmp_path);
 	p_queued_loads.push_back(load_info);
 	return handle;
 }
@@ -277,6 +277,27 @@ void submit_texture_to_gpu(asset_intermediate* texture_asset)
     ta_inter->m_intermediate.clear();
 }
 
+void link_shader_program(asset_intermediate* shader_asset)
+{
+    shader_intermediate_asset* shader_inter = static_cast<shader_intermediate_asset*>(shader_asset);
+    std::unordered_map<shader::stage, std::string> stages = shader::split_composite_shader(shader_inter->m_intermediate);
+
+    if (stages.find(shader::stage::compute) != stages.end())
+    {
+        shader_inter->get_concrete_asset()->m_data = shader(stages[shader::stage::compute]);
+    }
+
+    if (stages.find(shader::stage::vertex) != stages.end() && stages.find(shader::stage::fragment) != stages.end() && stages.find(shader::stage::geometry) == stages.end())
+    {
+        shader_inter->get_concrete_asset()->m_data = shader(stages[shader::stage::vertex], stages[shader::stage::fragment]);
+    }
+
+    if (stages.find(shader::stage::vertex) != stages.end() && stages.find(shader::stage::fragment) != stages.end() && stages.find(shader::stage::geometry) != stages.end())
+    {
+        shader_inter->get_concrete_asset()->m_data = shader(stages[shader::stage::vertex], stages[shader::stage::geometry], stages[shader::stage::fragment]);
+    }
+}
+
 asset_load_return load_model_asset_manager(const std::string& path)
 {
     std::vector < model::texture_entry> associated_textures;
@@ -335,14 +356,18 @@ asset_load_return load_shader_asset_manager(const std::string& path)
 {
     std::string source = utils::load_string_from_path(path);
     asset_load_return ret{};
+    ret.m_loaded_asset_intermediate = new shader_intermediate_asset(new asset_t<shader, asset_type::shader>(shader{}, path), source, path);
+    ret.m_asset_load_sync_callbacks.push_back(link_shader_program);
+    ret.m_new_assets_to_load = {};
+
     return ret;
 }
 
 void unload_shader_asset_manager(asset* _asset)
 {
     spdlog::info("Unloading texture : {}", _asset->m_path);
-    asset_t<texture, asset_type::texture>* ta = static_cast<asset_t<texture, asset_type::texture>*>(_asset);
-    ta->m_data.release();
+    asset_t<shader, asset_type::shader>* sa = static_cast<asset_t<shader, asset_type::shader>*>(_asset);
+    sa->m_data.release();
 }
 
 void asset_manager::dispatch_asset_load_task(const asset_handle& handle, asset_load_info& info)
@@ -354,6 +379,9 @@ void asset_manager::dispatch_asset_load_task(const asset_handle& handle, asset_l
         break;
     case asset_type::texture:
         p_pending_load_tasks.emplace(handle, std::move(std::async(std::launch::async, load_texture_asset_manager, info.m_path)));
+        break;
+    case asset_type::shader:
+        p_pending_load_tasks.emplace(handle, std::move(std::async(std::launch::async, load_shader_asset_manager, info.m_path)));
         break;
     }
 }
@@ -375,6 +403,9 @@ void asset_manager::unload_asset(const asset_handle& handle)
         break;
     case asset_type::texture:
         p_pending_unload_callbacks.emplace(handle, unload_texture_asset_manager);
+        break;
+    case asset_type::shader:
+        p_pending_unload_callbacks.emplace(handle, unload_shader_asset_manager);
         break;
     default:
         break;

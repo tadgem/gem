@@ -111,6 +111,11 @@ int main()
             {
                 ifd::FileDialog::Instance().Open("ModelOpenDialog", "Import a model", "Image file (*.dae;*.obj;*.fbx;*.gltf;){.dae,.obj,.fbx,.gltf},.*");
             }
+            ImGui::SameLine();
+            if (ImGui::Button("Load Shader"))
+            {
+                ifd::FileDialog::Instance().Open("ShaderOpenDialog", "Import a shader", "Shader file (*.shader){.shader,.*}");
+            }
 
         }
 
@@ -120,6 +125,16 @@ int main()
                 std::string res = p.u8string();
                 printf("OPEN[%s]\n", res.c_str());
                 am.load_asset(res, asset_type::model);
+            }
+            ifd::FileDialog::Instance().Close();
+        }
+
+        if (ifd::FileDialog::Instance().IsDone("ShaderOpenDialog")) {
+            if (ifd::FileDialog::Instance().HasResult()) {
+                std::filesystem::path p = ifd::FileDialog::Instance().GetResult();
+                std::string res = p.u8string();
+                printf("OPEN[%s]\n", res.c_str());
+                am.load_asset(res, asset_type::shader);
             }
             ifd::FileDialog::Instance().Close();
         }

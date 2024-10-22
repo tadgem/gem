@@ -73,7 +73,7 @@ void main() {
 
 	ivec3 sample_pos = get_texel_from_pos(pos.xyz, u_voxel_resolution);
 	vec4 current = imageLoad(imgOutput, sample_pos);
-	vec4 val = mix(light, current, 0.95);
+	vec4 val = mix(light, current, 0.5);
 	if(isnan(val.x) || isnan(val.y) || isnan(val.z))
 	{
 		return;

@@ -14,5 +14,9 @@ std::string get_asset_type_name(const asset_type& t)
 		return "text";
 	case asset_type::texture:
 		return "texture";
+	case asset_type::shader:
+		return "shader";
 	}
+
+	return "unknown";
 }

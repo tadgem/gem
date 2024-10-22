@@ -1,14 +1,4 @@
 #include "utils.h"
-#include "utils.h"
-#include "utils.h"
-#include "utils.h"
-#include "utils.h"
-#include "utils.h"
-#include "utils.h"
-#include "utils.h"
-#include "utils.h"
-#include "utils.h"
-#include "utils.h"
 #include <fstream>
 #include <sstream>
 #define GLM_ENABLE_EXPERIMENTAL

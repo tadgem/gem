@@ -51,7 +51,6 @@ public:
     ~asset_t()
     {
         m_data.~_Ty();
-        //std::cout << "Destructor called for asset_t<" << hash_utils::get_type_name<_Ty>() << "\n";
     }
 
     void* operator new(size_t size) {
@@ -85,18 +84,11 @@ public:
     _IntermediateType   m_intermediate;
     std::string         m_path;
 
-    inline static uint32_t     s_active_count = 0;
-
-    asset_t_intermediate(asset* data, const _IntermediateType& inter, const std::string& path) : asset_intermediate(data), m_intermediate(inter), m_path(path) {
-       s_active_count++;
-       spdlog::info("CTOR: active asset_t_intermediate<{}> : {} = {}", hash_utils::get_type_name<_AssetType>(), m_path, s_active_count);
-    }
+    asset_t_intermediate(asset* data, const _IntermediateType& inter, const std::string& path) : asset_intermediate(data), m_intermediate(inter), m_path(path) {}
 
     ~asset_t_intermediate()
     {
         m_intermediate.~_IntermediateType();
-        s_active_count--;
-        spdlog::info("DTOR: active asset_t_intermediate<{}> : {} = {}", hash_utils::get_type_name<_AssetType>(), m_path, s_active_count);
     }
 
     asset_t<_AssetType, _AssetTypeEnum>* get_concrete_asset()

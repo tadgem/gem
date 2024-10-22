@@ -1,14 +1,10 @@
 #include "shader.h"
-#include "shader.h"
-#include "shader.h"
-#include "shader.h"
-#include "shader.h"
-#include "shader.h"
-#include "shader.h"
 #include "gtc/type_ptr.hpp"
-
+#include <array>
 #include <iostream>
-
+#include "utils.h"
+#include <sstream>
+#include <iostream>
 
 shader::shader(const std::string& comp)
 {
@@ -47,6 +43,11 @@ shader::shader(const std::string& vert, const std::string& geom, const std::stri
 void shader::use()
 {
 	glUseProgram(m_shader_id);
+}
+
+void shader::release()
+{
+	glDeleteProgram(m_shader_id);
 }
 
 void shader::set_bool(const std::string& name, bool value) const
@@ -188,6 +189,60 @@ int shader::link_shader(gl_handle vert, gl_handle geom, gl_handle frag)
 	}
 
 	return prog_id;
+}
+
+std::unordered_map<shader::stage, std::string> shader::split_composite_shader(const std::string& input)
+{
+	static std::unordered_map<std::string, shader::stage> s_known_stages = { {"#frag", shader::stage::fragment}, {"#vert", shader::stage::vertex} , {"#geom", shader::stage::geometry}, {"#comp", shader::stage::compute} };
+	//static std::unordered_map<std::string, shader::stage> s_known_stages = { };
+	auto stages = std::unordered_map<shader::stage, std::string>();
+	std::string version = "";
+
+	std::stringstream input_stream(input);
+	std::stringstream stage_stream{};
+	std::string line = "";
+	std::string stage = "";
+
+	while (std::getline(input_stream, line)) {
+		if (line.find("#version") != std::string::npos)
+		{
+			version = line;
+			stage_stream << version << "\n";
+			continue;
+		}
+
+		for (auto& [known , stage_enum]: s_known_stages)
+		{
+			if (line.find(known) != std::string::npos)
+			{
+				if (!stage.empty())
+				{
+					stages.emplace(shader::stage(s_known_stages[stage]), std::string(stage_stream.str()));
+					stage_stream.str(std::string());
+					stage_stream.clear();
+					stage_stream << version << "\n";
+				}
+
+				stage = known;
+				break;
+			}
+		}
+
+		if (line == stage)
+		{
+			continue;
+		}
+
+		stage_stream << line << "\n";
+	}
+
+	std::string last_stream = stage_stream.str();
+	if (!stage.empty() && !last_stream.empty())
+	{
+		stages.emplace(s_known_stages[stage], last_stream);
+	}
+
+	return stages;
 }
 
 

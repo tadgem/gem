@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <unordered_map>
 #include "GL/glew.h"
 #include "glm.hpp"
 #include "alias.h"
@@ -24,13 +25,24 @@ public:
         image3D
     };
 
+    enum class stage
+    {
+        UNKNOWN,
+        vertex,
+        fragment,
+        geometry,
+        compute
+    };
+
 	unsigned int m_shader_id;
 
+    shader() = default;
     shader(const std::string& comp);
 	shader(const std::string& vert, const std::string& frag);
     shader(const std::string& vert, const std::string& geom, const std::string& frag);
 
     void use();
+    void release();
     
     void set_bool(const std::string& name, bool value) const;
     void set_int(const std::string& name, int value) const;
@@ -50,6 +62,9 @@ public:
     static int link_shader(gl_handle comp);
     static int link_shader(gl_handle vert, gl_handle frag);
     static int link_shader(gl_handle vert, gl_handle geom, gl_handle frag);
+
+    static std::unordered_map<shader::stage, std::string>     
+                split_composite_shader(const std::string& input);
 
     static uniform_type get_type_from_gl(GLenum type);
 };
