@@ -18,7 +18,7 @@ std::string get_asset_type_name(const asset_type& t);
 struct asset_handle
 {
     asset_type  m_type;
-    u64         m_path_hash;
+    hash_string m_path_hash;
 
     bool operator==(const asset_handle& o) const {
         return m_type == o.m_type && m_path_hash == o.m_path_hash;

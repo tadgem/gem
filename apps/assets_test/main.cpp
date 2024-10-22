@@ -101,6 +101,11 @@ int main()
                     ImGui::Text("%s : %s", info.m_loaded_asset_intermediate->m_asset_data->m_path.c_str(), get_asset_type_name(handle.m_type));
                 }
             }
+            ImGui::Separator();
+            if (ImGui::Button("Unload All Assets"))
+            {
+                am.unload_all_assets();
+            }
 
             if (ImGui::Button("Load Model"))
             {

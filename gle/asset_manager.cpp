@@ -27,7 +27,7 @@ asset_handle asset_manager::load_asset(const std::string& path, const asset_type
     }
 
 
-	asset_handle handle{ assetType, hash_utils::get_string_hash(path)};
+	asset_handle handle{ assetType, hash_string(path)};
     asset_load_info load_info{ path, assetType };
 
     auto it = std::find(p_queued_loads.begin(), p_queued_loads.end(), load_info);
@@ -122,6 +122,7 @@ void asset_manager::update()
     if (!any_assets_loading()) {
         return;
     }
+
     handle_load_and_unload_callbacks();
     handle_pending_loads();
     handle_async_tasks();
@@ -261,6 +262,7 @@ void submit_texture_to_gpu(asset_intermediate* texture_asset)
 {
     // cast to model asset
     texture_intermediate_asset* ta_inter = static_cast<texture_intermediate_asset*>(texture_asset);
+    spdlog::info("Submitting texture to GPU : {}", ta_inter->m_path);
     asset_t<texture, asset_type::texture>* ta = ta_inter->get_concrete_asset();
 
     if (ta->m_path.find("dds") != std::string::npos)
@@ -323,6 +325,7 @@ asset_load_return load_texture_asset_manager(const std::string& path)
 
 void unload_texture_asset_manager(asset* _asset)
 {
+    spdlog::info("Unloading texture : {}", _asset->m_path);
     asset_t<texture, asset_type::texture>* ta = static_cast<asset_t<texture, asset_type::texture>*>(_asset);
     ta->m_data.release();
 }
@@ -342,7 +345,7 @@ void asset_manager::dispatch_asset_load_task(const asset_handle& handle, asset_l
 
 asset_handle asset_load_info::to_handle()
 {
-    return asset_handle{ m_type, hash_utils::get_string_hash(m_path) };
+    return asset_handle{ m_type, hash_string(m_path) };
 }
 
 void asset_manager::unload_asset(const asset_handle& handle)

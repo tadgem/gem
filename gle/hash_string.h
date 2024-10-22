@@ -1,6 +1,7 @@
 #pragma once
 #include "alias.h"
 #include "ctti/type_id.hpp"
+#include "spdlog/spdlog.h"
 
 #define TRACK_HASH_STRING_ORIGINALS
 
@@ -17,12 +18,8 @@ public:
     static u64 get_type_hash() { return ctti::type_id<T>().hash(); }
 
     static u64 get_string_hash(const std::string& str) {
-        u64 ret = 0;
-        for (auto& c : str)
-        {
-            ret ^= 2305 * c;
-        }
-        return ret;
+
+        return ctti::id_from_name(str).hash();
     }
 };
 
@@ -35,6 +32,13 @@ struct hash_string
 
     hash_string(const std::string& input) : m_value(hash_utils::get_string_hash(input)) {
 #ifdef TRACK_HASH_STRING_ORIGINALS
+        if (s_hash_string_originals.find(m_value) != s_hash_string_originals.end())
+        {
+            if (s_hash_string_originals[m_value] != input)
+            {
+                spdlog::error("HASH STRING COLLISION : ORIGINAL : {}, NEW : {}", s_hash_string_originals[m_value], input);
+            }
+        }
         s_hash_string_originals[m_value] = input;
 #endif
     }
