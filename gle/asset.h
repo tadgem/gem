@@ -8,6 +8,7 @@
 enum class asset_type  {
     model,
     texture,
+    shader,
     audio,
     text,
     binary

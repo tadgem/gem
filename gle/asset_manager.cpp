@@ -1,12 +1,14 @@
 #include "asset_manager.h"
 #include "utils.h"
 #include "model.h"
+#include "shader.h"
 #include "hash_string.h"
 #include "spdlog/spdlog.h"
 #include <filesystem>
 
 using texture_intermediate_asset = asset_t_intermediate<texture, std::vector<unsigned char>, asset_type::texture>;
 using model_intermediate_asset = asset_t_intermediate<model, std::vector<model::mesh_entry>, asset_type::model>;
+using shader_intermediate_asset = asset_t_intermediate<shader, std::string, asset_type::shader>;
 
 asset_handle asset_manager::load_asset(const std::string& path, const asset_type& assetType)
 {
@@ -25,7 +27,6 @@ asset_handle asset_manager::load_asset(const std::string& path, const asset_type
             tmp_path.erase(0, 1);
         }
     }
-
 
 	asset_handle handle{ assetType, hash_string(path)};
     asset_load_info load_info{ path, assetType };
@@ -324,6 +325,20 @@ asset_load_return load_texture_asset_manager(const std::string& path)
 }
 
 void unload_texture_asset_manager(asset* _asset)
+{
+    spdlog::info("Unloading texture : {}", _asset->m_path);
+    asset_t<texture, asset_type::texture>* ta = static_cast<asset_t<texture, asset_type::texture>*>(_asset);
+    ta->m_data.release();
+}
+
+asset_load_return load_shader_asset_manager(const std::string& path)
+{
+    std::string source = utils::load_string_from_path(path);
+    asset_load_return ret{};
+    return ret;
+}
+
+void unload_shader_asset_manager(asset* _asset)
 {
     spdlog::info("Unloading texture : {}", _asset->m_path);
     asset_t<texture, asset_type::texture>* ta = static_cast<asset_t<texture, asset_type::texture>*>(_asset);

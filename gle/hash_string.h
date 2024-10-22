@@ -4,6 +4,7 @@
 #include "spdlog/spdlog.h"
 
 #define TRACK_HASH_STRING_ORIGINALS
+// #define CHECK_FOR_HASH_STRING_COLLISIONS
 
 #ifdef TRACK_HASH_STRING_ORIGINALS
 #include <unordered_map>
@@ -32,6 +33,7 @@ struct hash_string
 
     hash_string(const std::string& input) : m_value(hash_utils::get_string_hash(input)) {
 #ifdef TRACK_HASH_STRING_ORIGINALS
+#ifdef CHECK_FOR_HASH_STRING_COLLISIONS
         if (s_hash_string_originals.find(m_value) != s_hash_string_originals.end())
         {
             if (s_hash_string_originals[m_value] != input)
@@ -39,6 +41,7 @@ struct hash_string
                 spdlog::error("HASH STRING COLLISION : ORIGINAL : {}, NEW : {}", s_hash_string_originals[m_value], input);
             }
         }
+#endif
         s_hash_string_originals[m_value] = input;
 #endif
     }
