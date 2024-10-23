@@ -9,7 +9,6 @@
 
 class asset_manager;
 
-
 class gl_renderer_builtin
 {
 public:
@@ -60,8 +59,9 @@ public:
     voxel::grid_visualiser      m_voxel_visualiser;
 
 
-    glm::vec2   m_window_resolution;
-    u32         m_frame_index;
+    glm::vec2       m_window_resolution;
+    u32             m_frame_index;
+    entt::entity    m_last_selected_entity;
 
     GLfloat     m_vxgi_cone_trace_distance  = 45.0f;
     GLfloat     m_vxgi_diffuse_specular_mix = 0.0f;
@@ -88,4 +88,6 @@ public:
     inline static constexpr int         s_voxel_square_resolution = 256;
     inline static constexpr glm::ivec3  s_voxel_resolution = glm::ivec3(s_voxel_square_resolution);
 
+
+    void on_imgui(asset_manager& am);
 };

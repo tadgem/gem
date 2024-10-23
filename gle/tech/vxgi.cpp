@@ -7,6 +7,9 @@ void tech::vxgi::dispatch_gbuffer_voxelization(shader& voxelization, aabb& volum
 {
     GPU_MARKER("GBuffer Voxelisation");
     voxelization.use();
+    voxelization.set_int("u_gbuffer_pos", 0);
+    voxelization.set_int("u_gbuffer_lighting", 1);
+    voxelization.set_vec3("u_voxel_resolution", glm::vec3(256));
     voxelization.set_vec2("u_input_resolution", { window_res.x, window_res.y });
     voxelization.set_vec3("u_aabb.min", volume_bounding_box.min);
     voxelization.set_vec3("u_aabb.max", volume_bounding_box.max);

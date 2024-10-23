@@ -24,6 +24,7 @@ public:
 	bool					does_entity_exist(u32 e);
 
 	void					on_update();
+	void					update_aabb(aabb& in);
 
     const std::string	m_name;
     entt::registry		m_registry;

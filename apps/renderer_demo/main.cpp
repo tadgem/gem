@@ -31,7 +31,6 @@
 using namespace nlohmann;
 static glm::vec3 custom_orientation;
 
-
 Im3d::Vec3 ToIm3D(glm::vec3& input)
 {
     return { input.x, input.y, input.z };
@@ -43,7 +42,6 @@ inline static constexpr int _3d_tex_res = 256;
 const float SCREEN_W = 1920.0;
 const float SCREEN_H = 1080.0;
 inline static entt::entity selected_entity = entt::entity(UINT32_MAX);
-
 
 void on_im3d(scene& current_scene, camera& cam, int& selected_entity)
 {
@@ -94,8 +92,6 @@ int main()
     renderer.init(am);
 
     custom_orientation = glm::vec3(0, 1, 0);
-
-
     camera cam{};
     debug_camera_controller controller{};
     scene scene("test_scene");
@@ -109,16 +105,13 @@ int main()
     model sponza_geo = model::load_model_and_textures_from_path("assets/models/sponza/Sponza.gltf");
 
     scene.create_entity_from_model(sponza_geo, renderer.m_gbuffer_shader->m_data, glm::vec3(0.03), glm::vec3(0.0, 0.0, 0.0),
-        {
-            {"u_diffuse_map", texture_map_type::diffuse},
-            {"u_normal_map", texture_map_type::normal},
-            {"u_metallic_map", texture_map_type::metallicness},
-            {"u_roughness_map", texture_map_type::roughness},
-            {"u_ao_map", texture_map_type::ao}
-        });
-
-    
-
+    {
+        {"u_diffuse_map", texture_map_type::diffuse},
+        {"u_normal_map", texture_map_type::normal},
+        {"u_metallic_map", texture_map_type::metallicness},
+        {"u_roughness_map", texture_map_type::roughness},
+        {"u_ao_map", texture_map_type::ao}
+    });
 
     dir_light dir
     {
@@ -128,13 +121,12 @@ int main()
     };
 
     entity dir_light_entity = scene.create_entity("dir light");
-    e.add_component<dir_light>(dir);
+    dir_light& dir2 = e.add_component<dir_light>(dir);
     std::vector<point_light> lights;
     lights.push_back({ {0.0, 0.0, 0.0}, {255.0, 0.0, 0.0}, 10.0f});
     lights.push_back({ {10.0, 0.0, 10.0}, {255.0, 255.0, 0.0}, 20.0f });
     lights.push_back({ {-10.0, 0.0, -10.0}, {0.0, 255.0, 0.0}, 30.0f });
     lights.push_back({ {-10.0, 0.0, 10.0}, {0.0, 0.0, 255.0} , 40.0f});
-
 
     constexpr glm::vec3 _3d_tex_res_vec = { _3d_tex_res, _3d_tex_res, _3d_tex_res };
 
@@ -145,25 +137,14 @@ int main()
     glm::mat3 normal = utils::get_normal_matrix(model);
     sponza_geo.m_aabb = utils::transform_aabb(sponza_geo.m_aabb, model);
 
-
     glm::vec3 aabb_dim = sponza_geo.m_aabb.max - sponza_geo.m_aabb.min;
     glm::vec3 unit = glm::vec3((aabb_dim.x / _3d_tex_res), (aabb_dim.y / _3d_tex_res), (aabb_dim.z / _3d_tex_res));
     glm::vec3 n_unit = glm::normalize(unit);
-
-
     
     glm::vec3 aabb_half_extent = (sponza_geo.m_aabb.max - sponza_geo.m_aabb.min) / 2.0f;
     glm::vec3 aabb_center = sponza_geo.m_aabb.min + aabb_half_extent;
     glm::mat4 aabb_model = utils::get_model_matrix(aabb_center, glm::vec3(0.0f), aabb_half_extent * 2.0f);
 
-    GLfloat aSigma = 2.0f;
-    GLfloat aThreshold = 0.1f;
-    GLfloat aKSigma =  2.0f;
-    GLfloat vxgi_cone_distance = get_aabb_area(sponza_geo.m_aabb) / 10.0f;
-    GLfloat diffuse_spec_mix = 0.0;
-    float brightness = 0.0f;
-    float contrast = 1.0f;
-    float saturation = 1.05f;
     while (!engine::s_quit)
     {
         glm::mat4 model = utils::get_model_matrix(pos, euler, scale);
@@ -180,9 +161,7 @@ int main()
         renderer.render(cam, scene);
 
 
-
         glm::vec2 mouse_pos = input::get_mouse_position();
-
         if (input::get_mouse_button(mouse_button::left) && !ImGui::GetIO().WantCaptureMouse)
         {
             selected_entity = renderer.get_mouse_entity(mouse_pos);
@@ -192,57 +171,22 @@ int main()
         {
             entity_data& data = scene.m_registry.get<entity_data>((entt::entity)selected_entity);
             ImGui::Begin(data.m_name.c_str());
-
             // do each component ImGui
-
             ImGui::End();
         }
 
-
         {
-            ImGui::Begin("VXGI Debug");
+            renderer.on_imgui(am);
+
+            ImGui::Begin("Demo Settings");
+            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / engine::s_imgui_io->Framerate, engine::s_imgui_io->Framerate);
             ImGui::Text("Mouse Pos : %.3f, %.3f", mouse_pos.x, mouse_pos.y);
             ImGui::Text("Selected Entity ID : %d", selected_entity);
             ImGui::Separator();
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / engine::s_imgui_io->Framerate, engine::s_imgui_io->Framerate);
-            ImGui::Separator();
-            /*ImGui::Checkbox("Render 3D Voxel Grid", &draw_debug_3d_texture);
-            ImGui::Checkbox("Render Final Pass", &draw_final_pass);
-            ImGui::Checkbox("Render Direct Lighting Pass", &draw_direct_lighting);
-            ImGui::Checkbox("Render Direct Lighting Pass NO TAA", &draw_direct_lighting_no_taa);
-            ImGui::Checkbox("Render Cone Tracing Pass", &draw_cone_tracing_pass);
-            ImGui::Checkbox("Render SSR", &draw_ssr);
-            ImGui::Checkbox("Render Cone Tracing Pass NO TAA", &draw_cone_tracing_pass_no_taa);
-            ImGui::Checkbox("Render IM3D", &draw_im3d);*/
-            ImGui::Separator();
-            ImGui::Text("Brightness / Contrast / Saturation");
-            ImGui::DragFloat("Brightness", &brightness);
-            ImGui::DragFloat("Contrast", &contrast);
-            ImGui::DragFloat("Saturation", &saturation);
-            ImGui::Separator();
-            ImGui::Text("VXGI Settings");
-            ImGui::DragFloat("Trace Distance", &vxgi_cone_distance);
-            ImGui::DragFloat("Diffuse / Spec Mix", &diffuse_spec_mix, 1.0f, 0.0f, 1.0f);
-            ImGui::Separator();
-            ImGui::Text("Denoise Settings");
-            ImGui::DragFloat("Sigma", &aSigma);
-            ImGui::DragFloat("Threshold", &aThreshold);
-            ImGui::DragFloat("KSigma", &aKSigma);
-            ImGui::Separator();
-
-            ImGui::DragFloat3("Camera Position", &cam.m_pos[0]);
-            ImGui::DragFloat3("Camera Euler", &cam.m_euler[0]);
-            ImGui::Separator();
-            ImGui::DragFloat3("Orientation Test", &custom_orientation[0]);
-            ImGui::Separator();
-            ImGui::Text("Level Bounding Volume Area %.2f", get_aabb_area(sponza_geo.m_aabb));
-            glm::vec3 dim = sponza_geo.m_aabb.max - sponza_geo.m_aabb.min;
-            ImGui::Text("Level Bounding Volume Dimensions %.2f,%.2f,%.2f", dim.x, dim.y, dim.z);
-            ImGui::Separator();
             ImGui::Text("Lights");
-            ImGui::ColorEdit3("Dir Light Colour", &dir.colour[0]);
-            ImGui::DragFloat3("Dir Light Rotation", &dir.direction[0], 1.0f, 0.0f, 360.0f);
-            ImGui::DragFloat("Dir Light Intensity", &dir.intensity, 1.0f, 0.0f, 1000.0f);
+            ImGui::ColorEdit3("Dir Light Colour", &dir2.colour[0]);
+            ImGui::DragFloat3("Dir Light Rotation", &dir2.direction[0], 1.0f, 0.0f, 360.0f);
+            ImGui::DragFloat("Dir Light Intensity", &dir2.intensity, 1.0f, 0.0f, 1000.0f);
 
             for (int l = 0; l < lights.size(); l++)
             {
@@ -258,11 +202,10 @@ int main()
                     ImGui::TreePop();
                 }
                 ImGui::PopID();
-
             }
-
             ImGui::End();
         }
+
         engine::engine_post_frame();
     }
     engine::engine_shut_down();

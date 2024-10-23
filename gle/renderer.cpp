@@ -10,6 +10,8 @@
 #include "tech/ssr.h"
 #include "tech/taa.h"
 #include "im3d_math.h"
+#include "imgui.h"
+#include "input.h"
 
 void gl_renderer_builtin::init(asset_manager& am)
 {
@@ -211,7 +213,7 @@ void gl_renderer_builtin::render(camera& cam, scene& current_scene)
     if (m_debug_draw_ssr_pass)
     {
         glViewport(0, 0, m_window_resolution.x * m_ssr_resolution_scale, m_window_resolution.y * m_ssr_resolution_scale);
-        tech::ssr::dispatch_ssr_pass(m_ssr_shader->m_data, cam, m_ssr_buffer, m_gbuffer, m_lightpass_buffer, m_window_resolution);
+        tech::ssr::dispatch_ssr_pass(m_ssr_shader->m_data, cam, m_ssr_buffer, m_gbuffer, m_lightpass_buffer, m_window_resolution * m_ssr_resolution_scale);
         glViewport(0, 0, m_window_resolution.x, m_window_resolution.y);
         tech::taa::dispatch_taa_pass(
             m_taa_shader->m_data, 
@@ -355,10 +357,43 @@ entt::entity gl_renderer_builtin::get_mouse_entity(glm::vec2 mouse_position)
         5, 
         GL_RGBA, 
         GL_FLOAT);
-
-    return  entt::entity(
+    m_last_selected_entity = entt::entity(
         pixels[0][0] +
         pixels[0][1] * 256 +
         pixels[0][2] * 256 * 256
     );
+
+    return m_last_selected_entity;
+}
+
+void gl_renderer_builtin::on_imgui(asset_manager& am)
+{
+    glm::vec2 mouse_pos = input::get_mouse_position();
+    ImGui::Begin("Renderer Settings");
+    ImGui::Text("Mouse Pos : %.3f, %.3f", mouse_pos.x, mouse_pos.y);
+    ImGui::Text("Selected Entity ID : %d", m_last_selected_entity);
+    ImGui::Separator();
+    ImGui::Checkbox("Render 3D Voxel Grid", &m_debug_draw_3d_texture);
+    ImGui::Checkbox("Render Final Pass", &m_debug_draw_final_pass);
+    ImGui::Checkbox("Render Direct Lighting Pass", &m_debug_draw_lighting_pass);
+    ImGui::Checkbox("Render Direct Lighting Pass NO TAA", &m_debug_draw_lighting_pass_no_taa);
+    ImGui::Checkbox("Render Cone Tracing Pass", &m_debug_draw_cone_tracing_pass);
+    ImGui::Checkbox("Render SSR", &m_debug_draw_ssr_pass);
+    ImGui::Checkbox("Render Cone Tracing Pass NO TAA", &m_debug_draw_cone_tracing_pass_no_taa);
+    ImGui::Separator();
+    ImGui::Text("Brightness / Contrast / Saturation");
+    ImGui::DragFloat("Brightness", &m_tonemapping_brightness);
+    ImGui::DragFloat("Contrast", &m_tonemapping_contrast);
+    ImGui::DragFloat("Saturation", &m_tonemapping_saturation);
+    ImGui::Separator();
+    ImGui::Text("VXGI Settings");
+    ImGui::DragFloat("Trace Distance", &m_vxgi_cone_trace_distance);
+    ImGui::DragFloat("Diffuse / Spec Mix", &m_vxgi_diffuse_specular_mix, 1.0f, 0.0f, 1.0f);
+    ImGui::Separator();
+    ImGui::Text("Denoise Settings");
+    ImGui::DragFloat("Sigma", &m_denoise_sigma);
+    ImGui::DragFloat("Threshold", &m_denoise_threshold);
+    ImGui::DragFloat("KSigma", &m_denoise_k_sigma);
+    ImGui::Separator();
+    ImGui::End();
 }

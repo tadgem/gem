@@ -3,8 +3,8 @@
 #include "shader.h"
 #include "transform.h"
 #include "material.h"
+#include "utils.h"
 #include <sstream>
-
 
 scene::scene(const std::string& scene_name) : m_name(scene_name)
 {
@@ -52,6 +52,10 @@ std::vector<entity> scene::create_entity_from_model(model& model_to_load, shader
 		entities.push_back(e);
 	}
 
+	aabb transformed_aabb = utils::transform_aabb(model_to_load.m_aabb, utils::get_model_matrix(glm::vec3(0.0), euler, scale));
+
+	update_aabb(transformed_aabb);
+
 	return entities;
 }
 
@@ -63,6 +67,35 @@ bool scene::does_entity_exist(u32 index)
 void scene::on_update()
 {
 	transform::update_transforms(*this);
+}
+
+void scene::update_aabb(aabb& in)
+{
+	if (in.min.x < m_scene_bounding_volume.min.x)
+	{
+		m_scene_bounding_volume.min.x = in.min.x;
+	}
+	if (in.min.y < m_scene_bounding_volume.min.y)
+	{
+		m_scene_bounding_volume.min.y = in.min.y;
+	}
+	if (in.min.z < m_scene_bounding_volume.min.z)
+	{
+		m_scene_bounding_volume.min.z = in.min.z;
+	}
+
+	if (in.max.x > m_scene_bounding_volume.max.x)
+	{
+		m_scene_bounding_volume.max.x = in.max.x;
+	}
+	if (in.max.y > m_scene_bounding_volume.max.y)
+	{
+		m_scene_bounding_volume.max.y = in.max.y;
+	}
+	if (in.max.z > m_scene_bounding_volume.max.z)
+	{
+		m_scene_bounding_volume.max.z = in.max.z;
+	}
 }
 
 entity::entity(scene* escene, entt::entity e) : m_scene(escene), m_handle(e)
