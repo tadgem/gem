@@ -76,19 +76,19 @@ int main()
     engine::init(window_res);
     asset_manager am{};
 
-    am.load_asset("assets/shaders/gbuffer.shader", asset_type::shader);
-    am.load_asset("assets/shaders/lighting.shader", asset_type::shader);
-    am.load_asset("assets/shaders/visualize_3d_tex.shader", asset_type::shader);
-    am.load_asset("assets/shaders/present.shader", asset_type::shader);
-    am.load_asset("assets/shaders/dir_light_shadow.shader", asset_type::shader);
-    am.load_asset("assets/shaders/voxel_cone_tracing.shader", asset_type::shader);
-    am.load_asset("assets/shaders/ssr.shader", asset_type::shader);
-    am.load_asset("assets/shaders/taa.shader", asset_type::shader);
-    am.load_asset("assets/shaders/denoise.shader", asset_type::shader);
-    am.load_asset("assets/shaders/combine.shader", asset_type::shader);
-    am.load_asset("assets/shaders/downsample.shader", asset_type::shader);
-    am.load_asset("assets/shaders/gbuffer_voxelization.shader", asset_type::shader);
-    am.load_asset("assets/shaders/voxel_mips.shader", asset_type::shader);
+    am.load_asset("assets/shaders2/gbuffer.shader", asset_type::shader);
+    am.load_asset("assets/shaders2/lighting.shader", asset_type::shader);
+    am.load_asset("assets/shaders2/visualize_3d_tex.shader", asset_type::shader);
+    am.load_asset("assets/shaders2/present.shader", asset_type::shader);
+    am.load_asset("assets/shaders2/dir_light_shadow.shader", asset_type::shader);
+    am.load_asset("assets/shaders2/voxel_cone_tracing.shader", asset_type::shader);
+    am.load_asset("assets/shaders2/ssr.shader", asset_type::shader);
+    am.load_asset("assets/shaders2/taa.shader", asset_type::shader);
+    am.load_asset("assets/shaders2/denoise.shader", asset_type::shader);
+    am.load_asset("assets/shaders2/gi_combine.shader", asset_type::shader);
+    am.load_asset("assets/shaders2/downsample.shader", asset_type::shader);
+    am.load_asset("assets/shaders2/gbuffer_voxelization.shader", asset_type::shader);
+    am.load_asset("assets/shaders2/voxel_mips.shader", asset_type::shader);
     gl_renderer_builtin renderer{};
 
     renderer.init(am);

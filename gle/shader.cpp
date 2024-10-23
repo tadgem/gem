@@ -193,7 +193,7 @@ int shader::link_shader(gl_handle vert, gl_handle geom, gl_handle frag)
 
 std::unordered_map<shader::stage, std::string> shader::split_composite_shader(const std::string& input)
 {
-	static std::unordered_map<std::string, shader::stage> s_known_stages = { {"#frag", shader::stage::fragment}, {"#vert", shader::stage::vertex} , {"#geom", shader::stage::geometry}, {"#comp", shader::stage::compute} };
+	static std::unordered_map<std::string, shader::stage> s_known_stages = { {"#frag", shader::stage::fragment}, {"#vert", shader::stage::vertex} , {"#geom", shader::stage::geometry}, {"#compute", shader::stage::compute} };
 	//static std::unordered_map<std::string, shader::stage> s_known_stages = { };
 	auto stages = std::unordered_map<shader::stage, std::string>();
 	std::string version = "";

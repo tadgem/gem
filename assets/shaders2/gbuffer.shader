@@ -60,8 +60,6 @@ void main()
 
 #frag
 
-
-
 layout(location = 0) in vec2 aUV;
 layout(location = 1) in vec4 aPosition;
 layout(location = 2) in vec3 aNormal;

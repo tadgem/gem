@@ -17,19 +17,19 @@ void gl_renderer_builtin::init(asset_manager& am)
     m_im3d_state = im3d_gl::load_im3d();
 
 	am.wait_all_assets();
-	m_gbuffer_shader                    = am.get_asset<shader, asset_type::shader>("assets/shaders/gbuffer.shader");
-	m_lighting_shader                   = am.get_asset<shader, asset_type::shader>("assets/shaders/lighting.shader");
-	m_visualise_3d_tex_shader           = am.get_asset<shader, asset_type::shader>("assets/shaders/visualize_3d_tex.shader");
-	m_present_shader                    = am.get_asset<shader, asset_type::shader>("assets/shaders/present.shader");
-	m_dir_light_shadow_shader           = am.get_asset<shader, asset_type::shader>("assets/shaders/dir_light_shadow.shader");
-	m_voxel_cone_tracing_shader         = am.get_asset<shader, asset_type::shader>("assets/shaders/voxel_cone_tracing.shader");
-	m_ssr_shader                        = am.get_asset<shader, asset_type::shader>("assets/shaders/ssr.shader");
-	m_taa_shader                        = am.get_asset<shader, asset_type::shader>("assets/shaders/taa.shader");
-	m_denoise_shader                    = am.get_asset<shader, asset_type::shader>("assets/shaders/denoise.shader");
-	m_combine_shader                    = am.get_asset<shader, asset_type::shader>("assets/shaders/combine.shader");
-	m_downsample_shader                 = am.get_asset<shader, asset_type::shader>("assets/shaders/downsample.shader");
-	m_compute_voxelize_gbuffer_shader   = am.get_asset<shader, asset_type::shader>("assets/shaders/gbuffer_voxelization.shader");
-	m_compute_voxel_mips_shader         = am.get_asset<shader, asset_type::shader>("assets/shaders/voxel_mips.shader");
+	m_gbuffer_shader                    = am.get_asset<shader, asset_type::shader>("assets/shaders2/gbuffer.shader");
+	m_lighting_shader                   = am.get_asset<shader, asset_type::shader>("assets/shaders2/lighting.shader");
+	m_visualise_3d_tex_shader           = am.get_asset<shader, asset_type::shader>("assets/shaders2/visualize_3d_tex.shader");
+	m_present_shader                    = am.get_asset<shader, asset_type::shader>("assets/shaders2/present.shader");
+	m_dir_light_shadow_shader           = am.get_asset<shader, asset_type::shader>("assets/shaders2/dir_light_shadow.shader");
+	m_voxel_cone_tracing_shader         = am.get_asset<shader, asset_type::shader>("assets/shaders2/voxel_cone_tracing.shader");
+	m_ssr_shader                        = am.get_asset<shader, asset_type::shader>("assets/shaders2/ssr.shader");
+	m_taa_shader                        = am.get_asset<shader, asset_type::shader>("assets/shaders2/taa.shader");
+	m_denoise_shader                    = am.get_asset<shader, asset_type::shader>("assets/shaders2/denoise.shader");
+	m_combine_shader                    = am.get_asset<shader, asset_type::shader>("assets/shaders2/gi_combine.shader");
+	m_downsample_shader                 = am.get_asset<shader, asset_type::shader>("assets/shaders2/downsample.shader");
+	m_compute_voxelize_gbuffer_shader   = am.get_asset<shader, asset_type::shader>("assets/shaders2/gbuffer_voxelization.shader");
+	m_compute_voxel_mips_shader         = am.get_asset<shader, asset_type::shader>("assets/shaders2/voxel_mips.shader");
 
     m_window_resolution = { 1920.0, 1080.0 };
     const int shadow_resolution = 4096;
