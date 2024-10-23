@@ -131,10 +131,10 @@ float get_aabb_area(aabb& bb)
     return glm::length(bb.max - bb.min) ;
 }
 
-void on_asset_loaded(asset_loaded_data asset_data)
-{
-    std::cout << asset_data.m_handle_loaded.m_path_hash << "\n";
-}
+//void on_asset_loaded(asset_loaded_data asset_data)
+//{
+//    std::cout << asset_data.m_handle_loaded.m_path_hash << "\n";
+//}
 
 int main()
 {
@@ -142,11 +142,11 @@ int main()
     engine::init(window_res);
     custom_orientation = glm::vec3(0, 1, 0);
 
-    event_handler events; 
+    //event_handler events; 
 
-    events.add_subscription(on_asset_loaded);
-    events.invoke(asset_loaded_data());
-    events.remove_subscription(on_asset_loaded);
+    //events.add_subscription(on_asset_loaded);
+    //events.invoke(asset_loaded_data());
+    //events.remove_subscription(on_asset_loaded);
 
     std::string gbuffer_vert = utils::load_string_from_path("assets/shaders/gbuffer.vert.glsl");
     std::string gbuffer_frag = utils::load_string_from_path("assets/shaders/gbuffer.frag.glsl");
@@ -279,6 +279,9 @@ int main()
         {1.0f,1.0f,1.0f},
         2.75f
     };
+
+    entity dir_light_entity = scene.create_entity("dir light");
+    e.add_component<dir_light>(dir);
     std::vector<point_light> lights;
     lights.push_back({ {0.0, 0.0, 0.0}, {255.0, 0.0, 0.0}, 10.0f});
     lights.push_back({ {10.0, 0.0, 10.0}, {255.0, 255.0, 0.0}, 20.0f });

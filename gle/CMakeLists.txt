@@ -6,11 +6,6 @@ set(GL_SRC
         ${THIRD_PARTY_DIR}/imgui/ImFileDialog.cpp
         ${THIRD_PARTY_DIR}/imgui/backends/imgui_impl_opengl3.cpp
         ${THIRD_PARTY_DIR}/imgui/backends/imgui_impl_sdl2.cpp
-        ${THIRD_PARTY_DIR}/soil/src/image_dxt.c
-        ${THIRD_PARTY_DIR}/soil/src/image_helper.c
-        ${THIRD_PARTY_DIR}/soil/src/soil.c
-        ${THIRD_PARTY_DIR}/soil/include/SOIL/SOIL.h
-        ${THIRD_PARTY_DIR}/soil/src/stb_image_aug.c
         ${SUBMODULE_DIR}/im3d/im3d.cpp
         ${SUBMODULE_DIR}/im3d/im3d_config.h
         ${SUBMODULE_DIR}/im3d/im3d_math.h
@@ -25,6 +20,7 @@ set(GL_SRC
         ${CMAKE_CURRENT_SOURCE_DIR}/lights.h
         ${CMAKE_CURRENT_SOURCE_DIR}/dbg_memory.h
         ${CMAKE_CURRENT_SOURCE_DIR}/dbg_memory.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/asset_definitions.h
         ${CMAKE_CURRENT_SOURCE_DIR}/asset.h
         ${CMAKE_CURRENT_SOURCE_DIR}/asset.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/asset_manager.h
@@ -89,7 +85,6 @@ set(GLE_INCLUDES
         ${THIRD_PARTY_DIR}/imgui/backends
         ${THIRD_PARTY_DIR}/glm
         ${THIRD_PARTY_DIR}/gli/gli
-        ${THIRD_PARTY_DIR}/soil/include
         ${THIRD_PARTY_DIR}/entt
         ${THIRD_PARTY_DIR}
         ${SUBMODULE_DIR}/im3d

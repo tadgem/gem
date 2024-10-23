@@ -6,6 +6,7 @@
 #include <map>
 #include "alias.h"
 #include "texture.h"
+#include "shape.h"
 #include "entt.hpp"
 class entity;
 class model;
@@ -26,6 +27,7 @@ public:
 
     const std::string	m_name;
     entt::registry		m_registry;
+	aabb				m_scene_bounding_volume;
 protected:
 	u32					p_created_entity_count;
 };

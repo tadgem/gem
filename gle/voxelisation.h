@@ -14,6 +14,8 @@ public:
 		glm::ivec3	resolution;
 		glm::vec3	voxel_unit;		// scale of each texel
 		aabb		bounding_box;
+
+		void update_aabb(aabb& new_aabb);
 	};
 
 	struct grid_visualiser

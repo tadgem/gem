@@ -157,7 +157,7 @@ void get_material_texture_entry(const std::string& directory, aiMaterial* materi
         std::string final_path = directory + std::string(resultPath.C_Str());
 
         mat.m_material_maps[gl_texture_type] = nullptr;
-        asset_handle h{asset_type::texture, hash_utils::get_string_hash(final_path)};
+        asset_handle h(final_path, asset_type::texture);
         model::texture_entry texture_entry{ gl_texture_type, h, final_path, nullptr };
         texture_entries.push_back(texture_entry);
     }

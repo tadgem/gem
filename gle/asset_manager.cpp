@@ -28,7 +28,7 @@ asset_handle asset_manager::load_asset(const std::string& path, const asset_type
         }
     }
 
-	asset_handle handle{ assetType, hash_string(tmp_path)};
+	asset_handle handle( tmp_path, assetType);
     asset_load_info load_info{ tmp_path, assetType };
 
     auto it = std::find(p_queued_loads.begin(), p_queued_loads.end(), load_info);
@@ -388,7 +388,7 @@ void asset_manager::dispatch_asset_load_task(const asset_handle& handle, asset_l
 
 asset_handle asset_load_info::to_handle()
 {
-    return asset_handle{ m_type, hash_string(m_path) };
+    return asset_handle(m_path, m_type);
 }
 
 void asset_manager::unload_asset(const asset_handle& handle)

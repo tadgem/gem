@@ -2,13 +2,19 @@
 #include "gl.h"
 #include "utils.h"
 
+void voxel::grid::update_aabb(aabb& new_aabb)
+{
+	glm::vec3 aabb_dim = new_aabb.max - new_aabb.min;
+	voxel_unit = glm::vec3((aabb_dim.x / resolution.x), (aabb_dim.y / resolution.y), (aabb_dim.z / resolution.z));
+	resolution = resolution;
+	bounding_box = new_aabb;
+}
+
 voxel::grid voxel::create_grid(glm::ivec3 resolution, aabb bb)
 {
 	grid grid{};
-	glm::vec3 aabb_dim = bb.max - bb.min;
-	grid.voxel_unit = glm::vec3((aabb_dim.x / resolution.x), (aabb_dim.y / resolution.y), (aabb_dim.z / resolution.z));
 	grid.resolution = resolution;
-	grid.bounding_box = bb;	
+	grid.update_aabb(bb);
 	grid.voxel_texture = texture::create_3d_texture_empty(resolution, GL_RGBA, GL_RGBA16F, GL_FLOAT);
 	glAssert(glBindImageTexture(0, grid.voxel_texture.m_handle, 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA16F));
 	glAssert(glBindImageTexture(1, grid.voxel_texture.m_handle, 1, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA16F));

@@ -53,6 +53,22 @@ public:
     void                    unload_asset(const asset_handle& handle);
     asset*                  get_asset(asset_handle& handle);
 
+    template<typename _Ty, asset_type _AssetType>
+    asset_t<_Ty, _AssetType>*    get_asset(asset_handle& handle)
+    {
+        asset* asset = get_asset(handle);
+        return static_cast<asset_t<_Ty, _AssetType>*(asset);
+    }
+
+    template<typename _Ty, asset_type _AssetType>
+    asset_t<_Ty, _AssetType>*    get_asset(const std::string& path)
+    {
+        asset_handle handle(path, _AssetType);
+        asset* asset = get_asset(handle);
+        return static_cast<asset_t<_Ty, _AssetType>*>(asset);
+    }
+
+
     asset_load_progress     get_asset_load_progress(const asset_handle& handle);
     bool                    any_assets_loading();
     bool                    any_assets_unloading();
