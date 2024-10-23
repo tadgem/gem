@@ -63,11 +63,6 @@ void dispatch_cone_tracing_pass_taa(shader& taa, shader& denoise, shader& presen
 
 }
 
-void dispatch_ssr_pass_taa(shader& taa, shader& present_shader, framebuffer& conetracing_buffer, framebuffer& conetracing_buffer_resolve, framebuffer& history_conetracing_buffer, framebuffer& gbuffer, float aSigma, float aThreshold, float aKSigma, glm::ivec2 window_res, float resolution_scale)
-{
-    tech::taa::dispatch_taa_pass(taa, conetracing_buffer, conetracing_buffer_resolve, history_conetracing_buffer, gbuffer.m_colour_attachments[4], window_res);
-    texture::bind_sampler_handle(0, GL_TEXTURE0);
-}
 
 void dispatch_visualize_3d_texture(voxel::grid& voxel_data, voxel::grid_visualiser& voxel_visualiser, camera& cam, model& sponza, shader& z_prepass_shader, glm::mat4& model)
 {
@@ -385,10 +380,10 @@ int main()
         if (draw_ssr)
         {
             glViewport(0, 0, window_res.x * ssr_resolution_scale, window_res.y * ssr_resolution_scale);
-            tech::ssr::dispatch_ssr_pass(ssr, cam, ssr_buffer, gbuffer, lightpass_buffer, window_dim);
+            tech::ssr::dispatch_ssr_pass(ssr, cam, ssr_buffer, gbuffer, lightpass_buffer, window_res);
             glViewport(0, 0, window_res.x, window_res.y);
-            dispatch_ssr_pass_taa(taa, present_shader, ssr_buffer, ssr_buffer_resolve, ssr_buffer_history, gbuffer, aSigma, aThreshold, aKSigma, window_res, ssr_resolution_scale);
-
+            tech::taa::dispatch_taa_pass(taa, ssr_buffer, ssr_buffer_resolve, ssr_buffer_history, gbuffer.m_colour_attachments[4], window_res);
+            texture::bind_sampler_handle(0, GL_TEXTURE0);
         }
 
         if (draw_cone_tracing_pass)

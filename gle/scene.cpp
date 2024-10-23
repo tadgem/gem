@@ -52,10 +52,10 @@ std::vector<entity> scene::create_entity_from_model(model& model_to_load, shader
 		entities.push_back(e);
 	}
 
-	aabb transformed_aabb = utils::transform_aabb(model_to_load.m_aabb, utils::get_model_matrix(glm::vec3(0.0), euler, scale));
+	// TODO: Update to work from scene overall aabb
+	m_scene_bounding_volume = utils::transform_aabb(model_to_load.m_aabb, utils::get_model_matrix(glm::vec3(0.0), euler, scale));
 
-	update_aabb(transformed_aabb);
-
+	
 	return entities;
 }
 
