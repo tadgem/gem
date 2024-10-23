@@ -35,9 +35,6 @@ void gl_renderer_builtin::init(asset_manager& am)
 
     m_window_resolution = { 1920.0, 1080.0 };
     const int shadow_resolution = 4096;
-    const float gi_resolution_scale = 1.0;
-    const float ssr_resolution_scale= 0.66;
-
     m_gbuffer = framebuffer::create(m_window_resolution, {
         {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
         {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
@@ -69,7 +66,7 @@ void gl_renderer_builtin::init(asset_manager& am)
         {GL_RGBA,GL_RGBA16F, GL_LINEAR, GL_FLOAT},
         }, false);
 
-    glm::vec2 gi_res = { m_window_resolution.x * gi_resolution_scale, m_window_resolution.y * gi_resolution_scale };
+    glm::vec2 gi_res = { m_window_resolution.x * m_vxgi_resolution_scale, m_window_resolution.y * m_vxgi_resolution_scale };
     m_conetracing_buffer = framebuffer::create(gi_res, {
         {GL_RGBA,GL_RGBA16F, GL_LINEAR, GL_FLOAT},
         }, false);
@@ -86,7 +83,7 @@ void gl_renderer_builtin::init(asset_manager& am)
         {GL_RGBA,GL_RGBA16F, GL_LINEAR, GL_FLOAT},
         }, false);
 
-    glm::vec2 ssr_res = { m_window_resolution.x * ssr_resolution_scale, m_window_resolution.y * ssr_resolution_scale };
+    glm::vec2 ssr_res = { m_window_resolution.x * m_ssr_resolution_scale, m_window_resolution.y * m_ssr_resolution_scale };
     m_ssr_buffer = framebuffer::create(ssr_res, {
     {GL_RGBA,GL_RGBA16F, GL_LINEAR, GL_FLOAT},
         }, false);
