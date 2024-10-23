@@ -17,6 +17,7 @@ public:
 	gl_renderer_builtin() = default;
 
     void init(asset_manager& am);
+    void pre_frame(camera& cam, scene& current_scene);
     void render(camera& cam, scene& current_scene);
     void cleanup(asset_manager& am);
 
