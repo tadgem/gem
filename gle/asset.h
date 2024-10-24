@@ -11,7 +11,8 @@ enum class asset_type  {
     shader,
     audio,
     text,
-    binary
+    binary,
+    COUNT
 };
 
 std::string get_asset_type_name(const asset_type& t);
@@ -23,6 +24,7 @@ struct asset_handle
 
     asset_handle() {};
     asset_handle(const std::string& path, asset_type type);
+    asset_handle(const hash_string& path_hash, asset_type type);
 
     bool operator==(const asset_handle& o) const {
         return m_type == o.m_type && m_path_hash == o.m_path_hash;
@@ -30,6 +32,11 @@ struct asset_handle
 
     bool operator<(const asset_handle& o) const {
         return m_type < o.m_type && m_path_hash < o.m_path_hash;
+    }
+
+    static asset_handle INVALID()
+    {
+        return asset_handle(hash_string(UINT64_MAX), asset_type::COUNT );
     }
 };
 

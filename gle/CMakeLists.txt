@@ -26,6 +26,8 @@ set(GL_SRC
         ${CMAKE_CURRENT_SOURCE_DIR}/asset_manager.h
         ${CMAKE_CURRENT_SOURCE_DIR}/asset_manager.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/hash_string.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/fsm.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/fsm.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/shader.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/shader.h
         ${CMAKE_CURRENT_SOURCE_DIR}/material.cpp

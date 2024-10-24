@@ -27,3 +27,9 @@ asset_handle::asset_handle(const std::string& path, asset_type type)
 	m_type = type;
 	m_path_hash = hash_utils::get_string_hash(path);
 }
+
+asset_handle::asset_handle(const hash_string& path_hash, asset_type type)
+{
+	m_type = type;
+	m_path_hash = path_hash;
+}

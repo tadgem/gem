@@ -9,7 +9,8 @@
 #include "tech/tech_utils.h"
 #include "tech/ssr.h"
 #include "tech/taa.h"
-#include "im3d_math.h"
+#include "im3d/im3d_math.h"
+#include "engine.h"
 #include "imgui.h"
 #include "input.h"
 
@@ -17,6 +18,20 @@ void gl_renderer_builtin::init(asset_manager& am)
 {
     m_frame_index = 0;
     m_im3d_state = im3d_gl::load_im3d();
+
+    am.load_asset("assets/shaders2/gbuffer.shader", asset_type::shader);
+    am.load_asset("assets/shaders2/lighting.shader", asset_type::shader);
+    am.load_asset("assets/shaders2/visualize_3d_tex.shader", asset_type::shader);
+    am.load_asset("assets/shaders2/present.shader", asset_type::shader);
+    am.load_asset("assets/shaders2/dir_light_shadow.shader", asset_type::shader);
+    am.load_asset("assets/shaders2/voxel_cone_tracing.shader", asset_type::shader);
+    am.load_asset("assets/shaders2/ssr.shader", asset_type::shader);
+    am.load_asset("assets/shaders2/taa.shader", asset_type::shader);
+    am.load_asset("assets/shaders2/denoise.shader", asset_type::shader);
+    am.load_asset("assets/shaders2/gi_combine.shader", asset_type::shader);
+    am.load_asset("assets/shaders2/downsample.shader", asset_type::shader);
+    am.load_asset("assets/shaders2/gbuffer_voxelization.shader", asset_type::shader);
+    am.load_asset("assets/shaders2/voxel_mips.shader", asset_type::shader);
 
 	am.wait_all_assets();
 	m_gbuffer_shader                    = am.get_asset<shader, asset_type::shader>("assets/shaders2/gbuffer.shader");
@@ -370,6 +385,7 @@ void gl_renderer_builtin::on_imgui(asset_manager& am)
 {
     glm::vec2 mouse_pos = input::get_mouse_position();
     ImGui::Begin("Renderer Settings");
+    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / engine::s_imgui_io->Framerate, engine::s_imgui_io->Framerate);
     ImGui::Text("Mouse Pos : %.3f, %.3f", mouse_pos.x, mouse_pos.y);
     ImGui::Text("Selected Entity ID : %d", m_last_selected_entity);
     ImGui::Separator();

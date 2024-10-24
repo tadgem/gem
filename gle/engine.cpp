@@ -6,6 +6,7 @@
 #include "input.h"
 #include "ImFileDialog.h"
 #include "dbg_memory.h"
+#include "funnelsans.ttf.h"
 
 #undef main
 #if defined(IMGUI_IMPL_OPENGL_ES2)
@@ -92,7 +93,9 @@ static void glDebugOutput(GLenum source,
 
 void set_imgui_style()
 {
-    ImGui::GetIO().Fonts->AddFontFromFileTTF("assets/fonts/funnelsans.ttf", 18.0f);
+    ImFontConfig font_config = ImFontConfig();
+    font_config.FontDataOwnedByAtlas = false;
+    ImGui::GetIO().Fonts->AddFontFromMemoryTTF((void*) & funnel_sans_ttf_bin[0], FUNNELSANS_TTF_SIZE, 18.0f, &font_config);
     ImVec4* colors = ImGui::GetStyle().Colors;
     colors[ImGuiCol_Text] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
     colors[ImGuiCol_TextDisabled] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
@@ -293,6 +296,7 @@ void init_imgui_file_dialog()
         };
 }
 
+// todo: rework this to allow rendering backend to init
 void engine::init(engine_init& init_props)
 {
 #ifdef ENABLE_MEMORY_TRACKING
@@ -360,6 +364,7 @@ void engine::init(engine_init& init_props)
 
     SDL_GL_SetSwapInterval(init_props.enable_vsync); // Enable vsync
 
+    glEnable(GL_DEPTH_TEST);
 #ifdef __DEBUG__
     glEnable(GL_DEBUG_OUTPUT);
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
@@ -415,7 +420,7 @@ void engine::process_sdl_event()
 
 void engine::engine_pre_frame()
 {
-    static ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+    static ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 1.00f);
     s_last_counter = s_now_counter;
     s_now_counter = SDL_GetPerformanceCounter();
 

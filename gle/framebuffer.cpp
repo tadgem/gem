@@ -3,7 +3,7 @@
 
 framebuffer::framebuffer()
 {
-	glGenFramebuffers(1, &m_handle);
+	m_handle = INVALID_GL_HANDLE;
 }
 
 void framebuffer::unbind()
@@ -115,5 +115,9 @@ framebuffer framebuffer::create(glm::vec2 resolution, std::vector<attachment_inf
 
 void framebuffer::bind()
 {
+	if (m_handle == INVALID_GL_HANDLE)
+	{
+		glGenFramebuffers(1, &m_handle);
+	}
 	glBindFramebuffer(GL_FRAMEBUFFER, m_handle);
 }

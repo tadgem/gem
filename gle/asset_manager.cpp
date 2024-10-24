@@ -12,6 +12,11 @@ using shader_intermediate_asset = asset_t_intermediate<shader, std::string, asse
 
 asset_handle asset_manager::load_asset(const std::string& path, const asset_type& assetType, asset_loaded_callback on_asset_loaded)
 {
+    if (!std::filesystem::exists(path))
+    {
+        return asset_handle::INVALID();
+    }
+
     std::string wd = std::filesystem::current_path().string();
     std::string tmp_path = path;
     if(path.find(wd) != std::string::npos)
@@ -38,7 +43,6 @@ asset_handle asset_manager::load_asset(const std::string& path, const asset_type
         return *&it->to_handle();
     }
 
-    spdlog::info("Enqueing Load : {}", tmp_path);
 	p_queued_loads.push_back(load_info);
 
     if (on_asset_loaded != nullptr)
@@ -272,7 +276,6 @@ void submit_texture_to_gpu(asset_intermediate* texture_asset)
 {
     // cast to model asset
     texture_intermediate_asset* ta_inter = static_cast<texture_intermediate_asset*>(texture_asset);
-    spdlog::info("Submitting texture to GPU : {}", ta_inter->m_path);
     asset_t<texture, asset_type::texture>* ta = ta_inter->get_concrete_asset();
 
     if (ta->m_path.find("dds") != std::string::npos)
@@ -339,7 +342,6 @@ void unload_model_asset_manager(asset* _asset)
 
 asset_load_return load_texture_asset_manager(const std::string& path)
 {
-    spdlog::info("asset_manager: loading texture at path : {}", path);
     asset_load_return ret{};
     ret.m_new_assets_to_load = {};
     ret.m_asset_load_sync_callbacks.push_back(submit_texture_to_gpu);
@@ -355,7 +357,6 @@ asset_load_return load_texture_asset_manager(const std::string& path)
 
 void unload_texture_asset_manager(asset* _asset)
 {
-    spdlog::info("Unloading texture : {}", _asset->m_path);
     asset_t<texture, asset_type::texture>* ta = static_cast<asset_t<texture, asset_type::texture>*>(_asset);
     ta->m_data.release();
 }
@@ -373,7 +374,6 @@ asset_load_return load_shader_asset_manager(const std::string& path)
 
 void unload_shader_asset_manager(asset* _asset)
 {
-    spdlog::info("Unloading texture : {}", _asset->m_path);
     asset_t<shader, asset_type::shader>* sa = static_cast<asset_t<shader, asset_type::shader>*>(_asset);
     sa->m_data.release();
 }
@@ -397,6 +397,7 @@ void asset_manager::dispatch_asset_load_task(const asset_handle& handle, asset_l
 void asset_manager::transition_asset_to_loaded(const asset_handle& handle, asset* asset_to_transition)
 {
     p_loaded_assets.emplace(handle, std::move(std::unique_ptr<asset>(asset_to_transition)));
+    spdlog::info("asset_manager : loaded {} : {} ", get_asset_type_name(handle.m_type), asset_to_transition->m_path);
     
     if (p_asset_loaded_callbacks.find(handle) == p_asset_loaded_callbacks.end())
     {

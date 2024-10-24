@@ -32,11 +32,6 @@
 using namespace nlohmann;
 static glm::vec3 custom_orientation;
 
-Im3d::Vec3 ToIm3D(glm::vec3& input)
-{
-    return { input.x, input.y, input.z };
-}
-
 
 void on_im3d(gl_renderer_builtin& renderer, scene& current_scene, camera& cam)
 {
@@ -64,20 +59,6 @@ int main()
 {
     engine::init(engine_init{ {1920, 1080}, true });
     asset_manager am{};
-
-    am.load_asset("assets/shaders2/gbuffer.shader", asset_type::shader);
-    am.load_asset("assets/shaders2/lighting.shader", asset_type::shader);
-    am.load_asset("assets/shaders2/visualize_3d_tex.shader", asset_type::shader);
-    am.load_asset("assets/shaders2/present.shader", asset_type::shader);
-    am.load_asset("assets/shaders2/dir_light_shadow.shader", asset_type::shader);
-    am.load_asset("assets/shaders2/voxel_cone_tracing.shader", asset_type::shader);
-    am.load_asset("assets/shaders2/ssr.shader", asset_type::shader);
-    am.load_asset("assets/shaders2/taa.shader", asset_type::shader);
-    am.load_asset("assets/shaders2/denoise.shader", asset_type::shader);
-    am.load_asset("assets/shaders2/gi_combine.shader", asset_type::shader);
-    am.load_asset("assets/shaders2/downsample.shader", asset_type::shader);
-    am.load_asset("assets/shaders2/gbuffer_voxelization.shader", asset_type::shader);
-    am.load_asset("assets/shaders2/voxel_mips.shader", asset_type::shader);
     gl_renderer_builtin renderer{};
 
     renderer.init(am);

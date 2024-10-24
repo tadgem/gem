@@ -15,6 +15,7 @@ struct im3d_state
     gl_handle im3d_vertex_buffer;
     gl_handle im3d_vao;
 };
+
 class im3d_gl
 {
 public:
