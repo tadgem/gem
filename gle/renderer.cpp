@@ -323,6 +323,7 @@ void gl_renderer_builtin::render(camera& cam, scene& current_scene)
         tech::utils::dispatch_present_image(m_present_shader->m_data, "u_image_sampler", 0, m_final_pass.m_colour_attachments.front());
     }
 
+    im3d_gl::end_frame_im3d(m_im3d_state, m_window_resolution, cam);
 }
 
 void gl_renderer_builtin::cleanup(asset_manager& am)

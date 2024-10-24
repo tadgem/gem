@@ -41,24 +41,20 @@ inline static constexpr int shadow_resolution = 4096;
 inline static constexpr int _3d_tex_res = 256;
 const float SCREEN_W = 1920.0;
 const float SCREEN_H = 1080.0;
-inline static entt::entity selected_entity = entt::entity(UINT32_MAX);
 
-void on_im3d(scene& current_scene, camera& cam, int& selected_entity)
+void on_im3d(gl_renderer_builtin& renderer, scene& current_scene, camera& cam)
 {
-    if (!current_scene.does_entity_exist(selected_entity))
+    if (!current_scene.does_entity_exist((u32)renderer.m_last_selected_entity))
     {
-        selected_entity = -1;
         return;
     }
 
-    entt::entity e = static_cast<entt::entity>(selected_entity);
-    if (!current_scene.m_registry.any_of<mesh>(e))
+    if (!current_scene.m_registry.any_of<mesh>(renderer.m_last_selected_entity))
     {
-        selected_entity = -1;
         return;
     }
-    mesh& meshc = current_scene.m_registry.get<mesh>(e);
-    transform& trans = current_scene.m_registry.get<transform>(e);
+    mesh& meshc = current_scene.m_registry.get<mesh>(renderer.m_last_selected_entity);
+    transform& trans = current_scene.m_registry.get<transform>(renderer.m_last_selected_entity);
 
     Im3d::DrawAlignedBox(ToIm3D(meshc.m_transformed_aabb.min), ToIm3D(meshc.m_transformed_aabb.max));
 }
@@ -158,18 +154,19 @@ int main()
         controller.update(window_dim, cam);
         cam.update(window_dim);
         scene.on_update();
-        renderer.render(cam, scene);
+
+        on_im3d(renderer, scene, cam);
 
 
         glm::vec2 mouse_pos = input::get_mouse_position();
         if (input::get_mouse_button(mouse_button::left) && !ImGui::GetIO().WantCaptureMouse)
         {
-            selected_entity = renderer.get_mouse_entity(mouse_pos);
+            renderer.get_mouse_entity(mouse_pos);
         }
 
-        if (scene.does_entity_exist((u32) selected_entity))
+        if (scene.does_entity_exist((u32) renderer.m_last_selected_entity))
         {
-            entity_data& data = scene.m_registry.get<entity_data>((entt::entity)selected_entity);
+            entity_data& data = scene.m_registry.get<entity_data>(renderer.m_last_selected_entity);
             ImGui::Begin(data.m_name.c_str());
             // do each component ImGui
             ImGui::End();
@@ -181,7 +178,7 @@ int main()
             ImGui::Begin("Demo Settings");
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / engine::s_imgui_io->Framerate, engine::s_imgui_io->Framerate);
             ImGui::Text("Mouse Pos : %.3f, %.3f", mouse_pos.x, mouse_pos.y);
-            ImGui::Text("Selected Entity ID : %d", selected_entity);
+            ImGui::Text("Selected Entity ID : %d", renderer.m_last_selected_entity);
             ImGui::Separator();
             ImGui::Text("Lights");
             ImGui::ColorEdit3("Dir Light Colour", &dir2.colour[0]);
@@ -206,6 +203,7 @@ int main()
             ImGui::End();
         }
 
+        renderer.render(cam, scene);
         engine::engine_post_frame();
     }
     engine::engine_shut_down();
