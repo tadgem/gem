@@ -1,6 +1,10 @@
 #pragma once
 #include "shader.h"
 #include "camera.h"
+#include "im3d/im3d.h"
+
+Im3d::Vec3 ToIm3D(glm::vec3& input);
+Im3d::Vec2 ToIm3D(glm::vec2& input);
 
 struct im3d_state
 {

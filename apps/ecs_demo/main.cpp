@@ -14,7 +14,7 @@
 #include "voxelisation.h"
 
 #include <sstream>
-#include "im3d.h"
+#include "im3d/im3d.h"
 #include "im3d_gl.h"
 #include "gtc/matrix_transform.hpp"
 #include "gtc/quaternion.hpp"
@@ -33,15 +33,10 @@
 #include "tech/tech_utils.h"
 #include "tech/ssr.h"
 #include "tech/taa.h"
-#include "im3d_math.h"
+#include "im3d/im3d_math.h"
+
 using namespace nlohmann;
 static glm::vec3 custom_orientation;
-
-
-Im3d::Vec3 ToIm3D(glm::vec3& input)
-{
-    return { input.x, input.y, input.z };
-}
 
 static glm::mat4 last_vp = glm::mat4(1.0);
 inline static u32 frame_index = 0;

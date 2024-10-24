@@ -1,7 +1,7 @@
 #include "im3d_gl.h"
 #include "utils.h"
-#include "im3d.h"
-#include "im3d_math.h"
+#include "im3d/im3d.h"
+#include "im3d/im3d_math.h"
 #include "gtc/type_ptr.hpp"
 #include "imgui.h"
 #include "input.h"
@@ -244,4 +244,13 @@ void im3d_gl::end_frame_im3d(im3d_state& state, glm::ivec2 screen_dim, camera& c
 
 }
 
+Im3d::Vec3 ToIm3D(glm::vec3& input)
+{
+    return { input.x, input.y , input.z};
+}
+
+Im3d::Vec2 ToIm3D(glm::vec2& input)
+{
+    return { input.x, input.y };
+}
 

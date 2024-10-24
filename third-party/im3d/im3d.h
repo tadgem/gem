@@ -23,6 +23,7 @@
 #endif
 
 #include <cstdarg> // va_list
+#include "glm.hpp"
 
 namespace Im3d {
 

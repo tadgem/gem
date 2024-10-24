@@ -1,14 +1,9 @@
 #include "gle.h"
+#include <sstream>
 #include <iostream>
 
 using namespace nlohmann;
 static glm::vec3 custom_orientation;
-
-Im3d::Vec3 ToIm3D(glm::vec3& input)
-{
-    return { input.x, input.y, input.z };
-}
-
 
 void on_im3d(gl_renderer_builtin& renderer, scene& current_scene, camera& cam)
 {
