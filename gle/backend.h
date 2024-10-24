@@ -9,15 +9,15 @@
 GLenum glCheckError_(const char* file, int line);
 #define glAssert(X) X; glCheckError_(__FILE__, __LINE__)
 
-struct engine_init
+struct backend_init
 {
 	glm::vec2	window_resolution;
 	bool		enable_vsync;
 };
 
-class engine {
+class backend {
 public:
-	static void init(engine_init& init_props);
+	static void init(backend_init& init_props);
 	static void process_sdl_event();
 	static void engine_pre_frame();
 	static void engine_post_frame();

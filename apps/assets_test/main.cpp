@@ -2,7 +2,7 @@
 #include <sstream>
 
 #include "imgui.h"
-#include "engine.h"
+#include "backend.h"
 #include "texture.h" 
 #include "shader.h"
 #include "material.h"
@@ -39,22 +39,22 @@
 int main()
 {
     glm::ivec2 window_res{ 1280, 720};
-    engine::init(engine_init{ window_res, true });
+    backend::init(backend_init{ window_res, true });
     asset_manager am{};
 
     auto im3d_s =  im3d_gl::load_im3d();
-    while (!engine::s_quit)
+    while (!backend::s_quit)
     {       
-        engine::process_sdl_event();
-        engine::engine_pre_frame();        
-        glm::vec2 window_dim = engine::get_window_dim();
+        backend::process_sdl_event();
+        backend::engine_pre_frame();        
+        glm::vec2 window_dim = backend::get_window_dim();
         im3d_gl::new_frame_im3d(im3d_s, window_dim, camera{});
 
         am.update();
 
         if (ImGui::Begin("Assets Debug"))
         {
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / engine::s_imgui_io->Framerate, engine::s_imgui_io->Framerate);
+            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / backend::s_imgui_io->Framerate, backend::s_imgui_io->Framerate);
             if (ImGui::CollapsingHeader("CPU Memory")) {
                 ImGui::Text("Untracked : %.4f KB", (float)debug_memory_tracker::s_UntrackedSize / 1024.0f);
                 for (auto& [k, v] : debug_memory_tracker::s_instance->s_allocation_info) {
@@ -138,12 +138,12 @@ int main()
         ImGui::End();
         
         im3d_gl::end_frame_im3d(im3d_s, { window_res.x, window_res.y }, camera{});
-        engine::engine_post_frame();
+        backend::engine_post_frame();
     }
 
     am.shutdown();
     im3d_gl::shutdown_im3d(im3d_s);
-    engine::engine_shut_down();
+    backend::engine_shut_down();
 
     return 0;
 }

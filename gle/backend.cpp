@@ -1,4 +1,4 @@
-#include "engine.h"
+#include "backend.h"
 #include <iostream>
 #include "imgui.h"
 #include "imgui_impl_sdl2.h"
@@ -297,7 +297,7 @@ void init_imgui_file_dialog()
 }
 
 // todo: rework this to allow rendering backend to init
-void engine::init(engine_init& init_props)
+void backend::init(backend_init& init_props)
 {
 #ifdef ENABLE_MEMORY_TRACKING
     debug_memory_tracker::s_instance = new debug_memory_tracker();
@@ -395,7 +395,7 @@ void engine::init(engine_init& init_props)
 
 }
 
-void engine::process_sdl_event()
+void backend::process_sdl_event()
 {
     SDL_Event event;
     while (SDL_PollEvent(&event))
@@ -418,7 +418,7 @@ void engine::process_sdl_event()
     }
 }
 
-void engine::engine_pre_frame()
+void backend::engine_pre_frame()
 {
     static ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 1.00f);
     s_last_counter = s_now_counter;
@@ -442,7 +442,7 @@ void engine::engine_pre_frame()
     ImGui::NewFrame();
 }
 
-void engine::engine_post_frame()
+void backend::engine_post_frame()
 {
     // Rendering
     ImGui::Render();
@@ -450,7 +450,7 @@ void engine::engine_post_frame()
     SDL_GL_SwapWindow(s_window);
 }
 
-void engine::engine_shut_down()
+void backend::engine_shut_down()
 {
     // Cleanup
     ImGui_ImplOpenGL3_Shutdown();
@@ -463,12 +463,12 @@ void engine::engine_shut_down()
     SDL_Quit();
 }
 
-float engine::get_frame_time()
+float backend::get_frame_time()
 {
     return s_frametime;
 }
 
-void engine::engine_handle_input_events(SDL_Event& input_event)
+void backend::engine_handle_input_events(SDL_Event& input_event)
 {
     input::update_last_frame();
 
@@ -550,7 +550,7 @@ void engine::engine_handle_input_events(SDL_Event& input_event)
     }
 }
 
-glm::vec2 engine::get_window_dim()
+glm::vec2 backend::get_window_dim()
 {
     int w, h;
     SDL_GetWindowSize(s_window, &w, &h);

@@ -5,8 +5,7 @@
 #include "gtx/quaternion.hpp"
 #include "input.h"
 #include "utils.h"
-#include "engine.h"
-
+#include "backend.h"
 
 void camera::update(glm::vec2 screen_dim)
 {
@@ -68,7 +67,7 @@ void debug_camera_controller::update(glm::vec2 screen_dim, camera& cam)
     glm::vec3 forward = utils::get_forward_from_quat(rotation);
     glm::vec3 right = utils::get_right_from_quat(rotation);
     glm::vec3 up = utils::get_up_from_quat(rotation);
-    float frame_time = engine::get_frame_time();
+    float frame_time = backend::get_frame_time();
 
     cam.m_forward = forward;
     cam.m_right = right;

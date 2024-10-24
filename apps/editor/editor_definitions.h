@@ -2,7 +2,7 @@
 
 enum class editor_mode : int
 {
-	open_project,
+	no_open_project,
 	edit,
 	play
 };

@@ -10,7 +10,7 @@
 #include "tech/ssr.h"
 #include "tech/taa.h"
 #include "im3d/im3d_math.h"
-#include "engine.h"
+#include "backend.h"
 #include "imgui.h"
 #include "input.h"
 
@@ -385,7 +385,7 @@ void gl_renderer_builtin::on_imgui(asset_manager& am)
 {
     glm::vec2 mouse_pos = input::get_mouse_position();
     ImGui::Begin("Renderer Settings");
-    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / engine::s_imgui_io->Framerate, engine::s_imgui_io->Framerate);
+    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / backend::s_imgui_io->Framerate, backend::s_imgui_io->Framerate);
     ImGui::Text("Mouse Pos : %.3f, %.3f", mouse_pos.x, mouse_pos.y);
     ImGui::Text("Selected Entity ID : %d", m_last_selected_entity);
     ImGui::Separator();

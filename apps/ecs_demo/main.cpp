@@ -1,7 +1,7 @@
 #include <iostream>
 #include "imgui.h"
 
-#include "engine.h"
+#include "backend.h"
 #include "texture.h" 
 #include "shader.h"
 #include "material.h"
@@ -130,7 +130,7 @@ float get_aabb_area(aabb& bb)
 int main()
 {
     glm::ivec2 window_res{ SCREEN_W, SCREEN_H };
-    engine::init(engine_init{ window_res, true });
+    backend::init(backend_init{ window_res, true });
     asset_manager am{};
     custom_orientation = glm::vec3(0, 1, 0);
 
@@ -327,15 +327,15 @@ int main()
     float brightness = 0.0f;
     float contrast = 1.0f;
     float saturation = 1.05f;
-    while (!engine::s_quit)
+    while (!backend::s_quit)
     {
         glm::mat4 model = utils::get_model_matrix(pos, euler, scale);
 
         glEnable(GL_DEPTH_TEST);
         
-        engine::process_sdl_event();
-        engine::engine_pre_frame();        
-        glm::vec2 window_dim = engine::get_window_dim();
+        backend::process_sdl_event();
+        backend::engine_pre_frame();        
+        glm::vec2 window_dim = backend::get_window_dim();
         im3d_gl::new_frame_im3d(im3d_s, window_dim, cam);
         
         controller.update(window_dim, cam);
@@ -450,7 +450,7 @@ int main()
             ImGui::Text("Mouse Pos : %.3f, %.3f", mouse_pos.x, mouse_pos.y);
             ImGui::Text("Selected Entity ID : %d", selected_entity);
             ImGui::Separator();
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / engine::s_imgui_io->Framerate, engine::s_imgui_io->Framerate);
+            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / backend::s_imgui_io->Framerate, backend::s_imgui_io->Framerate);
             ImGui::Separator();
             ImGui::Checkbox("Render 3D Voxel Grid", &draw_debug_3d_texture);
             ImGui::Checkbox("Render Final Pass", &draw_final_pass);
@@ -518,10 +518,10 @@ int main()
         {
             Im3d::EndFrame();
         }
-        engine::engine_post_frame();
+        backend::engine_post_frame();
     }
     im3d_gl::shutdown_im3d(im3d_s);
-    engine::engine_shut_down();
+    backend::engine_shut_down();
 
     return 0;
 }

@@ -10,14 +10,16 @@ set(GL_SRC
         ${THIRD_PARTY_DIR}/im3d/im3d_config.h
         ${THIRD_PARTY_DIR}/im3d/im3d_math.h
         ${THIRD_PARTY_DIR}/im3d/im3d.h
-        ${CMAKE_CURRENT_SOURCE_DIR}/engine.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/engine.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/backend.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/backend.h
         ${CMAKE_CURRENT_SOURCE_DIR}/debug.h
         ${CMAKE_CURRENT_SOURCE_DIR}/input.h
         ${CMAKE_CURRENT_SOURCE_DIR}/input.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/dbg_assert.h
         ${CMAKE_CURRENT_SOURCE_DIR}/events.h
         ${CMAKE_CURRENT_SOURCE_DIR}/lights.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/project.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/project.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/dbg_memory.h
         ${CMAKE_CURRENT_SOURCE_DIR}/dbg_memory.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/asset_definitions.h

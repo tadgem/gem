@@ -1,24 +1,26 @@
 #include "editor_app.h"
+#include "ImFileDialog.h"
+
 
 editor_application::editor_application()
 {
-    engine::init(engine_init{ {1920, 1080}, true });
+    backend::init(backend_init{ {1920, 1080}, true });
 }
 
 void editor_application::run()
 {
-    while (!engine::s_quit)
+    while (!backend::s_quit)
     {
         m_asset_manager.update();
 
-        engine::process_sdl_event();
-        engine::engine_pre_frame();
+        backend::process_sdl_event();
+        backend::engine_pre_frame();
 
         main_menu_bar();
 
-        engine::engine_post_frame();
+        backend::engine_post_frame();
     }
-    engine::engine_shut_down();
+    backend::engine_shut_down();
 }
 
 void editor_application::main_menu_bar()

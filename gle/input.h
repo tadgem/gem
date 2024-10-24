@@ -139,7 +139,7 @@ public:
     static float        get_mouse_scroll();
 
 protected:
-    friend class engine;
+    friend class backend;
     static gamepad_stick   get_stick_from_sdl(SDL_GameControllerAxis& sdlAxis);
     static gamepad_trigger get_trigger_from_sdl(SDL_GameControllerAxis& sdlAxis);
     static gamepad_button  get_button_from_sdl(uint8_t sdlButton);

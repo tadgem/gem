@@ -40,6 +40,12 @@ struct asset_handle
     }
 };
 
+struct serializable_asset_handle
+{
+    asset_handle    m_handle;
+    std::string     m_path;
+};
+
 class asset
 {
 public:

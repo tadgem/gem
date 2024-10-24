@@ -1,7 +1,7 @@
 #include <iostream>
 #include "imgui.h"
 
-#include "engine.h"
+#include "backend.h"
 #include "texture.h" 
 #include "shader.h"
 #include "material.h"
@@ -57,7 +57,7 @@ float get_aabb_area(aabb& bb)
 
 int main()
 {
-    engine::init(engine_init{ {1920, 1080}, true });
+    backend::init(backend_init{ {1920, 1080}, true });
     asset_manager am{};
     gl_renderer_builtin renderer{};
 
@@ -105,14 +105,14 @@ int main()
     lights.push_back({ {-10.0, 0.0, 10.0}, {0.0, 0.0, 255.0} , 40.0f});
 
 
-    while (!engine::s_quit)
+    while (!backend::s_quit)
     {
         glEnable(GL_DEPTH_TEST);
         am.update();
         
-        engine::process_sdl_event();
-        engine::engine_pre_frame();      
-        glm::vec2 window_dim = engine::get_window_dim();
+        backend::process_sdl_event();
+        backend::engine_pre_frame();      
+        glm::vec2 window_dim = backend::get_window_dim();
         renderer.pre_frame(cam, scene);
         controller.update(window_dim, cam);
         cam.update(window_dim);
@@ -139,7 +139,7 @@ int main()
             renderer.on_imgui(am);
 
             ImGui::Begin("Demo Settings");
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / engine::s_imgui_io->Framerate, engine::s_imgui_io->Framerate);
+            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / backend::s_imgui_io->Framerate, backend::s_imgui_io->Framerate);
             ImGui::Text("Mouse Pos : %.3f, %.3f", mouse_pos.x, mouse_pos.y);
             ImGui::Text("Selected Entity ID : %d", renderer.m_last_selected_entity);
             ImGui::Separator();
@@ -167,9 +167,9 @@ int main()
         }
 
         renderer.render(am, cam, scene);
-        engine::engine_post_frame();
+        backend::engine_post_frame();
     }
-    engine::engine_shut_down();
+    backend::engine_shut_down();
 
     return 0;
 }
