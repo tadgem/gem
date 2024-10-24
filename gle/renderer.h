@@ -17,7 +17,7 @@ public:
 
     void init(asset_manager& am);
     void pre_frame(camera& cam, scene& current_scene);
-    void render(camera& cam, scene& current_scene);
+    void render(asset_manager& am, camera& cam, scene& current_scene);
     void cleanup(asset_manager& am);
 
     entt::entity  get_mouse_entity(glm::vec2 mouse_position);

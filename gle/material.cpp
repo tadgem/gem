@@ -1,5 +1,8 @@
 #include "material.h"
 #include "scene.h"
+#include "asset_manager.h"
+#include "asset_definitions.h"
+
 
 material::material(shader& program) : m_prog(program)
 {
@@ -21,7 +24,7 @@ material::material(shader& program) : m_prog(program)
     }
 }
 
-bool material::set_sampler(const std::string& sampler_name, GLenum texture_slot, texture& tex, GLenum texture_target)
+bool material::set_sampler(const std::string& sampler_name, GLenum texture_slot, texture_entry& tex_entry, GLenum texture_target)
 {
 #ifdef ENABLE_MATERIAL_UNIFORM_CHECKS
     if (m_uniforms.find(sampler_name) == m_uniforms.end())
@@ -30,12 +33,12 @@ bool material::set_sampler(const std::string& sampler_name, GLenum texture_slot,
     }
 #endif
 
-    m_uniform_values[sampler_name] = sampler_info{ texture_slot, texture_target, tex.m_handle };
+    m_uniform_values[sampler_name] = sampler_info{ texture_slot, texture_target, tex_entry };
 
     return true;
 }
 
-void material::bind_material_uniforms()
+void material::bind_material_uniforms(asset_manager& am)
 {
     m_prog.use();
     for (auto& [name, val] : m_uniform_values)
@@ -53,9 +56,22 @@ void material::bind_material_uniforms()
             case shader::uniform_type::sampler3D:
             {
                 sampler_info info = std::any_cast<sampler_info>(m_uniform_values[name]);
+                if (info.tex_entry.m_texture == nullptr)
+                {
+                    texture_asset* ta = am.get_asset<texture, asset_type::texture>(info.tex_entry.m_handle);
+                    if (!ta)
+                    {
+                        continue;
+                    }
+                    if (ta->m_data.m_handle != INVALID_GL_HANDLE)
+                    {
+                        info.tex_entry.m_texture = &ta->m_data;
+                    }
+                    m_uniform_values[name] = info;
+                }
                 int loc = info.sampler_slot - GL_TEXTURE0;
                 m_prog.set_int(name, loc);
-                texture::bind_sampler_handle(info.texture_handle, info.sampler_slot);
+                texture::bind_sampler_handle(info.tex_entry.m_texture->m_handle, info.sampler_slot);
                 break;
             }
             case shader::uniform_type::_int:

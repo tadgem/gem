@@ -3,6 +3,8 @@
 
 using gl_handle = unsigned int;
 
+static constexpr gl_handle INVALID_GL_HANDLE = UINT32_MAX;
+
 using i8 = int8_t;
 using i16 = int16_t;
 using i32 = int32_t;

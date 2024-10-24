@@ -6,7 +6,7 @@
 #include "material.h"
 #include "debug.h"
 
-void tech::gbuffer::dispatch_gbuffer(u32 frame_index, framebuffer& gbuffer, framebuffer& previous_position_buffer, shader& gbuffer_shader, camera& cam,  scene& current_scene, glm::ivec2 win_res)
+void tech::gbuffer::dispatch_gbuffer(u32 frame_index, framebuffer& gbuffer, framebuffer& previous_position_buffer, shader& gbuffer_shader, asset_manager& am, camera& cam,  scene& current_scene, glm::ivec2 win_res)
 {
     GPU_MARKER("GBuffer");
     glDisable(GL_DITHER);
@@ -38,7 +38,7 @@ void tech::gbuffer::dispatch_gbuffer(u32 frame_index, framebuffer& gbuffer, fram
 
     for (auto [e, trans, emesh, ematerial] : renderables.each())
     {
-        ematerial.bind_material_uniforms();
+        ematerial.bind_material_uniforms(am);
         gbuffer_shader.set_mat4("u_model", trans.m_model);
         gbuffer_shader.set_mat4("u_last_model", trans.m_last_model);
         gbuffer_shader.set_mat4("u_normal", trans.m_normal_matrix);
@@ -50,7 +50,7 @@ void tech::gbuffer::dispatch_gbuffer(u32 frame_index, framebuffer& gbuffer, fram
 
 }
 
-void tech::gbuffer::dispatch_gbuffer_with_id(u32 frame_index, framebuffer& gbuffer, framebuffer& previous_position_buffer, shader& gbuffer_shader, camera& cam, scene& current_scene, glm::ivec2 win_res)
+void tech::gbuffer::dispatch_gbuffer_with_id(u32 frame_index, framebuffer& gbuffer, framebuffer& previous_position_buffer, shader& gbuffer_shader, asset_manager& am, camera& cam, scene& current_scene, glm::ivec2 win_res)
 {
     GPU_MARKER("GBuffer-EntityID");
     glDisable(GL_DITHER);
@@ -83,7 +83,7 @@ void tech::gbuffer::dispatch_gbuffer_with_id(u32 frame_index, framebuffer& gbuff
 
     for (auto [e, trans, emesh, ematerial] : renderables.each())
     {
-        ematerial.bind_material_uniforms();
+        ematerial.bind_material_uniforms(am);
         gbuffer_shader.set_mat4("u_model", trans.m_model);
         gbuffer_shader.set_mat4("u_last_model", trans.m_last_model);
         gbuffer_shader.set_mat4("u_normal", trans.m_normal_matrix);

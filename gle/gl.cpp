@@ -294,7 +294,7 @@ void init_imgui_file_dialog()
         };
 }
 
-void engine::init(glm::ivec2 resolution)
+void engine::init(engine_init& init_props)
 {
 #ifdef ENABLE_MEMORY_TRACKING
     debug_memory_tracker::s_instance = new debug_memory_tracker();
@@ -340,7 +340,7 @@ void engine::init(glm::ivec2 resolution)
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-    s_window = SDL_CreateWindow("graphics engine", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, resolution.x, resolution.y, window_flags);
+    s_window = SDL_CreateWindow("graphics engine", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, init_props.window_resolution.x, init_props.window_resolution.y, window_flags);
     if (s_window == nullptr)
     {
         printf("Error: SDL_CreateWindow(): %s\n", SDL_GetError());
@@ -359,7 +359,7 @@ void engine::init(glm::ivec2 resolution)
         return;
     }
 
-    SDL_GL_SetSwapInterval(0); // Enable vsync
+    SDL_GL_SetSwapInterval(init_props.enable_vsync); // Enable vsync
 
 #ifdef __DEBUG__
     glEnable(GL_DEBUG_OUTPUT);

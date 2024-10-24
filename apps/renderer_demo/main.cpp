@@ -28,6 +28,7 @@
 #include "lights.h"
 #include "transform.h"
 #include "im3d_math.h"
+
 using namespace nlohmann;
 static glm::vec3 custom_orientation;
 
@@ -36,11 +37,6 @@ Im3d::Vec3 ToIm3D(glm::vec3& input)
     return { input.x, input.y, input.z };
 }
 
-static glm::mat4 last_vp = glm::mat4(1.0);
-inline static constexpr int shadow_resolution = 4096;
-inline static constexpr int _3d_tex_res = 256;
-const float SCREEN_W = 1920.0;
-const float SCREEN_H = 1080.0;
 
 void on_im3d(gl_renderer_builtin& renderer, scene& current_scene, camera& cam)
 {
@@ -66,8 +62,7 @@ float get_aabb_area(aabb& bb)
 
 int main()
 {
-    glm::ivec2 window_res{ SCREEN_W, SCREEN_H };
-    engine::init(window_res);
+    engine::init(engine_init{ {1920, 1080}, true });
     asset_manager am{};
 
     am.load_asset("assets/shaders2/gbuffer.shader", asset_type::shader);
@@ -92,21 +87,25 @@ int main()
     debug_camera_controller controller{};
     scene scene("test_scene");
     entity e = scene.create_entity("Daddalus");
+
     e.has_component<entity_data>();
     entity_data& data = e.get_component<entity_data>();
     material mat(renderer.m_gbuffer_shader->m_data);
-
     e.add_component<material>(renderer.m_gbuffer_shader->m_data);
 
-    model sponza_geo = model::load_model_and_textures_from_path("assets/models/sponza/Sponza.gltf");
-
-    scene.create_entity_from_model(sponza_geo, renderer.m_gbuffer_shader->m_data, glm::vec3(0.03), glm::vec3(0.0, 0.0, 0.0),
-    {
-        {"u_diffuse_map", texture_map_type::diffuse},
-        {"u_normal_map", texture_map_type::normal},
-        {"u_metallic_map", texture_map_type::metallicness},
-        {"u_roughness_map", texture_map_type::roughness},
-        {"u_ao_map", texture_map_type::ao}
+    // model sponza_geo = model::load_model_and_textures_from_path("assets/models/sponza/Sponza.gltf");
+    am.load_asset("assets/models/sponza/Sponza.gltf", asset_type::model, [&scene, &am, &renderer](asset* a) {
+        spdlog::info("adding model to scene");
+        model_asset* ma = static_cast<model_asset*>(a);
+        ma->m_data.update_aabb();
+        scene.create_entity_from_model(ma->m_data, renderer.m_gbuffer_shader->m_data, glm::vec3(0.03), glm::vec3(0.0, 0.0, 0.0),
+            {
+                {"u_diffuse_map", texture_map_type::diffuse},
+                {"u_normal_map", texture_map_type::normal},
+                {"u_metallic_map", texture_map_type::metallicness},
+                {"u_roughness_map", texture_map_type::roughness},
+                {"u_ao_map", texture_map_type::ao}
+            });
     });
 
     dir_light dir
@@ -124,33 +123,16 @@ int main()
     lights.push_back({ {-10.0, 0.0, -10.0}, {0.0, 255.0, 0.0}, 30.0f });
     lights.push_back({ {-10.0, 0.0, 10.0}, {0.0, 0.0, 255.0} , 40.0f});
 
-    constexpr glm::vec3 _3d_tex_res_vec = { _3d_tex_res, _3d_tex_res, _3d_tex_res };
-
-    glm::vec3 pos = glm::vec3(0.0f);
-    glm::vec3 euler = glm::vec3(0.0f, 0.0f, 0.0f);
-    glm::vec3 scale = glm::vec3(0.1f);
-    glm::mat4 model = utils::get_model_matrix(pos, euler, scale);
-    glm::mat3 normal = utils::get_normal_matrix(model);
-    sponza_geo.m_aabb = utils::transform_aabb(sponza_geo.m_aabb, model);
-
-    glm::vec3 aabb_dim = sponza_geo.m_aabb.max - sponza_geo.m_aabb.min;
-    glm::vec3 unit = glm::vec3((aabb_dim.x / _3d_tex_res), (aabb_dim.y / _3d_tex_res), (aabb_dim.z / _3d_tex_res));
-    glm::vec3 n_unit = glm::normalize(unit);
-    
-    glm::vec3 aabb_half_extent = (sponza_geo.m_aabb.max - sponza_geo.m_aabb.min) / 2.0f;
-    glm::vec3 aabb_center = sponza_geo.m_aabb.min + aabb_half_extent;
-    glm::mat4 aabb_model = utils::get_model_matrix(aabb_center, glm::vec3(0.0f), aabb_half_extent * 2.0f);
 
     while (!engine::s_quit)
     {
-        glm::mat4 model = utils::get_model_matrix(pos, euler, scale);
-
         glEnable(GL_DEPTH_TEST);
+        am.update();
         
         engine::process_sdl_event();
         engine::engine_pre_frame();      
-        renderer.pre_frame(cam, scene);
         glm::vec2 window_dim = engine::get_window_dim();
+        renderer.pre_frame(cam, scene);
         controller.update(window_dim, cam);
         cam.update(window_dim);
         scene.on_update();
@@ -203,7 +185,7 @@ int main()
             ImGui::End();
         }
 
-        renderer.render(cam, scene);
+        renderer.render(am, cam, scene);
         engine::engine_post_frame();
     }
     engine::engine_shut_down();

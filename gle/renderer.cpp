@@ -113,7 +113,7 @@ void gl_renderer_builtin::pre_frame(camera& cam, scene& current_scene)
     im3d_gl::new_frame_im3d(m_im3d_state, m_window_resolution, cam);
 }
 
-void gl_renderer_builtin::render(camera& cam, scene& current_scene)
+void gl_renderer_builtin::render(asset_manager& am, camera& cam, scene& current_scene)
 {
     tech::vxgi::dispatch_gbuffer_voxelization(
         m_compute_voxelize_gbuffer_shader->m_data, 
@@ -133,6 +133,7 @@ void gl_renderer_builtin::render(camera& cam, scene& current_scene)
         m_gbuffer, 
         m_position_buffer_history, 
         m_gbuffer_shader->m_data, 
+        am,
         cam, 
         current_scene, 
         m_window_resolution);
@@ -324,6 +325,7 @@ void gl_renderer_builtin::render(camera& cam, scene& current_scene)
     }
 
     im3d_gl::end_frame_im3d(m_im3d_state, m_window_resolution, cam);
+
 }
 
 void gl_renderer_builtin::cleanup(asset_manager& am)

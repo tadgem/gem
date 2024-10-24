@@ -18,10 +18,14 @@ entity scene::create_entity(const std::string& name)
 	return entity(this, e);
 }
 
-std::vector<entity> scene::create_entity_from_model(model& model_to_load, shader& material_shader, glm::vec3 scale, glm::vec3 euler, std::map<std::string, texture_map_type> known_maps)
+std::vector<entity> scene::create_entity_from_model(
+	model& model_to_load, 
+	shader& material_shader, 
+	glm::vec3 scale, 
+	glm::vec3 euler, 
+	std::map<std::string, texture_map_type> known_maps)
 {
 	std::vector<entity> entities{};
-
 	for (auto& entry : model_to_load.m_meshes)
 	{
 		std::stringstream entity_name;
@@ -37,25 +41,26 @@ std::vector<entity> scene::create_entity_from_model(model& model_to_load, shader
 		GLenum texture_slot = GL_TEXTURE0;
 		// go through each known map type
 		for (auto& [uniform_name, map_type] : known_maps)
-		{
-			// check if material (instance of shader) has slot for this map type
-			
+		{			
 			// check if material has desired map type
 			model::material_entry& material_entry = model_to_load.m_materials[entry.m_material_index];
 			if (material_entry.m_material_maps.find(map_type) != material_entry.m_material_maps.end())
 			{
-				current_mat.set_sampler(uniform_name, texture_slot, *material_entry.m_material_maps[map_type], GL_TEXTURE_2D);
+				current_mat.set_sampler(
+						uniform_name, 
+						texture_slot, 
+						material_entry.m_material_maps[map_type], 
+						GL_TEXTURE_2D);
+				
 				texture_slot++;
 			}
 		}
-
 		entities.push_back(e);
 	}
 
 	// TODO: Update to work from scene overall aabb
 	m_scene_bounding_volume = utils::transform_aabb(model_to_load.m_aabb, utils::get_model_matrix(glm::vec3(0.0), euler, scale));
 
-	
 	return entities;
 }
 

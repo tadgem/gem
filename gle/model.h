@@ -22,19 +22,9 @@ public:
 		DEBUG_IMPL_ALLOC(mesh_entry)
 	};
 
-	struct texture_entry
-	{
-		texture_map_type	m_map_type;
-		asset_handle		m_handle;
-		std::string			m_path;
-		texture* m_texture;
-		DEBUG_IMPL_ALLOC(texture_entry);
-
-	};
-
 	struct material_entry
 	{
-		std::unordered_map<texture_map_type, texture*> m_material_maps;
+		std::unordered_map<texture_map_type, texture_entry> m_material_maps;
 		DEBUG_IMPL_ALLOC(material_entry);
 	};
 
@@ -42,10 +32,12 @@ public:
 	std::vector<material_entry>		        m_materials;
         aabb						m_aabb;
 
-        void release();
 
 	static model load_model_and_textures_from_path(const std::string& path);
 	static model load_model_from_path_entries(const std::string& path, std::vector<texture_entry>& texture_entries, std::vector<mesh_entry>& mesh_entries);
+
+	void	update_aabb();
+    void	release();
 
 	DEBUG_IMPL_ALLOC(model);
 };

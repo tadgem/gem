@@ -40,7 +40,7 @@
 int main()
 {
     glm::ivec2 window_res{ 1280, 720};
-    engine::init(window_res);
+    engine::init(engine_init{ window_res, true });
     asset_manager am{};
 
 

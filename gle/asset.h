@@ -21,6 +21,7 @@ struct asset_handle
     asset_type  m_type;
     hash_string m_path_hash;
 
+    asset_handle() {};
     asset_handle(const std::string& path, asset_type type);
 
     bool operator==(const asset_handle& o) const {

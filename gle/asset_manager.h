@@ -1,11 +1,13 @@
 #pragma once
 #include <map>
 #include <future>
+#include <functional>
 #include <memory>
 #include "asset.h"
 
 
 using asset_load_callback = void(*) (asset_intermediate*);
+using asset_loaded_callback = std::function<void(asset*)>;
 using asset_unload_callback = void(*) (asset*);
 
 enum class asset_load_progress {
@@ -49,23 +51,23 @@ struct asset_load_return {
 class asset_manager {
 public:
 
-    asset_handle            load_asset(const std::string& path, const asset_type& assetType);
+    asset_handle            load_asset(const std::string& path, const asset_type& assetType, asset_loaded_callback on_asset_loaded = nullptr);
     void                    unload_asset(const asset_handle& handle);
     asset*                  get_asset(asset_handle& handle);
 
     template<typename _Ty, asset_type _AssetType>
     asset_t<_Ty, _AssetType>*    get_asset(asset_handle& handle)
     {
-        asset* asset = get_asset(handle);
-        return static_cast<asset_t<_Ty, _AssetType>*(asset);
+        asset* ass = get_asset(handle);
+        return static_cast<asset_t<_Ty, _AssetType>*>(ass);
     }
 
     template<typename _Ty, asset_type _AssetType>
     asset_t<_Ty, _AssetType>*    get_asset(const std::string& path)
     {
         asset_handle handle(path, _AssetType);
-        asset* asset = get_asset(handle);
-        return static_cast<asset_t<_Ty, _AssetType>*>(asset);
+        asset* ass = get_asset(handle);
+        return static_cast<asset_t<_Ty, _AssetType>*>(ass);
     }
 
 
@@ -87,6 +89,7 @@ public:
     std::unordered_map<asset_handle, std::unique_ptr<asset>>            p_loaded_assets;
     std::unordered_map<asset_handle, asset_load_return>                 p_pending_load_callbacks;
     std::unordered_map<asset_handle, asset_unload_callback>             p_pending_unload_callbacks;
+    std::unordered_map<asset_handle, asset_loaded_callback>             p_asset_loaded_callbacks;
     std::vector<asset_load_info>                                        p_queued_loads;
 
     const uint16_t p_callback_tasks_per_tick = 1;
@@ -99,4 +102,7 @@ public:
     void handle_async_tasks();
 
     void dispatch_asset_load_task(const asset_handle& handle, asset_load_info& info);
+
+private:
+    void transition_asset_to_loaded(const asset_handle& handle, asset* asset_to_transition);
 };

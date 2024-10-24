@@ -16,6 +16,12 @@ static glm::vec2 AssimpToGLM(aiVector2D aiVec) {
     return glm::vec2(aiVec.x, aiVec.y);
 }
 
+texture_entry::texture_entry(texture_map_type tmt, asset_handle ah, const std::string& path, texture* data) 
+    : m_handle(ah), m_map_type(tmt), m_path(path), m_texture(data)
+{
+
+}
+
 void ProcessMesh(model& model, aiMesh* m, aiNode* node, const aiScene* scene, bool use_entries, std::vector<model::mesh_entry>& mesh_entries) {
     bool hasPositions = m->HasPositions();
     bool hasUVs = m->HasTextureCoords(0);
@@ -136,18 +142,21 @@ void get_material_texture(const std::string& directory, aiMaterial* material, mo
     uint32_t tex_count = aiGetMaterialTextureCount(material, ass_texture_type);
     if (tex_count > 0)
     {
-        aiString resultPath;
-        aiGetMaterialTexture(material, ass_texture_type, 0, &resultPath);
-        std::string finalPath = directory + std::string(resultPath.C_Str());
-        spdlog::info("Loading Texture at Path: {}" , finalPath);
-        texture* tex = new texture(finalPath);
+        aiString result_path;
+        aiGetMaterialTexture(material, ass_texture_type, 0, &result_path);
+        std::string final_path = directory + std::string(result_path.C_Str());
+        spdlog::info("Loading Texture at Path: {}" , final_path);
+        texture* tex = new texture(final_path);
 
-        mat.m_material_maps[gl_texture_type] = tex;
+        asset_handle h(final_path, asset_type::texture);
+        texture_entry tex_entry( gl_texture_type , h, final_path, tex );
+
+        mat.m_material_maps[gl_texture_type] = tex_entry;
     }
 
 }
 
-void get_material_texture_entry(const std::string& directory, aiMaterial* material, model::material_entry& mat, aiTextureType ass_texture_type, texture_map_type gl_texture_type, std::vector<model::texture_entry>& texture_entries)
+void get_material_texture_entry(const std::string& directory, aiMaterial* material, model::material_entry& mat, aiTextureType ass_texture_type, texture_map_type gl_texture_type, std::vector<texture_entry>& texture_entries)
 {
     uint32_t tex_count = aiGetMaterialTextureCount(material, ass_texture_type);
     if (tex_count > 0)
@@ -156,9 +165,10 @@ void get_material_texture_entry(const std::string& directory, aiMaterial* materi
         aiGetMaterialTexture(material, ass_texture_type, 0, &resultPath);
         std::string final_path = directory + std::string(resultPath.C_Str());
 
-        mat.m_material_maps[gl_texture_type] = nullptr;
+
         asset_handle h(final_path, asset_type::texture);
-        model::texture_entry texture_entry{ gl_texture_type, h, final_path, nullptr };
+        texture_entry texture_entry(gl_texture_type, h, final_path, nullptr );
+        mat.m_material_maps[gl_texture_type] = texture_entry;
         texture_entries.push_back(texture_entry);
     }
 
@@ -241,20 +251,9 @@ model model::load_model_from_path_entries(const std::string& path, std::vector<t
     }
 
     model m{};
-    aabb  model_aabb{};
     ProcessNode(m, scene->mRootNode, scene, true, mesh_entries);
 
-    for (auto& mesh : m.m_meshes)
-    {
-        if (mesh.m_original_aabb.min.x < model_aabb.min.x) { model_aabb.min.x = mesh.m_original_aabb.min.x; }
-        if (mesh.m_original_aabb.min.y < model_aabb.min.y) { model_aabb.min.y = mesh.m_original_aabb.min.y; }
-        if (mesh.m_original_aabb.min.z < model_aabb.min.z) { model_aabb.min.z = mesh.m_original_aabb.min.z; }
-
-        if (mesh.m_original_aabb.max.x > model_aabb.max.x) { model_aabb.max.x = mesh.m_original_aabb.max.x; }
-        if (mesh.m_original_aabb.max.y > model_aabb.max.y) { model_aabb.max.y = mesh.m_original_aabb.max.y; }
-        if (mesh.m_original_aabb.max.z > model_aabb.max.z) { model_aabb.max.z = mesh.m_original_aabb.max.z; }
-    }
-    m.m_aabb = model_aabb;
+    m.update_aabb();
 
     std::string directory = path.substr(0, path.find_last_of('/') + 1);
     for (int i = 0; i < scene->mNumMaterials; i++)
@@ -275,6 +274,23 @@ model model::load_model_from_path_entries(const std::string& path, std::vector<t
 
     return m;
 }
+
+void model::update_aabb() {
+    aabb  model_aabb{};
+    for (auto& mesh : m_meshes)
+    {
+        if (mesh.m_original_aabb.min.x < model_aabb.min.x) { model_aabb.min.x = mesh.m_original_aabb.min.x; }
+        if (mesh.m_original_aabb.min.y < model_aabb.min.y) { model_aabb.min.y = mesh.m_original_aabb.min.y; }
+        if (mesh.m_original_aabb.min.z < model_aabb.min.z) { model_aabb.min.z = mesh.m_original_aabb.min.z; }
+
+        if (mesh.m_original_aabb.max.x > model_aabb.max.x) { model_aabb.max.x = mesh.m_original_aabb.max.x; }
+        if (mesh.m_original_aabb.max.y > model_aabb.max.y) { model_aabb.max.y = mesh.m_original_aabb.max.y; }
+        if (mesh.m_original_aabb.max.z > model_aabb.max.z) { model_aabb.max.z = mesh.m_original_aabb.max.z; }
+    }
+    m_aabb = model_aabb;
+}
+
+
 void model::release() {
     for(mesh& m : m_meshes)
     {

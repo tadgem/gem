@@ -3,6 +3,8 @@
 #include "vertex.h"
 #include "glm.hpp"
 #include "dbg_memory.h"
+#include "asset.h"
+
 enum class texture_map_type
 {
 	diffuse,
@@ -30,7 +32,7 @@ public:
 
 	int m_width, m_height, m_depth, m_num_channels;
 
-	gl_handle m_handle;
+	gl_handle m_handle = INVALID_GL_HANDLE;
 	
 	static texture from_data(unsigned int* data, unsigned int count, int width, int height, int depth, int nr_channels);
 	static texture create_3d_texture(glm::ivec3 dim, GLenum format, GLenum pixel_format, GLenum data_type, void* data, GLenum filter = GL_LINEAR, GLenum wrap_mode = GL_REPEAT);
@@ -47,9 +49,21 @@ public:
 	DEBUG_IMPL_ALLOC(texture);
 };
 
+struct texture_entry
+{
+	texture_map_type	m_map_type;
+	asset_handle		m_handle;
+	std::string			m_path;
+	texture*			m_texture = nullptr;
+
+	texture_entry() { m_texture = nullptr; };
+	texture_entry(texture_map_type tmt, asset_handle ah, const std::string& path, texture* data);
+	DEBUG_IMPL_ALLOC(texture_entry);
+};
+
 struct sampler_info
 {
-	GLenum      sampler_slot;
-	GLenum      texture_target;
-	gl_handle   texture_handle;
+	GLenum					sampler_slot;
+	GLenum					texture_target;
+	texture_entry			tex_entry;
 };

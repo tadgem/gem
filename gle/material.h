@@ -4,10 +4,12 @@
 #include <map>
 #include "shader.h"
 #include "texture.h"
+#include "model.h"
 
 #define ENABLE_MATERIAL_UNIFORM_CHECKS
 
 class scene;
+class asset_manager;
 
 class material
 {
@@ -30,9 +32,9 @@ public:
 		return true;
 	}
 
-	bool    set_sampler(const std::string& sampler_name, GLenum texture_slot, texture& tex, GLenum texture_target = GL_TEXTURE_2D);
+	bool    set_sampler(const std::string& sampler_name, GLenum texture_slot, texture_entry &tex_entry, GLenum texture_target = GL_TEXTURE_2D);
 
-	void	bind_material_uniforms();
+	void	bind_material_uniforms(asset_manager& am);
 
 	shader& m_prog;
 

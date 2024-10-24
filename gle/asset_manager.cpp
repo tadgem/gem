@@ -10,7 +10,7 @@ using texture_intermediate_asset = asset_t_intermediate<texture, std::vector<uns
 using model_intermediate_asset = asset_t_intermediate<model, std::vector<model::mesh_entry>, asset_type::model>;
 using shader_intermediate_asset = asset_t_intermediate<shader, std::string, asset_type::shader>;
 
-asset_handle asset_manager::load_asset(const std::string& path, const asset_type& assetType)
+asset_handle asset_manager::load_asset(const std::string& path, const asset_type& assetType, asset_loaded_callback on_asset_loaded)
 {
     std::string wd = std::filesystem::current_path().string();
     std::string tmp_path = path;
@@ -40,6 +40,12 @@ asset_handle asset_manager::load_asset(const std::string& path, const asset_type
 
     spdlog::info("Enqueing Load : {}", tmp_path);
 	p_queued_loads.push_back(load_info);
+
+    if (on_asset_loaded != nullptr)
+    {
+        p_asset_loaded_callbacks.emplace(handle, on_asset_loaded);
+    }
+
 	return handle;
 }
 
@@ -157,7 +163,8 @@ void asset_manager::handle_load_and_unload_callbacks()
         }
     }
     for (auto& handle : clears) {
-        p_loaded_assets.emplace(handle, std::move(std::unique_ptr<asset>(p_pending_load_callbacks[handle].m_loaded_asset_intermediate->m_asset_data)));
+        //p_loaded_assets.emplace(handle, std::move(std::unique_ptr<asset>(p_pending_load_callbacks[handle].m_loaded_asset_intermediate->m_asset_data)));
+        transition_asset_to_loaded(handle, p_pending_load_callbacks[handle].m_loaded_asset_intermediate->m_asset_data);
         delete p_pending_load_callbacks[handle].m_loaded_asset_intermediate;
         p_pending_load_callbacks.erase(handle);
     }
@@ -202,9 +209,11 @@ void asset_manager::handle_async_tasks()
             load_asset(newLoad.m_path, newLoad.m_type);
         }
 
-        if (asyncReturn.m_asset_load_sync_callbacks.empty()) {
-            p_loaded_assets.emplace(handle, std::move(std::unique_ptr<asset>(asyncReturn.m_loaded_asset_intermediate->m_asset_data)));
+        if (asyncReturn.m_asset_load_sync_callbacks.empty() && asyncReturn.m_loaded_asset_intermediate == nullptr) {
+            //p_loaded_assets.emplace(handle, std::move(std::unique_ptr<asset>(asyncReturn.m_loaded_asset_intermediate->m_asset_data)));
+            transition_asset_to_loaded(handle, asyncReturn.m_loaded_asset_intermediate->m_asset_data);
             delete asyncReturn.m_loaded_asset_intermediate;
+            asyncReturn.m_loaded_asset_intermediate = nullptr;
         }
         else {
             p_pending_load_callbacks.emplace(handle, asyncReturn);
@@ -300,7 +309,7 @@ void link_shader_program(asset_intermediate* shader_asset)
 
 asset_load_return load_model_asset_manager(const std::string& path)
 {
-    std::vector < model::texture_entry> associated_textures;
+    std::vector <texture_entry> associated_textures;
     std::vector <model::mesh_entry> mesh_entries;
     // move this into a heap allocated object
     model m = model::load_model_from_path_entries(path, associated_textures, mesh_entries);
@@ -311,10 +320,9 @@ asset_load_return load_model_asset_manager(const std::string& path)
     asset_load_return ret{};
     for (auto& tex : associated_textures)
     {
-        std::string final_path = directory + "/" + tex.m_path;
-        ret.m_new_assets_to_load.push_back(asset_load_info {final_path, asset_type::texture});
+        ret.m_new_assets_to_load.push_back(asset_load_info {tex.m_path, asset_type::texture});
     }
-    for (int i = 0; i < m.m_meshes.size(); i++)
+    for (int i = 0; i < mesh_entries.size(); i++)
     {
         ret.m_asset_load_sync_callbacks.push_back(submit_meshes_to_gpu);
     }
@@ -384,6 +392,23 @@ void asset_manager::dispatch_asset_load_task(const asset_handle& handle, asset_l
         p_pending_load_tasks.emplace(handle, std::move(std::async(std::launch::async, load_shader_asset_manager, info.m_path)));
         break;
     }
+}
+
+void asset_manager::transition_asset_to_loaded(const asset_handle& handle, asset* asset_to_transition)
+{
+    p_loaded_assets.emplace(handle, std::move(std::unique_ptr<asset>(asset_to_transition)));
+    
+    if (p_asset_loaded_callbacks.find(handle) == p_asset_loaded_callbacks.end())
+    {
+        return;
+    }
+
+    for (auto& [handle, loaded_callback] : p_asset_loaded_callbacks)
+    {
+        loaded_callback(p_loaded_assets[handle].get());
+    }
+
+    p_asset_loaded_callbacks.erase(handle);
 }
 
 asset_handle asset_load_info::to_handle()

@@ -22,6 +22,7 @@
 #include "json.hpp"
 #include "scene.h"
 #include "asset.h"
+#include "asset_manager.h"
 #include "events.h"
 #include "lights.h"
 #include "transform.h"
@@ -134,7 +135,8 @@ float get_aabb_area(aabb& bb)
 int main()
 {
     glm::ivec2 window_res{ SCREEN_W, SCREEN_H };
-    engine::init(window_res);
+    engine::init(engine_init{ window_res, true });
+    asset_manager am{};
     custom_orientation = glm::vec3(0, 1, 0);
 
     //event_handler events; 
@@ -351,7 +353,7 @@ int main()
 
         tech::vxgi::dispatch_gen_voxel_mips(voxelization_mips, voxel_data, _3d_tex_res_vec);
         
-        tech::gbuffer::dispatch_gbuffer_with_id(frame_index, gbuffer, position_buffer_history, gbuffer_shader, cam, scene, window_res);
+        tech::gbuffer::dispatch_gbuffer_with_id(frame_index, gbuffer, position_buffer_history, gbuffer_shader, am,  cam, scene, window_res);
         frame_index++;
 
         tech::shadow::dispatch_shadow_pass(dir_light_shadow_buffer, shadow_shader, dir, scene, window_res);
