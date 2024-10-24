@@ -65,13 +65,13 @@ public:
 
     GLfloat     m_vxgi_cone_trace_distance  = 45.0f;
     GLfloat     m_vxgi_diffuse_specular_mix = 0.0f;
-    GLfloat     m_vxgi_resolution_scale = 1.0f;
+    GLfloat     m_vxgi_resolution_scale = 0.75f;
 
-    GLfloat     m_ssr_resolution_scale = 0.75f;
+    GLfloat     m_ssr_resolution_scale = 0.66f;
 
-    GLfloat     m_denoise_sigma = 2.0f; 
+    GLfloat     m_denoise_sigma = 0.01f; 
     GLfloat     m_denoise_threshold = 0.1f; 
-    GLfloat     m_denoise_k_sigma = 2.0f;
+    GLfloat     m_denoise_k_sigma = 0.01f;
 
     GLfloat     m_tonemapping_brightness = 0.0f;
     GLfloat     m_tonemapping_contrast = 1.0f;

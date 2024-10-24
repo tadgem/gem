@@ -214,9 +214,9 @@ void gl_renderer_builtin::render(camera& cam, scene& current_scene)
         glViewport(0, 0, m_window_resolution.x, m_window_resolution.y);
         tech::taa::dispatch_taa_pass(
             m_taa_shader->m_data, 
-            m_conetracing_buffer, 
-            m_conetracing_buffer_resolve, 
-            m_conetracing_buffer_history, 
+            m_ssr_buffer, 
+            m_ssr_buffer_resolve, 
+            m_ssr_buffer_history, 
             m_gbuffer.m_colour_attachments[4], 
             m_window_resolution);
     }
@@ -311,10 +311,10 @@ void gl_renderer_builtin::render(camera& cam, scene& current_scene)
         m_combine_shader->m_data.set_int("lighting_pass", 0);
         texture::bind_sampler_handle(m_lightpass_buffer_resolve.m_colour_attachments.front(), GL_TEXTURE0);
         m_combine_shader->m_data.set_int("cone_tracing_pass", 1);
-        texture::bind_sampler_handle(m_conetracing_buffer_denoise.m_colour_attachments.front(), GL_TEXTURE1);
+        texture::bind_sampler_handle(m_conetracing_buffer_resolve.m_colour_attachments.front(), GL_TEXTURE1);
         m_combine_shader->m_data.set_int("ssr_pass", 2);
         m_combine_shader->m_data.set_int("ssr_pass", 2);
-        texture::bind_sampler_handle(m_ssr_buffer.m_colour_attachments.front(), GL_TEXTURE2);
+        texture::bind_sampler_handle(m_ssr_buffer_resolve.m_colour_attachments.front(), GL_TEXTURE2);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         texture::bind_sampler_handle(0, GL_TEXTURE0);

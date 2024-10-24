@@ -18,8 +18,8 @@ out vec4 FragColor;
 
 layout (location = 0) in vec2 aUV;
 
-uniform sampler2D u_current_light_buffer;
-uniform sampler2D u_history_light_buffer;
+uniform sampler2D u_current_buffer;
+uniform sampler2D u_history_buffer;
 uniform sampler2D u_velocity_buffer;
 uniform vec2      u_resolution;
 vec3 encodePalYuv(vec3 rgb)
@@ -65,7 +65,7 @@ float mitchellNetravali(float x, float B, float C)
 
 void main()
 {
-      vec4 current_colour = texture(u_current_light_buffer, aUV);
+      vec4 current_colour = texture(u_current_buffer, aUV);
       const vec2 unit = vec2(1.0) / u_resolution;
       vec2 velocity       = texture(u_velocity_buffer, aUV).xy / u_resolution;
       if(velocity.x < unit.x)
@@ -76,13 +76,13 @@ void main()
       {
           velocity.y = 0.0;
       }
-      vec3 history_colour = texture(u_history_light_buffer, aUV - velocity).xyz;
+      vec3 history_colour = texture(u_history_buffer, aUV - velocity).xyz;
 
       // Apply clamping on the history color.
-      vec3 NearColor0 = texture(u_current_light_buffer, aUV + vec2(unit.x, 0)).xyz;
-      vec3 NearColor1 = texture(u_current_light_buffer, aUV + vec2(0, unit.y)).xyz;
-      vec3 NearColor2 = texture(u_current_light_buffer, aUV + vec2(-unit.x, 0)).xyz;
-      vec3 NearColor3 = texture(u_current_light_buffer, aUV + vec2(0, -unit.y)).xyz;
+      vec3 NearColor0 = texture(u_current_buffer, aUV + vec2(unit.x, 0)).xyz;
+      vec3 NearColor1 = texture(u_current_buffer, aUV + vec2(0, unit.y)).xyz;
+      vec3 NearColor2 = texture(u_current_buffer, aUV + vec2(-unit.x, 0)).xyz;
+      vec3 NearColor3 = texture(u_current_buffer, aUV + vec2(0, -unit.y)).xyz;
     
       vec3 BoxMin = min(current_colour.xyz, min(NearColor0, min(NearColor1, min(NearColor2, NearColor3))));
       vec3 BoxMax = max(current_colour.xyz, max(NearColor0, max(NearColor1, max(NearColor2, NearColor3))));;
