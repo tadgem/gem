@@ -5,7 +5,8 @@
 #include "gtx/quaternion.hpp"
 #include "input.h"
 #include "utils.h"
-#include "gl.h"
+#include "engine.h"
+
 
 void camera::update(glm::vec2 screen_dim)
 {

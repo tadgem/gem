@@ -6,12 +6,12 @@ set(GL_SRC
         ${THIRD_PARTY_DIR}/imgui/ImFileDialog.cpp
         ${THIRD_PARTY_DIR}/imgui/backends/imgui_impl_opengl3.cpp
         ${THIRD_PARTY_DIR}/imgui/backends/imgui_impl_sdl2.cpp
-        ${SUBMODULE_DIR}/im3d/im3d.cpp
-        ${SUBMODULE_DIR}/im3d/im3d_config.h
-        ${SUBMODULE_DIR}/im3d/im3d_math.h
-        ${SUBMODULE_DIR}/im3d/im3d.h
-        ${CMAKE_CURRENT_SOURCE_DIR}/gl.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/gl.h
+        ${THIRD_PARTY_DIR}/im3d/im3d.cpp
+        ${THIRD_PARTY_DIR}/im3d/im3d_config.h
+        ${THIRD_PARTY_DIR}/im3d/im3d_math.h
+        ${THIRD_PARTY_DIR}/im3d/im3d.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/engine.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/engine.h
         ${CMAKE_CURRENT_SOURCE_DIR}/debug.h
         ${CMAKE_CURRENT_SOURCE_DIR}/input.h
         ${CMAKE_CURRENT_SOURCE_DIR}/input.cpp
@@ -86,8 +86,8 @@ set(GLE_INCLUDES
         ${THIRD_PARTY_DIR}/glm
         ${THIRD_PARTY_DIR}/gli/gli
         ${THIRD_PARTY_DIR}/entt
+        ${THIRD_PARTY_DIR}/im3d
         ${THIRD_PARTY_DIR}
-        ${SUBMODULE_DIR}/im3d
         ${SUBMODULE_DIR}/spdlog/include
         ${SUBMODULE_DIR}/cpptrace/include
         ${CMAKE_CURRENT_SOURCE_DIR}

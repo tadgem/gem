@@ -1,7 +1,8 @@
 #include <iostream>
-#include "imgui.h"
+#include <sstream>
 
-#include "gl.h"
+#include "imgui.h"
+#include "engine.h"
 #include "texture.h" 
 #include "shader.h"
 #include "material.h"
@@ -12,8 +13,6 @@
 #include "framebuffer.h"
 #include "shape.h"
 #include "voxelisation.h"
-
-#include <sstream>
 #include "im3d.h"
 #include "im3d_gl.h"
 #include "gtc/matrix_transform.hpp"
@@ -42,8 +41,6 @@ int main()
     glm::ivec2 window_res{ 1280, 720};
     engine::init(engine_init{ window_res, true });
     asset_manager am{};
-
-
 
     auto im3d_s =  im3d_gl::load_im3d();
     while (!engine::s_quit)
