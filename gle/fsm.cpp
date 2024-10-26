@@ -68,7 +68,7 @@ void fsm_lambda::update()
 	}
 	p_previous_state = p_current_state;
 }
-void fsm_lambda::trigger(int trigger)
+void fsm_lambda::trigger_int(int trigger)
 {
 	
 	for (int i = 0; i < p_transitions.size(); i++) {

@@ -184,6 +184,7 @@ vec3 trace_cones_v3(vec3 from, vec3 dir, vec3 unit)
 {
 
 	vec3 acc = vec3(0);
+	int count = 0;
 
 	for(int i = 0; i < DIFFUSE_CONE_COUNT_16; i++)
 	{
@@ -195,6 +196,7 @@ vec3 trace_cones_v3(vec3 from, vec3 dir, vec3 unit)
 		}
 		vec3 final_dir = mix(dir, DIFFUSE_CONE_DIRECTIONS_16[i], 0.5);
 		acc += trace_cone(from, final_dir, unit) * sDotN;
+		count++;
 	}
 
 	return acc; // num traces to get a more usable output for now;

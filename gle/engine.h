@@ -7,6 +7,7 @@
 
 class engine
 {
+public:
 	inline static asset_manager			assets;
 	inline static event_handler			events;
 	inline static gl_renderer			renderer;

@@ -98,11 +98,11 @@ public:
 		add_trigger(static_cast<int>(trigger), static_cast<int>(src_state), static_cast<int>(dst_state));
 	}
 
-	void trigger(int trigger);
+	void trigger_int(int trigger);
 	template<typename _Enum>
 	void trigger(_Enum trigger)
 	{
-		trigger(static_cast<int>(trigger));
+		trigger_int(static_cast<int>(trigger));
 	}
 
 	// arbitrary, can probably be done in a better way but we are in trouble if we

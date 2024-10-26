@@ -10,10 +10,6 @@ class editor_application
 public:
 	editor_application();
 
-	asset_manager				m_asset_manager;
-	// todo: store a const reference to a base renderer class to allow for vk backend
-	gl_renderer			m_renderer;
-
 	fsm							m_editor_fsm;
 
 	debug_camera_controller		m_editor_camera_controller;
@@ -21,6 +17,8 @@ public:
 
 	void run();
 
-protected:
+	void on_open_project();
+	void on_edit();
+	void on_play();
 	void main_menu_bar();
 };
