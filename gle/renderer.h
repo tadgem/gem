@@ -9,11 +9,11 @@
 
 class asset_manager;
 
-class gl_renderer_builtin
+class gl_renderer
 {
 public:
 
-	gl_renderer_builtin() = default;
+	gl_renderer() = default;
 
     void init(asset_manager& am);
     void pre_frame(camera& cam, scene& current_scene);

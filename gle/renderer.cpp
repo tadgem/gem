@@ -14,7 +14,7 @@
 #include "imgui.h"
 #include "input.h"
 
-void gl_renderer_builtin::init(asset_manager& am)
+void gl_renderer::init(asset_manager& am)
 {
     m_frame_index = 0;
     m_im3d_state = im3d_gl::load_im3d();
@@ -123,12 +123,12 @@ void gl_renderer_builtin::init(asset_manager& am)
     m_voxel_visualiser = voxel::create_grid_visualiser(m_voxel_data, m_visualise_3d_tex_shader->m_data, 8);
 }
 
-void gl_renderer_builtin::pre_frame(camera& cam, scene& current_scene)
+void gl_renderer::pre_frame(camera& cam, scene& current_scene)
 {
     im3d_gl::new_frame_im3d(m_im3d_state, m_window_resolution, cam);
 }
 
-void gl_renderer_builtin::render(asset_manager& am, camera& cam, scene& current_scene)
+void gl_renderer::render(asset_manager& am, camera& cam, scene& current_scene)
 {
     tech::vxgi::dispatch_gbuffer_voxelization(
         m_compute_voxelize_gbuffer_shader->m_data, 
@@ -343,7 +343,7 @@ void gl_renderer_builtin::render(asset_manager& am, camera& cam, scene& current_
 
 }
 
-void gl_renderer_builtin::cleanup(asset_manager& am)
+void gl_renderer::cleanup(asset_manager& am)
 {
     m_gbuffer.cleanup();
     m_gbuffer_downsample.cleanup();
@@ -364,7 +364,7 @@ void gl_renderer_builtin::cleanup(asset_manager& am)
     im3d_gl::shutdown_im3d(m_im3d_state);
 }
 
-entt::entity gl_renderer_builtin::get_mouse_entity(glm::vec2 mouse_position)
+entt::entity gl_renderer::get_mouse_entity(glm::vec2 mouse_position)
 {
     auto pixels = m_gbuffer.read_pixels<glm::vec4, 1, 1>(
         mouse_position.x, 
@@ -381,11 +381,11 @@ entt::entity gl_renderer_builtin::get_mouse_entity(glm::vec2 mouse_position)
     return m_last_selected_entity;
 }
 
-void gl_renderer_builtin::on_imgui(asset_manager& am)
+void gl_renderer::on_imgui(asset_manager& am)
 {
     glm::vec2 mouse_pos = input::get_mouse_position();
     ImGui::Begin("Renderer Settings");
-    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / backend::s_imgui_io->Framerate, backend::s_imgui_io->Framerate);
+    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / gl_backend::s_imgui_io->Framerate, gl_backend::s_imgui_io->Framerate);
     ImGui::Text("Mouse Pos : %.3f, %.3f", mouse_pos.x, mouse_pos.y);
     ImGui::Text("Selected Entity ID : %d", m_last_selected_entity);
     ImGui::Separator();

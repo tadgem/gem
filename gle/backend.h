@@ -15,7 +15,8 @@ struct backend_init
 	bool		enable_vsync;
 };
 
-class backend {
+
+class gl_backend {
 public:
 	static void init(backend_init& init_props);
 	static void process_sdl_event();

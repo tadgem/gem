@@ -39,22 +39,22 @@
 int main()
 {
     glm::ivec2 window_res{ 1280, 720};
-    backend::init(backend_init{ window_res, true });
+    gl_backend::init(backend_init{ window_res, true });
     asset_manager am{};
 
     auto im3d_s =  im3d_gl::load_im3d();
-    while (!backend::s_quit)
+    while (!gl_backend::s_quit)
     {       
-        backend::process_sdl_event();
-        backend::engine_pre_frame();        
-        glm::vec2 window_dim = backend::get_window_dim();
+        gl_backend::process_sdl_event();
+        gl_backend::engine_pre_frame();        
+        glm::vec2 window_dim = gl_backend::get_window_dim();
         im3d_gl::new_frame_im3d(im3d_s, window_dim, camera{});
 
         am.update();
 
         if (ImGui::Begin("Assets Debug"))
         {
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / backend::s_imgui_io->Framerate, backend::s_imgui_io->Framerate);
+            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / gl_backend::s_imgui_io->Framerate, gl_backend::s_imgui_io->Framerate);
             if (ImGui::CollapsingHeader("CPU Memory")) {
                 ImGui::Text("Untracked : %.4f KB", (float)debug_memory_tracker::s_UntrackedSize / 1024.0f);
                 for (auto& [k, v] : debug_memory_tracker::s_instance->s_allocation_info) {
@@ -106,7 +106,7 @@ int main()
 
             if (ImGui::Button("Load Model"))
             {
-                ifd::FileDialog::Instance().Open("ModelOpenDialog", "Import a model", "Image file (*.dae;*.obj;*.fbx;*.gltf;){.dae,.obj,.fbx,.gltf},.*");
+                ifd::FileDialog::Instance().Open("ModelOpenDialog", "Import a model", "Model file (*.dae;*.obj;*.fbx;*.gltf;){.dae,.obj,.fbx,.gltf},.*");
             }
             ImGui::SameLine();
             if (ImGui::Button("Load Shader"))
@@ -138,12 +138,12 @@ int main()
         ImGui::End();
         
         im3d_gl::end_frame_im3d(im3d_s, { window_res.x, window_res.y }, camera{});
-        backend::engine_post_frame();
+        gl_backend::engine_post_frame();
     }
 
     am.shutdown();
     im3d_gl::shutdown_im3d(im3d_s);
-    backend::engine_shut_down();
+    gl_backend::engine_shut_down();
 
     return 0;
 }

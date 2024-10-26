@@ -92,8 +92,8 @@ public:
 	}
 
 	void add_trigger(int trigger, int src_state, int dst_state);
-	template<typename _Enum>
-	void add_trigger(_Enum trigger, _Enum src_state, _Enum dst_state)
+	template<typename _TriggerEnum, typename _StateEnum>
+	void add_trigger(_TriggerEnum trigger, _StateEnum src_state, _StateEnum dst_state)
 	{
 		add_trigger(static_cast<int>(trigger), static_cast<int>(src_state), static_cast<int>(dst_state));
 	}

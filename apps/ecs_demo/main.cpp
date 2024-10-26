@@ -130,7 +130,7 @@ float get_aabb_area(aabb& bb)
 int main()
 {
     glm::ivec2 window_res{ SCREEN_W, SCREEN_H };
-    backend::init(backend_init{ window_res, true });
+    gl_backend::init(backend_init{ window_res, true });
     asset_manager am{};
     custom_orientation = glm::vec3(0, 1, 0);
 
@@ -327,15 +327,15 @@ int main()
     float brightness = 0.0f;
     float contrast = 1.0f;
     float saturation = 1.05f;
-    while (!backend::s_quit)
+    while (!gl_backend::s_quit)
     {
         glm::mat4 model = utils::get_model_matrix(pos, euler, scale);
 
         glEnable(GL_DEPTH_TEST);
         
-        backend::process_sdl_event();
-        backend::engine_pre_frame();        
-        glm::vec2 window_dim = backend::get_window_dim();
+        gl_backend::process_sdl_event();
+        gl_backend::engine_pre_frame();        
+        glm::vec2 window_dim = gl_backend::get_window_dim();
         im3d_gl::new_frame_im3d(im3d_s, window_dim, cam);
         
         controller.update(window_dim, cam);
@@ -450,7 +450,7 @@ int main()
             ImGui::Text("Mouse Pos : %.3f, %.3f", mouse_pos.x, mouse_pos.y);
             ImGui::Text("Selected Entity ID : %d", selected_entity);
             ImGui::Separator();
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / backend::s_imgui_io->Framerate, backend::s_imgui_io->Framerate);
+            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / gl_backend::s_imgui_io->Framerate, gl_backend::s_imgui_io->Framerate);
             ImGui::Separator();
             ImGui::Checkbox("Render 3D Voxel Grid", &draw_debug_3d_texture);
             ImGui::Checkbox("Render Final Pass", &draw_final_pass);
@@ -518,10 +518,10 @@ int main()
         {
             Im3d::EndFrame();
         }
-        backend::engine_post_frame();
+        gl_backend::engine_post_frame();
     }
     im3d_gl::shutdown_im3d(im3d_s);
-    backend::engine_shut_down();
+    gl_backend::engine_shut_down();
 
     return 0;
 }

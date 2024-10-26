@@ -7,3 +7,9 @@ enum class editor_mode : int
 	play
 };
 
+enum class editor_trigger : int
+{
+	begin_play_mode,
+	exit_play_mode,
+	project_loaded
+};

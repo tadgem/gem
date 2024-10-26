@@ -106,3 +106,40 @@ void scene::update_aabb(aabb& in)
 entity::entity(scene* escene, entt::entity e) : m_scene(escene), m_handle(e)
 {
 }
+
+
+scene_manager::scene_manager()
+{
+
+}
+
+void scene_manager::close_scene(hash_string scene_hash)
+{
+
+}
+
+scene* scene_manager::get_scene(hash_string scene_hash)
+{
+	if (p_active_scenes.find(scene_hash) == p_active_scenes.end())
+	{
+		return nullptr;
+	}
+	return p_active_scenes[scene_hash].get();
+}
+
+scene* scene_manager::create_scene(const std::string& scene_name)
+{
+	hash_string scene_hash(scene_name);
+	if (p_active_scenes.find(scene_hash) != p_active_scenes.end())
+	{
+		return p_active_scenes[scene_hash].get();
+	}
+
+	p_active_scenes.emplace(scene_hash, std::make_unique<scene>(scene_name));
+	return p_active_scenes[scene_hash].get();
+}
+
+scene* scene_manager::load_scene(nlohmann::json& scene_json)
+{
+	return nullptr;
+}

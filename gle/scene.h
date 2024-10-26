@@ -8,6 +8,7 @@
 #include "texture.h"
 #include "shape.h"
 #include "entt.hpp"
+#include "json.hpp"
 class entity;
 class model;
 class shader;
@@ -78,4 +79,19 @@ public:
 struct entity_data
 {
 	std::string m_name;
+};
+
+class scene_manager
+{
+public:	
+	scene_manager();
+
+	scene*			create_scene(const std::string& name);
+	scene*			load_scene(nlohmann::json& scene_json);
+	scene*			get_scene(hash_string scene_hash);
+	void			close_scene(hash_string scene_hash);
+
+protected:
+	std::unordered_map<hash_string, std::unique_ptr<scene>>	p_active_scenes;
+
 };

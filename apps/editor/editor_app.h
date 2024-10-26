@@ -12,7 +12,7 @@ public:
 
 	asset_manager				m_asset_manager;
 	// todo: store a const reference to a base renderer class to allow for vk backend
-	gl_renderer_builtin			m_renderer;
+	gl_renderer			m_renderer;
 
 	fsm							m_editor_fsm;
 

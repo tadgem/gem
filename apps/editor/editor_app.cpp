@@ -4,23 +4,36 @@
 
 editor_application::editor_application()
 {
-    backend::init(backend_init{ {1920, 1080}, true });
+    gl_backend::init(backend_init{ {1920, 1080}, true });
+    m_editor_fsm.set_starting_state(editor_mode::no_open_project);
+    m_editor_fsm.add_state(editor_mode::no_open_project, []() {return 1; });
+    m_editor_fsm.add_state(editor_mode::edit, []() {return 1; });
+    m_editor_fsm.add_state(editor_mode::play, []() {return 1; });
+
+    m_editor_fsm.add_state_entry(editor_mode::play, []() {});
+    m_editor_fsm.add_state_exit(editor_mode::play, []() {});
+
+    m_editor_fsm.add_trigger(editor_trigger::project_loaded, editor_mode::no_open_project, editor_mode::edit);
+    m_editor_fsm.add_trigger(editor_trigger::begin_play_mode, editor_mode::edit, editor_mode::play);
+    m_editor_fsm.add_trigger(editor_trigger::exit_play_mode, editor_mode::play, editor_mode::edit);
 }
 
 void editor_application::run()
 {
-    while (!backend::s_quit)
+    while (!gl_backend::s_quit)
     {
         m_asset_manager.update();
 
-        backend::process_sdl_event();
-        backend::engine_pre_frame();
+        gl_backend::process_sdl_event();
+        gl_backend::engine_pre_frame();
 
         main_menu_bar();
 
-        backend::engine_post_frame();
+        m_editor_fsm.update();
+
+        gl_backend::engine_post_frame();
     }
-    backend::engine_shut_down();
+    gl_backend::engine_shut_down();
 }
 
 void editor_application::main_menu_bar()

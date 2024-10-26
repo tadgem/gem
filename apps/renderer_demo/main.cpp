@@ -33,7 +33,7 @@ using namespace nlohmann;
 static glm::vec3 custom_orientation;
 
 
-void on_im3d(gl_renderer_builtin& renderer, scene& current_scene, camera& cam)
+void on_im3d(gl_renderer& renderer, scene& current_scene, camera& cam)
 {
     if (!current_scene.does_entity_exist((u32)renderer.m_last_selected_entity))
     {
@@ -57,9 +57,9 @@ float get_aabb_area(aabb& bb)
 
 int main()
 {
-    backend::init(backend_init{ {1920, 1080}, true });
+    gl_backend::init(backend_init{ {1920, 1080}, true });
     asset_manager am{};
-    gl_renderer_builtin renderer{};
+    gl_renderer renderer{};
 
     renderer.init(am);
 
@@ -105,14 +105,14 @@ int main()
     lights.push_back({ {-10.0, 0.0, 10.0}, {0.0, 0.0, 255.0} , 40.0f});
 
 
-    while (!backend::s_quit)
+    while (!gl_backend::s_quit)
     {
         glEnable(GL_DEPTH_TEST);
         am.update();
         
-        backend::process_sdl_event();
-        backend::engine_pre_frame();      
-        glm::vec2 window_dim = backend::get_window_dim();
+        gl_backend::process_sdl_event();
+        gl_backend::engine_pre_frame();      
+        glm::vec2 window_dim = gl_backend::get_window_dim();
         renderer.pre_frame(cam, scene);
         controller.update(window_dim, cam);
         cam.update(window_dim);
@@ -139,7 +139,7 @@ int main()
             renderer.on_imgui(am);
 
             ImGui::Begin("Demo Settings");
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / backend::s_imgui_io->Framerate, backend::s_imgui_io->Framerate);
+            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / gl_backend::s_imgui_io->Framerate, gl_backend::s_imgui_io->Framerate);
             ImGui::Text("Mouse Pos : %.3f, %.3f", mouse_pos.x, mouse_pos.y);
             ImGui::Text("Selected Entity ID : %d", renderer.m_last_selected_entity);
             ImGui::Separator();
@@ -167,9 +167,9 @@ int main()
         }
 
         renderer.render(am, cam, scene);
-        backend::engine_post_frame();
+        gl_backend::engine_post_frame();
     }
-    backend::engine_shut_down();
+    gl_backend::engine_shut_down();
 
     return 0;
 }
