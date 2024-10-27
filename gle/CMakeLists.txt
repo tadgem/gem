@@ -19,6 +19,7 @@ set(GL_SRC
         ${CMAKE_CURRENT_SOURCE_DIR}/dbg_assert.h
         ${CMAKE_CURRENT_SOURCE_DIR}/events.h
         ${CMAKE_CURRENT_SOURCE_DIR}/lights.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/ecs_system.h
         ${CMAKE_CURRENT_SOURCE_DIR}/project.h
         ${CMAKE_CURRENT_SOURCE_DIR}/project.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/dbg_memory.h

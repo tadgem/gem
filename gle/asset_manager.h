@@ -29,11 +29,6 @@ struct asset_load_info {
         return m_path.size() < o.m_path.size();
     }
 
-    template<typename Archive>
-    void serialize(Archive& ar) {
-        ZoneScoped;
-        ar(m_Path, m_Type);
-    }
 
     asset_handle to_handle();
 };

@@ -45,14 +45,53 @@ void editor_application::run()
     gl_backend::engine_shut_down();
 }
 
+static char s_create_project_name_buffer[256]{ 0 };
+
 void editor_application::on_open_project()
 {
-    ImGui::Begin("Open Project");
+    ImGui::SetNextWindowSize(ImGui::GetWindowSize(), ImGuiCond_Always);
+    auto y = ImGui::GetCursorPosY();
+    ImGui::SetNextWindowPos(ImVec2{ 0.0f, y });
+    ImGui::Begin("GE Main Menu");
+    ImGui::InputText("Project Name", &s_create_project_name_buffer[0], 256);
+
+    if (ImGui::Button("Create Project"))
+    {
+        std::string proj_name = std::string(s_create_project_name_buffer);
+        if (!proj_name.empty())
+        {
+            ifd::FileDialog::Instance().Save("ProjectSaveDialog", "Choose a destination for your project", "Project file (*.proj;){.proj},.*");
+        }
+        else
+        {
+            ImGui::OpenPopup("NoProjName");
+            
+        }
+    }
+    if (ImGui::BeginPopup("NoProjName"))
+    {
+        if (ImGui::Selectable("Please specify a project name in the input box"))
+        {
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
+    }
     if (ImGui::Button("Load Project"))
     {
-        m_editor_fsm.trigger(editor_trigger::project_loaded);
+        //m_editor_fsm.trigger(editor_trigger::project_loaded);
     }
     ImGui::End();
+
+
+    if (ifd::FileDialog::Instance().IsDone("ProjectSaveDialog")) {
+        if (ifd::FileDialog::Instance().HasResult()) {
+            std::filesystem::path p = ifd::FileDialog::Instance().GetResult();
+            std::string res = p.u8string();
+            std::filesystem::path directory = p.root_directory();
+            printf("Project Dir [%s]\n", res.c_str());
+        }
+        ifd::FileDialog::Instance().Close();
+    }
 }
 
 void editor_application::on_edit()

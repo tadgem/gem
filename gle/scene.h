@@ -90,6 +90,7 @@ public:
 	scene*			load_scene(nlohmann::json& scene_json);
 	scene*			get_scene(hash_string scene_hash);
 	void			close_scene(hash_string scene_hash);
+	nlohmann::json  save_scene(scene* ser_scene);
 
 protected:
 	std::unordered_map<hash_string, std::unique_ptr<scene>>	p_active_scenes;

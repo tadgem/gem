@@ -143,3 +143,11 @@ scene* scene_manager::load_scene(nlohmann::json& scene_json)
 {
 	return nullptr;
 }
+
+nlohmann::json  scene_manager::save_scene(scene* ser_scene)
+{
+	nlohmann::json json{};
+
+	return json;
+
+}

@@ -3,9 +3,16 @@
 
 nlohmann::json project::serialize(asset_manager& am)
 {
-	return nlohmann::json();
+	nlohmann::json json{};
+
+	json["project_name"] = m_name;
+	json["scenes"] = m_scene_paths;
+
+	return json;
 }
 
 void project::deserialize(asset_manager& am, nlohmann::json& proj_json)
 {
+	m_name			= proj_json["project_name"];
+	m_scene_paths	= proj_json["scenes"];
 }
