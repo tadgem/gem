@@ -2,10 +2,11 @@
 #include "scene.h"
 #include "asset_manager.h"
 #include "asset_definitions.h"
-
+#include "tracy/Tracy.hpp"
 
 material::material(shader& program) : m_prog(program)
 {
+    ZoneScoped;
     int uniform_count;
     GLint size; // size of the variable
     GLenum type; // type of the variable (float, vec3 or mat4, etc)
@@ -26,6 +27,7 @@ material::material(shader& program) : m_prog(program)
 
 bool material::set_sampler(const std::string& sampler_name, GLenum texture_slot, texture_entry& tex_entry, GLenum texture_target)
 {
+    ZoneScoped;
 #ifdef ENABLE_MATERIAL_UNIFORM_CHECKS
     if (m_uniforms.find(sampler_name) == m_uniforms.end())
     {
@@ -40,6 +42,7 @@ bool material::set_sampler(const std::string& sampler_name, GLenum texture_slot,
 
 void material::bind_material_uniforms(asset_manager& am)
 {
+    ZoneScoped;
     m_prog.use();
     for (auto& [name, val] : m_uniform_values)
     {

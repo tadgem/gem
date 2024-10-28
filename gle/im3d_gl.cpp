@@ -6,8 +6,10 @@
 #include "imgui.h"
 #include "input.h"
 #include "backend.h"
+#include "tracy/Tracy.hpp"
 
 Im3d::Mat4 ToIm3D(const glm::mat4& _m) {
+    ZoneScoped;
     Im3d::Mat4 m(1.0);
     for (int i = 0; i < 16; ++i)
     {
@@ -19,6 +21,7 @@ Im3d::Mat4 ToIm3D(const glm::mat4& _m) {
 
 void DrawIm3dTextListsImGuiAsChild(const Im3d::TextDrawList _textDrawLists[], uint32_t _count, uint32_t width, uint32_t height, glm::mat4 _viewProj)
 {
+    ZoneScoped;
     ImDrawList* imDrawList = ImGui::GetWindowDrawList();
     const Im3d::Mat4 viewProj = ToIm3D(_viewProj);
     for (uint32_t i = 0; i < _count; ++i)
@@ -99,9 +102,9 @@ void DrawIm3dTextListsImGuiAsChild(const Im3d::TextDrawList _textDrawLists[], ui
 
 void DrawIm3dTextListsImGui(const Im3d::TextDrawList _textDrawLists[], uint32_t _count, uint32_t width, uint32_t height, glm::mat4 _viewProj)
 {
+    ZoneScoped;
     // Using ImGui here as a simple means of rendering text draw lists, however as with primitives the application is free to draw text in any conceivable  manner.
-
-        // Invisible ImGui window which covers the screen.
+    // Invisible ImGui window which covers the screen.
     ImGui::PushStyleColor(ImGuiCol_WindowBg, IM_COL32_BLACK_TRANS);
     ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
     ImGui::SetNextWindowSize(ImVec2((float)width, (float)height));
@@ -123,6 +126,7 @@ void DrawIm3dTextListsImGui(const Im3d::TextDrawList _textDrawLists[], uint32_t 
 
 im3d_state im3d_gl::load_im3d()
 {
+    ZoneScoped;
     std::string tris_vert = utils::load_string_from_path("assets/shaders/im3d/im3d.tris.vert.glsl");
     std::string tris_frag = utils::load_string_from_path("assets/shaders/im3d/im3d.tris.frag.glsl");
 
@@ -157,6 +161,7 @@ im3d_state im3d_gl::load_im3d()
 
 void im3d_gl::shutdown_im3d(im3d_state& state)
 {
+    ZoneScoped;
     glDeleteVertexArrays(1, &state.im3d_vao);
     glDeleteBuffers(1, &state.im3d_vertex_buffer);
     glDeleteProgram(state.points_shader.m_shader_id);
@@ -166,6 +171,7 @@ void im3d_gl::shutdown_im3d(im3d_state& state)
 
 void im3d_gl::new_frame_im3d(im3d_state& state, glm::vec2 screen_dim, camera& cam)
 {
+    ZoneScoped;
     // update app data e.g. mouse pos, viewport size keys etc.
 	Im3d::AppData& ad = Im3d::GetAppData(); 
 	ad.m_viewportSize = { 1920, 1080};
@@ -189,7 +195,9 @@ void im3d_gl::new_frame_im3d(im3d_state& state, glm::vec2 screen_dim, camera& ca
 
 void im3d_gl::end_frame_im3d(im3d_state& state, glm::ivec2 screen_dim, camera& cam)
 {
+    ZoneScoped;
     Im3d::EndFrame();
+    // TODO: Enable blending to allow transparent filled im3d shapes
 	//glEnable(GL_BLEND);
 	//glBlendEquation(GL_FUNC_ADD);
 	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -246,11 +254,13 @@ void im3d_gl::end_frame_im3d(im3d_state& state, glm::ivec2 screen_dim, camera& c
 
 Im3d::Vec3 ToIm3D(glm::vec3& input)
 {
+    ZoneScoped;
     return { input.x, input.y , input.z};
 }
 
 Im3d::Vec2 ToIm3D(glm::vec2& input)
 {
+    ZoneScoped;
     return { input.x, input.y };
 }
 

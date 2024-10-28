@@ -1,45 +1,54 @@
 #include "input.h"
 #include "io.h"
+#include "tracy/Tracy.hpp"
 
 bool input::get_gamepad_button(int index, gamepad_button button)
 {
+    ZoneScoped;
     // AASSERT(index < MAX_SUPPORTED_GAMEPADS, "Invalid Gamepad Index Provided");
     return s_gamepad_state[index].current_frame_gamepad_button_state[button];
 }
 
 glm::vec2 input::get_gamepad_stick(int index, gamepad_stick stick)
 {
+    ZoneScoped;
     // AASSERT(index < MAX_SUPPORTED_GAMEPADS, "Invalid Gamepad Index Provided");
     return s_gamepad_state[index].current_frame_stick_state[stick];
 }
 
 bool input::get_keyboard_key(keyboard_key key)
 {
+    ZoneScoped;
     return s_keyboard_state.current_frame_key_state[key];
 }
 
 bool input::get_mouse_button(mouse_button button)
 {
+    ZoneScoped;
     return s_mouse_state.current_frame_mouse_button_state[button];
 }
 
 glm::vec2 input::get_mouse_position()
 {
+    ZoneScoped;
     return s_mouse_state.current_frame_mouse_location;
 }
 
 glm::vec2 input::get_mouse_velocity()
 {
+    ZoneScoped;
     return s_mouse_state.current_frame_mouse_velocity;
 }
 
 float input::get_mouse_scroll()
 {
+    ZoneScoped;
     return s_mouse_state.current_frame_scroll;
 }
 
 gamepad_stick input::get_stick_from_sdl(SDL_GameControllerAxis& sdlAxis)
 {
+    ZoneScoped;
     switch (sdlAxis) {
     case SDL_GameControllerAxis::SDL_CONTROLLER_AXIS_LEFTX:
         return gamepad_stick::LS;
@@ -55,6 +64,7 @@ gamepad_stick input::get_stick_from_sdl(SDL_GameControllerAxis& sdlAxis)
 
 gamepad_trigger input::get_trigger_from_sdl(SDL_GameControllerAxis& sdlAxis)
 {
+    ZoneScoped;
     switch (sdlAxis) {
     case SDL_GameControllerAxis::SDL_CONTROLLER_AXIS_TRIGGERLEFT:
         return gamepad_trigger::LT;
@@ -66,6 +76,7 @@ gamepad_trigger input::get_trigger_from_sdl(SDL_GameControllerAxis& sdlAxis)
 
 gamepad_button input::get_button_from_sdl(uint8_t sdlButton)
 {
+    ZoneScoped;
     switch (sdlButton) {
     case SDL_CONTROLLER_BUTTON_A:
         return gamepad_button::face_south;
@@ -102,6 +113,7 @@ gamepad_button input::get_button_from_sdl(uint8_t sdlButton)
 
 keyboard_key input::get_key_from_sdl(SDL_Keycode keyCode)
 {
+    ZoneScoped;
     {
         if (keyCode >= SDLK_0 && keyCode <= SDLK_9) {
             int diff = keyCode - SDLK_0;
@@ -182,34 +194,40 @@ keyboard_key input::get_key_from_sdl(SDL_Keycode keyCode)
 
 void input::update_gamepad_button(int gamepad_index, gamepad_button b, bool value)
 {
+    ZoneScoped;
     // AASSERT(gamepad_index < MAX_SUPPORTED_GAMEPADS, "Invalid Gamepad Index Provided");
     s_gamepad_state->current_frame_gamepad_button_state[b] = value;
 }
 
 void input::update_gamepad_trigger(int gamepad_index, gamepad_trigger b, float value)
 {
+    ZoneScoped;
     //AASSERT(gamepad_index < MAX_SUPPORTED_GAMEPADS, "Invalid Gamepad Index Provided");
     s_gamepad_state->current_frame_trigger_state[b] = value;
 }
 
 void input::update_gamepad_stick(int gamepad_index, gamepad_stick b, glm::vec2 value)
 {
+    ZoneScoped;
     //AASSERT(gamepad_index < MAX_SUPPORTED_GAMEPADS, "Invalid Gamepad Index Provided");
     s_gamepad_state->current_frame_stick_state[b] = value;
 }
 
 void input::update_mouse_button(mouse_button b, bool value)
 {
+    ZoneScoped;
     s_mouse_state.current_frame_mouse_button_state[b] = value;
 }
 
 void input::update_mouse_scroll(float value)
 {
+    ZoneScoped;
     s_mouse_state.current_frame_scroll = value;
 }
 
 void input::update_mouse_position(glm::vec2 screen_dim, glm::vec2 value)
 {
+    ZoneScoped;
     glm::vec2 val = value;
     val.x = glm::min(value.x, screen_dim.x);
     val.x = glm::max(value.x, 0.0f);
@@ -221,11 +239,13 @@ void input::update_mouse_position(glm::vec2 screen_dim, glm::vec2 value)
 
 void input::update_keyboard_key(keyboard_key k, bool value)
 {
+    ZoneScoped;
     s_keyboard_state.current_frame_key_state[k] = value;
 }
 
 void input::update_last_frame()
 {
+    ZoneScoped;
     s_keyboard_state.last_frame_key_state = s_keyboard_state.current_frame_key_state;
 
     s_mouse_state.last_frame_mouses_button_state = s_mouse_state.current_frame_mouse_button_state;

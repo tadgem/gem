@@ -7,6 +7,7 @@
 #include "stb_image.h"
 #include "utils.h"
 #include "gli.hpp"
+#include "tracy/Tracy.hpp"
 
 #define DDPS_ALPHAPIXELS 0x1
 #define DDPS_ALPHA 0x2
@@ -49,11 +50,12 @@ typedef struct {
 
 texture::texture()
 {
-
+	ZoneScoped;
 }
 
 texture::texture(const std::string& path)
 {
+	ZoneScoped;
 	std::string compressed_format_type = "";
 	int			block_size = -1;
 	
@@ -70,36 +72,43 @@ texture::texture(const std::string& path)
 
 texture::texture(const std::string& path, std::vector<unsigned char> data)
 {
+	ZoneScoped;
+
 }
 
 texture::~texture()
 {
+	ZoneScoped;
 }
 
 void texture::bind_sampler(GLenum texture_slot, GLenum texture_target)
 {
+	ZoneScoped;
 	bind_sampler_handle(m_handle, texture_slot, texture_target);
 }
 
 void texture::bind_sampler_handle(gl_handle handle, GLenum texture_slot, GLenum texture_target)
 {
+	ZoneScoped;
 	glAssert(glActiveTexture(texture_slot));
 	glAssert(glBindTexture(texture_target, handle));
 }
 
 void texture::bind_image_handle(gl_handle handle, uint32_t binding, uint32_t mip_level, GLenum format)
 {
+	ZoneScoped;
 	glAssert(glBindImageTexture(binding, handle, mip_level, GL_TRUE, 0, GL_READ_WRITE, format));
-
 }
 
 void texture::unbind_image(uint32_t binding)
 {
+	ZoneScoped;
 	glAssert(glBindImageTexture(binding, 0, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA8));
 }
 
 texture texture::from_data(unsigned int* data, unsigned int count, int width, int height, int depth, int nr_channels)
 {
+	ZoneScoped;
 	texture t{};
 	glGenTextures(1, &t.m_handle);
 	glBindTexture(GL_TEXTURE_2D, t.m_handle);
@@ -117,6 +126,7 @@ texture texture::from_data(unsigned int* data, unsigned int count, int width, in
 
 texture texture::create_3d_texture(glm::ivec3 dim, GLenum format, GLenum pixel_format, GLenum data_type, void* data, GLenum filter, GLenum wrap_mode )
 {
+	ZoneScoped;
 	texture t{};
 	glAssert(glGenTextures(1, &t.m_handle));
 	glAssert(glBindTexture(GL_TEXTURE_3D, t.m_handle));
@@ -136,6 +146,7 @@ texture texture::create_3d_texture(glm::ivec3 dim, GLenum format, GLenum pixel_f
 
 texture texture::create_3d_texture_empty(glm::ivec3 dim, GLenum format, GLenum pixel_format, GLenum data_type, GLenum filter, GLenum wrap_mode)
 {
+	ZoneScoped;
 	texture t{};
 	glAssert(glGenTextures(1, &t.m_handle));
 	glAssert(glBindTexture(GL_TEXTURE_3D, t.m_handle));
@@ -157,6 +168,7 @@ texture texture::create_3d_texture_empty(glm::ivec3 dim, GLenum format, GLenum p
 
 void texture::load_texture_stbi(std::vector<unsigned char>& data)
 {
+	ZoneScoped;
 	stbi_set_flip_vertically_on_load(1);
 	unsigned char* stbi_data = stbi_load_from_memory(data.data(), data.size(), &m_width, &m_height, &m_num_channels, 0);
 	if (!stbi_data)
@@ -177,6 +189,7 @@ void texture::load_texture_stbi(std::vector<unsigned char>& data)
 
 void texture::load_texture_gli(std::vector<unsigned char>& data)
 {
+	ZoneScoped;
 	gli::texture dds_tex_raw = gli::load_dds((const char*) data.data(), data.size());
 	gli::texture dds_tex = gli::flip(dds_tex_raw);
 	//gli::texture dds_tex = gli::load_dds(path);
@@ -207,5 +220,6 @@ void texture::load_texture_gli(std::vector<unsigned char>& data)
 	}
 }
 void texture::release() {
+	ZoneScoped;
     glDeleteTextures(1, &m_handle);
 }

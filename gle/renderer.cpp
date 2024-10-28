@@ -413,6 +413,7 @@ void gl_renderer::cleanup(asset_manager& am)
 
 entt::entity gl_renderer::get_mouse_entity(glm::vec2 mouse_position)
 {
+    ZoneScoped;
     auto pixels = m_gbuffer.read_pixels<glm::vec4, 1, 1>(
         mouse_position.x, 
         m_window_resolution.y - mouse_position.y, 
@@ -430,6 +431,7 @@ entt::entity gl_renderer::get_mouse_entity(glm::vec2 mouse_position)
 
 void gl_renderer::on_imgui(asset_manager& am)
 {
+    ZoneScoped;
     glm::vec2 mouse_pos = input::get_mouse_position();
     ImGui::Begin("Renderer Settings");
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / gl_backend::s_imgui_io->Framerate, gl_backend::s_imgui_io->Framerate);

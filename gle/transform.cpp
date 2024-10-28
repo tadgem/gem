@@ -2,9 +2,11 @@
 #include "scene.h"
 #include "utils.h"
 #include "mesh.h"
+#include "tracy/Tracy.hpp"
 
 void transform::update_transforms(scene& current_scene)
 {
+	ZoneScoped;
 	auto transform_view = current_scene.m_registry.view<transform>();
 
 	for (auto [e, trans] : transform_view.each())

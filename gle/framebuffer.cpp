@@ -1,24 +1,29 @@
 #include "framebuffer.h"
 #include <iostream>
+#include "tracy/Tracy.hpp"
 
 framebuffer::framebuffer()
 {
+	ZoneScoped;
 	m_handle = INVALID_GL_HANDLE;
 }
 
 void framebuffer::unbind()
 {
+	ZoneScoped;
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void framebuffer::cleanup()
 {
+	ZoneScoped;
 	glDeleteFramebuffers(1, &m_handle);
 }
 
 
 void framebuffer::add_colour_attachment(GLenum attachment_index, uint32_t width, uint32_t height, GLenum internal_format, GLenum format, GLenum filter, GLenum pixel_format)
 {
+	ZoneScoped;
 	gl_handle textureColorbuffer;
 	glGenTextures(1, &textureColorbuffer);
 	glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
@@ -35,6 +40,7 @@ void framebuffer::add_colour_attachment(GLenum attachment_index, uint32_t width,
 
 void framebuffer::add_depth_attachment(uint32_t width, uint32_t height, GLenum format)
 {
+	ZoneScoped;
 	gl_handle rbo;
 	glGenRenderbuffers(1, &rbo);
 	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
@@ -50,6 +56,7 @@ void framebuffer::add_depth_attachment(uint32_t width, uint32_t height, GLenum f
 
 void framebuffer::add_depth_attachment_sampler_friendly(uint32_t width, uint32_t height, GLenum format)
 {
+	ZoneScoped;
 	gl_handle depthMap;
 	glGenTextures(1, &depthMap);
 	glBindTexture(GL_TEXTURE_2D, depthMap);
@@ -70,6 +77,7 @@ void framebuffer::add_depth_attachment_sampler_friendly(uint32_t width, uint32_t
 
 void framebuffer::check()
 {
+	ZoneScoped;
 	auto zero = GL_COLOR_ATTACHMENT0;
 	std::vector<unsigned int> attachments;
 
@@ -96,6 +104,7 @@ void framebuffer::check()
 
 framebuffer framebuffer::create(glm::vec2 resolution, std::vector<attachment_info> attachments, bool add_depth)
 {
+	ZoneScoped;
 	GLenum attachment = GL_COLOR_ATTACHMENT0;
 	framebuffer fb {};
 	fb.bind();
@@ -115,6 +124,7 @@ framebuffer framebuffer::create(glm::vec2 resolution, std::vector<attachment_inf
 
 void framebuffer::bind()
 {
+	ZoneScoped;
 	if (m_handle == INVALID_GL_HANDLE)
 	{
 		glGenFramebuffers(1, &m_handle);

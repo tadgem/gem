@@ -5,13 +5,16 @@
 #include "material.h"
 #include "utils.h"
 #include <sstream>
+#include "tracy/Tracy.hpp"
 
 scene::scene(const std::string& scene_name) : m_name(scene_name)
 {
+	ZoneScoped;
 }
 
 entity scene::create_entity(const std::string& name)
 {
+	ZoneScoped;
 	entt::entity e = m_registry.create();
 	m_registry.emplace<entity_data>(e, entity_data{ name });
 	p_created_entity_count++;
@@ -25,6 +28,7 @@ std::vector<entity> scene::create_entity_from_model(
 	glm::vec3 euler, 
 	std::map<std::string, texture_map_type> known_maps)
 {
+	ZoneScoped;
 	std::vector<entity> entities{};
 	for (auto& entry : model_to_load.m_meshes)
 	{
@@ -66,16 +70,19 @@ std::vector<entity> scene::create_entity_from_model(
 
 bool scene::does_entity_exist(u32 index)
 {
+	ZoneScoped;
 	return m_registry.valid(entt::entity {index});
 }
 
 void scene::on_update()
 {
+	ZoneScoped;
 	transform::update_transforms(*this);
 }
 
 void scene::update_aabb(aabb& in)
 {
+	ZoneScoped;
 	if (in.min.x < m_scene_bounding_volume.min.x)
 	{
 		m_scene_bounding_volume.min.x = in.min.x;
@@ -105,21 +112,24 @@ void scene::update_aabb(aabb& in)
 
 entity::entity(scene* escene, entt::entity e) : m_scene(escene), m_handle(e)
 {
+	ZoneScoped;
 }
 
 
 scene_manager::scene_manager()
 {
-
+	ZoneScoped;
 }
 
 void scene_manager::close_scene(hash_string scene_hash)
 {
+	ZoneScoped;
 
 }
 
 scene* scene_manager::get_scene(hash_string scene_hash)
 {
+	ZoneScoped;
 	if (p_active_scenes.find(scene_hash) == p_active_scenes.end())
 	{
 		return nullptr;
@@ -129,6 +139,7 @@ scene* scene_manager::get_scene(hash_string scene_hash)
 
 scene* scene_manager::create_scene(const std::string& scene_name)
 {
+	ZoneScoped;
 	hash_string scene_hash(scene_name);
 	if (p_active_scenes.find(scene_hash) != p_active_scenes.end())
 	{
@@ -141,11 +152,13 @@ scene* scene_manager::create_scene(const std::string& scene_name)
 
 scene* scene_manager::load_scene(nlohmann::json& scene_json)
 {
+	ZoneScoped;
 	return nullptr;
 }
 
 nlohmann::json  scene_manager::save_scene(scene* ser_scene)
 {
+	ZoneScoped;
 	nlohmann::json json{};
 
 	return json;

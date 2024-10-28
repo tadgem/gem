@@ -7,22 +7,27 @@
 #include "assimp/mesh.h"
 #include "assimp/scene.h"
 #include "spdlog/spdlog.h"
+#include "tracy/Tracy.hpp"
 
 static glm::vec3 AssimpToGLM(aiVector3D aiVec) {
+    ZoneScoped;
     return glm::vec3(aiVec.x, aiVec.y, aiVec.z);
 }
 
 static glm::vec2 AssimpToGLM(aiVector2D aiVec) {
+    ZoneScoped;
     return glm::vec2(aiVec.x, aiVec.y);
 }
 
 texture_entry::texture_entry(texture_map_type tmt, asset_handle ah, const std::string& path, texture* data) 
     : m_handle(ah), m_map_type(tmt), m_path(path), m_texture(data)
 {
+    ZoneScoped;
 
 }
 
 void ProcessMesh(model& model, aiMesh* m, aiNode* node, const aiScene* scene, bool use_entries, std::vector<model::mesh_entry>& mesh_entries) {
+    ZoneScoped;
     bool hasPositions = m->HasPositions();
     bool hasUVs = m->HasTextureCoords(0);
     bool hasNormals = m->HasNormals();
@@ -119,7 +124,7 @@ void ProcessMesh(model& model, aiMesh* m, aiNode* node, const aiScene* scene, bo
 }
 
 void ProcessNode(model& model, aiNode* node, const aiScene* scene, bool use_entries, std::vector<model::mesh_entry>& mesh_entries) {
-
+    ZoneScoped;
     if (node->mNumMeshes > 0) {
         for (unsigned int i = 0; i < node->mNumMeshes; i++) {
             unsigned int sceneIndex = node->mMeshes[i];
@@ -139,6 +144,7 @@ void ProcessNode(model& model, aiNode* node, const aiScene* scene, bool use_entr
 
 void get_material_texture(const std::string& directory, aiMaterial* material, model::material_entry& mat, aiTextureType ass_texture_type, texture_map_type gl_texture_type)
 {
+    ZoneScoped;
     uint32_t tex_count = aiGetMaterialTextureCount(material, ass_texture_type);
     if (tex_count > 0)
     {
@@ -158,6 +164,7 @@ void get_material_texture(const std::string& directory, aiMaterial* material, mo
 
 void get_material_texture_entry(const std::string& directory, aiMaterial* material, model::material_entry& mat, aiTextureType ass_texture_type, texture_map_type gl_texture_type, std::vector<texture_entry>& texture_entries)
 {
+    ZoneScoped;
     uint32_t tex_count = aiGetMaterialTextureCount(material, ass_texture_type);
     if (tex_count > 0)
     {
@@ -176,6 +183,7 @@ void get_material_texture_entry(const std::string& directory, aiMaterial* materi
 
 model model::load_model_and_textures_from_path(const std::string& path)
 {
+    ZoneScoped;
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(path.c_str(),
         aiProcess_Triangulate |
@@ -234,6 +242,7 @@ model model::load_model_and_textures_from_path(const std::string& path)
 
 model model::load_model_from_path_entries(const std::string& path, std::vector<texture_entry>& texture_entries, std::vector<mesh_entry>& mesh_entries)
 {
+    ZoneScoped;
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(path.c_str(),
         aiProcess_Triangulate |
@@ -276,6 +285,7 @@ model model::load_model_from_path_entries(const std::string& path, std::vector<t
 }
 
 void model::update_aabb() {
+    ZoneScoped;
     aabb  model_aabb{};
     for (auto& mesh : m_meshes)
     {
@@ -290,8 +300,8 @@ void model::update_aabb() {
     m_aabb = model_aabb;
 }
 
-
 void model::release() {
+    ZoneScoped;
     for(mesh& m : m_meshes)
     {
         m.m_vao.free();

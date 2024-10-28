@@ -6,9 +6,11 @@
 #include "input.h"
 #include "utils.h"
 #include "backend.h"
+#include "tracy/Tracy.hpp"
 
 void camera::update(glm::vec2 screen_dim)
 {
+    ZoneScoped;
     m_last_vp = m_proj * m_view;
     glm::mat4 rotate = get_rotation_matrix();
     glm::mat4 translate = glm::mat4(1.0f);
@@ -32,6 +34,7 @@ void camera::update(glm::vec2 screen_dim)
 
 glm::mat4 camera::get_rotation_matrix()
 {
+    ZoneScoped;
     glm::quat qPitch = glm::angleAxis(glm::radians(-m_euler.x), glm::vec3(1, 0, 0));
     glm::quat qYaw = glm::angleAxis(glm::radians(m_euler.y), glm::vec3(0, 1, 0));
     // omit roll
@@ -42,6 +45,7 @@ glm::mat4 camera::get_rotation_matrix()
 
 void debug_camera_controller::update(glm::vec2 screen_dim, camera& cam)
 {
+    ZoneScoped;
     if (!input::get_mouse_button(mouse_button::right) && !show_mouse)
     {
         SDL_ShowCursor(SDL_ENABLE);

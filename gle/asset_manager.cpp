@@ -4,6 +4,7 @@
 #include "shader.h"
 #include "hash_string.h"
 #include "spdlog/spdlog.h"
+#include "tracy/Tracy.hpp"
 #include <filesystem>
 
 using texture_intermediate_asset = asset_t_intermediate<texture, std::vector<unsigned char>, asset_type::texture>;
@@ -12,6 +13,7 @@ using shader_intermediate_asset = asset_t_intermediate<shader, std::string, asse
 
 asset_handle asset_manager::load_asset(const std::string& path, const asset_type& assetType, asset_loaded_callback on_asset_loaded)
 {
+    ZoneScoped;
     if (!std::filesystem::exists(path))
     {
         return asset_handle::INVALID();
@@ -55,6 +57,7 @@ asset_handle asset_manager::load_asset(const std::string& path, const asset_type
 
 asset* asset_manager::get_asset(asset_handle& handle)
 {
+    ZoneScoped;
 	if (p_loaded_assets.find(handle) == p_loaded_assets.end()) {
 		return nullptr;
 	}
@@ -64,6 +67,7 @@ asset* asset_manager::get_asset(asset_handle& handle)
 
 asset_load_progress asset_manager::get_asset_load_progress(const asset_handle& handle)
 {
+    ZoneScoped;
     for (auto& queued : p_queued_loads) {
         if (queued.to_handle() == handle) {
             return asset_load_progress::loading;
@@ -88,17 +92,20 @@ asset_load_progress asset_manager::get_asset_load_progress(const asset_handle& h
 
 bool asset_manager::any_assets_loading()
 {
+    ZoneScoped;
     return !p_pending_load_tasks.empty() || !p_pending_load_callbacks.empty() || !p_pending_unload_callbacks.empty() ||
         !p_queued_loads.empty();
 }
 
 bool asset_manager::any_assets_unloading()
 {
+    ZoneScoped;
     return !p_pending_unload_callbacks.empty();
 }
 
 void asset_manager::wait_all_assets()
 {
+    ZoneScoped;
     while (any_assets_loading())
     {
         update();
@@ -107,6 +114,7 @@ void asset_manager::wait_all_assets()
 
 void asset_manager::wait_all_unloads()
 {
+    ZoneScoped;
     while (any_assets_unloading())
     {
         update();
@@ -115,6 +123,7 @@ void asset_manager::wait_all_unloads()
 
 void asset_manager::unload_all_assets()
 {
+    ZoneScoped;
     std::vector<asset_handle> assetsRemaining{};
 
     for (auto& [handle, asset] : p_loaded_assets) {
@@ -130,6 +139,7 @@ void asset_manager::unload_all_assets()
 
 void asset_manager::update()
 {
+    ZoneScoped;
     if (!any_assets_loading()) {
         return;
     }
@@ -142,6 +152,7 @@ void asset_manager::update()
 
 void asset_manager::shutdown()
 {
+    ZoneScoped;
     wait_all_assets();
     wait_all_unloads();
     unload_all_assets();
@@ -149,6 +160,7 @@ void asset_manager::shutdown()
 
 void asset_manager::handle_load_and_unload_callbacks()
 {
+    ZoneScoped;
     u16 processedCallbacks = 0;
     std::vector<asset_handle> clears;
 
@@ -190,6 +202,7 @@ void asset_manager::handle_load_and_unload_callbacks()
 
 void asset_manager::handle_pending_loads()
 {
+    ZoneScoped;
     while (p_pending_load_tasks.size() < p_max_async_tasks_in_flight && !p_queued_loads.empty()) {
         auto& info = p_queued_loads.front();
         dispatch_asset_load_task(info.to_handle(), info);
@@ -199,6 +212,7 @@ void asset_manager::handle_pending_loads()
 
 void asset_manager::handle_async_tasks()
 {
+    ZoneScoped;
     std::vector<asset_handle> finished;
     for (auto& [handle, future] : p_pending_load_tasks) {
         if (utils::is_future_ready(future)) {
@@ -229,6 +243,7 @@ void asset_manager::handle_async_tasks()
 
 void submit_meshes_to_gpu(asset_intermediate* model_asset)
 {
+    ZoneScoped;
     // cast to model asset
     model_intermediate_asset* inter = static_cast<model_intermediate_asset*>(model_asset);
     asset_t<model, asset_type::model>* ma = inter->get_concrete_asset();
@@ -274,6 +289,7 @@ void submit_meshes_to_gpu(asset_intermediate* model_asset)
 
 void submit_texture_to_gpu(asset_intermediate* texture_asset)
 {
+    ZoneScoped;
     // cast to model asset
     texture_intermediate_asset* ta_inter = static_cast<texture_intermediate_asset*>(texture_asset);
     asset_t<texture, asset_type::texture>* ta = ta_inter->get_concrete_asset();
@@ -291,6 +307,7 @@ void submit_texture_to_gpu(asset_intermediate* texture_asset)
 
 void link_shader_program(asset_intermediate* shader_asset)
 {
+    ZoneScoped;
     shader_intermediate_asset* shader_inter = static_cast<shader_intermediate_asset*>(shader_asset);
     std::unordered_map<shader::stage, std::string> stages = shader::split_composite_shader(shader_inter->m_intermediate);
 
@@ -312,6 +329,7 @@ void link_shader_program(asset_intermediate* shader_asset)
 
 asset_load_return load_model_asset_manager(const std::string& path)
 {
+    ZoneScoped;
     std::vector <texture_entry> associated_textures;
     std::vector <model::mesh_entry> mesh_entries;
     // move this into a heap allocated object
@@ -336,12 +354,14 @@ asset_load_return load_model_asset_manager(const std::string& path)
 
 void unload_model_asset_manager(asset* _asset)
 {
+    ZoneScoped;
     asset_t<model, asset_type::model>* ma = static_cast<asset_t<model, asset_type::model>*>(_asset);
     ma->m_data.release();
 }
 
 asset_load_return load_texture_asset_manager(const std::string& path)
 {
+    ZoneScoped;
     asset_load_return ret{};
     ret.m_new_assets_to_load = {};
     ret.m_asset_load_sync_callbacks.push_back(submit_texture_to_gpu);
@@ -357,12 +377,14 @@ asset_load_return load_texture_asset_manager(const std::string& path)
 
 void unload_texture_asset_manager(asset* _asset)
 {
+    ZoneScoped;
     asset_t<texture, asset_type::texture>* ta = static_cast<asset_t<texture, asset_type::texture>*>(_asset);
     ta->m_data.release();
 }
 
 asset_load_return load_shader_asset_manager(const std::string& path)
 {
+    ZoneScoped;
     std::string source = utils::load_string_from_path(path);
     asset_load_return ret{};
     ret.m_loaded_asset_intermediate = new shader_intermediate_asset(new asset_t<shader, asset_type::shader>(shader{}, path), source, path);
@@ -374,12 +396,14 @@ asset_load_return load_shader_asset_manager(const std::string& path)
 
 void unload_shader_asset_manager(asset* _asset)
 {
+    ZoneScoped;
     asset_t<shader, asset_type::shader>* sa = static_cast<asset_t<shader, asset_type::shader>*>(_asset);
     sa->m_data.release();
 }
 
 void asset_manager::dispatch_asset_load_task(const asset_handle& handle, asset_load_info& info)
 {
+    ZoneScoped;
     switch (info.m_type)
     {
     case asset_type::model:
@@ -396,6 +420,7 @@ void asset_manager::dispatch_asset_load_task(const asset_handle& handle, asset_l
 
 void asset_manager::transition_asset_to_loaded(const asset_handle& handle, asset* asset_to_transition)
 {
+    ZoneScoped;
     p_loaded_assets.emplace(handle, std::move(std::unique_ptr<asset>(asset_to_transition)));
     spdlog::info("asset_manager : loaded {} : {} ", get_asset_type_name(handle.m_type), asset_to_transition->m_path);
     
@@ -414,11 +439,13 @@ void asset_manager::transition_asset_to_loaded(const asset_handle& handle, asset
 
 asset_handle asset_load_info::to_handle()
 {
+    ZoneScoped;
     return asset_handle(m_path, m_type);
 }
 
 void asset_manager::unload_asset(const asset_handle& handle)
 {
+    ZoneScoped;
     if (p_loaded_assets.find(handle) == p_loaded_assets.end()) {
         return;
     }

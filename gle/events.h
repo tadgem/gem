@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <memory>
 #include <type_traits>
+#include "tracy/Tracy.hpp"
 
 enum class event_queue : u32
 {
@@ -53,6 +54,7 @@ struct event_comparator
 
 	bool operator==(event_comparator const& rhs) const
 	{
+		ZoneScoped;
 		return m_queue == rhs.m_queue && m_index == rhs.m_index;
 	}
 
@@ -63,6 +65,7 @@ struct event_comparator
 template<>
 struct std::hash<event_comparator> {
 	std::size_t operator()(const event_comparator& ah) const {
+		ZoneScoped;
 		return std::hash<u32>()(ah.m_queue) ^ std::hash<u32>()(ah.m_index);
 	}
 };
@@ -77,6 +80,7 @@ public:
 	template<typename _EventData>
 	void add_subscription(void(*callback) (_EventData))
 	{
+		ZoneScoped;
 		static_assert(std::is_base_of<a_event_data, _EventData>(), "_EventData does not inherit from a_event_data");
 		static_assert(std::is_default_constructible<_EventData>(), "_EventData is not default constructible");
 
@@ -93,6 +97,7 @@ public:
 	template<typename _EventData>
 	void remove_subscription(void(*callback) (_EventData))
 	{
+		ZoneScoped;
 		static_assert(std::is_base_of<a_event_data, _EventData>(), "_EventData does not inherit from a_event_data");
 		static_assert(std::is_default_constructible<_EventData>(), "_EventData is not default constructible");
 
@@ -124,6 +129,7 @@ public:
 	template<typename _EventData>
 	void invoke(_EventData data)
 	{
+		ZoneScoped;
 		static_assert(std::is_base_of<a_event_data, _EventData>(), "_EventData does not inherit from a_event_data");
 		static_assert(std::is_default_constructible<_EventData>(), "_EventData is not default constructible");
 		_EventData prototype{};

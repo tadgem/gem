@@ -1,9 +1,11 @@
 #include "voxelisation.h"
 #include "backend.h"
 #include "utils.h"
+#include "tracy/Tracy.hpp"
 
 void voxel::grid::update_aabb(aabb& new_aabb)
 {
+	ZoneScoped;
 	glm::vec3 aabb_dim = new_aabb.max - new_aabb.min;
 	voxel_unit = glm::vec3((aabb_dim.x / resolution.x), (aabb_dim.y / resolution.y), (aabb_dim.z / resolution.z));
 	resolution = resolution;
@@ -12,6 +14,7 @@ void voxel::grid::update_aabb(aabb& new_aabb)
 
 voxel::grid voxel::create_grid(glm::ivec3 resolution, aabb bb)
 {
+	ZoneScoped;
 	grid grid{};
 	grid.resolution = resolution;
 	grid.update_aabb(bb);
@@ -28,6 +31,7 @@ voxel::grid voxel::create_grid(glm::ivec3 resolution, aabb bb)
 
 voxel::grid_visualiser voxel::create_grid_visualiser(voxel::grid& vg, shader& visualisation_shader, int texel_resolution)
 {
+	ZoneScoped;
 	grid_visualiser vgv{ visualisation_shader, {}, texel_resolution, 0 };
 	// create the voxel texel shape
 	std::vector<float>			vertex_data;

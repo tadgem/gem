@@ -1,11 +1,15 @@
 #include "asset.h"
 #include "hash_string.h"
+#include "tracy/Tracy.hpp"
+
 asset::asset(const std::string& path, asset_type type) : m_path(path), m_handle (path, type)
 {
+	ZoneScoped;
 }
 
 std::string get_asset_type_name(const asset_type& t)
 {
+	ZoneScoped;
 	switch (t)
 	{
 	case asset_type::model:
@@ -24,12 +28,14 @@ std::string get_asset_type_name(const asset_type& t)
 
 asset_handle::asset_handle(const std::string& path, asset_type type)
 {
+	ZoneScoped;
 	m_type = type;
 	m_path_hash = hash_utils::get_string_hash(path);
 }
 
 asset_handle::asset_handle(const hash_string& path_hash, asset_type type)
 {
+	ZoneScoped;
 	m_type = type;
 	m_path_hash = path_hash;
 }

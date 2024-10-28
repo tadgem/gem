@@ -1,7 +1,9 @@
 #include "shape.h"
+#include "tracy/Tracy.hpp"
 
 VAO shapes::gen_cube_instanced_vao(std::vector<glm::mat4>& matrices, std::vector<glm::vec3>& uvs)
 {
+    ZoneScoped;
     //  Set up vertex attribute data and attribute pointers
     std::vector<float>  cube_data = {
         -0.5f, -0.5f, -0.5f,

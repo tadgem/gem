@@ -1,9 +1,11 @@
 #include "fsm.h"
 #include "spdlog/spdlog.h"
+#include "tracy/Tracy.hpp"
 
 fsm_lambda::state::state(int state, std::function<int()> action, std::function<void()> entry, std::function<void()> exit)
 	: m_state(state), m_action(action)
 {
+	ZoneScoped;
 	m_has_entry = false;
 	m_has_exit = false;
 	if (entry != NULL) {
@@ -16,16 +18,18 @@ fsm_lambda::state::state(int state, std::function<int()> action, std::function<v
 	}
 }
 fsm_lambda::fsm_lambda() : p_current_state(UINT16_MAX), p_run_entry(false) { 
+	ZoneScoped;
 }
 
 void fsm_lambda::set_starting_state(int state)
 {	
+	ZoneScoped;
 	p_current_state = state;
 }
 
 void fsm_lambda::update()
 {
-	
+	ZoneScoped;	
 	int index = -1;
 	for (int i = 0; i < p_states.size(); i++) {
 		if (p_states[i].m_state == p_current_state) {
@@ -70,7 +74,7 @@ void fsm_lambda::update()
 }
 void fsm_lambda::trigger_int(int trigger)
 {
-	
+	ZoneScoped;
 	for (int i = 0; i < p_transitions.size(); i++) {
 		if (p_transitions[i].m_trigger == trigger) {
 			if (p_transitions[i].m_src_state == p_current_state) {
@@ -82,6 +86,7 @@ void fsm_lambda::trigger_int(int trigger)
 }
 void fsm_lambda::add_state(int s, std::function<int()> action)
 {
+	ZoneScoped;
 		for (int i = 0; i < p_states.size(); i++) {
 		if (p_states[i].m_state == s) {
 			spdlog::error("Already have a state in machine for : {}", s);
@@ -93,7 +98,7 @@ void fsm_lambda::add_state(int s, std::function<int()> action)
 }
 void fsm_lambda::add_state_entry(int state, std::function<void()> entry)
 {
-	
+	ZoneScoped;
 	for (int i = 0; i < p_states.size(); i++) {
 		if (p_states[i].m_state == state) {
 			p_states[i].m_entry_procedure = entry;
@@ -103,7 +108,7 @@ void fsm_lambda::add_state_entry(int state, std::function<void()> entry)
 }
 void fsm_lambda::add_state_exit(int state, std::function<void()> exit)
 {
-	
+	ZoneScoped;
 	for (int i = 0; i < p_states.size(); i++) {
 		if (p_states[i].m_state == state) {
 			p_states[i].m_exit_procedure= exit;
@@ -113,14 +118,14 @@ void fsm_lambda::add_state_exit(int state, std::function<void()> exit)
 }
 void fsm_lambda::add_trigger(int trigger, int src_state, int dst_state)
 {
-	
+	ZoneScoped;	
 	state_transition transition{ trigger, src_state, dst_state };
 	p_transitions.emplace_back(transition);
 }
 
 void fsm_lambda::transition_state(int new_state)
 {
-	
+	ZoneScoped;
 	if (p_states[p_current_state].m_has_exit) {
 		p_states[p_current_state].m_exit_procedure();
 	}

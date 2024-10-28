@@ -16,6 +16,8 @@
 #endif
 #include "texture.h"
 #include "shape.h"
+#include "tracy/Tracy.hpp"
+
 
 
 static SDL_GLContext*   s_sdl_gl_context = nullptr;
@@ -24,6 +26,7 @@ static Uint64           s_last_counter;
 
 GLenum glCheckError_(const char* file, int line)
 {
+    ZoneScoped;
     GLenum errorCode;
     while ((errorCode = glGetError()) != GL_NO_ERROR)
     {
@@ -51,6 +54,7 @@ static void glDebugOutput(GLenum source,
     const char* message,
     const void* userParam)
 {
+    ZoneScoped;
     // ignore non-significant error/warning codes
     if (id == 131169 || id == 131185 || id == 131218 || id == 131204) return;
     if (severity == GL_DEBUG_SEVERITY_NOTIFICATION) return; // GPU Markers count as notifications
@@ -93,6 +97,7 @@ static void glDebugOutput(GLenum source,
 
 void set_imgui_style()
 {
+    ZoneScoped;
     ImFontConfig font_config = ImFontConfig();
     font_config.FontDataOwnedByAtlas = false;
     ImGui::GetIO().Fonts->AddFontFromMemoryTTF((void*) & funnel_sans_ttf_bin[0], FUNNELSANS_TTF_SIZE, 18.0f, &font_config);
@@ -179,6 +184,7 @@ void set_imgui_style()
 
 void init_built_in_assets()
 {
+    ZoneScoped;
     std::vector<unsigned int> black_data = { 0 };
     std::vector<unsigned int> white_data = { UINT32_MAX };
     texture::white = new texture(texture::from_data(white_data.data(), white_data.size(), 1, 1, 1, 4));
@@ -274,6 +280,7 @@ void init_built_in_assets()
 
 void init_imgui_file_dialog()
 {
+    ZoneScoped;
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
         GLuint tex;
 
@@ -299,6 +306,7 @@ void init_imgui_file_dialog()
 // todo: rework this to allow rendering backend to init
 void gl_backend::init(backend_init& init_props)
 {
+    ZoneScoped;
 #ifdef ENABLE_MEMORY_TRACKING
     debug_memory_tracker::s_instance = new debug_memory_tracker();
 #endif
@@ -397,6 +405,7 @@ void gl_backend::init(backend_init& init_props)
 
 void gl_backend::process_sdl_event()
 {
+    ZoneScoped;
     SDL_Event event;
     while (SDL_PollEvent(&event))
     {
@@ -420,6 +429,7 @@ void gl_backend::process_sdl_event()
 
 void gl_backend::engine_pre_frame()
 {
+    ZoneScoped;
     static ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 1.00f);
     s_last_counter = s_now_counter;
     s_now_counter = SDL_GetPerformanceCounter();
@@ -444,7 +454,7 @@ void gl_backend::engine_pre_frame()
 
 void gl_backend::engine_post_frame()
 {
-    // Rendering
+    ZoneScoped;
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     SDL_GL_SwapWindow(s_window);
@@ -452,7 +462,7 @@ void gl_backend::engine_post_frame()
 
 void gl_backend::engine_shut_down()
 {
-    // Cleanup
+    ZoneScoped;
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplSDL2_Shutdown();
     ImGui::DestroyContext();
@@ -465,11 +475,13 @@ void gl_backend::engine_shut_down()
 
 float gl_backend::get_frame_time()
 {
+    ZoneScoped;
     return s_frametime;
 }
 
 void gl_backend::engine_handle_input_events(SDL_Event& input_event)
 {
+    ZoneScoped;
     input::update_last_frame();
 
     if (input_event.type == SDL_KEYDOWN) {
@@ -552,6 +564,7 @@ void gl_backend::engine_handle_input_events(SDL_Event& input_event)
 
 glm::vec2 gl_backend::get_window_dim()
 {
+    ZoneScoped;
     int w, h;
     SDL_GetWindowSize(s_window, &w, &h);
     return glm::vec2{ static_cast<float>(w), static_cast<float>(h) };
