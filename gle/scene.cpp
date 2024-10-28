@@ -7,7 +7,7 @@
 #include <sstream>
 #include "tracy/Tracy.hpp"
 
-scene::scene(const std::string& scene_name) : m_name(scene_name)
+scene::scene(const std::string& scene_name) : m_name(scene_name), m_name_hash(scene_name)
 {
 	ZoneScoped;
 }
@@ -130,24 +130,29 @@ void scene_manager::close_scene(hash_string scene_hash)
 scene* scene_manager::get_scene(hash_string scene_hash)
 {
 	ZoneScoped;
-	if (p_active_scenes.find(scene_hash) == p_active_scenes.end())
+
+	for (auto& scene : p_active_scenes)
 	{
-		return nullptr;
+		if (scene->m_name_hash == scene_hash)
+		{
+			return p_active_scenes[scene_hash].get();
+		}
 	}
-	return p_active_scenes[scene_hash].get();
+	return nullptr;
 }
 
 scene* scene_manager::create_scene(const std::string& scene_name)
 {
 	ZoneScoped;
 	hash_string scene_hash(scene_name);
-	if (p_active_scenes.find(scene_hash) != p_active_scenes.end())
+	scene* existing_scene = get_scene(scene_hash);
+	if (existing_scene != nullptr)
 	{
-		return p_active_scenes[scene_hash].get();
+		return existing_scene;
 	}
 
-	p_active_scenes.emplace(scene_hash, std::make_unique<scene>(scene_name));
-	return p_active_scenes[scene_hash].get();
+	p_active_scenes.emplace_back(std::make_unique<scene>(scene_name));
+	return p_active_scenes.back().get();
 }
 
 scene* scene_manager::load_scene(nlohmann::json& scene_json)

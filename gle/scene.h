@@ -28,6 +28,7 @@ public:
 	void					update_aabb(aabb& in);
 
     const std::string	m_name;
+	const hash_string   m_name_hash;
     entt::registry		m_registry;
 	aabb				m_scene_bounding_volume;
 protected:
@@ -93,6 +94,6 @@ public:
 	nlohmann::json  save_scene(scene* ser_scene);
 
 protected:
-	std::unordered_map<hash_string, std::unique_ptr<scene>>	p_active_scenes;
+	std::vector<std::unique_ptr<scene>>	p_active_scenes;
 
 };
