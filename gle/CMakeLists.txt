@@ -93,11 +93,12 @@ set(GLE_INCLUDES
         ${THIRD_PARTY_DIR}/gli/gli
         ${THIRD_PARTY_DIR}/entt
         ${THIRD_PARTY_DIR}/im3d
+        ${THIRD_PARTY_DIR}/tracy/public
         ${THIRD_PARTY_DIR}
         ${SUBMODULE_DIR}/spdlog/include
         ${SUBMODULE_DIR}/cpptrace/include
         ${CMAKE_CURRENT_SOURCE_DIR}
 CACHE INTERNAL "")
 
-target_link_libraries(gle PRIVATE glew_s SDL2-static glm assimp cpptrace::cpptrace spdlog)
+target_link_libraries(gle PRIVATE glew_s SDL2-static glm assimp cpptrace::cpptrace spdlog TracyClient)
 target_include_directories(gle PUBLIC ${GLE_INCLUDES})

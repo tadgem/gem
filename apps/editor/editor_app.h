@@ -1,7 +1,7 @@
 #pragma once
 #include "gle.h"
 #include "editor_definitions.h"
-#include "editor_app.h" 
+#include "project.h"
 #include <sstream>
 #include <iostream>
 
@@ -21,4 +21,6 @@ public:
 	void on_edit();
 	void on_play();
 	void main_menu_bar();
+	
+	project create_project(const std::string& name, const std::string& path);
 };

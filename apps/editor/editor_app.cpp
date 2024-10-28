@@ -88,6 +88,8 @@ void editor_application::on_open_project()
             std::filesystem::path p = ifd::FileDialog::Instance().GetResult();
             std::string res = p.u8string();
             std::filesystem::path directory = p.root_directory();
+            project new_proj{};
+            new_proj.m_name = std::string(s_create_project_name_buffer);
             printf("Project Dir [%s]\n", res.c_str());
         }
         ifd::FileDialog::Instance().Close();
@@ -122,4 +124,11 @@ void editor_application::main_menu_bar()
         ImGui::EndMenu();
     }
     ImGui::EndMainMenuBar();
+}
+
+project editor_application::create_project(const std::string& name, const std::string& path)
+{
+    project proj{};
+    proj.m_name = name;
+
 }
