@@ -16,8 +16,8 @@ public:
 	gl_renderer() = default;
 
     void init(asset_manager& am);
-    void pre_frame(camera& cam, scene& current_scene);
-    void render(asset_manager& am, camera& cam, scene& current_scene);
+    void pre_frame(camera& cam);
+    void render(asset_manager& am, camera& cam, std::vector<scene*>& scenes);
     void cleanup(asset_manager& am);
 
     entt::entity  get_mouse_entity(glm::vec2 mouse_position);

@@ -6,7 +6,7 @@
 #include "material.h"
 #include "debug.h"
 
-void tech::gbuffer::dispatch_gbuffer(u32 frame_index, framebuffer& gbuffer, framebuffer& previous_position_buffer, shader& gbuffer_shader, asset_manager& am, camera& cam,  scene& current_scene, glm::ivec2 win_res)
+void tech::gbuffer::dispatch_gbuffer(u32 frame_index, framebuffer& gbuffer, framebuffer& previous_position_buffer, shader& gbuffer_shader, asset_manager& am, camera& cam, std::vector<scene*>& scenes, glm::ivec2 win_res)
 {
     GPU_MARKER("GBuffer");
     glDisable(GL_DITHER);
@@ -34,23 +34,26 @@ void tech::gbuffer::dispatch_gbuffer(u32 frame_index, framebuffer& gbuffer, fram
 
     texture::bind_sampler_handle(previous_position_buffer.m_colour_attachments.front(), GL_TEXTURE5);
 
-    auto renderables = current_scene.m_registry.view<transform, mesh, material>();
-
-    for (auto [e, trans, emesh, ematerial] : renderables.each())
+    for (scene* current_scene : scenes)
     {
-        ematerial.bind_material_uniforms(am);
-        gbuffer_shader.set_mat4("u_model", trans.m_model);
-        gbuffer_shader.set_mat4("u_last_model", trans.m_last_model);
-        gbuffer_shader.set_mat4("u_normal", trans.m_normal_matrix);
-        emesh.m_vao.use();
-        glDrawElements(GL_TRIANGLES, emesh.m_index_count, GL_UNSIGNED_INT, 0);
+        auto renderables = current_scene->m_registry.view<transform, mesh, material>();
+
+        for (auto [e, trans, emesh, ematerial] : renderables.each())
+        {
+            ematerial.bind_material_uniforms(am);
+            gbuffer_shader.set_mat4("u_model", trans.m_model);
+            gbuffer_shader.set_mat4("u_last_model", trans.m_last_model);
+            gbuffer_shader.set_mat4("u_normal", trans.m_normal_matrix);
+            emesh.m_vao.use();
+            glDrawElements(GL_TRIANGLES, emesh.m_index_count, GL_UNSIGNED_INT, 0);
+        }
     }
     gbuffer.unbind();
     glEnable(GL_DITHER);
 
 }
 
-void tech::gbuffer::dispatch_gbuffer_with_id(u32 frame_index, framebuffer& gbuffer, framebuffer& previous_position_buffer, shader& gbuffer_shader, asset_manager& am, camera& cam, scene& current_scene, glm::ivec2 win_res)
+void tech::gbuffer::dispatch_gbuffer_with_id(u32 frame_index, framebuffer& gbuffer, framebuffer& previous_position_buffer, shader& gbuffer_shader, asset_manager& am, camera& cam, std::vector<scene*>& scenes, glm::ivec2 win_res)
 {
     GPU_MARKER("GBuffer-EntityID");
     glDisable(GL_DITHER);
@@ -79,18 +82,21 @@ void tech::gbuffer::dispatch_gbuffer_with_id(u32 frame_index, framebuffer& gbuff
 
     texture::bind_sampler_handle(previous_position_buffer.m_colour_attachments.front(), GL_TEXTURE5);
 
-    auto renderables = current_scene.m_registry.view<transform, mesh, material>();
-
-    for (auto [e, trans, emesh, ematerial] : renderables.each())
+    for (scene* current_scene : scenes)
     {
-        ematerial.bind_material_uniforms(am);
-        gbuffer_shader.set_mat4("u_model", trans.m_model);
-        gbuffer_shader.set_mat4("u_last_model", trans.m_last_model);
-        gbuffer_shader.set_mat4("u_normal", trans.m_normal_matrix);
-        int entity_index = static_cast<int>(e);
-        gbuffer_shader.set_int("u_entity_index", entity_index);
-        emesh.m_vao.use();
-        glDrawElements(GL_TRIANGLES, emesh.m_index_count, GL_UNSIGNED_INT, 0);
+        auto renderables = current_scene->m_registry.view<transform, mesh, material>();
+
+        for (auto [e, trans, emesh, ematerial] : renderables.each())
+        {
+            ematerial.bind_material_uniforms(am);
+            gbuffer_shader.set_mat4("u_model", trans.m_model);
+            gbuffer_shader.set_mat4("u_last_model", trans.m_last_model);
+            gbuffer_shader.set_mat4("u_normal", trans.m_normal_matrix);
+            int entity_index = static_cast<int>(e);
+            gbuffer_shader.set_int("u_entity_index", entity_index);
+            emesh.m_vao.use();
+            glDrawElements(GL_TRIANGLES, emesh.m_index_count, GL_UNSIGNED_INT, 0);
+        }
     }
     gbuffer.unbind();
     glEnable(GL_DITHER);

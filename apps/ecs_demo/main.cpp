@@ -327,6 +327,7 @@ int main()
     float brightness = 0.0f;
     float contrast = 1.0f;
     float saturation = 1.05f;
+    std::vector<::scene*> scenes{ &scene };
     while (!gl_backend::s_quit)
     {
         glm::mat4 model = utils::get_model_matrix(pos, euler, scale);
@@ -348,10 +349,10 @@ int main()
 
         tech::vxgi::dispatch_gen_voxel_mips(voxelization_mips, voxel_data, _3d_tex_res_vec);
         
-        tech::gbuffer::dispatch_gbuffer_with_id(frame_index, gbuffer, position_buffer_history, gbuffer_shader, am,  cam, scene, window_res);
+        tech::gbuffer::dispatch_gbuffer_with_id(frame_index, gbuffer, position_buffer_history, gbuffer_shader, am,  cam, scenes, window_res);
         frame_index++;
 
-        tech::shadow::dispatch_shadow_pass(dir_light_shadow_buffer, shadow_shader, dir, scene, window_res);
+        tech::shadow::dispatch_shadow_pass(dir_light_shadow_buffer, shadow_shader, dir, scenes, window_res);
 
         tech::lighting::dispatch_light_pass(lighting_shader, lightpass_buffer, gbuffer, dir_light_shadow_buffer, cam, lights, dir);
 

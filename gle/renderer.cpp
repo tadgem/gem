@@ -127,23 +127,26 @@ void gl_renderer::init(asset_manager& am)
     m_voxel_visualiser = voxel::create_grid_visualiser(m_voxel_data, m_visualise_3d_tex_shader->m_data, 8);
 }
 
-void gl_renderer::pre_frame(camera& cam, scene& current_scene)
+void gl_renderer::pre_frame(camera& cam)
 {
     ZoneScoped;
 
     im3d_gl::new_frame_im3d(m_im3d_state, m_window_resolution, cam);
 }
 
-void gl_renderer::render(asset_manager& am, camera& cam, scene& current_scene)
+void gl_renderer::render(asset_manager& am, camera& cam, std::vector<scene*>& scenes)
 {
     FrameMark;
     ZoneScoped;
+
+    // Todo: create a total bounding volume from all active scenes;
+    aabb total_bounding_volume = scenes.front()->m_scene_bounding_volume;
 
     {
         TracyGpuZone("GBuffer Voxelization");
         tech::vxgi::dispatch_gbuffer_voxelization(
             m_compute_voxelize_gbuffer_shader->m_data,
-            current_scene.m_scene_bounding_volume,
+            total_bounding_volume,
             m_voxel_data,
             m_gbuffer,
             m_lightpass_buffer_resolve,
@@ -166,7 +169,7 @@ void gl_renderer::render(asset_manager& am, camera& cam, scene& current_scene)
             m_gbuffer_shader->m_data,
             am,
             cam,
-            current_scene,
+            scenes,
             m_window_resolution);
 
         m_frame_index++;
@@ -174,10 +177,14 @@ void gl_renderer::render(asset_manager& am, camera& cam, scene& current_scene)
 
     // TODO: Need a way to get a single instance more efficiently
     dir_light dir{};
-    auto dir_light_view = current_scene.m_registry.view<dir_light>();
-    for (auto [e, dir_light_c] : dir_light_view.each())
-    {
-        dir = dir_light_c;
+
+    if (!scenes.empty()) {
+        auto dir_light_view = scenes.front()->m_registry.view<dir_light>();
+        for (auto [e, dir_light_c] : dir_light_view.each())
+        {
+            dir = dir_light_c;
+            break;
+        }
     }
 
     std::vector<point_light> point_lights{};
@@ -187,7 +194,7 @@ void gl_renderer::render(asset_manager& am, camera& cam, scene& current_scene)
             m_dir_light_shadow_buffer,
             m_dir_light_shadow_shader->m_data,
             dir,
-            current_scene,
+            scenes,
             m_window_resolution);
     }
     {
@@ -232,7 +239,7 @@ void gl_renderer::render(asset_manager& am, camera& cam, scene& current_scene)
             m_conetracing_buffer, 
             m_gbuffer, 
             m_window_resolution, 
-            current_scene.m_scene_bounding_volume, 
+            total_bounding_volume, 
             s_voxel_resolution, 
             cam, 
             m_vxgi_cone_trace_distance, 

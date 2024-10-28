@@ -43,6 +43,8 @@ public:
 
 	entity(scene* escene, entt::entity e);
 
+	static entity INVALID() { return entity(nullptr, static_cast<entt::entity>(UINT32_MAX)); }
+
 	template<typename _Ty, typename ... Args>
 	_Ty&				add_component(Args&& ... args)
 	{
@@ -80,6 +82,7 @@ public:
 struct entity_data
 {
 	std::string m_name;
+	entity		m_parent = entity::INVALID();
 };
 
 class scene_manager

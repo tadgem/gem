@@ -8,7 +8,7 @@
 #include "material.h"
 #include "debug.h"
 
-void tech::shadow::dispatch_shadow_pass(framebuffer& shadow_fb, shader& shadow_shader, dir_light& sun, scene& current_scene, glm::ivec2 window_res)
+void tech::shadow::dispatch_shadow_pass(framebuffer& shadow_fb, shader& shadow_shader, dir_light& sun, std::vector<scene*>& scenes, glm::ivec2 window_res)
 {
     GPU_MARKER("Shadow Map Pass");
     float near_plane = 0.01f, far_plane = 1000.0f;
@@ -32,12 +32,15 @@ void tech::shadow::dispatch_shadow_pass(framebuffer& shadow_fb, shader& shadow_s
     shadow_shader.use();
     shadow_shader.set_mat4("lightSpaceMatrix", lightSpaceMatrix);
 
-    auto renderables = current_scene.m_registry.view<transform, mesh, material>();
-
-    for (auto [e, trans, emesh, ematerial] : renderables.each())
+    for (scene* current_scene : scenes)
     {
-        shadow_shader.set_mat4("model", trans.m_model);
-        emesh.draw();
+        auto renderables = current_scene->m_registry.view<transform, mesh, material>();
+
+        for (auto [e, trans, emesh, ematerial] : renderables.each())
+        {
+            shadow_shader.set_mat4("model", trans.m_model);
+            emesh.draw();
+        }
     }
 
 

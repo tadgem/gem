@@ -66,8 +66,8 @@ int main()
     custom_orientation = glm::vec3(0, 1, 0);
     camera cam{};
     debug_camera_controller controller{};
-    scene scene("test_scene");
-    entity e = scene.create_entity("Daddalus");
+    scene* s = new scene("test_scene");
+    entity e = s->create_entity("Daddalus");
 
     e.has_component<entity_data>();
     entity_data& data = e.get_component<entity_data>();
@@ -75,11 +75,11 @@ int main()
     e.add_component<material>(renderer.m_gbuffer_shader->m_data);
 
     // model sponza_geo = model::load_model_and_textures_from_path("assets/models/sponza/Sponza.gltf");
-    am.load_asset("assets/models/sponza/Sponza.gltf", asset_type::model, [&scene, &am, &renderer](asset* a) {
+    am.load_asset("assets/models/sponza/Sponza.gltf", asset_type::model, [s, &am, &renderer](asset* a) {
         spdlog::info("adding model to scene");
         model_asset* ma = static_cast<model_asset*>(a);
         ma->m_data.update_aabb();
-        scene.create_entity_from_model(ma->m_data, renderer.m_gbuffer_shader->m_data, glm::vec3(0.03), glm::vec3(0.0, 0.0, 0.0),
+        s->create_entity_from_model(ma->m_data, renderer.m_gbuffer_shader->m_data, glm::vec3(0.03), glm::vec3(0.0, 0.0, 0.0),
             {
                 {"u_diffuse_map", texture_map_type::diffuse},
                 {"u_normal_map", texture_map_type::normal},
@@ -96,7 +96,7 @@ int main()
         2.75f
     };
 
-    entity dir_light_entity = scene.create_entity("dir light");
+    entity dir_light_entity = s->create_entity("dir light");
     dir_light& dir2 = e.add_component<dir_light>(dir);
     std::vector<point_light> lights;
     lights.push_back({ {0.0, 0.0, 0.0}, {255.0, 0.0, 0.0}, 10.0f});
@@ -104,6 +104,7 @@ int main()
     lights.push_back({ {-10.0, 0.0, -10.0}, {0.0, 255.0, 0.0}, 30.0f });
     lights.push_back({ {-10.0, 0.0, 10.0}, {0.0, 0.0, 255.0} , 40.0f});
 
+    std::vector<scene*> scenes{ s };
 
     while (!gl_backend::s_quit)
     {
@@ -113,12 +114,16 @@ int main()
         gl_backend::process_sdl_event();
         gl_backend::engine_pre_frame();      
         glm::vec2 window_dim = gl_backend::get_window_dim();
-        renderer.pre_frame(cam, scene);
+        renderer.pre_frame(cam);
         controller.update(window_dim, cam);
         cam.update(window_dim);
-        scene.on_update();
 
-        on_im3d(renderer, scene, cam);
+        for (auto* current_scene : scenes)
+        {
+            current_scene->on_update();
+            on_im3d(renderer, *s, cam);
+        }
+
 
 
         glm::vec2 mouse_pos = input::get_mouse_position();
@@ -127,9 +132,9 @@ int main()
             renderer.get_mouse_entity(mouse_pos);
         }
 
-        if (scene.does_entity_exist((u32) renderer.m_last_selected_entity))
+        if (s->does_entity_exist((u32) renderer.m_last_selected_entity))
         {
-            entity_data& data = scene.m_registry.get<entity_data>(renderer.m_last_selected_entity);
+            entity_data& data = s->m_registry.get<entity_data>(renderer.m_last_selected_entity);
             ImGui::Begin(data.m_name.c_str());
             // do each component ImGui
             ImGui::End();
@@ -166,7 +171,7 @@ int main()
             ImGui::End();
         }
 
-        renderer.render(am, cam, scene);
+        renderer.render(am, cam, scenes);
         gl_backend::engine_post_frame();
     }
     gl_backend::engine_shut_down();
