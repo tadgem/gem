@@ -38,12 +38,16 @@ struct asset_handle
     {
         return asset_handle(hash_string(UINT64_MAX), asset_type::COUNT );
     }
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(asset_handle, m_type, m_path_hash);
 };
 
 struct serializable_asset_handle
 {
     asset_handle    m_handle;
     std::string     m_path;
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(serializable_asset_handle, m_handle, m_path)
 };
 
 class asset

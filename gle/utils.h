@@ -12,7 +12,9 @@ class utils
 public:
 
 	static std::string					load_string_from_path(const std::string& path);
+	static void							save_string_to_path(const std::string& path, const std::string& str);
 	static std::vector<u8>				load_binary_from_path(const std::string& path);
+	static void							save_binary_to_path(const std::string& path, std::vector<u8>& bytes);
 	static glm::quat					get_quat_from_euler(glm::vec3 euler);
 	static glm::mat4					get_model_matrix(glm::vec3 position, glm::vec3 euler, glm::vec3 scale);
 	static glm::mat3					get_normal_matrix(glm::mat4 model);

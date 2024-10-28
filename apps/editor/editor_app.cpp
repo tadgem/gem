@@ -78,7 +78,7 @@ void editor_application::on_open_project()
     }
     if (ImGui::Button("Load Project"))
     {
-        //m_editor_fsm.trigger(editor_trigger::project_loaded);
+        ifd::FileDialog::Instance().Open("ProjectOpenDialog", "Choose project file", "Project file (*.proj;){.proj},.*");
     }
     ImGui::End();
 
@@ -87,10 +87,20 @@ void editor_application::on_open_project()
         if (ifd::FileDialog::Instance().HasResult()) {
             std::filesystem::path p = ifd::FileDialog::Instance().GetResult();
             std::string res = p.u8string();
-            std::filesystem::path directory = p.root_directory();
-            project new_proj{};
-            new_proj.m_name = std::string(s_create_project_name_buffer);
-            printf("Project Dir [%s]\n", res.c_str());
+            std::filesystem::path directory = p.parent_path();
+            engine::active_project = create_project(std::string(s_create_project_name_buffer), directory.string());
+            engine::save_project_to_disk(p.filename().string(), directory.string());
+            m_editor_fsm.trigger(editor_trigger::project_loaded);
+        }
+        ifd::FileDialog::Instance().Close();
+    }
+
+    if (ifd::FileDialog::Instance().IsDone("ProjectOpenDialog")) {
+        if (ifd::FileDialog::Instance().HasResult()) {
+            std::filesystem::path p = ifd::FileDialog::Instance().GetResult();
+            std::string res = p.u8string();
+            engine::load_project_from_disk(res);
+            m_editor_fsm.trigger(editor_trigger::project_loaded);
         }
         ifd::FileDialog::Instance().Close();
     }
@@ -130,5 +140,6 @@ project editor_application::create_project(const std::string& name, const std::s
 {
     project proj{};
     proj.m_name = name;
-
+    std::filesystem::current_path(std::filesystem::path(path));
+    return proj;
 }

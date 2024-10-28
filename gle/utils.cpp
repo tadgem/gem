@@ -22,6 +22,21 @@ std::string utils::load_string_from_path(const std::string& path)
     return stream.str();
 }
 
+void utils::save_string_to_path(const std::string& path, const std::string& str)
+{
+    ZoneScoped;
+    {
+        std::ofstream out(path);
+
+        if (!out.is_open())
+        {
+            return;
+        }
+
+        out << str;
+    }
+}
+
 std::vector<u8> utils::load_binary_from_path(const std::string& path)
 {
     ZoneScoped;
@@ -32,6 +47,25 @@ std::vector<u8> utils::load_binary_from_path(const std::string& path)
 
     input.close();
     return bytes;
+}
+
+void utils::save_binary_to_path(const std::string& path, std::vector<u8>& bytes)
+{
+    ZoneScoped;
+    {
+        std::ofstream out(path);
+
+        if (!out.is_open())
+        {
+            return;
+        }
+
+        for (u8 b : bytes)
+        {
+            out << b;
+        }
+
+    }
 }
 
 glm::quat utils::get_quat_from_euler(glm::vec3 euler)

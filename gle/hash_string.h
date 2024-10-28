@@ -2,6 +2,7 @@
 #include "alias.h"
 #include "ctti/type_id.hpp"
 #include "spdlog/spdlog.h"
+#include "json.hpp"
 
 #define TRACK_HASH_STRING_ORIGINALS
 // #define CHECK_FOR_HASH_STRING_COLLISIONS
@@ -61,6 +62,9 @@ struct hash_string
     bool operator<(const hash_string& o) const { return m_value < o.m_value; };
 
     operator u64() const { return m_value; };
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(hash_string, m_value)
+
 };
 
 template <>
