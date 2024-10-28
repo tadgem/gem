@@ -5,7 +5,8 @@
 #include "material.h"
 #include "utils.h"
 #include <sstream>
-#include "tracy/Tracy.hpp"
+#include "profile.h"
+#include "engine.h"
 
 scene::scene(const std::string& scene_name) : m_name(scene_name), m_name_hash(scene_name)
 {
@@ -77,7 +78,10 @@ bool scene::does_entity_exist(u32 index)
 void scene::on_update()
 {
 	ZoneScoped;
-	transform::update_transforms(*this);
+	for (auto& sys : engine::systems.m_systems)
+	{
+		sys->update(*this);
+	}
 }
 
 void scene::update_aabb(aabb& in)

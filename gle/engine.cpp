@@ -1,5 +1,15 @@
 #include "engine.h"
 #include "utils.h"
+#include "transform.h"
+#include "mesh.h"
+#include "material.h"
+
+void engine::init()
+{
+	systems.add_system<transform_sys>();
+	systems.add_system<mesh_sys>();
+	systems.add_system<material_sys>();
+}
 
 void engine::save_project_to_disk(const std::string& filename, const std::string& directory)
 {
@@ -13,4 +23,10 @@ void engine::load_project_from_disk(const std::string& filepath)
 	project new_proj{};
 	new_proj.deserialize(assets, proj_json);
 	engine::active_project = new_proj;
+}
+
+void engine::shutdown()
+{
+	systems.m_systems.clear();
+	systems.m_system_type_aliases.clear();
 }

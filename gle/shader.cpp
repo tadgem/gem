@@ -5,7 +5,7 @@
 #include "utils.h"
 #include <sstream>
 #include <iostream>
-#include "tracy/Tracy.hpp"
+#include "profile.h"
 
 shader::shader(const std::string& comp)
 {

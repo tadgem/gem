@@ -13,8 +13,7 @@
 #include "backend.h"
 #include "imgui.h"
 #include "input.h"
-#include "tracy/Tracy.hpp"
-#include "tracy/TracyOpenGL.hpp"
+#include "profile.h"
 
 void gl_renderer::init(asset_manager& am)
 {

@@ -2,7 +2,7 @@
 #include "scene.h"
 #include "utils.h"
 #include "mesh.h"
-#include "tracy/Tracy.hpp"
+#include "profile.h"
 
 void transform::update_transforms(scene& current_scene)
 {
@@ -22,3 +22,27 @@ void transform::update_transforms(scene& current_scene)
 		mesh.m_transformed_aabb = utils::transform_aabb(mesh.m_original_aabb, trans.m_model);
 	}
 }
+
+void transform_sys::init()
+{
+}
+
+void transform_sys::cleanup()
+{
+}
+
+void transform_sys::update(scene& current_scene)
+{
+	transform::update_transforms(current_scene);
+}
+
+nlohmann::json transform_sys::serialize(scene& current_scene)
+{
+	return {};
+}
+
+void transform_sys::deserialize(scene& current_scene, nlohmann::json& sys_json)
+{
+	return;
+}
+

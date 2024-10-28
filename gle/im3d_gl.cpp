@@ -6,7 +6,7 @@
 #include "imgui.h"
 #include "input.h"
 #include "backend.h"
-#include "tracy/Tracy.hpp"
+#include "profile.h"
 
 Im3d::Mat4 ToIm3D(const glm::mat4& _m) {
     ZoneScoped;

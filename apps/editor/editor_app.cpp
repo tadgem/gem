@@ -5,6 +5,8 @@
 editor_application::editor_application()
 {
     gl_backend::init(backend_init{ {1920, 1080}, true });
+    engine::init();
+
     m_editor_fsm.set_starting_state(editor_mode::no_open_project);
     m_editor_fsm.add_state(editor_mode::no_open_project, [this]() {
         this->on_open_project();
@@ -43,6 +45,7 @@ void editor_application::run()
         gl_backend::engine_post_frame();
     }
     gl_backend::engine_shut_down();
+    engine::shutdown();
 }
 
 static char s_create_project_name_buffer[256]{ 0 };

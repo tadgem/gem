@@ -2,7 +2,7 @@
 #include "scene.h"
 #include "asset_manager.h"
 #include "asset_definitions.h"
-#include "tracy/Tracy.hpp"
+#include "profile.h"
 
 material::material(shader& program) : m_prog(program)
 {
@@ -39,6 +39,7 @@ bool material::set_sampler(const std::string& sampler_name, GLenum texture_slot,
 
     return true;
 }
+
 
 void material::bind_material_uniforms(asset_manager& am)
 {
@@ -120,3 +121,28 @@ void material::bind_material_uniforms(asset_manager& am)
         }
     }
 }
+
+
+
+void material_sys::init()
+{
+}
+
+void material_sys::cleanup()
+{
+}
+
+void material_sys::update(scene& current_scene)
+{
+}
+
+nlohmann::json material_sys::serialize(scene& current_scene)
+{
+    return {};
+}
+
+void material_sys::deserialize(scene& current_scene, nlohmann::json& sys_json)
+{
+    return;
+}
+

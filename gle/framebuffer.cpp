@@ -1,6 +1,6 @@
 #include "framebuffer.h"
 #include <iostream>
-#include "tracy/Tracy.hpp"
+#include "profile.h"
 
 framebuffer::framebuffer()
 {

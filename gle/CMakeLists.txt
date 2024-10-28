@@ -13,6 +13,7 @@ set(GL_SRC
         ${CMAKE_CURRENT_SOURCE_DIR}/backend.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/backend.h
         ${CMAKE_CURRENT_SOURCE_DIR}/debug.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/profile.h
         ${CMAKE_CURRENT_SOURCE_DIR}/engine.h
         ${CMAKE_CURRENT_SOURCE_DIR}/engine.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/input.h
@@ -48,6 +49,7 @@ set(GL_SRC
         ${CMAKE_CURRENT_SOURCE_DIR}/renderer.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/renderer.h
         ${CMAKE_CURRENT_SOURCE_DIR}/mesh.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/mesh.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/model.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/model.h
         ${CMAKE_CURRENT_SOURCE_DIR}/shape.cpp

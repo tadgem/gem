@@ -7,7 +7,7 @@
 #include "stb_image.h"
 #include "utils.h"
 #include "gli.hpp"
-#include "tracy/Tracy.hpp"
+#include "profile.h"
 
 #define DDPS_ALPHAPIXELS 0x1
 #define DDPS_ALPHA 0x2

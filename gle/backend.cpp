@@ -16,7 +16,7 @@
 #endif
 #include "texture.h"
 #include "shape.h"
-#include "tracy/Tracy.hpp"
+#include "profile.h"
 
 
 

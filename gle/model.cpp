@@ -7,7 +7,7 @@
 #include "assimp/mesh.h"
 #include "assimp/scene.h"
 #include "spdlog/spdlog.h"
-#include "tracy/Tracy.hpp"
+#include "profile.h"
 
 static glm::vec3 AssimpToGLM(aiVector3D aiVec) {
     ZoneScoped;

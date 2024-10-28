@@ -2,6 +2,7 @@
 #include "imgui.h"
 
 #include "backend.h"
+#include "engine.h"
 #include "texture.h" 
 #include "shader.h"
 #include "material.h"
@@ -58,6 +59,7 @@ float get_aabb_area(aabb& bb)
 int main()
 {
     gl_backend::init(backend_init{ {1920, 1080}, true });
+    engine::init();
     asset_manager am{};
     gl_renderer renderer{};
 
@@ -175,6 +177,7 @@ int main()
         gl_backend::engine_post_frame();
     }
     gl_backend::engine_shut_down();
+    engine::shutdown();
 
     return 0;
 }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ecs_system.h"
 #include "glm.hpp"
 #include "gtc/quaternion.hpp"
 
@@ -18,4 +19,19 @@ struct transform
 	glm::mat3 m_normal_matrix;
 
 	static void update_transforms(scene& current_scene);
+};
+
+
+class transform_sys : public ecs_system
+{
+public:
+
+	void			init() override;
+	void			update(scene& current_scene) override;
+	void			cleanup() override;
+	nlohmann::json	serialize(scene& current_scene) override;
+	void			deserialize(scene& current_scene, nlohmann::json& sys_json) override;
+
+	~transform_sys() {}
+
 };

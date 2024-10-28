@@ -1,7 +1,7 @@
 #include "voxelisation.h"
 #include "backend.h"
 #include "utils.h"
-#include "tracy/Tracy.hpp"
+#include "profile.h"
 
 void voxel::grid::update_aabb(aabb& new_aabb)
 {

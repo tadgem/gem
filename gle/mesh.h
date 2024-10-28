@@ -2,7 +2,7 @@
 
 #include "vertex.h"
 #include "shape.h"
-
+#include "ecs_system.h"
 
 struct mesh
 {
@@ -17,4 +17,18 @@ struct mesh
 		m_vao.use();
 		glDrawElements(GL_TRIANGLES, m_index_count, GL_UNSIGNED_INT, 0);
 	}
+};
+
+
+class mesh_sys : public ecs_system
+{
+public:
+
+	void			init() override;
+	void			update(scene& current_scene) override;
+	void			cleanup() override;
+	nlohmann::json	serialize(scene& current_scene) override;
+	void			deserialize(scene& current_scene, nlohmann::json& sys_json) override;
+
+	~mesh_sys() {}
 };

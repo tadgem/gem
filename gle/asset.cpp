@@ -1,6 +1,6 @@
 #include "asset.h"
 #include "hash_string.h"
-#include "tracy/Tracy.hpp"
+#include "profile.h"
 
 asset::asset(const std::string& path, asset_type type) : m_path(path), m_handle (path, type)
 {

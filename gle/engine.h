@@ -15,9 +15,11 @@ public:
 	inline static event_handler									events;
 	inline static gl_renderer									renderer;
 	inline static scene_manager									scenes;
-	inline static std::vector<std::unique_ptr<ecs_system>>	    systems;
+	inline static system_manager								systems;
 	inline static project										active_project;
 
-	static void   save_project_to_disk(const std::string& filename, const std::string& directory);
-	static void   load_project_from_disk(const std::string& filepath);
+	static void		init();
+	static void		save_project_to_disk(const std::string& filename, const std::string& directory);
+	static void		load_project_from_disk(const std::string& filepath);
+	static void		shutdown();
 };

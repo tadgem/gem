@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include <memory>
 #include <type_traits>
-#include "tracy/Tracy.hpp"
+#include "profile.h"
 
 enum class event_queue : u32
 {

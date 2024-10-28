@@ -1,6 +1,6 @@
 #include "project.h"
 #include "asset_manager.h"
-#include "tracy/Tracy.hpp"
+#include "profile.h"
 
 nlohmann::json project::serialize(asset_manager& am)
 {

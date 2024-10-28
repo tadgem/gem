@@ -4,7 +4,7 @@
 #include "shader.h"
 #include "hash_string.h"
 #include "spdlog/spdlog.h"
-#include "tracy/Tracy.hpp"
+#include "profile.h"
 #include <filesystem>
 
 using texture_intermediate_asset = asset_t_intermediate<texture, std::vector<unsigned char>, asset_type::texture>;
@@ -203,7 +203,7 @@ void asset_manager::handle_load_and_unload_callbacks()
 void asset_manager::handle_pending_loads()
 {
     ZoneScoped;
-    while (p_pending_load_tasks.size() < p_max_async_tasks_in_flight && !p_queued_loads.empty()) {
+    while (p_pending_load_tasks.size() <= p_max_async_tasks_in_flight && !p_queued_loads.empty()) {
         auto& info = p_queued_loads.front();
         dispatch_asset_load_task(info.to_handle(), info);
         p_queued_loads.erase(p_queued_loads.begin());

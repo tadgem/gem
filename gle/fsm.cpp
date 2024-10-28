@@ -1,6 +1,6 @@
 #include "fsm.h"
 #include "spdlog/spdlog.h"
-#include "tracy/Tracy.hpp"
+#include "profile.h"
 
 fsm_lambda::state::state(int state, std::function<int()> action, std::function<void()> entry, std::function<void()> exit)
 	: m_state(state), m_action(action)

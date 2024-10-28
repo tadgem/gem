@@ -5,7 +5,7 @@
 #include "shader.h"
 #include "texture.h"
 #include "model.h"
-
+#include "ecs_system.h"
 #define ENABLE_MATERIAL_UNIFORM_CHECKS
 
 class scene;
@@ -38,4 +38,16 @@ public:
 
 	shader& m_prog;
 
+};
+
+class material_sys : public ecs_system
+{
+public:
+	void			init() override;
+	void			update(scene& current_scene) override;
+	void			cleanup() override;
+	nlohmann::json	serialize(scene& current_scene) override;
+	void			deserialize(scene& current_scene, nlohmann::json& sys_json) override;
+
+	~material_sys() {}
 };

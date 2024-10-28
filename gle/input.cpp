@@ -1,6 +1,6 @@
 #include "input.h"
 #include "io.h"
-#include "tracy/Tracy.hpp"
+#include "profile.h"
 
 bool input::get_gamepad_button(int index, gamepad_button button)
 {

@@ -1,5 +1,5 @@
 #include "vertex.h"
-#include "tracy/Tracy.hpp"
+#include "profile.h"
 
 void VAO::use()
 {

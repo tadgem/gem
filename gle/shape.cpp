@@ -1,5 +1,5 @@
 #include "shape.h"
-#include "tracy/Tracy.hpp"
+#include "profile.h"
 
 VAO shapes::gen_cube_instanced_vao(std::vector<glm::mat4>& matrices, std::vector<glm::vec3>& uvs)
 {

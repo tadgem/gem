@@ -6,7 +6,7 @@
 #include "gtc/matrix_transform.hpp"
 #include "gtx/quaternion.hpp"
 #include "gtx/matrix_decompose.hpp"
-#include "tracy/Tracy.hpp"
+#include "profile.h"
 
 std::string utils::load_string_from_path(const std::string& path)
 {

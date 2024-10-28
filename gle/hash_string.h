@@ -67,6 +67,8 @@ struct hash_string
 
 };
 
+using hash_string_ge = hash_string;
+
 template <>
 struct std::hash<hash_string>
 {
