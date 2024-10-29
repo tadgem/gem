@@ -8,8 +8,7 @@
 #include "texture.h"
 #include "shape.h"
 #include "entt.hpp"
-#include "serialization.h"
-
+#include "json.hpp"
 class entity;
 class model;
 class shader;
@@ -92,11 +91,10 @@ public:
 	scene_manager();
 
 	scene*			create_scene(const std::string& name);
+	scene*			load_scene(nlohmann::json& scene_json);
 	scene*			get_scene(hash_string scene_hash);
 	void			close_scene(hash_string scene_hash);
-
-	//scene*			load_scene(nlohmann::json& scene_json);
-	//nlohmann::json  save_scene(scene* ser_scene);
+	nlohmann::json  save_scene(scene* ser_scene);
 
 protected:
 	std::vector<std::unique_ptr<scene>>	p_active_scenes;

@@ -3,7 +3,7 @@
 #include "utils.h"
 #include "mesh.h"
 #include "profile.h"
-#include "serialization.h"
+#include "json_type_interop.hpp"
 void transform::update_transforms(scene& current_scene)
 {
 	ZoneScoped;
@@ -36,26 +36,26 @@ void transform_sys::update(scene& current_scene)
 	transform::update_transforms(current_scene);
 }
 
-//nlohmann::json transform_sys::serialize(scene& current_scene)
-//{
-//	nlohmann::json sys_json;
-//
-//	auto sys_view = current_scene.m_registry.view<transform>();
-//
-//	for (auto [e, transform] : sys_view.each())
-//	{
-//		nlohmann::json comp_json;
-//		comp_json["position"] = transform.m_position;
-//		comp_json["euler"] = transform.m_euler;
-//		comp_json["scale"] = transform.m_scale;
-//		sys_json[static_cast<u32>(e)] = comp_json;
-//	}
-//
-//	return sys_json;
-//}
-//
-//void transform_sys::deserialize(scene& current_scene, nlohmann::json& sys_json)
-//{
-//	return;
-//}
+nlohmann::json transform_sys::serialize(scene& current_scene)
+{
+	nlohmann::json sys_json;
+
+	auto sys_view = current_scene.m_registry.view<transform>();
+
+	for (auto [e, transform] : sys_view.each())
+	{
+		nlohmann::json comp_json;
+		comp_json["position"] = transform.m_position;
+		comp_json["euler"] = transform.m_euler;
+		comp_json["scale"] = transform.m_scale;
+		sys_json[static_cast<u32>(e)] = comp_json;
+	}
+
+	return sys_json;
+}
+
+void transform_sys::deserialize(scene& current_scene, nlohmann::json& sys_json)
+{
+	return;
+}
 

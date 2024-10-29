@@ -1,5 +1,5 @@
 #pragma once
-#include "serialization.h"
+#include "json.hpp"
 #include "hash_string.h"
 #include <vector>
 #include <unordered_map>
@@ -16,6 +16,9 @@ public:
 	virtual void			init() = 0;
 	virtual void			update(scene& current_scene) = 0;
 	virtual void			cleanup() = 0;
+
+	virtual nlohmann::json	serialize(scene& current_scene) = 0;
+	virtual void			deserialize(scene& current_scene, nlohmann::json& sys_json) = 0;
 
     virtual ~ecs_system() {}
 };

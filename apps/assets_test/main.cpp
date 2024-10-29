@@ -18,6 +18,7 @@
 #include "gtc/matrix_transform.hpp"
 #include "gtc/quaternion.hpp"
 #include "input.h"
+#include "json.hpp"
 #include "scene.h"
 #include "asset.h"
 #include "asset_manager.h"

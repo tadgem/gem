@@ -2,7 +2,7 @@
 #include "alias.h"
 #include "ctti/type_id.hpp"
 #include "spdlog/spdlog.h"
-#include "serialization.h"
+#include "json.hpp"
 
 #define TRACK_HASH_STRING_ORIGINALS
 // #define CHECK_FOR_HASH_STRING_COLLISIONS
@@ -63,11 +63,7 @@ struct hash_string
 
     operator u64() const { return m_value; };
 
-    template<typename Archive>
-    void serialize(Archive& ar) {
-        ZoneScoped;
-        ar(m_value);
-    }
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(hash_string, m_value)
 
 };
 

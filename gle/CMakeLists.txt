@@ -14,7 +14,6 @@ set(GL_SRC
         ${CMAKE_CURRENT_SOURCE_DIR}/backend.h
         ${CMAKE_CURRENT_SOURCE_DIR}/debug.h
         ${CMAKE_CURRENT_SOURCE_DIR}/profile.h
-        ${CMAKE_CURRENT_SOURCE_DIR}/serialization.h
         ${CMAKE_CURRENT_SOURCE_DIR}/engine.h
         ${CMAKE_CURRENT_SOURCE_DIR}/engine.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/input.h
@@ -55,6 +54,8 @@ set(GL_SRC
         ${CMAKE_CURRENT_SOURCE_DIR}/model.h
         ${CMAKE_CURRENT_SOURCE_DIR}/shape.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/shape.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/json.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/json_type_interop.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/vertex.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/vertex.h
         ${CMAKE_CURRENT_SOURCE_DIR}/scene.h
@@ -80,6 +81,7 @@ set(GL_SRC
         ${CMAKE_CURRENT_SOURCE_DIR}/tech/ssr.h
         # third party sources
         ${CMAKE_CURRENT_SOURCE_DIR}/stb_image.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/json.hpp
 )
 
 set(CMAKE_CXX_STANDARD 17)
@@ -99,10 +101,9 @@ set(GLE_INCLUDES
         ${THIRD_PARTY_DIR}/tracy/public
         ${THIRD_PARTY_DIR}
         ${SUBMODULE_DIR}/spdlog/include
-        ${SUBMODULE_DIR}/cereal/include
         ${SUBMODULE_DIR}/cpptrace/include
         ${CMAKE_CURRENT_SOURCE_DIR}
 CACHE INTERNAL "")
 
-target_link_libraries(gle PRIVATE glew_s SDL2-static glm cereal assimp cpptrace::cpptrace spdlog TracyClient)
+target_link_libraries(gle PRIVATE glew_s SDL2-static glm assimp cpptrace::cpptrace spdlog TracyClient)
 target_include_directories(gle PUBLIC ${GLE_INCLUDES})

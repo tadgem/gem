@@ -36,9 +36,9 @@ public:
 
 	void			init() override;
 	void			update(scene& current_scene) override;
-	void			cleanup() override;/*
+	void			cleanup() override;
 	nlohmann::json	serialize(scene& current_scene) override;
-	void			deserialize(scene& current_scene, nlohmann::json& sys_json) override;*/
+	void			deserialize(scene& current_scene, nlohmann::json& sys_json) override;
 
 	~mesh_sys() {}
 };

@@ -20,6 +20,7 @@
 #include "gtc/matrix_transform.hpp"
 #include "gtc/quaternion.hpp"
 #include "input.h"
+#include "json.hpp"
 #include "scene.h"
 #include "asset.h"
 #include "events.h"
@@ -27,6 +28,7 @@
 #include "transform.h"
 #include "im3d_math.h"
 
+using namespace nlohmann;
 static glm::vec3 custom_orientation;
 
 
@@ -86,9 +88,9 @@ int main()
                 {"u_ao_map", texture_map_type::ao}
             });
 
-        //nlohmann::json scene_json = engine::scenes.save_scene(s);
-        //spdlog::info("finished adding model to scene, dumping scene json");
-        //spdlog::info(scene_json.dump());
+        nlohmann::json scene_json = engine::scenes.save_scene(s);
+        spdlog::info("finished adding model to scene, dumping scene json");
+        spdlog::info(scene_json.dump());
     });
 
     dir_light dir
