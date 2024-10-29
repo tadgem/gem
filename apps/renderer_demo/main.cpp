@@ -126,8 +126,6 @@ int main()
             on_im3d(renderer, *s, cam);
         }
 
-
-
         glm::vec2 mouse_pos = input::get_mouse_position();
         if (input::get_mouse_button(mouse_button::left) && !ImGui::GetIO().WantCaptureMouse)
         {

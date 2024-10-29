@@ -43,6 +43,8 @@ public:
 class material_sys : public ecs_system
 {
 public:
+
+	material_sys() : ecs_system(hash_utils::get_type_hash<material_sys>()) {}
 	void			init() override;
 	void			update(scene& current_scene) override;
 	void			cleanup() override;

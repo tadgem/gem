@@ -48,5 +48,4 @@ namespace entt
         j.at("entity").get_to(index);
         e = static_cast<entt::entity>(index);
     }
-
 }

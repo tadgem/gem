@@ -24,6 +24,8 @@ class mesh_sys : public ecs_system
 {
 public:
 
+	mesh_sys() : ecs_system(hash_utils::get_type_hash<mesh_sys>()) {}
+
 	void			init() override;
 	void			update(scene& current_scene) override;
 	void			cleanup() override;

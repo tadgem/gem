@@ -26,6 +26,8 @@ class transform_sys : public ecs_system
 {
 public:
 
+	transform_sys() : ecs_system(hash_utils::get_type_hash<transform_sys>()) {}
+
 	void			init() override;
 	void			update(scene& current_scene) override;
 	void			cleanup() override;

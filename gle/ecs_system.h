@@ -9,6 +9,9 @@ class scene;
 class ecs_system
 {
 public:
+	const hash_string	m_sys_hash;
+
+	ecs_system(hash_string sys_hash) : m_sys_hash(sys_hash) {}
 
 	virtual void			init() = 0;
 	virtual void			update(scene& current_scene) = 0;
