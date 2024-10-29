@@ -54,6 +54,8 @@ set(GL_SRC
         ${CMAKE_CURRENT_SOURCE_DIR}/model.h
         ${CMAKE_CURRENT_SOURCE_DIR}/shape.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/shape.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/json.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/json_type_interop.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/vertex.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/vertex.h
         ${CMAKE_CURRENT_SOURCE_DIR}/scene.h
