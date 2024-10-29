@@ -4,6 +4,7 @@
 #include "hash_string.h"
 #include "dbg_memory.h"
 #include "spdlog/spdlog.h"
+#include "serialization.h"
 
 enum class asset_type  {
     model,
@@ -39,7 +40,11 @@ struct asset_handle
         return asset_handle(hash_string(UINT64_MAX), asset_type::COUNT );
     }
 
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(asset_handle, m_type, m_path_hash);
+    template<typename Archive>
+    void serialize(Archive& ar) {
+        ZoneScoped;
+        ar(m_type, m_path_hash);
+    }
 };
 
 struct serializable_asset_handle
@@ -47,7 +52,11 @@ struct serializable_asset_handle
     asset_handle    m_handle;
     std::string     m_path;
 
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(serializable_asset_handle, m_handle, m_path)
+    template<typename Archive>
+    void serialize(Archive& ar) {
+        ZoneScoped;
+        ar(m_handle, m_path);
+    }
 };
 
 class asset

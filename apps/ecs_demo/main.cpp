@@ -1,6 +1,7 @@
 #include <iostream>
 #include "imgui.h"
 
+#include "engine.h"
 #include "backend.h"
 #include "texture.h" 
 #include "shader.h"
@@ -19,7 +20,6 @@
 #include "gtc/matrix_transform.hpp"
 #include "gtc/quaternion.hpp"
 #include "input.h"
-#include "json.hpp"
 #include "scene.h"
 #include "asset.h"
 #include "asset_manager.h"
@@ -35,7 +35,6 @@
 #include "tech/taa.h"
 #include "im3d/im3d_math.h"
 
-using namespace nlohmann;
 static glm::vec3 custom_orientation;
 
 static glm::mat4 last_vp = glm::mat4(1.0);
@@ -131,6 +130,7 @@ int main()
 {
     glm::ivec2 window_res{ SCREEN_W, SCREEN_H };
     gl_backend::init(backend_init{ window_res, true });
+    engine::init();
     asset_manager am{};
     custom_orientation = glm::vec3(0, 1, 0);
 
@@ -184,9 +184,10 @@ int main()
 
     e.add_component<material>(gbuffer_shader);
 
+    asset_handle model_handle = asset_handle("assets/models/sponza/Sponza.gltf", asset_type::model);
     model sponza_geo = model::load_model_and_textures_from_path("assets/models/sponza/Sponza.gltf");
 
-    scene.create_entity_from_model(sponza_geo, gbuffer_shader, glm::vec3(0.03), glm::vec3(0.0, 0.0, 0.0),
+    scene.create_entity_from_model(model_handle, sponza_geo, gbuffer_shader, glm::vec3(0.03), glm::vec3(0.0, 0.0, 0.0),
         {
             {"u_diffuse_map", texture_map_type::diffuse},
             {"u_normal_map", texture_map_type::normal},
