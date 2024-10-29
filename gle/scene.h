@@ -20,7 +20,7 @@ public:
     scene(const std::string& scene_name);
 
     entity					create_entity(const std::string& name);
-	std::vector<entity>		create_entity_from_model(model& model_to_load, shader& material_shader, glm::vec3 scale = glm::vec3(1.0f), glm::vec3 euler = glm::vec3(0.0f), std::map<std::string, texture_map_type> known_maps = {});
+	std::vector<entity>		create_entity_from_model(asset_handle model_asset_handle, model& model_to_load, shader& material_shader, glm::vec3 scale = glm::vec3(1.0f), glm::vec3 euler = glm::vec3(0.0f), std::map<std::string, texture_map_type> known_maps = {});
 
 	bool					does_entity_exist(u32 e);
 

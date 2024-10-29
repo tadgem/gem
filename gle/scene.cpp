@@ -23,6 +23,7 @@ entity scene::create_entity(const std::string& name)
 }
 
 std::vector<entity> scene::create_entity_from_model(
+	asset_handle model_asset_handle,
 	model& model_to_load, 
 	shader& material_shader, 
 	glm::vec3 scale, 
@@ -31,8 +32,9 @@ std::vector<entity> scene::create_entity_from_model(
 {
 	ZoneScoped;
 	std::vector<entity> entities{};
-	for (auto& entry : model_to_load.m_meshes)
+	for (u32 i = 0; i < model_to_load.m_meshes.size(); i++)
 	{
+		auto& entry = model_to_load.m_meshes[i];
 		std::stringstream entity_name;
 		entity_name << "Entity " << p_created_entity_count;
 		entity e = create_entity(entity_name.str());
@@ -40,7 +42,7 @@ std::vector<entity> scene::create_entity_from_model(
 		transform& trans = e.add_component<transform>();
 		trans.m_scale = scale;
 		trans.m_euler = euler;
-		e.add_component<mesh>(entry);
+		e.add_component<mesh_component>(mesh_component{ entry, model_asset_handle, i });
 		material& current_mat = e.add_component<material>(material_shader);
 
 		GLenum texture_slot = GL_TEXTURE0;
@@ -169,6 +171,14 @@ nlohmann::json  scene_manager::save_scene(scene* ser_scene)
 {
 	ZoneScoped;
 	nlohmann::json json{};
+
+	json["name"] = ser_scene->m_name;
+	json["systems"] = nlohmann::json();
+
+	for (auto& sys : engine::systems.m_systems)
+	{
+		json["systems"][sys->m_sys_hash] = sys->serialize(*ser_scene);
+	}	
 
 	return json;
 

@@ -3,6 +3,7 @@
 #include "vertex.h"
 #include "shape.h"
 #include "ecs_system.h"
+#include "asset.h"
 
 struct mesh
 {
@@ -17,6 +18,13 @@ struct mesh
 		m_vao.use();
 		glDrawElements(GL_TRIANGLES, m_index_count, GL_UNSIGNED_INT, 0);
 	}
+};
+
+struct mesh_component
+{
+	mesh			m_mesh;
+	asset_handle	m_handle;
+	u32				m_mesh_index;
 };
 
 

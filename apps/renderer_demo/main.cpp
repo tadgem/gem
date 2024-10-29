@@ -1,6 +1,6 @@
 #include <iostream>
+#include <sstream>
 #include "imgui.h"
-
 #include "backend.h"
 #include "engine.h"
 #include "texture.h" 
@@ -15,8 +15,6 @@
 #include "voxelisation.h"
 #include "asset_manager.h"
 #include "renderer.h"
-
-#include <sstream>
 #include "im3d.h"
 #include "im3d_gl.h"
 #include "gtc/matrix_transform.hpp"
@@ -81,7 +79,7 @@ int main()
         spdlog::info("adding model to scene");
         model_asset* ma = static_cast<model_asset*>(a);
         ma->m_data.update_aabb();
-        s->create_entity_from_model(ma->m_data, renderer.m_gbuffer_shader->m_data, glm::vec3(0.03), glm::vec3(0.0, 0.0, 0.0),
+        s->create_entity_from_model(ma->m_handle, ma->m_data, renderer.m_gbuffer_shader->m_data, glm::vec3(0.03), glm::vec3(0.0, 0.0, 0.0),
             {
                 {"u_diffuse_map", texture_map_type::diffuse},
                 {"u_normal_map", texture_map_type::normal},
@@ -89,6 +87,10 @@ int main()
                 {"u_roughness_map", texture_map_type::roughness},
                 {"u_ao_map", texture_map_type::ao}
             });
+
+        nlohmann::json scene_json = engine::scenes.save_scene(s);
+        spdlog::info("finished adding model to scene, dumping scene json");
+        spdlog::info(scene_json.dump());
     });
 
     dir_light dir
@@ -107,6 +109,7 @@ int main()
     lights.push_back({ {-10.0, 0.0, 10.0}, {0.0, 0.0, 255.0} , 40.0f});
 
     std::vector<scene*> scenes{ s };
+
 
     while (!gl_backend::s_quit)
     {

@@ -84,7 +84,7 @@ void tech::gbuffer::dispatch_gbuffer_with_id(u32 frame_index, framebuffer& gbuff
 
     for (scene* current_scene : scenes)
     {
-        auto renderables = current_scene->m_registry.view<transform, mesh, material>();
+        auto renderables = current_scene->m_registry.view<transform, mesh_component, material>();
 
         for (auto [e, trans, emesh, ematerial] : renderables.each())
         {
@@ -94,8 +94,8 @@ void tech::gbuffer::dispatch_gbuffer_with_id(u32 frame_index, framebuffer& gbuff
             gbuffer_shader.set_mat4("u_normal", trans.m_normal_matrix);
             int entity_index = static_cast<int>(e);
             gbuffer_shader.set_int("u_entity_index", entity_index);
-            emesh.m_vao.use();
-            glDrawElements(GL_TRIANGLES, emesh.m_index_count, GL_UNSIGNED_INT, 0);
+            emesh.m_mesh.m_vao.use();
+            glDrawElements(GL_TRIANGLES, emesh.m_mesh.m_index_count, GL_UNSIGNED_INT, 0);
         }
     }
     gbuffer.unbind();

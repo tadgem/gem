@@ -138,7 +138,39 @@ void material_sys::update(scene& current_scene)
 
 nlohmann::json material_sys::serialize(scene& current_scene)
 {
-    return {};
+    nlohmann::json sys_json;
+
+    auto sys_view = current_scene.m_registry.view<material>();
+
+    for (auto [e, mat] : sys_view.each())
+    {
+        nlohmann::json comp_json;
+        for (auto [name, uniform_type] : mat.m_uniforms)
+        {
+            if (mat.m_uniform_values.find(name) != mat.m_uniform_values.end())
+            {
+                switch (uniform_type)
+                {
+                case shader::uniform_type::sampler2D:
+                case shader::uniform_type::sampler3D:
+                {
+                    sampler_info info = std::any_cast<sampler_info>(mat.m_uniform_values[name]);
+                    nlohmann::json sampler_json{};
+                    sampler_json["slot"] = info.sampler_slot;
+                    sampler_json["target"] = info.texture_target;
+                    sampler_json["handle"] = info.tex_entry.m_handle;
+                    comp_json[name] = sampler_json;
+                    break;
+                }
+                default:
+                    break;
+                }
+            }
+        }
+        sys_json[static_cast<u32>(e)] = comp_json;
+    }
+
+    return sys_json;
 }
 
 void material_sys::deserialize(scene& current_scene, nlohmann::json& sys_json)

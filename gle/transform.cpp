@@ -42,13 +42,13 @@ nlohmann::json transform_sys::serialize(scene& current_scene)
 
 	auto sys_view = current_scene.m_registry.view<transform>();
 
-	for (auto [entity, transform] : sys_view.each())
+	for (auto [e, transform] : sys_view.each())
 	{
 		nlohmann::json comp_json;
 		comp_json["position"] = transform.m_position;
 		comp_json["euler"] = transform.m_euler;
 		comp_json["scale"] = transform.m_scale;
-		sys_json[static_cast<u32>(entity)] = comp_json;
+		sys_json[static_cast<u32>(e)] = comp_json;
 	}
 
 	return sys_json;
