@@ -48,7 +48,7 @@ nlohmann::json transform_sys::serialize(scene& current_scene)
 		comp_json["position"] = transform.m_position;
 		comp_json["euler"] = transform.m_euler;
 		comp_json["scale"] = transform.m_scale;
-		sys_json[static_cast<u32>(e)] = comp_json;
+		sys_json[get_entity_string(e)] = comp_json;
 	}
 
 	return sys_json;
@@ -56,6 +56,17 @@ nlohmann::json transform_sys::serialize(scene& current_scene)
 
 void transform_sys::deserialize(scene& current_scene, nlohmann::json& sys_json)
 {
-	return;
+	// std::string str = sys_json.dump();
+	for (auto [entity,  entry ] : sys_json.items())
+	{
+		entt::entity e = get_entity_from_string(entity);
+		transform t{};
+		t.m_position = entry["position"];
+		t.m_euler = entry["euler"];
+		t.m_scale = entry["scale"];
+
+		e = current_scene.m_registry.create(e);
+		current_scene.m_registry.emplace<transform>(e, t);
+	}
 }
 

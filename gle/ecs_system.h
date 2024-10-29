@@ -4,6 +4,7 @@
 #include <vector>
 #include <unordered_map>
 #include <type_traits>
+#include "entt/entt.hpp"
 class scene;
 
 class ecs_system
@@ -19,6 +20,9 @@ public:
 
 	virtual nlohmann::json	serialize(scene& current_scene) = 0;
 	virtual void			deserialize(scene& current_scene, nlohmann::json& sys_json) = 0;
+
+	std::string				get_entity_string(entt::entity& e) { return std::to_string(static_cast<u32>(e)); }
+	entt::entity			get_entity_from_string(const std::string& e) { return entt::entity{ std::stoul(e) }; }
 
     virtual ~ecs_system() {}
 };

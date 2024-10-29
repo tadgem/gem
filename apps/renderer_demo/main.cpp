@@ -66,7 +66,7 @@ int main()
     custom_orientation = glm::vec3(0, 1, 0);
     camera cam{};
     debug_camera_controller controller{};
-    scene* s = new scene("test_scene");
+    scene* s = engine::scenes.create_scene("test_scene");
     entity e = s->create_entity("Daddalus");
 
     e.has_component<entity_data>();
@@ -89,8 +89,10 @@ int main()
             });
 
         nlohmann::json scene_json = engine::scenes.save_scene(s);
+        std::string scene_json_str = scene_json.dump();
         spdlog::info("finished adding model to scene, dumping scene json");
-        spdlog::info(scene_json.dump());
+        spdlog::info(scene_json_str);
+        scene* s2 = engine::scenes.load_scene(engine::scenes.save_scene(s));
     });
 
     dir_light dir
@@ -109,6 +111,7 @@ int main()
     lights.push_back({ {-10.0, 0.0, 10.0}, {0.0, 0.0, 255.0} , 40.0f});
 
     std::vector<scene*> scenes{ s };
+
 
 
     while (!gl_backend::s_quit)

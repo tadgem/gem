@@ -145,29 +145,31 @@ nlohmann::json material_sys::serialize(scene& current_scene)
     for (auto [e, mat] : sys_view.each())
     {
         nlohmann::json comp_json;
+        // comp_json["shader"] = mat.m_prog.
         for (auto [name, uniform_type] : mat.m_uniforms)
         {
             if (mat.m_uniform_values.find(name) != mat.m_uniform_values.end())
             {
+                nlohmann::json uniform_json{};
+                uniform_json["uniform_type"] = uniform_type;
                 switch (uniform_type)
                 {
                 case shader::uniform_type::sampler2D:
                 case shader::uniform_type::sampler3D:
                 {
                     sampler_info info = std::any_cast<sampler_info>(mat.m_uniform_values[name]);
-                    nlohmann::json sampler_json{};
-                    sampler_json["slot"] = info.sampler_slot;
-                    sampler_json["target"] = info.texture_target;
-                    sampler_json["handle"] = info.tex_entry.m_handle;
-                    comp_json[name] = sampler_json;
+                    uniform_json["slot"] = info.sampler_slot;
+                    uniform_json["target"] = info.texture_target;
+                    uniform_json["handle"] = info.tex_entry.m_handle;
                     break;
                 }
                 default:
                     break;
                 }
+                comp_json[name] = uniform_json;
             }
         }
-        sys_json[static_cast<u32>(e)] = comp_json;
+        sys_json[get_entity_string(e)] = comp_json;
     }
 
     return sys_json;
@@ -175,6 +177,13 @@ nlohmann::json material_sys::serialize(scene& current_scene)
 
 void material_sys::deserialize(scene& current_scene, nlohmann::json& sys_json)
 {
-    return;
+    for (auto [entity, entry] : sys_json.items())
+    {
+        entt::entity e = get_entity_from_string(entity);
+        //material m{};
+        
+        e = current_scene.m_registry.create(e);
+        //current_scene.m_registry.emplace<material>(e, m);
+    }
 }
 

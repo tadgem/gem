@@ -186,7 +186,7 @@ int main()
 
     model sponza_geo = model::load_model_and_textures_from_path("assets/models/sponza/Sponza.gltf");
 
-    scene.create_entity_from_model(sponza_geo, gbuffer_shader, glm::vec3(0.03), glm::vec3(0.0, 0.0, 0.0),
+    scene.create_entity_from_model(asset_handle("assets/models/sponza/Sponza.gltf", asset_type::model), sponza_geo, gbuffer_shader, glm::vec3(0.03), glm::vec3(0.0, 0.0, 0.0),
         {
             {"u_diffuse_map", texture_map_type::diffuse},
             {"u_normal_map", texture_map_type::normal},

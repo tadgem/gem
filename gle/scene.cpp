@@ -164,7 +164,16 @@ scene* scene_manager::create_scene(const std::string& scene_name)
 scene* scene_manager::load_scene(nlohmann::json& scene_json)
 {
 	ZoneScoped;
-	return nullptr;
+	std::string scene_name = scene_json["name"];
+	p_active_scenes.push_back(std::make_unique<scene>(scene_name));
+	scene* s = p_active_scenes.back().get();
+
+	for (auto& sys : engine::systems.m_systems)
+	{
+		sys->deserialize(*s, scene_json["systems"][std::to_string(sys->m_sys_hash.m_value)]);
+	}
+
+	return s;
 }
 
 nlohmann::json  scene_manager::save_scene(scene* ser_scene)
@@ -177,7 +186,7 @@ nlohmann::json  scene_manager::save_scene(scene* ser_scene)
 
 	for (auto& sys : engine::systems.m_systems)
 	{
-		json["systems"][sys->m_sys_hash] = sys->serialize(*ser_scene);
+		json["systems"][std::to_string(sys->m_sys_hash.m_value)] = sys->serialize(*ser_scene);
 	}	
 
 	return json;
