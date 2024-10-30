@@ -2,20 +2,21 @@
 #include "gem/profile.h"
 
 #ifdef ENABLE_MEMORY_TRACKING
+namespace gem {
 
-debug_memory_tracker::debug_memory_tracker() {
-    ZoneScoped;
-    if (s_instance != nullptr) {
-        // error;
-        return;
+    debug_memory_tracker::debug_memory_tracker() {
+        ZoneScoped;
+        if (s_instance != nullptr) {
+            // error;
+            return;
+        }
+
+        s_instance = this;
     }
 
-    s_instance = this;
+    debug_memory_tracker::~debug_memory_tracker() {
+        ZoneScoped;
+        s_instance = nullptr;
+    }
 }
-
-debug_memory_tracker::~debug_memory_tracker() {
-    ZoneScoped;
-    s_instance = nullptr;
-}
-
 #endif

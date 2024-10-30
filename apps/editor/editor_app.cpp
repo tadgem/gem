@@ -2,6 +2,8 @@
 #include "editor_app.h"
 #include "ImFileDialog.h"
 
+using namespace gem;
+
 editor_application::editor_application()
 {
     gl_backend::init(backend_init{ {1920, 1080}, true });

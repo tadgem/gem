@@ -49,3 +49,4 @@ namespace entt
         e = static_cast<entt::entity>(index);
     }
 }
+

@@ -2,43 +2,46 @@
 #include "glm.hpp"
 #include <array>
 
-struct frustum_planes
-{
-	std::array<glm::vec4, 6>	m_planes; // L,R,B,T,N,F
-};
+namespace gem {
 
-struct camera
-{
-	enum projection_type
+	struct frustum_planes
 	{
-		orthographic,
-		perspective
+		std::array<glm::vec4, 6>	m_planes; // L,R,B,T,N,F
 	};
 
-	glm::mat4 m_view;
-	glm::mat4 m_proj;
-	glm::mat4 m_last_vp;
+	struct camera
+	{
+		enum projection_type
+		{
+			orthographic,
+			perspective
+		};
 
-	glm::vec3	m_pos, m_euler, m_forward, m_right, m_up;
-	float		m_fov = 60.0f, m_aspect = 1.666f, m_near = 0.01f, m_far = 300.0f;
+		glm::mat4 m_view;
+		glm::mat4 m_proj;
+		glm::mat4 m_last_vp;
 
-	frustum_planes	m_frustum_planes;
+		glm::vec3	m_pos, m_euler, m_forward, m_right, m_up;
+		float		m_fov = 60.0f, m_aspect = 1.666f, m_near = 0.01f, m_far = 300.0f;
 
-	projection_type m_projection_type = projection_type::perspective;
+		frustum_planes	m_frustum_planes;
 
-	void update(glm::vec2 screen_dim);
+		projection_type m_projection_type = projection_type::perspective;
 
-	glm::mat4 get_rotation_matrix();
-};
+		void update(glm::vec2 screen_dim);
 
-struct debug_camera_controller
-{
-	void update(glm::vec2 screen_dim, camera& cam);
+		glm::mat4 get_rotation_matrix();
+	};
 
-	float movement_speed = 50.0f;
-	float deadzone = 0.002f;
-	float rotational_speed = 45.0f;
-	static constexpr float rotational_factor = 360.0f;
+	struct debug_camera_controller
+	{
+		void update(glm::vec2 screen_dim, camera& cam);
 
-	bool show_mouse = true;
-};
+		float movement_speed = 50.0f;
+		float deadzone = 0.002f;
+		float rotational_speed = 45.0f;
+		static constexpr float rotational_factor = 360.0f;
+
+		bool show_mouse = true;
+	};
+}

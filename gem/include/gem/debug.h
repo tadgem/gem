@@ -2,18 +2,21 @@
 #include <string>
 #include "GL/glew.h"
 
-class GL_DEBUG
-{
-public:
-	GL_DEBUG(const std::string& name)
-	{
-		glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, name.c_str());
-	}
+namespace gem {
 
-	~GL_DEBUG()
+	class GL_DEBUG
 	{
-		glPopDebugGroup();
-	}
-};
+	public:
+		GL_DEBUG(const std::string& name)
+		{
+			glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, name.c_str());
+		}
 
-#define GPU_MARKER(X) GL_DEBUG __marker__(X)
+		~GL_DEBUG()
+		{
+			glPopDebugGroup();
+		}
+	};
+
+	#define GPU_MARKER(X) GL_DEBUG __marker__(X)
+}

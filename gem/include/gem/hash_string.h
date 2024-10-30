@@ -11,68 +11,72 @@
 #include <unordered_map>
 #endif
 
-class hash_utils {
-public:
-    template <typename T>
-    static std::string get_type_name() { return ctti::type_id<T>().name().str(); }
+namespace gem {
 
-    template <typename T>
-    static u64 get_type_hash() { return ctti::type_id<T>().hash(); }
+    class hash_utils {
+    public:
+        template <typename T>
+        static std::string get_type_name() { return ctti::type_id<T>().name().str(); }
 
-    static u64 get_string_hash(const std::string& str) {
+        template <typename T>
+        static u64 get_type_hash() { return ctti::type_id<T>().hash(); }
 
-        return ctti::id_from_name(str).hash();
-    }
-};
+        static u64 get_string_hash(const std::string& str) {
 
-struct hash_string
-{
+            return ctti::id_from_name(str).hash();
+        }
+    };
+
+    struct hash_string
+    {
 #ifdef TRACK_HASH_STRING_ORIGINALS
-    inline static std::unordered_map<u64, std::string> s_hash_string_originals;
+        inline static std::unordered_map<u64, std::string> s_hash_string_originals;
 #endif
-    hash_string() { m_value = 0; }
+        hash_string() { m_value = 0; }
 
-    hash_string(const std::string& input) : m_value(hash_utils::get_string_hash(input)) {
+        hash_string(const std::string& input) : m_value(hash_utils::get_string_hash(input)) {
 #ifdef TRACK_HASH_STRING_ORIGINALS
 #ifdef CHECK_FOR_HASH_STRING_COLLISIONS
-        if (s_hash_string_originals.find(m_value) != s_hash_string_originals.end())
-        {
-            if (s_hash_string_originals[m_value] != input)
+            if (s_hash_string_originals.find(m_value) != s_hash_string_originals.end())
             {
-                spdlog::error("HASH STRING COLLISION : ORIGINAL : {}, NEW : {}", s_hash_string_originals[m_value], input);
+                if (s_hash_string_originals[m_value] != input)
+                {
+                    spdlog::error("HASH STRING COLLISION : ORIGINAL : {}, NEW : {}", s_hash_string_originals[m_value], input);
+                }
             }
+#endif
+            s_hash_string_originals[m_value] = input;
+#endif
         }
-#endif
-        s_hash_string_originals[m_value] = input;
-#endif
-    }
 
-    hash_string(u64 value) : m_value(value) {}
+        hash_string(u64 value) : m_value(value) {}
 
-    template <typename T>
-    hash_string() : m_value(get_type_hash<T>()) {}
+        template <typename T>
+        hash_string() : m_value(get_type_hash<T>()) {}
 
-    u64 m_value;
+        u64 m_value;
 
-    bool operator==(hash_string const& rhs) const
-    {
-        return m_value == rhs.m_value;
-    }
+        bool operator==(hash_string const& rhs) const
+        {
+            return m_value == rhs.m_value;
+        }
 
-    bool operator<(const hash_string& o) const { return m_value < o.m_value; };
+        bool operator<(const hash_string& o) const { return m_value < o.m_value; };
 
-    operator u64() const { return m_value; };
+        operator u64() const { return m_value; };
 
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(hash_string, m_value)
+        NLOHMANN_DEFINE_TYPE_INTRUSIVE(hash_string, m_value)
 
-};
+    };
 
-using hash_string_ge = hash_string;
+    using hash_string_ge = hash_string;
+}
+
 
 template <>
-struct std::hash<hash_string>
+struct std::hash<gem::hash_string>
 {
-    std::size_t operator()(const hash_string& h) const
+    std::size_t operator()(const gem::hash_string& h) const
     {
         return std::hash<u64>()(h.m_value) ^
             std::hash<u64>()(h.m_value);

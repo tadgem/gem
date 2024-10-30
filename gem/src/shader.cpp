@@ -7,272 +7,274 @@
 #include "gem/utils.h"
 #include "gem/profile.h"
 
-shader::shader(const std::string& comp)
-{
-	ZoneScoped;
-	auto c = compile_shader(comp, GL_COMPUTE_SHADER);
-	m_shader_id = link_shader(c);
+namespace gem {
 
-	glDeleteShader(c);
-}
-
-shader::shader(const std::string& vert, const std::string& frag)
-{
-	ZoneScoped;
-	auto v = compile_shader(vert, GL_VERTEX_SHADER);
-	auto f = compile_shader(frag, GL_FRAGMENT_SHADER);
-
-	m_shader_id = link_shader(v, f);
-
-	glDeleteShader(v);
-	glDeleteShader(f);
-
-}
-
-shader::shader(const std::string& vert, const std::string& geom, const std::string& frag)
-{
-	ZoneScoped;
-	auto v = compile_shader(vert, GL_VERTEX_SHADER);
-	auto g = compile_shader(geom, GL_GEOMETRY_SHADER);
-	auto f = compile_shader(frag, GL_FRAGMENT_SHADER);
-
-	m_shader_id = link_shader(v, g, f);
-
-	glDeleteShader(v);
-	glDeleteShader(g);
-	glDeleteShader(f);
-
-}
-
-void shader::use()
-{
-	ZoneScoped;
-	glUseProgram(m_shader_id);
-}
-
-void shader::release()
-{
-	ZoneScoped;
-	glDeleteProgram(m_shader_id);
-}
-
-void shader::set_bool(const std::string& name, bool value) const
-{
-	ZoneScoped;
-	glUniform1i(glGetUniformLocation(m_shader_id, name.c_str()), (int)value);
-}
-
-void shader::set_int(const std::string& name, int value) const
-{
-	ZoneScoped;
-	glUniform1i(glGetUniformLocation(m_shader_id, name.c_str()), value);
-}
-
-void shader::set_uint(const std::string& name, unsigned int value) const
-{
-	ZoneScoped;
-	glUniform1ui(glGetUniformLocation(m_shader_id, name.c_str()), value);
-}
-
-void shader::set_float(const std::string& name, float value) const
-{
-	ZoneScoped;
-	glUniform1f(glGetUniformLocation(m_shader_id, name.c_str()), value);
-}
-
-void shader::set_vec2(const std::string& name, glm::vec2 value) const
-{
-	ZoneScoped;
-	glUniform2f(glGetUniformLocation(m_shader_id, name.c_str()), value.x, value.y);
-}
-
-void shader::set_vec3(const std::string& name, glm::vec3 value) const
-{
-	ZoneScoped;
-	glUniform3f(glGetUniformLocation(m_shader_id, name.c_str()), value.x, value.y, value.z);
-}
-
-void shader::set_vec4(const std::string& name, glm::vec4 value) const
-{
-	ZoneScoped;
-	glUniform4f(glGetUniformLocation(m_shader_id, name.c_str()), value.x, value.y, value.z, value.w);
-}
-
-void shader::set_ivec2(const std::string& name, glm::ivec2 value) const
-{
-	ZoneScoped;
-	glUniform2i(glGetUniformLocation(m_shader_id, name.c_str()), value.x, value.y);
-}
-
-void shader::set_ivec3(const std::string& name, glm::ivec3 value) const
-{
-	ZoneScoped;
-	glUniform3i(glGetUniformLocation(m_shader_id, name.c_str()), value.x, value.y, value.z);
-}
-
-void shader::set_ivec4(const std::string& name, glm::ivec4 value) const
-{
-	ZoneScoped;
-	glUniform4i(glGetUniformLocation(m_shader_id, name.c_str()), value.x, value.y, value.z, value.w);
-}
-
-void shader::set_mat3(const std::string& name, glm::mat3 value) const
-{
-	ZoneScoped;
-	glUniformMatrix3fv(glGetUniformLocation(m_shader_id, name.c_str()), 1, GL_FALSE, glm::value_ptr(value));
-}
-
-void shader::set_mat4(const std::string& name, glm::mat4 value) const
-{
-	ZoneScoped;
-	glUniformMatrix4fv(glGetUniformLocation(m_shader_id, name.c_str()), 1, GL_FALSE, glm::value_ptr(value));
-}
-
-gl_handle shader::compile_shader(const std::string& source, GLenum shader_stage)
-{
-	ZoneScoped;
-	const char* src = source.c_str();
-	gl_handle s = glCreateShader(shader_stage);
-	glShaderSource(s, 1, &src, NULL);
-	glCompileShader(s);
-
-	int success = 0;
-
-	glGetShaderiv(s, GL_COMPILE_STATUS, &success);
-
-	if (!success)
+	shader::shader(const std::string& comp)
 	{
-		char infoLog[512];
-		glGetShaderInfoLog(s, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::COMPILATION_FAILED\n" << infoLog << std::endl;
-	};
+		ZoneScoped;
+		auto c = compile_shader(comp, GL_COMPUTE_SHADER);
+		m_shader_id = link_shader(c);
 
-	return s;
-}
-
-int shader::link_shader(gl_handle comp)
-{
-	ZoneScoped;
-	auto prog_id = glCreateProgram();
-	glAttachShader(prog_id, comp);
-	glLinkProgram(prog_id);
-
-	int success = 0;
-
-	glGetProgramiv(prog_id, GL_LINK_STATUS, &success);
-	if (!success)
-	{
-		char infoLog[512];
-		glGetProgramInfoLog(prog_id, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
+		glDeleteShader(c);
 	}
 
-	return prog_id;
-}
-
-int shader::link_shader(gl_handle vert, gl_handle frag)
-{
-	ZoneScoped;
-	auto prog_id = glCreateProgram();
-	glAttachShader(prog_id, vert);
-	glAttachShader(prog_id, frag);
-	glLinkProgram(prog_id);
-
-	int success = 0;
-
-	glGetProgramiv(prog_id, GL_LINK_STATUS, &success);
-	if (!success)
+	shader::shader(const std::string& vert, const std::string& frag)
 	{
-		char infoLog[512];
-		glGetProgramInfoLog(prog_id, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
+		ZoneScoped;
+		auto v = compile_shader(vert, GL_VERTEX_SHADER);
+		auto f = compile_shader(frag, GL_FRAGMENT_SHADER);
+
+		m_shader_id = link_shader(v, f);
+
+		glDeleteShader(v);
+		glDeleteShader(f);
+
 	}
 
-	return prog_id;
-}
-
-int shader::link_shader(gl_handle vert, gl_handle geom, gl_handle frag)
-{
-	ZoneScoped;
-	auto prog_id = glCreateProgram();
-	glAttachShader(prog_id, vert);
-	glAttachShader(prog_id, geom);
-	glAttachShader(prog_id, frag);
-	glLinkProgram(prog_id);
-
-	int success = 0;
-
-	glGetProgramiv(prog_id, GL_LINK_STATUS, &success);
-	if (!success)
+	shader::shader(const std::string& vert, const std::string& geom, const std::string& frag)
 	{
-		char infoLog[512];
-		glGetProgramInfoLog(prog_id, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
+		ZoneScoped;
+		auto v = compile_shader(vert, GL_VERTEX_SHADER);
+		auto g = compile_shader(geom, GL_GEOMETRY_SHADER);
+		auto f = compile_shader(frag, GL_FRAGMENT_SHADER);
+
+		m_shader_id = link_shader(v, g, f);
+
+		glDeleteShader(v);
+		glDeleteShader(g);
+		glDeleteShader(f);
+
 	}
 
-	return prog_id;
-}
+	void shader::use()
+	{
+		ZoneScoped;
+		glUseProgram(m_shader_id);
+	}
 
-std::unordered_map<shader::stage, std::string> shader::split_composite_shader(const std::string& input)
-{
-	ZoneScoped;
-	static std::unordered_map<std::string, shader::stage> s_known_stages = { {"#frag", shader::stage::fragment}, {"#vert", shader::stage::vertex} , {"#geom", shader::stage::geometry}, {"#compute", shader::stage::compute} };
-	//static std::unordered_map<std::string, shader::stage> s_known_stages = { };
-	auto stages = std::unordered_map<shader::stage, std::string>();
-	std::string version = "";
+	void shader::release()
+	{
+		ZoneScoped;
+		glDeleteProgram(m_shader_id);
+	}
 
-	std::stringstream input_stream(input);
-	std::stringstream stage_stream{};
-	std::string line = "";
-	std::string stage = "";
+	void shader::set_bool(const std::string& name, bool value) const
+	{
+		ZoneScoped;
+		glUniform1i(glGetUniformLocation(m_shader_id, name.c_str()), (int)value);
+	}
 
-	while (std::getline(input_stream, line)) {
-		if (line.find("#version") != std::string::npos)
+	void shader::set_int(const std::string& name, int value) const
+	{
+		ZoneScoped;
+		glUniform1i(glGetUniformLocation(m_shader_id, name.c_str()), value);
+	}
+
+	void shader::set_uint(const std::string& name, unsigned int value) const
+	{
+		ZoneScoped;
+		glUniform1ui(glGetUniformLocation(m_shader_id, name.c_str()), value);
+	}
+
+	void shader::set_float(const std::string& name, float value) const
+	{
+		ZoneScoped;
+		glUniform1f(glGetUniformLocation(m_shader_id, name.c_str()), value);
+	}
+
+	void shader::set_vec2(const std::string& name, glm::vec2 value) const
+	{
+		ZoneScoped;
+		glUniform2f(glGetUniformLocation(m_shader_id, name.c_str()), value.x, value.y);
+	}
+
+	void shader::set_vec3(const std::string& name, glm::vec3 value) const
+	{
+		ZoneScoped;
+		glUniform3f(glGetUniformLocation(m_shader_id, name.c_str()), value.x, value.y, value.z);
+	}
+
+	void shader::set_vec4(const std::string& name, glm::vec4 value) const
+	{
+		ZoneScoped;
+		glUniform4f(glGetUniformLocation(m_shader_id, name.c_str()), value.x, value.y, value.z, value.w);
+	}
+
+	void shader::set_ivec2(const std::string& name, glm::ivec2 value) const
+	{
+		ZoneScoped;
+		glUniform2i(glGetUniformLocation(m_shader_id, name.c_str()), value.x, value.y);
+	}
+
+	void shader::set_ivec3(const std::string& name, glm::ivec3 value) const
+	{
+		ZoneScoped;
+		glUniform3i(glGetUniformLocation(m_shader_id, name.c_str()), value.x, value.y, value.z);
+	}
+
+	void shader::set_ivec4(const std::string& name, glm::ivec4 value) const
+	{
+		ZoneScoped;
+		glUniform4i(glGetUniformLocation(m_shader_id, name.c_str()), value.x, value.y, value.z, value.w);
+	}
+
+	void shader::set_mat3(const std::string& name, glm::mat3 value) const
+	{
+		ZoneScoped;
+		glUniformMatrix3fv(glGetUniformLocation(m_shader_id, name.c_str()), 1, GL_FALSE, glm::value_ptr(value));
+	}
+
+	void shader::set_mat4(const std::string& name, glm::mat4 value) const
+	{
+		ZoneScoped;
+		glUniformMatrix4fv(glGetUniformLocation(m_shader_id, name.c_str()), 1, GL_FALSE, glm::value_ptr(value));
+	}
+
+	gl_handle shader::compile_shader(const std::string& source, GLenum shader_stage)
+	{
+		ZoneScoped;
+		const char* src = source.c_str();
+		gl_handle s = glCreateShader(shader_stage);
+		glShaderSource(s, 1, &src, NULL);
+		glCompileShader(s);
+
+		int success = 0;
+
+		glGetShaderiv(s, GL_COMPILE_STATUS, &success);
+
+		if (!success)
 		{
-			version = line;
-			stage_stream << version << "\n";
-			continue;
+			char infoLog[512];
+			glGetShaderInfoLog(s, 512, NULL, infoLog);
+			std::cout << "ERROR::SHADER::COMPILATION_FAILED\n" << infoLog << std::endl;
+		};
+
+		return s;
+	}
+
+	int shader::link_shader(gl_handle comp)
+	{
+		ZoneScoped;
+		auto prog_id = glCreateProgram();
+		glAttachShader(prog_id, comp);
+		glLinkProgram(prog_id);
+
+		int success = 0;
+
+		glGetProgramiv(prog_id, GL_LINK_STATUS, &success);
+		if (!success)
+		{
+			char infoLog[512];
+			glGetProgramInfoLog(prog_id, 512, NULL, infoLog);
+			std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
 		}
 
-		for (auto& [known , stage_enum]: s_known_stages)
+		return prog_id;
+	}
+
+	int shader::link_shader(gl_handle vert, gl_handle frag)
+	{
+		ZoneScoped;
+		auto prog_id = glCreateProgram();
+		glAttachShader(prog_id, vert);
+		glAttachShader(prog_id, frag);
+		glLinkProgram(prog_id);
+
+		int success = 0;
+
+		glGetProgramiv(prog_id, GL_LINK_STATUS, &success);
+		if (!success)
 		{
-			if (line.find(known) != std::string::npos)
+			char infoLog[512];
+			glGetProgramInfoLog(prog_id, 512, NULL, infoLog);
+			std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
+		}
+
+		return prog_id;
+	}
+
+	int shader::link_shader(gl_handle vert, gl_handle geom, gl_handle frag)
+	{
+		ZoneScoped;
+		auto prog_id = glCreateProgram();
+		glAttachShader(prog_id, vert);
+		glAttachShader(prog_id, geom);
+		glAttachShader(prog_id, frag);
+		glLinkProgram(prog_id);
+
+		int success = 0;
+
+		glGetProgramiv(prog_id, GL_LINK_STATUS, &success);
+		if (!success)
+		{
+			char infoLog[512];
+			glGetProgramInfoLog(prog_id, 512, NULL, infoLog);
+			std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
+		}
+
+		return prog_id;
+	}
+
+	std::unordered_map<shader::stage, std::string> shader::split_composite_shader(const std::string& input)
+	{
+		ZoneScoped;
+		static std::unordered_map<std::string, shader::stage> s_known_stages = { {"#frag", shader::stage::fragment}, {"#vert", shader::stage::vertex} , {"#geom", shader::stage::geometry}, {"#compute", shader::stage::compute} };
+		//static std::unordered_map<std::string, shader::stage> s_known_stages = { };
+		auto stages = std::unordered_map<shader::stage, std::string>();
+		std::string version = "";
+
+		std::stringstream input_stream(input);
+		std::stringstream stage_stream{};
+		std::string line = "";
+		std::string stage = "";
+
+		while (std::getline(input_stream, line)) {
+			if (line.find("#version") != std::string::npos)
 			{
-				if (!stage.empty())
-				{
-					stages.emplace(shader::stage(s_known_stages[stage]), std::string(stage_stream.str()));
-					stage_stream.str(std::string());
-					stage_stream.clear();
-					stage_stream << version << "\n";
-				}
-
-				stage = known;
-				break;
+				version = line;
+				stage_stream << version << "\n";
+				continue;
 			}
+
+			for (auto& [known, stage_enum] : s_known_stages)
+			{
+				if (line.find(known) != std::string::npos)
+				{
+					if (!stage.empty())
+					{
+						stages.emplace(shader::stage(s_known_stages[stage]), std::string(stage_stream.str()));
+						stage_stream.str(std::string());
+						stage_stream.clear();
+						stage_stream << version << "\n";
+					}
+
+					stage = known;
+					break;
+				}
+			}
+
+			if (line == stage)
+			{
+				continue;
+			}
+
+			stage_stream << line << "\n";
 		}
 
-		if (line == stage)
+		std::string last_stream = stage_stream.str();
+		if (!stage.empty() && !last_stream.empty())
 		{
-			continue;
+			stages.emplace(s_known_stages[stage], last_stream);
 		}
 
-		stage_stream << line << "\n";
+		return stages;
 	}
 
-	std::string last_stream = stage_stream.str();
-	if (!stage.empty() && !last_stream.empty())
+	shader::uniform_type shader::get_type_from_gl(GLenum type)
 	{
-		stages.emplace(s_known_stages[stage], last_stream);
-	}
-
-	return stages;
-}
-
-shader::uniform_type shader::get_type_from_gl(GLenum type)
-{
-	ZoneScoped;
-	switch (type)
-	{
+		ZoneScoped;
+		switch (type)
+		{
 		case GL_SAMPLER_2D:
 			return uniform_type::sampler2D;
 		case GL_SAMPLER_3D:
@@ -297,7 +299,8 @@ shader::uniform_type shader::get_type_from_gl(GLenum type)
 			return uniform_type::mat4;
 		default:
 			return uniform_type::UNKNOWN;
-	}
+		}
 
-	return uniform_type::UNKNOWN;
+		return uniform_type::UNKNOWN;
+	}
 }

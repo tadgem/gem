@@ -35,6 +35,7 @@
 #include "gem/tech/ssr.h"
 #include "gem/tech/taa.h"
 
+using namespace gem;
 
 int main()
 {

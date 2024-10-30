@@ -29,8 +29,9 @@
 #include "gem/transform.h"
 
 using namespace nlohmann;
-static glm::vec3 custom_orientation;
+using namespace gem;
 
+static glm::vec3 custom_orientation;
 
 void on_im3d(gl_renderer& renderer, scene& current_scene, camera& cam)
 {

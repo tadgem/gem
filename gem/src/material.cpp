@@ -3,59 +3,60 @@
 #include "gem/asset_manager.h"
 #include "gem/asset_definitions.h"
 #include "gem/profile.h"
+namespace gem {
 
-material::material(asset_handle shader_handle, shader& program) : m_prog(program), m_shader_handle(shader_handle)
-{
-    ZoneScoped;
-    int uniform_count;
-    GLint size; // size of the variable
-    GLenum type; // type of the variable (float, vec3 or mat4, etc)
-
-    const GLsizei bufSize = 16; // maximum name length
-    GLchar name[bufSize]; // variable name in GLSL
-    GLsizei length; // name length
-    glGetProgramiv(m_prog.m_shader_id, GL_ACTIVE_UNIFORMS, &uniform_count);
-
-    for (int i = 0; i < uniform_count; i++)
+    material::material(asset_handle shader_handle, shader& program) : m_prog(program), m_shader_handle(shader_handle)
     {
-        glGetActiveUniform(m_prog.m_shader_id, (GLuint)i, bufSize, &length, &size, &type, name);
-        std::string uname = std::string(name);
-        shader::uniform_type utype = shader::get_type_from_gl(type);
-        m_uniforms.emplace(uname, utype);
-    }
-}
+        ZoneScoped;
+        int uniform_count;
+        GLint size; // size of the variable
+        GLenum type; // type of the variable (float, vec3 or mat4, etc)
 
-bool material::set_sampler(const std::string& sampler_name, GLenum texture_slot, texture_entry& tex_entry, GLenum texture_target)
-{
-    ZoneScoped;
-#ifdef ENABLE_MATERIAL_UNIFORM_CHECKS
-    if (m_uniforms.find(sampler_name) == m_uniforms.end())
-    {
-        return false;
-    }
-#endif
+        const GLsizei bufSize = 16; // maximum name length
+        GLchar name[bufSize]; // variable name in GLSL
+        GLsizei length; // name length
+        glGetProgramiv(m_prog.m_shader_id, GL_ACTIVE_UNIFORMS, &uniform_count);
 
-    m_uniform_values[sampler_name] = sampler_info{ texture_slot, texture_target, tex_entry };
-
-    return true;
-}
-
-
-void material::bind_material_uniforms(asset_manager& am)
-{
-    ZoneScoped;
-    m_prog.use();
-    for (auto& [name, val] : m_uniform_values)
-    {
-#ifdef ENABLE_MATERIAL_UNIFORM_CHECKS
-        if (m_uniforms.find(name) == m_uniforms.end())
+        for (int i = 0; i < uniform_count; i++)
         {
-            continue;
+            glGetActiveUniform(m_prog.m_shader_id, (GLuint)i, bufSize, &length, &size, &type, name);
+            std::string uname = std::string(name);
+            shader::uniform_type utype = shader::get_type_from_gl(type);
+            m_uniforms.emplace(uname, utype);
+        }
+    }
+
+    bool material::set_sampler(const std::string& sampler_name, GLenum texture_slot, texture_entry& tex_entry, GLenum texture_target)
+    {
+        ZoneScoped;
+#ifdef ENABLE_MATERIAL_UNIFORM_CHECKS
+        if (m_uniforms.find(sampler_name) == m_uniforms.end())
+        {
+            return false;
         }
 #endif
-        switch (m_uniforms[name])
+
+        m_uniform_values[sampler_name] = sampler_info{ texture_slot, texture_target, tex_entry };
+
+        return true;
+    }
+
+
+    void material::bind_material_uniforms(asset_manager& am)
+    {
+        ZoneScoped;
+        m_prog.use();
+        for (auto& [name, val] : m_uniform_values)
         {
-            // TODO: Image attachments for compute shaders....
+#ifdef ENABLE_MATERIAL_UNIFORM_CHECKS
+            if (m_uniforms.find(name) == m_uniforms.end())
+            {
+                continue;
+            }
+#endif
+            switch (m_uniforms[name])
+            {
+                // TODO: Image attachments for compute shaders....
             case shader::uniform_type::sampler2D:
             case shader::uniform_type::sampler3D:
             {
@@ -118,82 +119,82 @@ void material::bind_material_uniforms(asset_manager& am)
                 m_prog.set_mat4(name, m4);
                 break;
             }
-        }
-    }
-}
-
-
-
-void material_sys::init()
-{
-    ZoneScoped;
-
-}
-
-void material_sys::cleanup()
-{
-    ZoneScoped;
-
-}
-
-void material_sys::update(scene& current_scene)
-{
-    ZoneScoped;
-
-}
-
-nlohmann::json material_sys::serialize(scene& current_scene)
-{
-    ZoneScoped;
-
-    nlohmann::json sys_json;
-
-    auto sys_view = current_scene.m_registry.view<material>();
-
-    for (auto [e, mat] : sys_view.each())
-    {
-        nlohmann::json comp_json;
-        // comp_json["shader"] = mat.m_prog.
-        for (auto [name, uniform_type] : mat.m_uniforms)
-        {
-            if (mat.m_uniform_values.find(name) != mat.m_uniform_values.end())
-            {
-                nlohmann::json uniform_json{};
-                uniform_json["uniform_type"] = uniform_type;
-                switch (uniform_type)
-                {
-                case shader::uniform_type::sampler2D:
-                case shader::uniform_type::sampler3D:
-                {
-                    sampler_info info = std::any_cast<sampler_info>(mat.m_uniform_values[name]);
-                    uniform_json["slot"] = info.sampler_slot;
-                    uniform_json["target"] = info.texture_target;
-                    uniform_json["handle"] = info.tex_entry.m_handle;
-                    break;
-                }
-                default:
-                    break;
-                }
-                comp_json[name] = uniform_json;
             }
         }
-        sys_json[get_entity_string(e)] = comp_json;
     }
 
-    return sys_json;
-}
 
-void material_sys::deserialize(scene& current_scene, nlohmann::json& sys_json)
-{
-    ZoneScoped;
 
-    for (auto [entity, entry] : sys_json.items())
+    void material_sys::init()
     {
-        entt::entity e = get_entity_from_string(entity);
-        //material m{};
-        
-        e = current_scene.m_registry.create(e);
-        //current_scene.m_registry.emplace<material>(e, m);
+        ZoneScoped;
+
+    }
+
+    void material_sys::cleanup()
+    {
+        ZoneScoped;
+
+    }
+
+    void material_sys::update(scene& current_scene)
+    {
+        ZoneScoped;
+
+    }
+
+    nlohmann::json material_sys::serialize(scene& current_scene)
+    {
+        ZoneScoped;
+
+        nlohmann::json sys_json;
+
+        auto sys_view = current_scene.m_registry.view<material>();
+
+        for (auto [e, mat] : sys_view.each())
+        {
+            nlohmann::json comp_json;
+            // comp_json["shader"] = mat.m_prog.
+            for (auto [name, uniform_type] : mat.m_uniforms)
+            {
+                if (mat.m_uniform_values.find(name) != mat.m_uniform_values.end())
+                {
+                    nlohmann::json uniform_json{};
+                    uniform_json["uniform_type"] = uniform_type;
+                    switch (uniform_type)
+                    {
+                    case shader::uniform_type::sampler2D:
+                    case shader::uniform_type::sampler3D:
+                    {
+                        sampler_info info = std::any_cast<sampler_info>(mat.m_uniform_values[name]);
+                        uniform_json["slot"] = info.sampler_slot;
+                        uniform_json["target"] = info.texture_target;
+                        uniform_json["handle"] = info.tex_entry.m_handle;
+                        break;
+                    }
+                    default:
+                        break;
+                    }
+                    comp_json[name] = uniform_json;
+                }
+            }
+            sys_json[get_entity_string(e)] = comp_json;
+        }
+
+        return sys_json;
+    }
+
+    void material_sys::deserialize(scene& current_scene, nlohmann::json& sys_json)
+    {
+        ZoneScoped;
+
+        for (auto [entity, entry] : sys_json.items())
+        {
+            entt::entity e = get_entity_from_string(entity);
+            //material m{};
+
+            e = current_scene.m_registry.create(e);
+            //current_scene.m_registry.emplace<material>(e, m);
+        }
     }
 }
-
