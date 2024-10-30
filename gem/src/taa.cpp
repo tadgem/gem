@@ -4,9 +4,11 @@
 #include "gem/shape.h"
 #include "gem/tech/tech_utils.h"
 #include "gem/debug.h"
+#include "gem/profile.h"
 
 void tech::taa::dispatch_taa_pass(shader& taa, framebuffer& pass_buffer, framebuffer pass_resolve_buffer, framebuffer& pass_history_buffer, gl_handle& velocity_buffer_attachment, glm::ivec2 window_res)
 {
+    ZoneScoped;
     GPU_MARKER("TAA Pass");
     pass_resolve_buffer.bind();
     shapes::s_screen_quad.use();

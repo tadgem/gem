@@ -17,8 +17,8 @@
 
 void gl_renderer::init(asset_manager& am)
 {
-    TracyGpuContext;
     ZoneScoped;
+    TracyGpuContext;
     m_frame_index = 0;
     m_im3d_state = im3d_gl::load_im3d();
 
@@ -135,8 +135,8 @@ void gl_renderer::pre_frame(camera& cam)
 
 void gl_renderer::render(asset_manager& am, camera& cam, std::vector<scene*>& scenes)
 {
-    FrameMark;
     ZoneScoped;
+    FrameMark;
 
     // Todo: create a total bounding volume from all active scenes;
     aabb total_bounding_volume = scenes.front()->m_scene_bounding_volume;

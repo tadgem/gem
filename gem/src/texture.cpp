@@ -169,22 +169,34 @@ texture texture::create_3d_texture_empty(glm::ivec3 dim, GLenum format, GLenum p
 void texture::load_texture_stbi(std::vector<unsigned char>& data)
 {
 	ZoneScoped;
-	stbi_set_flip_vertically_on_load(1);
-	unsigned char* stbi_data = stbi_load_from_memory(data.data(), data.size(), &m_width, &m_height, &m_num_channels, 0);
-	if (!stbi_data)
+	//TODO: Split up STBI and GLI CPU loading and GL submission
+	// STBI CPU processing taking 22ms in release, only 2ms to submit to GPU
+	unsigned char* stbi_data = nullptr;
 	{
-		return;
+		ZoneScopedN("STBI Cpu Processing");
+		stbi_set_flip_vertically_on_load(1);
+		stbi_data = stbi_load_from_memory(data.data(), data.size(), &m_width, &m_height, &m_num_channels, 0);
+		if (!stbi_data)
+		{
+			return;
+		}
 	}
-	glGenTextures(1, &m_handle);
-	glBindTexture(GL_TEXTURE_2D, m_handle);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	GLenum format = m_num_channels == 4 ? GL_RGBA : GL_RGB;
-	glTexImage2D(GL_TEXTURE_2D, 0, format, m_width, m_height, 0, format, GL_UNSIGNED_BYTE, stbi_data);
-	glGenerateMipmap(GL_TEXTURE_2D);
-	stbi_image_free(stbi_data);
+	{
+		ZoneScopedN("STBI Submit to GPU");
+		glGenTextures(1, &m_handle);
+		glBindTexture(GL_TEXTURE_2D, m_handle);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		GLenum format = m_num_channels == 4 ? GL_RGBA : GL_RGB;
+		glTexImage2D(GL_TEXTURE_2D, 0, format, m_width, m_height, 0, format, GL_UNSIGNED_BYTE, stbi_data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	{
+		ZoneScopedN("STBU Free CPU Memory");
+		stbi_image_free(stbi_data);
+	}
 }
 
 void texture::load_texture_gli(std::vector<unsigned char>& data)

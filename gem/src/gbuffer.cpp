@@ -5,9 +5,11 @@
 #include "gem/mesh.h"
 #include "gem/material.h"
 #include "gem/debug.h"
+#include "gem/profile.h"
 
 void tech::gbuffer::dispatch_gbuffer(u32 frame_index, framebuffer& gbuffer, framebuffer& previous_position_buffer, shader& gbuffer_shader, asset_manager& am, camera& cam, std::vector<scene*>& scenes, glm::ivec2 win_res)
 {
+    ZoneScoped;
     GPU_MARKER("GBuffer");
     glDisable(GL_DITHER);
     gbuffer.bind();
@@ -55,6 +57,7 @@ void tech::gbuffer::dispatch_gbuffer(u32 frame_index, framebuffer& gbuffer, fram
 
 void tech::gbuffer::dispatch_gbuffer_with_id(u32 frame_index, framebuffer& gbuffer, framebuffer& previous_position_buffer, shader& gbuffer_shader, asset_manager& am, camera& cam, std::vector<scene*>& scenes, glm::ivec2 win_res)
 {
+    ZoneScoped;
     GPU_MARKER("GBuffer-EntityID");
     glDisable(GL_DITHER);
 

@@ -126,18 +126,26 @@ void material::bind_material_uniforms(asset_manager& am)
 
 void material_sys::init()
 {
+    ZoneScoped;
+
 }
 
 void material_sys::cleanup()
 {
+    ZoneScoped;
+
 }
 
 void material_sys::update(scene& current_scene)
 {
+    ZoneScoped;
+
 }
 
 nlohmann::json material_sys::serialize(scene& current_scene)
 {
+    ZoneScoped;
+
     nlohmann::json sys_json;
 
     auto sys_view = current_scene.m_registry.view<material>();
@@ -177,6 +185,8 @@ nlohmann::json material_sys::serialize(scene& current_scene)
 
 void material_sys::deserialize(scene& current_scene, nlohmann::json& sys_json)
 {
+    ZoneScoped;
+
     for (auto [entity, entry] : sys_json.items())
     {
         entt::entity e = get_entity_from_string(entity);

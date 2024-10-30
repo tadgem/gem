@@ -4,14 +4,20 @@
 
 void mesh_sys::init()
 {
+	ZoneScoped;
+
 }
 
 void mesh_sys::cleanup()
 {
+	ZoneScoped;
+
 }
 
 void try_update_mesh_component(mesh_component& mc)
 {
+	ZoneScoped;
+
 	if (engine::assets.get_asset_load_progress(mc.m_handle) == asset_load_progress::loaded)
 	{
 		auto model_asset = engine::assets.get_asset<model, asset_type::model>(mc.m_handle);
@@ -21,6 +27,8 @@ void try_update_mesh_component(mesh_component& mc)
 
 void mesh_sys::update(scene& current_scene)
 {
+	ZoneScoped;
+
 	auto mesh_view = current_scene.m_registry.view<mesh_component>();
 
 	for (auto& [e, meshc] : mesh_view.each())
@@ -34,6 +42,8 @@ void mesh_sys::update(scene& current_scene)
 
 nlohmann::json mesh_sys::serialize(scene& current_scene)
 {
+	ZoneScoped;
+
 	nlohmann::json sys_json{};
 	auto view = current_scene.m_registry.view<mesh_component>();
 	for (auto [e, mesh] : view.each())
@@ -49,6 +59,8 @@ nlohmann::json mesh_sys::serialize(scene& current_scene)
 
 void mesh_sys::deserialize(scene& current_scene, nlohmann::json& sys_json)
 {
+	ZoneScoped;
+
 	for (auto [entity, entry] : sys_json.items())
 	{
 		entt::entity e = get_entity_from_string(entity);

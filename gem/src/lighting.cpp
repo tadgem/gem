@@ -7,9 +7,11 @@
 #include "gem/camera.h"
 #include "gem/utils.h"
 #include "gem/debug.h"
+#include "gem/profile.h"
 
 void tech::lighting::dispatch_light_pass(shader& lighting_shader, framebuffer& lighting_buffer, framebuffer& gbuffer, framebuffer& dir_light_shadow_buffer, camera& cam, std::vector<point_light>& point_lights, dir_light& sun)
 {
+    ZoneScoped;
     GPU_MARKER("Lighting Pass");
     lighting_buffer.bind();
     lighting_shader.use();

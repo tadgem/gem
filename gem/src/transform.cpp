@@ -26,19 +26,25 @@ void transform::update_transforms(scene& current_scene)
 
 void transform_sys::init()
 {
+	ZoneScoped;
+
 }
 
 void transform_sys::cleanup()
 {
+	ZoneScoped;
+
 }
 
 void transform_sys::update(scene& current_scene)
 {
+	ZoneScoped;
 	transform::update_transforms(current_scene);
 }
 
 nlohmann::json transform_sys::serialize(scene& current_scene)
 {
+	ZoneScoped;
 	nlohmann::json sys_json;
 
 	auto sys_view = current_scene.m_registry.view<transform>();
@@ -57,7 +63,7 @@ nlohmann::json transform_sys::serialize(scene& current_scene)
 
 void transform_sys::deserialize(scene& current_scene, nlohmann::json& sys_json)
 {
-	// std::string str = sys_json.dump();
+	ZoneScoped;
 	for (auto [entity,  entry ] : sys_json.items())
 	{
 		entt::entity e = get_entity_from_string(entity);

@@ -4,9 +4,11 @@
 #include "gem/texture.h"
 #include "gem/camera.h"
 #include "gem/debug.h"
+#include "gem/profile.h"
 
 void tech::ssr::dispatch_ssr_pass(shader& ssr, camera& cam,framebuffer& ssr_buffer, framebuffer& gbuffer, framebuffer& lighting_buffer, glm::vec2 screen_dim)
 {
+    ZoneScoped;
     GPU_MARKER("SSR Pass");
     shapes::s_screen_quad.use();
     ssr_buffer.bind();
