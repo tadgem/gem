@@ -36,12 +36,12 @@ static constexpr u32 get_index() {return static_cast<u32>(INDEX);}\
 
 
 // sample event data
-//struct asset_loaded_data : a_event_data
-//{
-//	asset_handle	m_handle_loaded = {};
-//
-//	EVENT_DATA_IMPL(asset_loaded_data, event_queue::engine, engine_event::asset_loaded)
-//};
+struct asset_loaded_data : a_event_data
+{
+	asset_handle	m_handle_loaded = {};
+
+	EVENT_DATA_IMPL(asset_loaded_data, event_queue::engine, engine_event::asset_loaded)
+};
 
 // helper struct to quickly find subscribed events
 struct event_comparator
@@ -145,4 +145,4 @@ public:
 			callback(data);
 		}
 	}
-};
+}; 

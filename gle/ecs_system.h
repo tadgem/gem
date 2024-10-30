@@ -6,7 +6,7 @@
 #include <type_traits>
 #include "entt/entt.hpp"
 class scene;
-
+class asset_manager;
 class ecs_system
 {
 public:
