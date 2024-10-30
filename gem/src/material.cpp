@@ -3,6 +3,7 @@
 #include "gem/asset_manager.h"
 #include "gem/asset_definitions.h"
 #include "gem/profile.h"
+#include "gem/engine.h"
 namespace gem {
 
     material::material(asset_handle shader_handle, shader& program) : m_prog(program), m_shader_handle(shader_handle)
@@ -154,7 +155,8 @@ namespace gem {
         for (auto [e, mat] : sys_view.each())
         {
             nlohmann::json comp_json;
-            // comp_json["shader"] = mat.m_prog.
+            comp_json["shader"] = mat.m_shader_handle;
+            comp_json["uniforms"] = nlohmann::json();
             for (auto [name, uniform_type] : mat.m_uniforms)
             {
                 if (mat.m_uniform_values.find(name) != mat.m_uniform_values.end())
@@ -175,7 +177,7 @@ namespace gem {
                     default:
                         break;
                     }
-                    comp_json[name] = uniform_json;
+                    comp_json["uniforms"][name] = uniform_json;
                 }
             }
             sys_json[get_entity_string(e)] = comp_json;
@@ -191,9 +193,32 @@ namespace gem {
         for (auto [entity, entry] : sys_json.items())
         {
             entt::entity e = get_entity_from_string(entity);
-            //material m{};
-
             e = current_scene.m_registry.create(e);
+            asset_handle shader_handle = entry["shader"];
+            auto* shader_asset = engine::assets.get_asset<shader, asset_type::shader>(shader_handle);
+            material mat(shader_handle, shader_asset->m_data);
+
+            nlohmann::json uniforms = entry["uniforms"].items();
+
+            spdlog::info("entity : {} : material json : {}", entity, entry.dump());
+
+            for (auto [uniform_name, uniform_json] : uniforms.items())
+            {
+                shader::uniform_type uniform_type = uniform_json["uniform_type"];
+
+                switch (uniform_type)
+                    {
+                    case shader::uniform_type::sampler2D:
+                    case shader::uniform_type::sampler3D:
+                    {
+                        break;
+                    }
+                    default:
+                    {
+                        break;
+                    }
+                }
+            }
             //current_scene.m_registry.emplace<material>(e, m);
         }
     }

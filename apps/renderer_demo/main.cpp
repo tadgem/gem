@@ -59,10 +59,9 @@ int main()
 {
     gl_backend::init(backend_init{ {1920, 1080}, true });
     engine::init();
-    asset_manager am{};
     gl_renderer renderer{};
 
-    renderer.init(am);
+    renderer.init(engine::assets);
 
     custom_orientation = glm::vec3(0, 1, 0);
     camera cam{};
@@ -76,7 +75,7 @@ int main()
     e.add_component<material>(renderer.m_gbuffer_shader->m_handle, renderer.m_gbuffer_shader->m_data);
 
     // model sponza_geo = model::load_model_and_textures_from_path("assets/models/sponza/Sponza.gltf");
-    am.load_asset("assets/models/sponza/Sponza.gltf", asset_type::model, [s, &am, &renderer](asset* a) {
+    engine::assets.load_asset("assets/models/sponza/Sponza.gltf", asset_type::model, [s, &renderer](asset* a) {
         spdlog::info("adding model to scene");
         model_asset* ma = static_cast<model_asset*>(a);
         ma->m_data.update_aabb();
@@ -118,7 +117,7 @@ int main()
     while (!gl_backend::s_quit)
     {
         glEnable(GL_DEPTH_TEST);
-        am.update();
+        engine::assets.update();
         
         gl_backend::process_sdl_event();
         gl_backend::engine_pre_frame();      
@@ -148,7 +147,7 @@ int main()
         }
 
         {
-            renderer.on_imgui(am);
+            renderer.on_imgui(engine::assets);
 
             ImGui::Begin("Demo Settings");
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / gl_backend::s_imgui_io->Framerate, gl_backend::s_imgui_io->Framerate);
@@ -178,7 +177,7 @@ int main()
             ImGui::End();
         }
 
-        renderer.render(am, cam, scenes);
+        renderer.render(engine::assets, cam, scenes);
         gl_backend::engine_post_frame();
     }
     gl_backend::engine_shut_down();
