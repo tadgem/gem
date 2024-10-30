@@ -41,3 +41,4 @@ third-party/glew/glew.pc
 /cmake-build-debug
 /cmake-build-release
 /.idea
+/.VSCodeCounter
