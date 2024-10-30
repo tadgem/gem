@@ -3,8 +3,8 @@ set(CMAKE_CXX_STANDARD 17)
 
 add_executable(assets-test main.cpp)
 
-target_link_libraries(assets-test PRIVATE gle cpptrace::cpptrace)
-target_include_directories(assets-test PRIVATE ${GLE_INCLUDES})
+target_link_libraries(assets-test PRIVATE gem cpptrace::cpptrace)
+target_include_directories(assets-test PRIVATE ${GEM_INCLUDES})
 
 file(COPY ${ASSETS_DIR} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 

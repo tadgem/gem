@@ -1,9 +1,9 @@
 #pragma once
-#include "gle.h"
-#include "editor_definitions.h"
-#include "project.h"
+#include "gem/gem.h"
+#include "gem/project.h"
 #include <sstream>
 #include <iostream>
+#include "editor_definitions.h"
 
 class editor_application
 {

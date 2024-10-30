@@ -10,7 +10,7 @@
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
 
-#include "stb_image.h"
+#include "gem/stb_image.h"
 
 #ifdef _WIN32
 #define NOMINMAX
