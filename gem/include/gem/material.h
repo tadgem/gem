@@ -14,7 +14,7 @@ class asset_manager;
 class material
 {
 public:
-	material(shader& shader_program);
+	material(asset_handle shader_handle, shader& shader_program);
 
 	std::map<std::string, shader::uniform_type>	m_uniforms;
 	std::map<std::string, std::any>				m_uniform_values;
@@ -37,7 +37,7 @@ public:
 	void	bind_material_uniforms(asset_manager& am);
 
 	shader& m_prog;
-
+	const asset_handle m_shader_handle;
 };
 
 class material_sys : public ecs_system

@@ -25,6 +25,7 @@ entity scene::create_entity(const std::string& name)
 std::vector<entity> scene::create_entity_from_model(
 	asset_handle model_asset_handle,
 	model& model_to_load, 
+	asset_handle shader_asset_handle,
 	shader& material_shader, 
 	glm::vec3 scale, 
 	glm::vec3 euler, 
@@ -43,7 +44,7 @@ std::vector<entity> scene::create_entity_from_model(
 		trans.m_scale = scale;
 		trans.m_euler = euler;
 		e.add_component<mesh_component>(mesh_component{ entry, model_asset_handle, i });
-		material& current_mat = e.add_component<material>(material_shader);
+		material& current_mat = e.add_component<material>(shader_asset_handle, material_shader);
 
 		GLenum texture_slot = GL_TEXTURE0;
 		// go through each known map type

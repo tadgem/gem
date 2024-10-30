@@ -4,7 +4,7 @@
 #include "gem/asset_definitions.h"
 #include "gem/profile.h"
 
-material::material(shader& program) : m_prog(program)
+material::material(asset_handle shader_handle, shader& program) : m_prog(program), m_shader_handle(shader_handle)
 {
     ZoneScoped;
     int uniform_count;
