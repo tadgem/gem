@@ -24,13 +24,11 @@ out vec4 FragColor;
 #define LINEAR 0 /* Looks meh when using gamma correction. */
 #define QUADRATIC 1
 
-
 struct AABB
 {
 	vec3 min;
 	vec3 max;
 };
-
 
 uniform sampler2D   u_position_map;
 uniform sampler2D   u_colour_map;
@@ -42,7 +40,6 @@ uniform vec3		u_cam_position;
 uniform float		u_max_trace_distance;
 uniform float		u_diffuse_spec_mix;
 #define VOXEL_SIZE (1/128.0)
-
 
 vec3 orthogonal(vec3 u) {
 	u = normalize(u);
@@ -65,7 +62,6 @@ bool is_in_aabb(vec3 pos)
 	return true;
 }
 
-
 vec3 get_texel_from_pos(vec3 position, vec3 unit)
 {
 	vec3 clip_pos = position - u_aabb.min;
@@ -80,18 +76,14 @@ ivec3 get_absolute_texel_from_pos(vec3 position, vec3 resolution)
 	vec3 aabb_dim = u_aabb.max - u_aabb.min;
 	vec3 unit = vec3((aabb_dim.x / resolution.x), (aabb_dim.y / resolution.y) , (aabb_dim.z / resolution.z));
 
-	/// <summary>
-	/// 0,0,0 is aabb.min
-	/// </summary>
+	// 0,0,0 is aabb.min
 	vec3 new_pos = position - u_aabb.min;
 	int x = int(new_pos.x / unit.x) ;
 	int y = int(new_pos.y / unit.y) ;
 	int z = int(new_pos.z / unit.z) ;
 
 	return ivec3(x, y, z);
-
 }
-
 
 vec4 get_voxel_colour(vec3 position, vec3 unit, float lod)
 {
@@ -129,6 +121,7 @@ float remap(float source, float sourceFrom, float sourceTo, float targetFrom, fl
 {
 	return targetFrom + (source-sourceFrom)*(targetTo-targetFrom)/(sourceTo-sourceFrom);
 }
+
 float easeOutQuart(float x) {
 	return 1.0 - pow(1.0 - x, 4);
 }
@@ -182,15 +175,12 @@ const vec3 DIFFUSE_CONE_DIRECTIONS_16[16] = {
 
 vec3 trace_cones_v3(vec3 from, vec3 dir, vec3 unit)
 {
-
 	vec3 acc = vec3(0);
-	int count = 0;
 
 	for(int i = 0; i < DIFFUSE_CONE_COUNT_16; i++)
 	{
 	    float sDotN = max(dot(dir, DIFFUSE_CONE_DIRECTIONS_16[i]), 0.0);
 		if(sDotN <= 0.001)
-		//if(sDotN < 0.0)
 		{
 			continue;
 		}
@@ -198,11 +188,8 @@ vec3 trace_cones_v3(vec3 from, vec3 dir, vec3 unit)
 		acc += trace_cone(from, final_dir, unit) * sDotN;
 		count++;
 	}
-
 	return acc; // num traces to get a more usable output for now;
 }
-
-
 
 void main()
 {

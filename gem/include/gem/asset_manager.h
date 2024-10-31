@@ -1,9 +1,9 @@
 #pragma once
-#include "asset.h"
 #include <functional>
 #include <future>
 #include <map>
 #include <memory>
+#include "asset.h"
 
 namespace gem {
 
@@ -74,13 +74,16 @@ public:
   // Move the Asset* into a UPtr once returned from the future
   std::unordered_map<asset_handle, std::future<asset_load_return>>
       p_pending_load_tasks;
-  std::unordered_map<asset_handle, std::unique_ptr<asset>> p_loaded_assets;
-  std::unordered_map<asset_handle, asset_load_return> p_pending_load_callbacks;
+  std::unordered_map<asset_handle, std::unique_ptr<asset>>
+      p_loaded_assets;
+  std::unordered_map<asset_handle, asset_load_return>
+      p_pending_load_callbacks;
   std::unordered_map<asset_handle, asset_unload_callback>
       p_pending_unload_callbacks;
   std::unordered_map<asset_handle, asset_loaded_callback>
       p_asset_loaded_callbacks;
-  std::vector<asset_load_info> p_queued_loads;
+  std::vector<asset_load_info>
+      p_queued_loads;
 
   const uint16_t p_callback_tasks_per_tick = 1;
   const uint16_t p_max_async_tasks_in_flight = 8;
