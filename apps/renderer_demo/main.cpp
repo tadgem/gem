@@ -93,6 +93,8 @@ int main()
         spdlog::info("finished adding model to scene, dumping scene json");
         spdlog::info(scene_json_str);
         scene* s2 = engine::scenes.load_scene(engine::scenes.save_scene(s));
+        engine::scenes.save_scene_to_disk("test.scene", s2);
+        scene* s3 = engine::scenes.load_scene_from_disk("test.scene");
     });
 
     dir_light dir

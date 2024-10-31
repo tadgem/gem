@@ -165,4 +165,20 @@ nlohmann::json scene_manager::save_scene(scene *ser_scene) {
 
   return json;
 }
+void  scene_manager::save_scene_to_disk(const std::string &path,
+                                                 scene *ser_scene) {
+
+  nlohmann::json scene_json = save_scene(ser_scene);
+  utils::save_string_to_path(path, scene_json.dump());
+}
+
+scene *scene_manager::load_scene_from_disk(const std::string &scene_path) {
+  std::string scene_json_str = utils::load_string_from_path(scene_path);
+  if(scene_json_str.empty())
+  {
+    return nullptr;
+  }
+  nlohmann::json scene_json = nlohmann::json::parse(scene_json_str);
+  return load_scene(scene_json);
+}
 } // namespace gem

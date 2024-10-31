@@ -88,9 +88,11 @@ public:
 
   scene *create_scene(const std::string &name);
   scene *load_scene(nlohmann::json &scene_json);
+  scene *load_scene_from_disk(const std::string& scene_path);
   scene *get_scene(hash_string scene_hash);
   void close_scene(hash_string scene_hash);
   nlohmann::json save_scene(scene *ser_scene);
+  void save_scene_to_disk(const std::string& path, scene *ser_scene);
 
 protected:
   std::vector<std::unique_ptr<scene>> p_active_scenes;
