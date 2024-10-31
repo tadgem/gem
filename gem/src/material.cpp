@@ -4,6 +4,7 @@
 #include "gem/asset_definitions.h"
 #include "gem/profile.h"
 #include "gem/engine.h"
+
 namespace gem {
 
     material::material(asset_handle shader_handle, shader& program) : m_prog(program), m_shader_handle(shader_handle)
@@ -120,6 +121,8 @@ namespace gem {
                 m_prog.set_mat4(name, m4);
                 break;
             }
+            default:
+                break;
             }
         }
     }
@@ -171,7 +174,7 @@ namespace gem {
                         sampler_info info = std::any_cast<sampler_info>(mat.m_uniform_values[name]);
                         uniform_json["slot"] = info.sampler_slot;
                         uniform_json["target"] = info.texture_target;
-                        uniform_json["handle"] = info.tex_entry.m_handle;
+                        uniform_json["entry"] = info.tex_entry;
                         break;
                     }
                     default:
@@ -198,19 +201,24 @@ namespace gem {
             auto* shader_asset = engine::assets.get_asset<shader, asset_type::shader>(shader_handle);
             material mat(shader_handle, shader_asset->m_data);
 
-            nlohmann::json uniforms = entry["uniforms"].items();
+            nlohmann::json uniforms = entry["uniforms"];
 
             spdlog::info("entity : {} : material json : {}", entity, entry.dump());
 
-            for (auto [uniform_name, uniform_json] : uniforms.items())
+            for (auto& [uniform_name, uniform_json] : uniforms.items())
             {
-                shader::uniform_type uniform_type = uniform_json["uniform_type"];
+                std::string uniform_json_str = uniform_json.dump();
+
+                spdlog::info("entity : {} : uniform json {}", entity, uniform_json_str);
+                shader::uniform_type  uniform_type = uniform_json["uniform_type"];
 
                 switch (uniform_type)
                     {
                     case shader::uniform_type::sampler2D:
                     case shader::uniform_type::sampler3D:
                     {
+                        texture_entry tex_entry = uniform_json["entry"];
+                        mat.set_sampler(uniform_name, uniform_json["slot"], tex_entry, uniform_json["target"]);
                         break;
                     }
                     default:
@@ -219,7 +227,7 @@ namespace gem {
                     }
                 }
             }
-            //current_scene.m_registry.emplace<material>(e, m);
+            current_scene.m_registry.emplace<material>(e, mat);
         }
     }
 }

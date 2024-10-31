@@ -68,7 +68,7 @@ namespace gem {
 
         GLfloat                     m_vxgi_cone_trace_distance = 45.0f;
         GLfloat                     m_vxgi_diffuse_specular_mix = 0.0f;
-        GLfloat                     m_vxgi_resolution_scale = 0.75f;
+        GLfloat                     m_vxgi_resolution_scale = 1.0f;
 
         GLfloat                     m_ssr_resolution_scale = 0.66f;
 
