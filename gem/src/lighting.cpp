@@ -1,4 +1,5 @@
 #include <sstream>
+#define GLM_ENABLE_EXPERIMENTAL
 #include "gtc/quaternion.hpp"
 #include "gem/tech/lighting.h"
 #include "gem/framebuffer.h"

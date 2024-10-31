@@ -1,3 +1,5 @@
+#define GLM_ENABLE_EXPERIMENTAL
+
 #include <iostream>
 #include "imgui.h"
 #include "imgui_impl_sdl2.h"

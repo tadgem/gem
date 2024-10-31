@@ -1,5 +1,7 @@
 #pragma once
 #include <string>
+#define GLM_ENABLE_EXPERIMENTAL
+#include "gli.hpp"
 #include "glm.hpp"
 #include "gem/vertex.h"
 #include "gem/dbg_memory.h"
@@ -21,6 +23,13 @@ namespace gem {
 	{
 	public:
 
+                enum class mode
+                {
+                    stb,
+                    gli,
+                    memory
+                };
+
 		texture();
 		texture(const std::string& path);
 		texture(const std::string& path, std::vector<unsigned char> data);
@@ -32,15 +41,23 @@ namespace gem {
 		static void unbind_image(uint32_t binding);
 
 		int m_width, m_height, m_depth, m_num_channels;
-
 		gl_handle m_handle = INVALID_GL_HANDLE;
+                mode m_mode = mode::memory;
 
-		static texture from_data(unsigned int* data, unsigned int count, int width, int height, int depth, int nr_channels);
+                union
+                {
+                  unsigned char*  stb_data;
+                  gli::texture*   gli_data;
+                } m_cpu_data;
+
+                static texture from_data(unsigned int* data, unsigned int count, int width, int height, int depth, int nr_channels);
 		static texture create_3d_texture(glm::ivec3 dim, GLenum format, GLenum pixel_format, GLenum data_type, void* data, GLenum filter = GL_LINEAR, GLenum wrap_mode = GL_REPEAT);
 		static texture create_3d_texture_empty(glm::ivec3 dim, GLenum format, GLenum pixel_format, GLenum data_type, GLenum filter = GL_LINEAR, GLenum wrap_mode = GL_REPEAT);
 
 		void	load_texture_stbi(std::vector<unsigned char>& data);
 		void	load_texture_gli(std::vector<unsigned char>& data);
+
+                void    submit_to_gpu();
 
 		void    release();
 

@@ -1,3 +1,5 @@
+#define GLM_ENABLE_EXPERIMENTAL
+
 #include "gem/material.h"
 #include "gem/scene.h"
 #include "gem/asset_manager.h"

@@ -1,3 +1,4 @@
+#define GLM_ENABLE_EXPERIMENTAL
 #include <filesystem>
 #include "spdlog/spdlog.h"
 #include "gem/asset_manager.h"
@@ -299,14 +300,7 @@ namespace gem {
         texture_intermediate_asset* ta_inter = static_cast<texture_intermediate_asset*>(texture_asset);
         asset_t<texture, asset_type::texture>* ta = ta_inter->get_concrete_asset();
 
-        if (ta->m_path.find("dds") != std::string::npos)
-        {
-            ta->m_data.load_texture_gli(ta_inter->m_intermediate);
-        }
-        else {
-            ta->m_data.load_texture_stbi(ta_inter->m_intermediate);
-        }
-
+        ta->m_data.submit_to_gpu();
         ta_inter->m_intermediate.clear();
     }
 
@@ -373,6 +367,15 @@ namespace gem {
 
         texture t{};
         std::vector<unsigned char> binary = utils::load_binary_from_path(path);
+
+        if (path.find("dds") != std::string::npos)
+        {
+            t.load_texture_gli(binary);
+        }
+        else {
+            t.load_texture_stbi(binary);
+        }
+
         asset_t<texture, asset_type::texture>* ta = new asset_t<texture, asset_type::texture>(t, path);
         texture_intermediate_asset* ta_inter = new texture_intermediate_asset(ta, binary, path);
 

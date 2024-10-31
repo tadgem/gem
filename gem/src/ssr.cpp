@@ -1,3 +1,5 @@
+#define GLM_ENABLE_EXPERIMENTAL
+
 #include "gem/tech/ssr.h"
 #include "gem/shape.h"
 #include "gem/framebuffer.h"

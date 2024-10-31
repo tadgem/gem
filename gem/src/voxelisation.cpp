@@ -1,3 +1,4 @@
+#define GLM_ENABLE_EXPERIMENTAL
 #include "gem/voxelisation.h"
 #include "gem/backend.h"
 #include "gem/utils.h"

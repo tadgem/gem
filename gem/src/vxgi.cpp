@@ -1,3 +1,4 @@
+#define GLM_ENABLE_EXPERIMENTAL
 #include "gem/tech/vxgi.h"
 #include "gem/backend.h"
 #include "gem/debug.h"
@@ -39,7 +40,7 @@ namespace gem {
             texture::bind_image_handle(voxel_data.voxel_texture.m_handle, 0, i, GL_RGBA16F);
             texture::bind_image_handle(voxel_data.voxel_texture.m_handle, 1, i - 1, GL_RGBA16F);
             voxelization_mips.set_vec3("u_current_resolution", current_mip_resolution);
-            glm::ivec3 dispatch_dims = current_mip_resolution;
+            glm::ivec3 dispatch_dims = glm::ivec3(int(current_mip_resolution.x), int(current_mip_resolution.y), int(current_mip_resolution.z));
             glAssert(glDispatchCompute(dispatch_dims.x / 8, dispatch_dims.y / 8, dispatch_dims.z / 8));
             current_mip_resolution /= 2.0f;
             last_mip_resolution /= 2.0f;

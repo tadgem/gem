@@ -1,3 +1,4 @@
+#define GLM_ENABLE_EXPERIMENTAL
 #include "gem/tech/tech_utils.h"
 #include "gem/shader.h"
 #include "gem/shape.h"

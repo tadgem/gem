@@ -1,3 +1,5 @@
+#define GLM_ENABLE_EXPERIMENTAL
+
 #include <sstream>
 #include "gem/scene.h"
 #include "gem/model.h"

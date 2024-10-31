@@ -1,3 +1,4 @@
+#define GLM_ENABLE_EXPERIMENTAL
 #include "gtc/matrix_transform.hpp"
 #include "gtc/quaternion.hpp"
 #include "gem/tech/shadow.h"

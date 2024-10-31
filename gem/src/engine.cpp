@@ -1,3 +1,4 @@
+#define GLM_ENABLE_EXPERIMENTAL
 #include "gem/engine.h"
 #include "gem/utils.h"
 #include "gem/transform.h"

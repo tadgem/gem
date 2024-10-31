@@ -1,3 +1,4 @@
+#define GLM_ENABLE_EXPERIMENTAL
 #include "gem/tech/gbuffer.h"
 #include "gem/camera.h"
 #include "gem/scene.h"

@@ -1,3 +1,5 @@
+#define GLM_ENABLE_EXPERIMENTAL
+
 #include "gem/tech/taa.h"
 #include "gem/framebuffer.h"
 #include "gem/texture.h"

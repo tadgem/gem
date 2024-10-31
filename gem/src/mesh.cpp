@@ -1,3 +1,5 @@
+#define GLM_ENABLE_EXPERIMENTAL
+
 #include "gem/mesh.h"
 #include "gem/scene.h"
 #include "gem/engine.h"
