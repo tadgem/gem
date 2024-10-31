@@ -3,7 +3,7 @@ file(GLOB_RECURSE GEM_HEADER_FILES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" includ
 file(GLOB_RECURSE GEM_HEADERPP_FILES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" include/*.hpp)
 
 
-set(GEM_SRC 
+set(GEM_SRC
         ${THIRD_PARTY_DIR}/imgui/imgui_draw.cpp
         ${THIRD_PARTY_DIR}/imgui/imgui_tables.cpp
         ${THIRD_PARTY_DIR}/imgui/imgui_widgets.cpp
@@ -24,7 +24,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 add_library(gem STATIC ${GEM_SRC})
 
-set(GEM_INCLUDES 
+set(GEM_INCLUDES
         ${THIRD_PARTY_DIR}/glew/include
         ${THIRD_PARTY_DIR}/sdl/include
         ${THIRD_PARTY_DIR}/imgui
@@ -39,7 +39,7 @@ set(GEM_INCLUDES
         ${SUBMODULE_DIR}/spdlog/include
         ${SUBMODULE_DIR}/cpptrace/include
         ${CMAKE_CURRENT_SOURCE_DIR}/include
-CACHE INTERNAL "")
+        CACHE INTERNAL "")
 
 target_link_libraries(gem PRIVATE glew_s SDL2-static glm assimp cpptrace::cpptrace spdlog TracyClient)
 target_include_directories(gem PUBLIC ${GEM_INCLUDES})
