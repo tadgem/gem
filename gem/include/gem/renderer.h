@@ -35,6 +35,7 @@ public:
   shader_asset *m_downsample_shader;
   shader_asset *m_compute_voxelize_gbuffer_shader;
   shader_asset *m_compute_voxel_mips_shader;
+  shader_asset *m_compute_voxel_reprojection_shader;
 
   framebuffer m_gbuffer;
   framebuffer m_gbuffer_downsample;
@@ -63,7 +64,7 @@ public:
 
   GLfloat m_vxgi_cone_trace_distance = 45.0f;
   GLfloat m_vxgi_diffuse_specular_mix = 0.0f;
-  GLfloat m_vxgi_resolution_scale = 1.0f;
+  GLfloat m_vxgi_resolution_scale = 0.75f;
 
   GLfloat m_ssr_resolution_scale = 0.66f;
 

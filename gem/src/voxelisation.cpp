@@ -13,7 +13,8 @@ void voxel::grid::update_aabb(aabb &new_aabb) {
       glm::vec3((aabb_dim.x / resolution.x), (aabb_dim.y / resolution.y),
                 (aabb_dim.z / resolution.z));
   resolution = resolution;
-  bounding_box = new_aabb;
+  previous_bounding_box = current_bounding_box;
+  current_bounding_box = new_aabb;
 }
 
 voxel::grid voxel::create_grid(glm::ivec3 resolution, aabb bb) {
@@ -119,11 +120,14 @@ voxel::create_grid_visualiser(voxel::grid &vg, shader &visualisation_shader,
   std::vector<glm::mat4> instance_matrices;
   auto scaled_unit =
       glm::vec3{vg.voxel_unit.x, vg.voxel_unit.y, vg.voxel_unit.z};
+
   for (auto i = 0; i < total_instances; i++) {
     // instance vbo is per-instance transform
-    float z = vg.bounding_box.min.z;
-    float y = vg.bounding_box.min.y;
-    float x = vg.bounding_box.min.x;
+    // THIS IS NOT WORKIN BECAUSE BB IS FED FROM SCENE
+    // Need to
+    float z = vg.current_bounding_box.min.z;
+    float y = vg.current_bounding_box.min.y;
+    float x = vg.current_bounding_box.min.x;
 
     float z_offset = i / (scaled_resolution.x * scaled_resolution.y);
     float y_offset = (i / scaled_resolution.x) % scaled_resolution.y;
@@ -145,9 +149,9 @@ voxel::create_grid_visualiser(voxel::grid &vg, shader &visualisation_shader,
   builder.begin();
   builder.add_vertex_buffer(vertex_data);
   builder.add_vertex_attribute(0, 3 * sizeof(float), 3);
+  builder.add_index_buffer(index_data);
   builder.add_vertex_buffer(instance_matrices);
   auto matrices_vbo = builder.m_vbos.back();
-  builder.add_index_buffer(index_data);
 
   constexpr std::size_t vec4Size = sizeof(glm::vec4);
   glEnableVertexAttribArray(1);

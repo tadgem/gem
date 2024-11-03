@@ -126,10 +126,10 @@ float easeOutQuart(float x) {
 	return 1.0 - pow(1.0 - x, 4);
 }
 
-vec3 trace_cone(vec3 from, vec3 dir, vec3 unit)
+vec3 trace_cone(vec3 from, vec3 dir, vec3 unit, float aperture)
 {
 	const int MAX_STEPS = int(u_voxel_resolution.x); // should probs be the longest axis of minimum mip dimension
-	const int MIN_LOD	= 2;
+	const int MIN_LOD	= 3;
 	const int MAX_LOD	= 5;
 	vec4 accum = vec4(0.0);
 	vec3 pos = from;
@@ -138,15 +138,18 @@ vec3 trace_cone(vec3 from, vec3 dir, vec3 unit)
 	pos += dir * (length(unit * lod));
 	float cone_distance = distance(from, pos);
 
-	while (accum.w < 1.0 && is_in_aabb(pos) && cone_distance < u_max_trace_distance && steps < MAX_STEPS)
+	while (accum.w < 0.05 && is_in_aabb(pos) && cone_distance < u_max_trace_distance && steps < MAX_STEPS)
 	{
 		vec4 result = get_voxel_colour(pos, unit, lod);
 		cone_distance = distance(from, pos);
-		accum += result * easeOutQuart((1.0 - (cone_distance / u_max_trace_distance)));
-		lod = round(remap(cone_distance * 1.25, 0.0, u_max_trace_distance, MIN_LOD, MAX_LOD));
+		if(result.w > 0.5)
+		{
+			accum += result * easeOutQuart((1.0 - (cone_distance / u_max_trace_distance)));
+		}
+		lod += aperture;
 		steps += 1;
 		float factor = (1.0 - result.w) * lod;
-		pos += dir * (unit * factor);
+		pos += dir * (unit * factor * aperture);
 	}
 
 	return accum.xyz * 2.0;
@@ -185,8 +188,7 @@ vec3 trace_cones_v3(vec3 from, vec3 dir, vec3 unit)
 			continue;
 		}
 		vec3 final_dir = mix(dir, DIFFUSE_CONE_DIRECTIONS_16[i], 0.5);
-		acc += trace_cone(from, final_dir, unit) * sDotN;
-		count++;
+		acc += trace_cone(from, final_dir, unit, DIFFUSE_CONE_APERTURE_16) * sDotN;
 	}
 	return acc; // num traces to get a more usable output for now;
 }

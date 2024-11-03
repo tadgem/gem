@@ -13,8 +13,6 @@ struct AABB
 	vec3 max;
 };
 
-
-
 uniform mat4	u_view_projection;
 uniform ivec3	u_texture_resolution;
 uniform ivec3	u_voxel_group_resolution;

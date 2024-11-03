@@ -11,7 +11,8 @@ public:
     texture voxel_texture; // 3D Texture (Voxel Data)
     glm::ivec3 resolution;
     glm::vec3 voxel_unit; // scale of each texel
-    aabb bounding_box;
+    aabb current_bounding_box;
+    aabb previous_bounding_box;
 
     void update_aabb(aabb &new_aabb);
   };

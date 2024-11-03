@@ -61,5 +61,5 @@ void main() {
 	ivec3 lod_pix15 = center + ivec3(-1,0,-1);
 	colour  +=  imageLoad(last_mip, lod_pix15);
 
-	imageStore(current_mip, pix, colour / 15.0);
+	imageStore(current_mip, pix, colour * 0.1);
 }

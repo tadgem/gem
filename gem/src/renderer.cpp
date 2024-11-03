@@ -37,6 +37,7 @@ void gl_renderer::init(asset_manager &am) {
   am.load_asset("assets/shaders/downsample.shader", asset_type::shader);
   am.load_asset("assets/shaders/gbuffer_voxelization.shader", asset_type::shader);
   am.load_asset("assets/shaders/voxel_mips.shader", asset_type::shader);
+  am.load_asset("assets/shaders/voxel_reprojection.shader", asset_type::shader);
 
   am.wait_all_assets();
   m_gbuffer_shader = am.get_asset<shader, asset_type::shader>(
@@ -65,6 +66,8 @@ void gl_renderer::init(asset_manager &am) {
       "assets/shaders/gbuffer_voxelization.shader");
   m_compute_voxel_mips_shader = am.get_asset<shader, asset_type::shader>(
       "assets/shaders/voxel_mips.shader");
+  m_compute_voxel_reprojection_shader = am.get_asset<shader, asset_type::shader>(
+      "assets/shaders/voxel_reprojection.shader");
 
   m_window_resolution = {1920.0, 1080.0};
   const int shadow_resolution = 4096;
@@ -210,6 +213,11 @@ void gl_renderer::render(asset_manager &am, camera &cam,
         m_compute_voxelize_gbuffer_shader->m_data, total_bounding_volume,
         m_voxel_data, m_gbuffer, m_lightpass_buffer_resolve,
         m_window_resolution);
+  }
+  {
+    TracyGpuZone("Voxel Reprojection")
+    tech::vxgi::dispatch_voxel_reprojection(m_compute_voxel_reprojection_shader-> m_data,
+                                                m_voxel_data, s_voxel_resolution, total_bounding_volume, total_bounding_volume);
   }
   {
     TracyGpuZone("GBuffer Voxelization MIPS");
@@ -363,8 +371,25 @@ void gl_renderer::render(asset_manager &am, camera &cam,
                             "u_image_sampler", 0,
                             m_ssr_buffer_resolve.m_colour_attachments.front());
   }
-  glClear(GL_DEPTH_BUFFER_BIT);
 
+  glClear(GL_DEPTH_BUFFER_BIT);
+  if (m_debug_draw_3d_texture)
+  {
+    m_voxel_visualiser.texel_shape.use();
+    auto& vs = m_voxel_visualiser.visual_shader;
+    vs.use();
+    vs.set_mat4("u_view_projection", cam.m_proj * cam.m_view);
+    vs.set_ivec3("u_texture_resolution", m_voxel_data.resolution);
+    vs.set_vec3("u_aabb.min", total_bounding_volume.min);
+    vs.set_vec3("u_aabb.max", total_bounding_volume.max);
+    vs.set_ivec3("u_voxel_group_resolution", glm::ivec3(m_voxel_visualiser.texel_resolution));
+    vs.set_int("u_volume", 0);
+    texture::bind_sampler_handle(m_voxel_data.voxel_texture.m_handle, GL_TEXTURE0, GL_TEXTURE_3D);
+    glDrawElementsInstanced(GL_TRIANGLES, m_voxel_visualiser.index_count, GL_UNSIGNED_INT, 0, m_voxel_visualiser.total_invocations);
+    texture::bind_sampler_handle(0, GL_TEXTURE0);
+  }
+
+  glClear(GL_DEPTH_BUFFER_BIT);
   if (m_debug_draw_final_pass) {
     TracyGpuZone("Composite Final Pass");
     m_final_pass.bind();

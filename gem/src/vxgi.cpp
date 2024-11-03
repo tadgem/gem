@@ -100,4 +100,24 @@ void tech::vxgi::dispatch_cone_tracing_pass(
   texture::bind_sampler_handle(0, GL_TEXTURE3);
   glViewport(0, 0, window_res.x, window_res.y);
 }
+
+void tech::vxgi::dispatch_voxel_reprojection(shader &voxel_reprojection,
+                                             voxel::grid &voxel_data,
+                                             glm::vec3 _3d_tex_res_vec,
+                                             aabb old_bb, aabb new_bb) {
+
+  ZoneScoped;
+  GPU_MARKER("Voxel Reprojection");
+  voxel_reprojection.use();
+  voxel_reprojection.set_int("u_grid", 0);
+  voxel_reprojection.set_vec3("u_resolution", _3d_tex_res_vec);
+  voxel_reprojection.set_vec3("u_previous_aabb.min", old_bb.min);
+  voxel_reprojection.set_vec3("u_previous_aabb.max", old_bb.max);
+  voxel_reprojection.set_vec3("u_current_aabb.min", new_bb.min);
+  voxel_reprojection.set_vec3("u_current_aabb.max", new_bb.max);
+  texture::bind_image_handle(voxel_data.voxel_texture.m_handle, 0, 0,
+                             GL_RGBA16F);
+  glAssert(glDispatchCompute(_3d_tex_res_vec.x / 8, _3d_tex_res_vec.y / 8,_3d_tex_res_vec.z / 8));
+  glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+}
 } // namespace gem

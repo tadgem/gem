@@ -57,6 +57,8 @@ void mesh_sys::deserialize(scene &current_scene, nlohmann::json &sys_json) {
     mc.m_handle = entry["asset_handle"];
     mc.m_mesh_index = entry["mesh_index"];
 
+    // todo: only do this on update, allow scene serialization to be async
+    // might be ok but could hit race
     try_update_mesh_component(mc);
 
     e = current_scene.m_registry.create(e);
