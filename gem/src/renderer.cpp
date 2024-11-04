@@ -216,6 +216,7 @@ void gl_renderer::render(asset_manager &am, camera &cam,
   }
   {
     TracyGpuZone("Voxel Reprojection")
+    m_voxel_data.update_aabb(m_voxel_data.current_bounding_box);
     tech::vxgi::dispatch_voxel_reprojection(m_compute_voxel_reprojection_shader-> m_data,
                                                 m_voxel_data, s_voxel_resolution, total_bounding_volume, total_bounding_volume);
   }
@@ -488,6 +489,11 @@ void gl_renderer::on_imgui(asset_manager &am) {
   ImGui::DragFloat("Trace Distance", &m_vxgi_cone_trace_distance);
   ImGui::DragFloat("Diffuse / Spec Mix", &m_vxgi_diffuse_specular_mix, 1.0f,
                    0.0f, 1.0f);
+  ImGui::DragFloat3("Current VXGI BB Min", &m_voxel_data.current_bounding_box.min[0]);
+  ImGui::DragFloat3("Current VXGI BB Max", &m_voxel_data.current_bounding_box.max[0]);
+  // TODO: better place for this
+  Im3d::DrawAlignedBox(ToIm3D(m_voxel_data.current_bounding_box.min),
+                       ToIm3D(m_voxel_data.current_bounding_box.max));
   ImGui::Separator();
   ImGui::Text("Denoise Settings");
   ImGui::DragFloat("Sigma", &m_denoise_sigma);

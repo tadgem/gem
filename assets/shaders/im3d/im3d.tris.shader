@@ -1,5 +1,5 @@
 #version 450 
-
+#vert
 #define VertexData \
 	_VertexData { \
 		noperspective float m_edgeDistance; \

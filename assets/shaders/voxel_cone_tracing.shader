@@ -129,7 +129,7 @@ float easeOutQuart(float x) {
 vec3 trace_cone(vec3 from, vec3 dir, vec3 unit, float aperture)
 {
 	const int MAX_STEPS = int(u_voxel_resolution.x); // should probs be the longest axis of minimum mip dimension
-	const int MIN_LOD	= 3;
+	const int MIN_LOD	= 2;
 	const int MAX_LOD	= 5;
 	vec4 accum = vec4(0.0);
 	vec3 pos = from;
@@ -176,7 +176,45 @@ const vec3 DIFFUSE_CONE_DIRECTIONS_16[16] = {
     vec3( 0.182696, -0.388844,  0.903007 )
 };
 
-vec3 trace_cones_v3(vec3 from, vec3 dir, vec3 unit)
+const int 	DIFFUSE_CONE_COUNT_32	  = 32;
+const float DIFFUSE_CONE_APERTURE_32  = 0.628319;
+const vec3 DIFFUSE_CONE_DIRECTIONS_32[32] = {
+vec3( 0.898904,   0.435512,   0.0479745),
+vec3( 0.898904,  -0.435512,  -0.0479745),
+vec3( 0.898904,   0.0479745, -0.435512 ),
+vec3( 0.898904,  -0.0479745,  0.435512 ),
+vec3(-0.898904,   0.435512,  -0.0479745),
+vec3(-0.898904,  -0.435512,   0.0479745),
+vec3(-0.898904,   0.0479745,  0.435512 ),
+vec3(-0.898904,  -0.0479745, -0.435512 ),
+vec3( 0.0479745,  0.898904,   0.435512 ),
+vec3(-0.0479745,  0.898904,  -0.435512 ),
+vec3(-0.435512,   0.898904,   0.0479745),
+vec3( 0.435512,   0.898904,  -0.0479745),
+vec3(-0.0479745, -0.898904,   0.435512 ),
+vec3( 0.0479745, -0.898904,  -0.435512 ),
+vec3( 0.435512,  -0.898904,   0.0479745),
+vec3(-0.435512,  -0.898904,  -0.0479745),
+vec3( 0.435512,   0.0479745,  0.898904 ),
+vec3(-0.435512,  -0.0479745,  0.898904 ),
+vec3( 0.0479745, -0.435512,   0.898904 ),
+vec3(-0.0479745,  0.435512,   0.898904 ),
+vec3( 0.435512,  -0.0479745, -0.898904 ),
+vec3(-0.435512,   0.0479745, -0.898904 ),
+vec3( 0.0479745,  0.435512,  -0.898904 ),
+vec3(-0.0479745, -0.435512,  -0.898904 ),
+vec3( 0.57735,    0.57735,    0.57735  ),
+vec3( 0.57735,    0.57735,   -0.57735  ),
+vec3( 0.57735,   -0.57735,    0.57735  ),
+vec3( 0.57735,   -0.57735,   -0.57735  ),
+vec3(-0.57735,    0.57735,    0.57735  ),
+vec3(-0.57735,    0.57735,   -0.57735  ),
+vec3(-0.57735,   -0.57735,    0.57735  ),
+vec3(-0.57735,   -0.57735,   -0.57735  )
+};
+
+
+vec3 trace_cones_16(vec3 from, vec3 dir, vec3 unit)
 {
 	vec3 acc = vec3(0);
 
@@ -193,6 +231,23 @@ vec3 trace_cones_v3(vec3 from, vec3 dir, vec3 unit)
 	return acc; // num traces to get a more usable output for now;
 }
 
+vec3 trace_cones_32(vec3 from, vec3 dir, vec3 unit)
+{
+	vec3 acc = vec3(0);
+
+	for(int i = 0; i < DIFFUSE_CONE_COUNT_32; i++)
+	{
+		float sDotN = max(dot(dir, DIFFUSE_CONE_DIRECTIONS_32[i]), 0.0);
+		if(sDotN <= 0.001)
+		{
+			continue;
+		}
+		vec3 final_dir = mix(dir, DIFFUSE_CONE_DIRECTIONS_32[i], 0.5);
+		acc += trace_cone(from, final_dir, unit, DIFFUSE_CONE_APERTURE_32) * sDotN;
+	}
+	return acc; // num traces to get a more usable output for now;
+}
+
 void main()
 {
 	vec3 aabb_dim = u_aabb.max - u_aabb.min;
@@ -201,7 +256,7 @@ void main()
 	vec3 position = texture(u_position_map, aUV).xyz;
 	vec3 normal = texture(u_normal_map, aUV).xyz;
 	vec3 normalized_n = normalize(normal);
-	vec3 v_diffuse = trace_cones_v3(position, normalized_n, unit);
+	vec3 v_diffuse = trace_cones_32(position, normalized_n, unit);
 	vec3 v_spec = trace_ray(position, reflect(position, normalized_n), unit);
 	FragColor = vec4(mix(diffuse * v_diffuse, v_spec, u_diffuse_spec_mix), 1.0);
 }

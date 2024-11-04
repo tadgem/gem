@@ -124,27 +124,23 @@ void DrawIm3dTextListsImGui(const Im3d::TextDrawList _textDrawLists[],
 
 im3d_state im3d_gl::load_im3d() {
   ZoneScoped;
-  std::string tris_vert =
-      utils::load_string_from_path("assets/shaders/im3d/im3d.tris.vert.glsl");
-  std::string tris_frag =
-      utils::load_string_from_path("assets/shaders/im3d/im3d.tris.frag.glsl");
+  std::string tris=
+      utils::load_string_from_path("assets/shaders/im3d/im3d.tris.shader");
 
-  std::string points_vert =
-      utils::load_string_from_path("assets/shaders/im3d/im3d.points.vert.glsl");
-  std::string points_frag =
-      utils::load_string_from_path("assets/shaders/im3d/im3d.points.frag.glsl");
+  std::string points =
+      utils::load_string_from_path("assets/shaders/im3d/im3d.points.shader");
 
-  std::string lines_vert =
-      utils::load_string_from_path("assets/shaders/im3d/im3d.lines.vert.glsl");
-  std::string lines_frag =
-      utils::load_string_from_path("assets/shaders/im3d/im3d.lines.frag.glsl");
+  std::string lines =
+      utils::load_string_from_path("assets/shaders/im3d/im3d.lines.shader");
 
-  std::string geo =
-      utils::load_string_from_path("assets/shaders/im3d/im3d.geom.glsl");
 
-  shader points_shader(points_vert, points_frag);
-  shader line_shader(lines_vert, geo, lines_frag);
-  shader tris_shader(tris_vert, tris_frag);
+  auto tris_stages = shader::split_composite_shader(tris);
+  auto points_stages = shader::split_composite_shader(points);
+  auto lines_stages = shader::split_composite_shader(lines);
+
+  shader points_shader(points_stages[shader::stage::vertex], points_stages[shader::stage::fragment]);
+  shader tris_shader(tris_stages[shader::stage::vertex], tris_stages[shader::stage::fragment]);
+  shader lines_shader(lines_stages[shader::stage::vertex], lines_stages[shader::stage::geometry], lines_stages[shader::stage::fragment]);
 
   gl_handle im3d_vertex_buffer;
   gl_handle im3d_vao;
@@ -162,7 +158,7 @@ im3d_state im3d_gl::load_im3d() {
                         (GLvoid *)offsetof(Im3d::VertexData, m_color));
   glBindVertexArray(0);
 
-  return {points_shader, line_shader, tris_shader, im3d_vertex_buffer,
+  return {points_shader, lines_shader, tris_shader, im3d_vertex_buffer,
           im3d_vao};
 }
 
