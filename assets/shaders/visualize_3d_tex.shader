@@ -14,9 +14,10 @@ struct AABB
 };
 
 uniform mat4	u_view_projection;
+uniform mat4	u_model;
 uniform ivec3	u_texture_resolution;
 uniform ivec3	u_voxel_group_resolution;
-uniform AABB		u_aabb;
+uniform AABB	u_aabb;
 
 vec3 get_uv_from_invocation( int idx, ivec3 limits ) {
     int tmp = idx;
@@ -50,7 +51,7 @@ void main()
 
 	vec3 worldPos = vec3(iTransform * vec4(aPos, 1.0));
 
-	gl_Position = u_view_projection * iTransform * vec4(aPos, 1.0);
+	gl_Position = u_view_projection * u_model * iTransform * vec4(aPos, 1.0);
 }
 #frag
 

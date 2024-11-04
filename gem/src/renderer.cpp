@@ -204,21 +204,21 @@ void gl_renderer::render(asset_manager &am, camera &cam,
   ZoneScoped;
   FrameMark;
 
-  // Todo: create a total bounding volume from all active scenes;
-  aabb total_bounding_volume = scenes.front()->m_scene_bounding_volume;
-
   {
     TracyGpuZone("GBuffer Voxelization");
+    m_voxel_data.update_grid_position(cam);
+    m_voxel_data.update_voxel_unit();
     tech::vxgi::dispatch_gbuffer_voxelization(
-        m_compute_voxelize_gbuffer_shader->m_data, total_bounding_volume,
+        m_compute_voxelize_gbuffer_shader->m_data, m_voxel_data.current_bounding_box,
         m_voxel_data, m_gbuffer, m_lightpass_buffer_resolve,
         m_window_resolution);
   }
   {
     TracyGpuZone("Voxel Reprojection")
-    m_voxel_data.update_aabb(m_voxel_data.current_bounding_box);
     tech::vxgi::dispatch_voxel_reprojection(m_compute_voxel_reprojection_shader-> m_data,
-                                                m_voxel_data, s_voxel_resolution, total_bounding_volume, total_bounding_volume);
+                                            m_voxel_data, s_voxel_resolution,
+                                            m_voxel_data.previous_bounding_box,
+                                            m_voxel_data.current_bounding_box);
   }
   {
     TracyGpuZone("GBuffer Voxelization MIPS");
@@ -281,7 +281,7 @@ void gl_renderer::render(asset_manager &am, camera &cam,
     TracyGpuZone("Voxel Cone Tracing Pass");
     tech::vxgi::dispatch_cone_tracing_pass(
         m_voxel_cone_tracing_shader->m_data, m_voxel_data, m_conetracing_buffer,
-        m_gbuffer, m_window_resolution, total_bounding_volume,
+        m_gbuffer, m_window_resolution, m_voxel_data.current_bounding_box,
         s_voxel_resolution, cam, m_vxgi_cone_trace_distance,
         m_vxgi_resolution_scale, m_vxgi_diffuse_specular_mix);
   }
@@ -376,20 +376,9 @@ void gl_renderer::render(asset_manager &am, camera &cam,
   glClear(GL_DEPTH_BUFFER_BIT);
   if (m_debug_draw_3d_texture)
   {
-    m_voxel_visualiser.texel_shape.use();
-    auto& vs = m_voxel_visualiser.visual_shader;
-    vs.use();
-    vs.set_mat4("u_view_projection", cam.m_proj * cam.m_view);
-    vs.set_ivec3("u_texture_resolution", m_voxel_data.resolution);
-    vs.set_vec3("u_aabb.min", total_bounding_volume.min);
-    vs.set_vec3("u_aabb.max", total_bounding_volume.max);
-    vs.set_ivec3("u_voxel_group_resolution", glm::ivec3(m_voxel_visualiser.texel_resolution));
-    vs.set_int("u_volume", 0);
-    texture::bind_sampler_handle(m_voxel_data.voxel_texture.m_handle, GL_TEXTURE0, GL_TEXTURE_3D);
-    glDrawElementsInstanced(GL_TRIANGLES, m_voxel_visualiser.index_count, GL_UNSIGNED_INT, 0, m_voxel_visualiser.total_invocations);
-    texture::bind_sampler_handle(0, GL_TEXTURE0);
+    m_voxel_visualiser.dispatch_draw(m_voxel_data, cam);
   }
-
+  m_voxel_data.previous_bounding_box = m_voxel_data.current_bounding_box;
   glClear(GL_DEPTH_BUFFER_BIT);
   if (m_debug_draw_final_pass) {
     TracyGpuZone("Composite Final Pass");

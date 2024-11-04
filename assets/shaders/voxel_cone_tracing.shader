@@ -148,8 +148,8 @@ vec3 trace_cone(vec3 from, vec3 dir, vec3 unit, float aperture)
 		}
 		lod += aperture;
 		steps += 1;
-		float factor = (1.0 - result.w) * lod;
-		pos += dir * (unit * factor * aperture);
+		float factor = (1.0 - result.w);
+		pos += dir * (unit * lod * factor * aperture);
 	}
 
 	return accum.xyz * 2.0;
