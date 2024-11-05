@@ -26,6 +26,8 @@ public:
     int           m_texel_resolution;
     int           m_total_invocations;
     unsigned int  m_index_count;
+    float         m_debug_scale = 1.0f;
+    glm::vec3     m_debug_position_offset;
 
     void dispatch_draw(grid& vg, camera& cam);
   };

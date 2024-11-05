@@ -124,11 +124,11 @@ voxel::create_grid_visualiser(voxel::grid &vg, shader &visualisation_shader,
   auto scaled_unit =
       glm::vec3{vg.voxel_unit.x, vg.voxel_unit.y, vg.voxel_unit.z};
 
-  for(int x = 0; x < vg.resolution.x; x += texel_resolution)
+  for(int z = 0; z < vg.resolution.z; z += texel_resolution)
   {
     for(int y = 0; y < vg.resolution.y; y += texel_resolution)
     {
-      for(int z = 0; z < vg.resolution.z; z += texel_resolution)
+      for(int x = 0; x < vg.resolution.x; x += texel_resolution)
       {
         // glm::mat4 model = utils::get_model_matrix({x, y, z}, {0, 0, 0}, glm::vec3(1.0));
         glm::vec3 pos {x, y, z};
@@ -186,7 +186,7 @@ void voxel::grid_visualiser::dispatch_draw(voxel::grid& vg, camera& cam)
   vs.set_ivec3("u_texture_resolution", vg.resolution);
   vs.set_ivec3("u_voxel_group_resolution", glm::ivec3(m_texel_resolution));
   vs.set_mat4("u_view_projection", cam.m_proj * cam.m_view);
-  vs.set_mat4("u_model", utils::get_model_matrix(vg.current_bounding_box.min, glm::vec3(0.0f), vg.voxel_unit));
+  vs.set_mat4("u_model", utils::get_model_matrix(vg.current_bounding_box.min + m_debug_position_offset, glm::vec3(0.0f), vg.voxel_unit * m_debug_scale));
   vs.set_vec3("u_aabb.min", vg.current_bounding_box.min);
   vs.set_vec3("u_aabb.max", vg.current_bounding_box.max);
   vs.set_int("u_volume", 0);

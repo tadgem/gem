@@ -26,14 +26,31 @@ bool is_in_aabb(vec3 point, AABB bb)
 	return true;
 }
 
-vec3 transform_point(vec3 point, AABB previous, AABB current)
+ivec3 get_texel_from_pos(vec3 position, vec3 resolution, AABB bb)
 {
-	return vec3(0.0);
+	vec3 aabb_dim = bb.max - bb.min;
+	vec3 unit = vec3((aabb_dim.x / resolution.x), (aabb_dim.y / resolution.y) , (aabb_dim.z / resolution.z));
+
+	/// <summary>
+	/// 0,0,0 is aabb.min
+	/// </summary>
+	vec3 new_pos = position - bb.min;
+	int x = int(new_pos.x / unit.x) ;
+	int y = int(new_pos.y / unit.y) ;
+	int z = int(new_pos.z / unit.z) ;
+
+	return ivec3(x, y, z);
+
 }
 
 void main() {
 	ivec3 pix = ivec3(gl_GlobalInvocationID.xyz);
 	vec3 uv = pix / u_resolution;
+
+	if(distance(u_previous_aabb.min, u_current_aabb.min) < 0.5)
+	{
+		return;
+	}
 
 	vec3 prev_unit 		= (u_previous_aabb.max - u_previous_aabb.min) / u_resolution;
 	vec3 last_world_position 	= u_previous_aabb.min + (prev_unit * pix);
@@ -46,8 +63,7 @@ void main() {
 		imageStore(u_grid, pix, vec4(0.0));
 	}
 
-	vec3 last_position_diff = last_world_position - u_previous_aabb.min;
-	ivec3 last_uv_coord = ivec3(last_position_diff / prev_unit);
+	ivec3 last_uv_coord = get_texel_from_pos(last_world_position, u_resolution, u_previous_aabb);
 	vec4 colour = imageLoad(u_grid, last_uv_coord);
 	imageStore(u_grid, pix, colour);
 	// convert new position to a uv coord in the old grid

@@ -51,9 +51,9 @@ void main()
 
 	mat4 instance_model = u_model;
 
-	vec3 instance_pos = u_aabb.min + (unit * iPos);
+	vec3 instance_pos = (iPos * unit);
 
-	instance_model[3] = vec4(instance_pos, 1.0);
+	instance_model[3] += vec4(instance_pos, 1.0);
 
 	vec4 worldPos = instance_model * vec4(aPos, 1.0);
 
@@ -70,7 +70,7 @@ uniform sampler3D u_volume;
 void main()
 {
 	vec4 col = texture(u_volume, oUVW);
-	if (col.w < 0.1)
+	if (col.w < 0.5)
 	{
 		discard;
 	}

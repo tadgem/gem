@@ -214,7 +214,7 @@ void gl_renderer::render(asset_manager &am, camera &cam,
         m_window_resolution);
   }
   {
-    TracyGpuZone("Voxel Reprojection")
+//    TracyGpuZone("Voxel Reprojection")
 //    tech::vxgi::dispatch_voxel_reprojection(m_compute_voxel_reprojection_shader-> m_data,
 //                                            m_voxel_data, s_voxel_resolution,
 //                                            m_voxel_data.previous_bounding_box,
@@ -480,6 +480,8 @@ void gl_renderer::on_imgui(asset_manager &am) {
                    0.0f, 1.0f);
   ImGui::Separator();
   ImGui::DragFloat3("AABB Dimensions", &m_voxel_data.aabb_dim[0]);
+  ImGui::DragFloat("AABB Debug Visual Model Matrix Scale", &m_voxel_visualiser.m_debug_scale, 0.01f, 3000.0f);
+  ImGui::DragFloat3("AABB Position Offset", &m_voxel_visualiser.m_debug_position_offset[0]);
   ImGui::DragFloat3("Current VXGI BB Min", &m_voxel_data.current_bounding_box.min[0]);
   ImGui::DragFloat3("Current VXGI BB Max", &m_voxel_data.current_bounding_box.max[0]);
   // TODO: better place for this
