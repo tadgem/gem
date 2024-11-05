@@ -130,9 +130,7 @@ voxel::create_grid_visualiser(voxel::grid &vg, shader &visualisation_shader,
     {
       for(int x = 0; x < vg.resolution.x; x += texel_resolution)
       {
-        // glm::mat4 model = utils::get_model_matrix({x, y, z}, {0, 0, 0}, glm::vec3(1.0));
-        glm::vec3 pos {x, y, z};
-        instance_positions.push_back(pos);
+        instance_positions.push_back({x,y,z});
       }
     }
   }
