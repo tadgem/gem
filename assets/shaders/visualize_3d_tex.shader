@@ -3,7 +3,7 @@
 
 
 layout(location = 0) in vec3 aPos;
-layout(location = 1) in mat4 iTransform;
+layout(location = 1) in vec3 iPos;
 
 layout(location = 0) out vec3 oUVW;
 
@@ -44,14 +44,20 @@ void main()
 	vec3 base_uv = get_uv_from_invocation(gl_InstanceID, u_texture_resolution / u_voxel_group_resolution) * u_voxel_group_resolution;
     vec3 offset_uv = get_uv_from_invocation(gl_VertexID / 24, u_voxel_group_resolution);
     vec3 uv = base_uv + offset_uv;
-
+	vec3 unit = (u_aabb.max - u_aabb.min) / u_texture_resolution;
     // UV needs to be in range 0-1 for texture sampling
     vec3 uvw = vec3(float(uv.x / u_texture_resolution.x), float(uv.y / u_texture_resolution.y), float(uv.z / u_texture_resolution.z)); 
 	oUVW = uvw;
 
-	vec3 worldPos = vec3(iTransform * vec4(aPos, 1.0));
+	mat4 instance_model = u_model;
 
-	gl_Position = u_view_projection * u_model * iTransform * vec4(aPos, 1.0);
+	vec3 instance_pos = u_aabb.min + (unit * iPos);
+
+	instance_model[3] = vec4(instance_pos, 1.0);
+
+	vec4 worldPos = instance_model * vec4(aPos, 1.0);
+
+	gl_Position = u_view_projection * worldPos;
 }
 #frag
 

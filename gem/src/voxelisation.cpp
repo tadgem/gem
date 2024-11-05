@@ -120,18 +120,21 @@ voxel::create_grid_visualiser(voxel::grid &vg, shader &visualisation_shader,
 
   glm::ivec3 scaled_resolution = vg.resolution / glm::ivec3(texel_resolution);
 
-  std::vector<glm::mat4> instance_matrices;
+  std::vector<glm::vec3> instance_positions;
   auto scaled_unit =
       glm::vec3{vg.voxel_unit.x, vg.voxel_unit.y, vg.voxel_unit.z};
 
-  for (auto i = 0; i < total_instances; i++) {
-    float z = i / (vg.resolution.x * vg.resolution.y);
-    float y = (i / vg.resolution.x) % vg.resolution.y;
-    float x = i % vg.resolution.x;
-
-
-    instance_matrices.push_back(
-        utils::get_model_matrix({x, y, z}, {0, 0, 0}, glm::vec3(1.0)));
+  for(int x = 0; x < vg.resolution.x; x += texel_resolution)
+  {
+    for(int y = 0; y < vg.resolution.y; y += texel_resolution)
+    {
+      for(int z = 0; z < vg.resolution.z; z += texel_resolution)
+      {
+        // glm::mat4 model = utils::get_model_matrix({x, y, z}, {0, 0, 0}, glm::vec3(1.0));
+        glm::vec3 pos {x, y, z};
+        instance_positions.push_back(pos);
+      }
+    }
   }
 
   vao_builder builder;
@@ -139,33 +142,38 @@ voxel::create_grid_visualiser(voxel::grid &vg, shader &visualisation_shader,
   builder.add_vertex_buffer(vertex_data);
   builder.add_vertex_attribute(0, 3 * sizeof(float), 3);
   builder.add_index_buffer(index_data);
-  builder.add_vertex_buffer(instance_matrices);
+  builder.add_vertex_buffer(instance_positions);
   auto matrices_vbo = builder.m_vbos.back();
 
-  constexpr std::size_t vec4Size = sizeof(glm::vec4);
   glEnableVertexAttribArray(1);
   glBindBuffer(GL_ARRAY_BUFFER, matrices_vbo);
-  glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void *)0);
-  glEnableVertexAttribArray(2);
-  glBindBuffer(GL_ARRAY_BUFFER, matrices_vbo);
-  glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size,
-                        (void *)(1 * vec4Size));
-  glEnableVertexAttribArray(3);
-  glBindBuffer(GL_ARRAY_BUFFER, matrices_vbo);
-  glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size,
-                        (void *)(2 * vec4Size));
-  glEnableVertexAttribArray(4);
-  glBindBuffer(GL_ARRAY_BUFFER, matrices_vbo);
-  glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size,
-                        (void *)(3 * vec4Size));
-
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void *)0);
   glVertexAttribDivisor(1, 1);
-  glVertexAttribDivisor(2, 1);
-  glVertexAttribDivisor(3, 1);
-  glVertexAttribDivisor(4, 1);
+
+//  constexpr std::size_t vec4Size = sizeof(glm::vec4);
+//  glEnableVertexAttribArray(1);
+//  glBindBuffer(GL_ARRAY_BUFFER, matrices_vbo);
+//  glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void *)0);
+//  glEnableVertexAttribArray(2);
+//  glBindBuffer(GL_ARRAY_BUFFER, matrices_vbo);
+//  glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size,
+//                        (void *)(1 * vec4Size));
+//  glEnableVertexAttribArray(3);
+//  glBindBuffer(GL_ARRAY_BUFFER, matrices_vbo);
+//  glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size,
+//                        (void *)(2 * vec4Size));
+//  glEnableVertexAttribArray(4);
+//  glBindBuffer(GL_ARRAY_BUFFER, matrices_vbo);
+//  glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size,
+//                        (void *)(3 * vec4Size));
+//
+//  glVertexAttribDivisor(1, 1);
+//  glVertexAttribDivisor(2, 1);
+//  glVertexAttribDivisor(3, 1);
+//  glVertexAttribDivisor(4, 1);
 
   vgv.m_texel_shape = builder.build();
-  vgv.m_total_invocations = instance_matrices.size();
+  vgv.m_total_invocations = instance_positions.size();
   vgv.m_index_count = index_data.size();
   return vgv;
 }
