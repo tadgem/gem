@@ -21,6 +21,7 @@ set(SDL_THREADS ON)
 
 add_subdirectory(submodules/cpptrace)
 add_subdirectory(submodules/spdlog)
+add_subdirectory(submodules/efsw)
 add_subdirectory(third-party/sdl)
 add_subdirectory(third-party/tracy)
 add_subdirectory(third-party/glew/build/cmake)

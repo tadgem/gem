@@ -7,6 +7,8 @@
 #include "gem/utils.h"
 #include "spdlog/spdlog.h"
 #include <filesystem>
+#include "efsw/efsw.hpp"
+
 
 namespace gem {
 
