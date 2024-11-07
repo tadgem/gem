@@ -254,6 +254,29 @@ shader::split_composite_shader(const std::string &input) {
   return stages;
 }
 
+shader shader::create_from_composite(const std::string &composite_shader) {
+  std::unordered_map<shader::stage, std::string> stages =
+      shader::split_composite_shader(composite_shader);
+
+  if (stages.find(shader::stage::compute) != stages.end()) {
+    return shader(stages[shader::stage::compute]);
+  }
+
+  if (stages.find(shader::stage::vertex) != stages.end() &&
+      stages.find(shader::stage::fragment) != stages.end() &&
+      stages.find(shader::stage::geometry) == stages.end()) {
+    return shader(stages[shader::stage::vertex], stages[shader::stage::fragment]);
+  }
+
+  if (stages.find(shader::stage::vertex) != stages.end() &&
+      stages.find(shader::stage::fragment) != stages.end() &&
+      stages.find(shader::stage::geometry) != stages.end()) {
+    return shader(stages[shader::stage::vertex], stages[shader::stage::geometry],
+               stages[shader::stage::fragment]);
+  }
+  return {};
+}
+
 shader::uniform_type shader::get_type_from_gl(GLenum type) {
   ZoneScoped;
   switch (type) {

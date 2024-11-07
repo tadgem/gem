@@ -4,7 +4,7 @@
 #include <map>
 #include <memory>
 #include "asset.h"
-
+#include "asset_hot_reload.h"
 namespace gem {
 
 using asset_load_callback = void (*)(asset_intermediate *);
@@ -40,6 +40,9 @@ struct asset_load_return {
 
 class asset_manager {
 public:
+
+  asset_manager();
+
   asset_handle load_asset(const std::string &path, const asset_type &assetType,
                           asset_loaded_callback on_asset_loaded = nullptr);
   void unload_asset(const asset_handle &handle);
@@ -84,6 +87,9 @@ public:
       p_asset_loaded_callbacks;
   std::vector<asset_load_info>
       p_queued_loads;
+
+  std::unique_ptr<efsw::FileWatcher>  p_file_watcher;
+  std::unique_ptr<GemFileListener>    p_gem_listener;
 
   const uint16_t p_callback_tasks_per_tick = 1;
   const uint16_t p_max_async_tasks_in_flight = 8;

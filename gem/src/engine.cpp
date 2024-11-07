@@ -36,4 +36,16 @@ void engine::shutdown() {
   systems.m_systems.clear();
   systems.m_system_type_aliases.clear();
 }
+void engine::update() {
+  assets.update();
+
+  for(auto& cb : debug_callbacks.m_callbacks)
+  {
+    cb();
+  }
+  debug_callbacks.m_callbacks.clear();
+}
 } // namespace gem
+void debug_callbacks_collection::add(std::function<void()> debug_callback) {
+  m_callbacks.emplace_back(debug_callback);
+}

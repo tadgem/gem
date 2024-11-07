@@ -59,6 +59,8 @@ public:
   static std::unordered_map<shader::stage, std::string>
   split_composite_shader(const std::string &input);
 
+  static shader create_from_composite(const std::string& composite_shader);
+
   static uniform_type get_type_from_gl(GLenum type);
 };
 } // namespace gem

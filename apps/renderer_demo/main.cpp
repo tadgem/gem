@@ -119,7 +119,7 @@ int main()
     while (!gl_backend::s_quit)
     {
         glEnable(GL_DEPTH_TEST);
-        engine::assets.update();
+        engine::update();
         
         gl_backend::process_sdl_event();
         gl_backend::engine_pre_frame();      

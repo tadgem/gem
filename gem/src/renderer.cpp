@@ -214,11 +214,11 @@ void gl_renderer::render(asset_manager &am, camera &cam,
         m_window_resolution);
   }
   {
-//    TracyGpuZone("Voxel Reprojection")
-//    tech::vxgi::dispatch_voxel_reprojection(m_compute_voxel_reprojection_shader-> m_data,
-//                                            m_voxel_data, s_voxel_resolution,
-//                                            m_voxel_data.previous_bounding_box,
-//                                            m_voxel_data.current_bounding_box);
+    TracyGpuZone("Voxel Reprojection")
+    tech::vxgi::dispatch_voxel_reprojection(m_compute_voxel_reprojection_shader-> m_data,
+                                            m_voxel_data, s_voxel_resolution,
+                                            m_voxel_data.previous_bounding_box,
+                                            m_voxel_data.current_bounding_box);
   }
   {
     TracyGpuZone("GBuffer Voxelization MIPS");

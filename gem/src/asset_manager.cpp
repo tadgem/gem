@@ -7,7 +7,6 @@
 #include "gem/utils.h"
 #include "spdlog/spdlog.h"
 #include <filesystem>
-#include "efsw/efsw.hpp"
 
 
 namespace gem {
@@ -304,28 +303,9 @@ void link_shader_program(asset_intermediate *shader_asset) {
   ZoneScoped;
   shader_intermediate_asset *shader_inter =
       static_cast<shader_intermediate_asset *>(shader_asset);
-  std::unordered_map<shader::stage, std::string> stages =
-      shader::split_composite_shader(shader_inter->m_intermediate);
 
-  if (stages.find(shader::stage::compute) != stages.end()) {
-    shader_inter->get_concrete_asset()->m_data =
-        shader(stages[shader::stage::compute]);
-  }
-
-  if (stages.find(shader::stage::vertex) != stages.end() &&
-      stages.find(shader::stage::fragment) != stages.end() &&
-      stages.find(shader::stage::geometry) == stages.end()) {
-    shader_inter->get_concrete_asset()->m_data =
-        shader(stages[shader::stage::vertex], stages[shader::stage::fragment]);
-  }
-
-  if (stages.find(shader::stage::vertex) != stages.end() &&
-      stages.find(shader::stage::fragment) != stages.end() &&
-      stages.find(shader::stage::geometry) != stages.end()) {
-    shader_inter->get_concrete_asset()->m_data =
-        shader(stages[shader::stage::vertex], stages[shader::stage::geometry],
-               stages[shader::stage::fragment]);
-  }
+  shader_inter->get_concrete_asset()->m_data
+      = shader::create_from_composite(shader_inter->m_intermediate);
 }
 
 asset_load_return load_model_asset_manager(const std::string &path) {
@@ -476,5 +456,11 @@ void asset_manager::unload_asset(const asset_handle &handle) {
   default:
     break;
   }
+}
+asset_manager::asset_manager() {
+  p_file_watcher = std::make_unique<efsw::FileWatcher>();
+  p_gem_listener = std::make_unique<GemFileListener>();
+  p_gem_listener->m_watch_id = p_file_watcher->addWatch("assets", p_gem_listener.get(), true);
+  p_file_watcher->watch();
 }
 } // namespace gem
