@@ -14,7 +14,7 @@ void voxel::grid::update_voxel_unit() {
                 (aabb_dim.z / resolution.z));
 }
 
-void voxel::grid::update_grid_position(gem::camera& cam) {
+void voxel::grid::update_grid_history(camera &cam) {
   ZoneScoped;
   current_bounding_box.max = cam.m_pos + (aabb_dim * 0.5f);
   current_bounding_box.min = cam.m_pos - (aabb_dim * 0.5f);
@@ -39,6 +39,7 @@ voxel::grid voxel::create_grid(glm::ivec3 resolution, aabb bb) {
                               GL_READ_WRITE, GL_RGBA16F));
   glAssert(glBindImageTexture(5, grid.voxel_texture.m_handle, 5, GL_TRUE, 0,
                               GL_READ_WRITE, GL_RGBA16F));
+  grid.history_voxel_texture = texture::create_3d_texture_empty(resolution, GL_RGBA, GL_RGBA16F, GL_FLOAT);
 
   return grid;
 }

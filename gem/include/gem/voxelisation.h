@@ -10,6 +10,7 @@ class voxel {
 public:
   struct grid {
     texture     voxel_texture; // 3D Texture (Voxel Data)
+    texture     history_voxel_texture;
     glm::ivec3  resolution;
     glm::vec3   voxel_unit; // scale of each texel
     glm::vec3   aabb_dim {150.0, 100.0, 150.0};
@@ -17,7 +18,7 @@ public:
     aabb        previous_bounding_box;
 
     void update_voxel_unit();
-    void update_grid_position(camera& cam);
+    void update_grid_history(camera &cam);
   };
 
   struct grid_visualiser {

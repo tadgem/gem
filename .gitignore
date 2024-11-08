@@ -44,3 +44,7 @@ third-party/glew/glew.pc
 /.VSCodeCounter
 /cmake-build-debug-visual-studio
 /cmake-build-release-visual-studio
+/cmake-build-final
+/cmake-build-releasedebug-visual-studio
+imgui.ini
+test.scene

@@ -36,6 +36,7 @@ public:
   shader_asset *m_compute_voxelize_gbuffer_shader;
   shader_asset *m_compute_voxel_mips_shader;
   shader_asset *m_compute_voxel_reprojection_shader;
+  shader_asset *m_compute_voxel_blit_shader;
 
   framebuffer m_gbuffer;
   framebuffer m_gbuffer_downsample;

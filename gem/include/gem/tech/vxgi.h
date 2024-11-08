@@ -16,6 +16,12 @@ public:
                                             framebuffer &gbuffer,
                                             framebuffer &lightpass_buffer,
                                             glm::ivec2 window_res);
+
+  static void dispatch_blit_voxel(shader &blit_voxel,
+                                      voxel::grid &voxel_data,
+                                      glm::vec3 _3d_tex_res_vec);
+
+
   static void dispatch_gen_voxel_mips(shader &voxelization_mips,
                                       voxel::grid &voxel_data,
                                       glm::vec3 _3d_tex_res_vec);

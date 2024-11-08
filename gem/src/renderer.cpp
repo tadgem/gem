@@ -38,6 +38,7 @@ void gl_renderer::init(asset_manager &am) {
   am.load_asset("assets/shaders/gbuffer_voxelization.shader", asset_type::shader);
   am.load_asset("assets/shaders/voxel_mips.shader", asset_type::shader);
   am.load_asset("assets/shaders/voxel_reprojection.shader", asset_type::shader);
+  am.load_asset("assets/shaders/voxel_blit.shader", asset_type::shader);
 
   am.wait_all_assets();
   m_gbuffer_shader = am.get_asset<shader, asset_type::shader>(
@@ -68,6 +69,8 @@ void gl_renderer::init(asset_manager &am) {
       "assets/shaders/voxel_mips.shader");
   m_compute_voxel_reprojection_shader = am.get_asset<shader, asset_type::shader>(
       "assets/shaders/voxel_reprojection.shader");
+  m_compute_voxel_blit_shader = am.get_asset<shader, asset_type::shader>(
+      "assets/shaders/voxel_blit.shader");
 
   m_window_resolution = {1920.0, 1080.0};
   const int shadow_resolution = 4096;
@@ -203,11 +206,15 @@ void gl_renderer::render(asset_manager &am, camera &cam,
                          std::vector<scene *> &scenes) {
   ZoneScoped;
   FrameMark;
+  {
+    TracyGpuZone("Voxel Histroy Blit");
+    tech::vxgi::dispatch_blit_voxel(m_compute_voxel_blit_shader->m_data, m_voxel_data, s_voxel_resolution);
+    m_voxel_data.update_grid_history(cam);
+    m_voxel_data.update_voxel_unit();
+  }
 
   {
     TracyGpuZone("GBuffer Voxelization");
-    m_voxel_data.update_grid_position(cam);
-    m_voxel_data.update_voxel_unit();
     tech::vxgi::dispatch_gbuffer_voxelization(
         m_compute_voxelize_gbuffer_shader->m_data, m_voxel_data.current_bounding_box,
         m_voxel_data, m_gbuffer, m_lightpass_buffer_resolve,
