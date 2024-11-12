@@ -142,7 +142,7 @@ vec3 trace_cone(vec3 from, vec3 dir, vec3 unit, float aperture)
 	{
 		vec4 result = get_voxel_colour(pos, unit, lod);
 		cone_distance = distance(from, pos);
-		if(result.w > 0.5)
+		if(result.w > 1.0)
 		{
 			accum += result * easeOutQuart((1.0 - (cone_distance / u_max_trace_distance)));
 		}
@@ -256,7 +256,7 @@ void main()
 	vec3 position = texture(u_position_map, aUV).xyz;
 	vec3 normal = texture(u_normal_map, aUV).xyz;
 	vec3 normalized_n = normalize(normal);
-	vec3 v_diffuse = trace_cones_32(position, normalized_n, unit);
+	vec3 v_diffuse = trace_cones_16(position, normalized_n, unit);
 	vec3 v_spec = trace_ray(position, reflect(position, normalized_n), unit);
 	FragColor = vec4(mix(diffuse * v_diffuse, v_spec, u_diffuse_spec_mix), 1.0);
 }

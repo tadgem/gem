@@ -1,9 +1,7 @@
 #version 450
 #vert
 
-
 layout(location = 0) in vec3 aPos;
-layout(location = 1) in vec3 iPos;
 
 layout(location = 0) out vec3 oUVW;
 
@@ -18,6 +16,11 @@ uniform mat4	u_model;
 uniform ivec3	u_texture_resolution;
 uniform ivec3	u_voxel_group_resolution;
 uniform AABB	u_aabb;
+
+
+layout(std430, binding=1) buffer ssbo_instance_matrices { //GL_VERTEX_BUFFER?/ GL_STATIC_DRAW
+	mat4 u_instance_matrices[];
+};
 
 vec3 get_uv_from_invocation( int idx, ivec3 limits ) {
     int tmp = idx;
@@ -46,16 +49,12 @@ void main()
     vec3 uv = base_uv + offset_uv;
 	vec3 unit = (u_aabb.max - u_aabb.min) / u_texture_resolution;
     // UV needs to be in range 0-1 for texture sampling
-    vec3 uvw = vec3(float(uv.x / u_texture_resolution.x), float(uv.y / u_texture_resolution.y), float(uv.z / u_texture_resolution.z)); 
+    vec3 uvw = vec3(float(uv.x / u_texture_resolution.x), float(uv.y / u_texture_resolution.y), float(uv.z / u_texture_resolution.z));
 	oUVW = uvw;
 
-	mat4 instance_model = u_model;
+	const int INSTANCE_INDEX = gl_InstanceID;
 
-	vec3 instance_pos = (iPos * unit);
-
-	instance_model[3] += vec4(instance_pos, 1.0);
-
-	vec4 worldPos = instance_model * vec4(aPos, 1.0);
+	vec4 worldPos = u_instance_matrices[INSTANCE_INDEX] * vec4(aPos, 1.0);
 
 	gl_Position = u_view_projection * worldPos;
 }
@@ -70,7 +69,7 @@ uniform sampler3D u_volume;
 void main()
 {
 	vec4 col = texture(u_volume, oUVW);
-	if (col.w < 0.5)
+	if (col.w < 0.3)
 	{
 		discard;
 	}

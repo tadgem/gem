@@ -20,25 +20,27 @@ void tech::ssr::dispatch_ssr_pass(shader &ssr, camera &cam,
   glClearColor(0, 0, 0, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
   glDepthMask(GL_FALSE);
-  ssr.use();
-  ssr.set_float("SCR_WIDTH", screen_dim.x);
-  ssr.set_float("SCR_HEIGHT", screen_dim.y);
-  ssr.set_mat4("projection", cam.m_proj);
-  ssr.set_mat4("invProjection", glm::inverse(cam.m_proj));
-  ssr.set_mat4("rotation", cam.get_rotation_matrix());
 
-  ssr.set_int("gNormal", 0);
+  ssr.use();
+  ssr.set_float("u_screen_width", screen_dim.x);
+  ssr.set_float("u_screen_height", screen_dim.y);
+  ssr.set_mat4("u_inv_projection", glm::inverse(cam.m_proj));
+  ssr.set_mat4("u_projection", cam.m_proj);
+  ssr.set_mat4("u_rotation", cam.get_rotation_matrix());
+
+  ssr.set_int("u_gnormal_buffer", 0);
   texture::bind_sampler_handle(gbuffer.m_colour_attachments[2], GL_TEXTURE0);
 
-  ssr.set_int("colorBuffer", 1);
+  ssr.set_int("u_gcolour_buffer", 1);
   texture::bind_sampler_handle(lighting_buffer.m_colour_attachments.front(),
                                GL_TEXTURE1);
 
-  ssr.set_int("depthMap", 2);
-  texture::bind_sampler_handle(gbuffer.m_depth_attachment, GL_TEXTURE2);
+  ssr.set_int("u_gpbr_buffer", 2);
+  texture::bind_sampler_handle(gbuffer.m_colour_attachments[3], GL_TEXTURE2);
 
-  ssr.set_int("pbrMap", 3);
-  texture::bind_sampler_handle(gbuffer.m_colour_attachments[3], GL_TEXTURE3);
+  ssr.set_int("u_depth_buffer", 3);
+  texture::bind_sampler_handle(gbuffer.m_depth_attachment, GL_TEXTURE3);
+
 
   glStencilFunc(GL_EQUAL, 1, 0xFF);
   glStencilMask(0x00);

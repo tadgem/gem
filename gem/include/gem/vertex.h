@@ -19,18 +19,18 @@ public:
 
   void begin();
 
-  template <typename _Ty> void add_vertex_buffer(_Ty *data, uint32_t count) {
+  template <typename _Ty> void add_vertex_buffer(_Ty *data, uint32_t count, GLenum usage_flags = GL_STATIC_DRAW) {
     gl_handle vbo;
     glGenBuffers(1, &vbo);
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     auto data_size = sizeof(_Ty) * count;
-    glBufferData(GL_ARRAY_BUFFER, data_size, data, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, data_size, data, usage_flags);
     m_vbos.push_back(vbo);
   }
 
-  template <typename _Ty> void add_vertex_buffer(std::vector<_Ty> data) {
-    add_vertex_buffer<_Ty>(&data[0], data.size());
+  template <typename _Ty> void add_vertex_buffer(std::vector<_Ty> data, GLenum usage_flags = GL_STATIC_DRAW) {
+    add_vertex_buffer<_Ty>(&data[0], data.size(), usage_flags);
   }
 
   void add_index_buffer(uint32_t *data, uint32_t data_count);

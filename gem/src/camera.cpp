@@ -61,6 +61,13 @@ void debug_camera_controller::update(glm::vec2 screen_dim, camera &cam) {
     SDL_ShowCursor(SDL_DISABLE);
   }
 
+  float speed = movement_speed;
+
+  if(input::get_keyboard_key(keyboard_key::left_shift))
+  {
+    speed *= 3.0f;
+  }
+
   glm::quat q_pitch =
       glm::angleAxis(glm::radians(-cam.m_euler.x), glm::vec3(1, 0, 0));
   glm::quat q_yaw =
@@ -77,7 +84,7 @@ void debug_camera_controller::update(glm::vec2 screen_dim, camera &cam) {
   cam.m_up = up;
 
   if (input::get_keyboard_key(keyboard_key::w)) {
-    cam.m_pos += forward * movement_speed * frame_time;
+    cam.m_pos += forward * speed * frame_time;
   }
 
   if (input::get_keyboard_key(keyboard_key::s)) {

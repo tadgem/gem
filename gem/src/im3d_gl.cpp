@@ -176,7 +176,7 @@ void im3d_gl::new_frame_im3d(im3d_state &state, glm::vec2 screen_dim,
   ZoneScoped;
   // update app data e.g. mouse pos, viewport size keys etc.
   Im3d::AppData &ad = Im3d::GetAppData();
-  ad.m_viewportSize = {1920, 1080};
+  ad.m_viewportSize = {screen_dim.x, screen_dim.y};
   ad.m_keyDown[Im3d::Key::Mouse_Left] =
       input::get_mouse_button(mouse_button::left);
   ad.m_keyDown[Im3d::Key::Key_L] = input::get_keyboard_key(keyboard_key::l);
@@ -258,7 +258,7 @@ void im3d_gl::end_frame_im3d(im3d_state &state, glm::ivec2 screen_dim,
   }
 
   DrawIm3dTextListsImGui(Im3d::GetContext().getTextDrawLists(),
-                         Im3d::GetContext().getTextDrawListCount(), 1920, 1080,
+                         Im3d::GetContext().getTextDrawListCount(), screen_dim.x, screen_dim.y,
                          viewProj);
 }
 

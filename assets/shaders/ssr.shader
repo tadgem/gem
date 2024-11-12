@@ -15,19 +15,18 @@ void main()
 #frag
 
 layout (location = 0) in vec2 aUV;
-layout (location = 0) out vec4 reflectionColor;
+layout (location = 0) out vec4 oColour;
 
-uniform sampler2D gNormal;
-uniform sampler2D colorBuffer;
-uniform sampler2D depthMap;
-uniform sampler2D pbrMap;
+uniform sampler2D u_gnormal_buffer;
+uniform sampler2D u_gcolour_buffer;
+uniform sampler2D u_gpbr_buffer;
+uniform sampler2D u_depth_buffer;
 
-
-uniform float SCR_WIDTH;
-uniform float SCR_HEIGHT;
-uniform mat4  invProjection;
-uniform mat4  projection;
-uniform mat4  rotation;
+uniform float u_screen_width;
+uniform float u_screen_height;
+uniform mat4  u_inv_projection;
+uniform mat4  u_projection;
+uniform mat4  u_rotation;
 
 bool rayIsOutofScreen(vec2 ray) {
 	return (ray.x > 1 || ray.y > 1 || ray.x < 0 || ray.y < 0) ? true : false;
@@ -44,11 +43,11 @@ vec3 TraceRay(vec3 rayPos, vec3 dir, int iterationCount){
 			break;
 		}
 
-		sampleDepth = texture(depthMap, rayPos.xy).r;
+		sampleDepth = texture(u_depth_buffer, rayPos.xy).r;
 		float depthDif = rayPos.z - sampleDepth;
 		if(depthDif >= 0 && depthDif < 0.00001){ //we have a hit
 			hit = true;
-			hitColor = texture(colorBuffer, rayPos.xy).rgb;
+			hitColor = texture(u_gcolour_buffer, rayPos.xy).rgb;
 			break;
 		}
 	}
@@ -62,34 +61,34 @@ void main(){
 	vec3 pixelPositionTexture;
 	pixelPositionTexture.xy = aUV;
 
-	vec3 pbr_props = texture(pbrMap, pixelPositionTexture.xy).rgb;
+	vec3 pbr_props = texture(u_gpbr_buffer, pixelPositionTexture.xy).rgb;
 
 	if(pbr_props.y > 0.75)
 	{
 		return;
 	}
 
-	vec3 normalView = (rotation * texture(gNormal, pixelPositionTexture.xy)).rgb;	
-	float pixelDepth = texture(depthMap, pixelPositionTexture.xy).r;	// 0< <1
+	vec3 normalView = (u_rotation * texture(u_gnormal_buffer, pixelPositionTexture.xy)).rgb;
+	float pixelDepth = texture(u_depth_buffer, pixelPositionTexture.xy).r;	// 0< <1
 	pixelPositionTexture.z = pixelDepth;		
-	vec4 positionView = invProjection *  vec4(pixelPositionTexture * 2 - vec3(1), 1);
+	vec4 positionView = u_inv_projection *  vec4(pixelPositionTexture * 2 - vec3(1), 1);
 	positionView /= positionView.w;
 	vec3 reflectionView = normalize(reflect(positionView.xyz, normalView));
 	if(reflectionView.z > 0){
-		reflectionColor = vec4(0,0,0,1);
+		oColour = vec4(0,0,0,1);
 		return;
 	}
 	vec3 rayEndPositionView = positionView.xyz + reflectionView * maxRayDistance;
 
 
 	//Texture Space ray calculation
-	vec4 rayEndPositionTexture = projection * vec4(rayEndPositionView,1);
+	vec4 rayEndPositionTexture = u_projection * vec4(rayEndPositionView,1);
 	rayEndPositionTexture /= rayEndPositionTexture.w;
 	rayEndPositionTexture.xyz = (rayEndPositionTexture.xyz + vec3(1)) / 2.0f;
 	vec3 rayDirectionTexture = rayEndPositionTexture.xyz - pixelPositionTexture;
 
-	ivec2 screenSpaceStartPosition = ivec2(pixelPositionTexture.x * SCR_WIDTH, pixelPositionTexture.y * SCR_HEIGHT); 
-	ivec2 screenSpaceEndPosition = ivec2(rayEndPositionTexture.x * SCR_WIDTH, rayEndPositionTexture.y * SCR_HEIGHT); 
+	ivec2 screenSpaceStartPosition = ivec2(pixelPositionTexture.x * u_screen_width, pixelPositionTexture.y * u_screen_height);
+	ivec2 screenSpaceEndPosition = ivec2(rayEndPositionTexture.x * u_screen_width, rayEndPositionTexture.y * u_screen_height);
 	ivec2 screenSpaceDistance = screenSpaceEndPosition - screenSpaceStartPosition;
 	int screenSpaceMaxDistance = max(abs(screenSpaceDistance.x), abs(screenSpaceDistance.y)) / 2;
 	rayDirectionTexture /= max(screenSpaceMaxDistance, 0.001f);
@@ -97,5 +96,5 @@ void main(){
 
 	//trace the ray
 	vec3 outColor = TraceRay(pixelPositionTexture, rayDirectionTexture, screenSpaceMaxDistance);
-	reflectionColor = vec4(outColor, 1) * (1.0 - pbr_props.y);
+	oColour = vec4(outColor, 1) * (1.0 - pbr_props.y);
 }

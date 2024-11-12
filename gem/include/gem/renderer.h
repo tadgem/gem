@@ -25,6 +25,7 @@ public:
   shader_asset *m_gbuffer_shader;
   shader_asset *m_lighting_shader;
   shader_asset *m_visualise_3d_tex_shader;
+  shader_asset *m_visualise_3d_tex_instances_shader;
   shader_asset *m_present_shader;
   shader_asset *m_dir_light_shadow_shader;
   shader_asset *m_voxel_cone_tracing_shader;
@@ -84,6 +85,7 @@ public:
   bool m_debug_draw_ssr_pass = true;
   bool m_debug_draw_3d_texture = false;
   bool m_debug_draw_final_pass = true;
+  bool m_debug_enable_voxel_reprojection = true;
 
   inline static constexpr int s_voxel_square_resolution = 256;
   inline static constexpr glm::ivec3 s_voxel_resolution =

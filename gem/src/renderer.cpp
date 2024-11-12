@@ -27,6 +27,7 @@ void gl_renderer::init(asset_manager &am) {
   am.load_asset("assets/shaders/gbuffer.shader", asset_type::shader);
   am.load_asset("assets/shaders/lighting.shader", asset_type::shader);
   am.load_asset("assets/shaders/visualize_3d_tex.shader", asset_type::shader);
+  am.load_asset("assets/shaders/visualize_3d_tex_instances.shader", asset_type::shader);
   am.load_asset("assets/shaders/present.shader", asset_type::shader);
   am.load_asset("assets/shaders/dir_light_shadow.shader", asset_type::shader);
   am.load_asset("assets/shaders/voxel_cone_tracing.shader",asset_type::shader);
@@ -47,6 +48,8 @@ void gl_renderer::init(asset_manager &am) {
       "assets/shaders/lighting.shader");
   m_visualise_3d_tex_shader = am.get_asset<shader, asset_type::shader>(
       "assets/shaders/visualize_3d_tex.shader");
+  m_visualise_3d_tex_instances_shader = am.get_asset<shader, asset_type::shader>(
+      "assets/shaders/visualize_3d_tex_instances.shader");
   m_present_shader = am.get_asset<shader, asset_type::shader>(
       "assets/shaders/present.shader");
   m_dir_light_shadow_shader = am.get_asset<shader, asset_type::shader>(
@@ -72,7 +75,7 @@ void gl_renderer::init(asset_manager &am) {
   m_compute_voxel_blit_shader = am.get_asset<shader, asset_type::shader>(
       "assets/shaders/voxel_blit.shader");
 
-  m_window_resolution = {1920.0, 1080.0};
+  m_window_resolution = {1600.0, 900.0};
   const int shadow_resolution = 4096;
   m_gbuffer =
       framebuffer::create(m_window_resolution,
@@ -193,7 +196,9 @@ void gl_renderer::init(asset_manager &am) {
 
   m_voxel_data = voxel::create_grid(s_voxel_resolution, aabb{});
   m_voxel_visualiser = voxel::create_grid_visualiser(
-      m_voxel_data, m_visualise_3d_tex_shader->m_data, 8);
+      m_voxel_data, m_visualise_3d_tex_shader->m_data,
+      m_visualise_3d_tex_instances_shader->m_data,
+      8);
 }
 
 void gl_renderer::pre_frame(camera &cam) {
@@ -212,27 +217,14 @@ void gl_renderer::render(asset_manager &am, camera &cam,
     m_voxel_data.update_grid_history(cam);
     m_voxel_data.update_voxel_unit();
   }
-
-  {
-    TracyGpuZone("GBuffer Voxelization");
-    tech::vxgi::dispatch_gbuffer_voxelization(
-        m_compute_voxelize_gbuffer_shader->m_data, m_voxel_data.current_bounding_box,
-        m_voxel_data, m_gbuffer, m_lightpass_buffer_resolve,
-        m_window_resolution);
-  }
+  if(m_debug_enable_voxel_reprojection)
   {
     TracyGpuZone("Voxel Reprojection")
-    tech::vxgi::dispatch_voxel_reprojection(m_compute_voxel_reprojection_shader-> m_data,
-                                            m_voxel_data, s_voxel_resolution,
-                                            m_voxel_data.previous_bounding_box,
-                                            m_voxel_data.current_bounding_box);
+        tech::vxgi::dispatch_voxel_reprojection(m_compute_voxel_reprojection_shader-> m_data,
+                                                m_voxel_data, s_voxel_resolution,
+                                                m_voxel_data.previous_bounding_box,
+                                                m_voxel_data.current_bounding_box);
   }
-  {
-    TracyGpuZone("GBuffer Voxelization MIPS");
-    tech::vxgi::dispatch_gen_voxel_mips(m_compute_voxel_mips_shader->m_data,
-                                        m_voxel_data, s_voxel_resolution);
-  }
-
   {
     TracyGpuZone("GBuffer");
     tech::gbuffer::dispatch_gbuffer_with_id(
@@ -241,10 +233,9 @@ void gl_renderer::render(asset_manager &am, camera &cam,
 
     m_frame_index++;
   }
-
   // TODO: Need a way to get a single instance more efficiently
   dir_light dir{};
-
+  std::vector<point_light> point_lights{};
   if (!scenes.empty()) {
     auto dir_light_view = scenes.front()->m_registry.view<dir_light>();
     for (auto [e, dir_light_c] : dir_light_view.each()) {
@@ -252,8 +243,6 @@ void gl_renderer::render(asset_manager &am, camera &cam,
       break;
     }
   }
-
-  std::vector<point_light> point_lights{};
   {
     TracyGpuZone("Dir Light Shadow Pass");
     tech::shadow::dispatch_shadow_pass(m_dir_light_shadow_buffer,
@@ -266,6 +255,21 @@ void gl_renderer::render(asset_manager &am, camera &cam,
         m_lighting_shader->m_data, m_lightpass_buffer, m_gbuffer,
         m_dir_light_shadow_buffer, cam, point_lights, dir);
   }
+
+  {
+    TracyGpuZone("GBuffer Voxelization");
+    tech::vxgi::dispatch_gbuffer_voxelization(
+        m_compute_voxelize_gbuffer_shader->m_data, m_voxel_data.current_bounding_box,
+        m_voxel_data, m_gbuffer, m_lightpass_buffer_resolve,
+        m_window_resolution);
+  }
+
+  {
+    TracyGpuZone("GBuffer Voxelization MIPS");
+    tech::vxgi::dispatch_gen_voxel_mips(m_compute_voxel_mips_shader->m_data,
+                                        m_voxel_data, s_voxel_resolution);
+  }
+
 
   {
     TracyGpuZone("GBuffer Downsample");
@@ -466,40 +470,58 @@ void gl_renderer::on_imgui(asset_manager &am) {
   ImGui::Text("Mouse Pos : %.3f, %.3f", mouse_pos.x, mouse_pos.y);
   ImGui::Text("Selected Entity ID : %d", m_last_selected_entity);
   ImGui::Separator();
-  ImGui::Checkbox("Render 3D Voxel Grid", &m_debug_draw_3d_texture);
-  ImGui::Checkbox("Render Final Pass", &m_debug_draw_final_pass);
-  ImGui::Checkbox("Render Direct Lighting Pass", &m_debug_draw_lighting_pass);
-  ImGui::Checkbox("Render Direct Lighting Pass NO TAA",
-                  &m_debug_draw_lighting_pass_no_taa);
-  ImGui::Checkbox("Render Cone Tracing Pass", &m_debug_draw_cone_tracing_pass);
-  ImGui::Checkbox("Render SSR", &m_debug_draw_ssr_pass);
-  ImGui::Checkbox("Render Cone Tracing Pass NO TAA",
-                  &m_debug_draw_cone_tracing_pass_no_taa);
-  ImGui::Separator();
-  ImGui::Text("Brightness / Contrast / Saturation");
-  ImGui::DragFloat("Brightness", &m_tonemapping_brightness);
-  ImGui::DragFloat("Contrast", &m_tonemapping_contrast);
-  ImGui::DragFloat("Saturation", &m_tonemapping_saturation);
-  ImGui::Separator();
-  ImGui::Text("VXGI Settings");
-  ImGui::DragFloat("Trace Distance", &m_vxgi_cone_trace_distance);
-  ImGui::DragFloat("Diffuse / Spec Mix", &m_vxgi_diffuse_specular_mix, 1.0f,
-                   0.0f, 1.0f);
-  ImGui::Separator();
-  ImGui::DragFloat3("AABB Dimensions", &m_voxel_data.aabb_dim[0]);
-  ImGui::DragFloat("AABB Debug Visual Model Matrix Scale", &m_voxel_visualiser.m_debug_scale, 0.01f, 3000.0f);
-  ImGui::DragFloat3("AABB Position Offset", &m_voxel_visualiser.m_debug_position_offset[0]);
-  ImGui::DragFloat3("Current VXGI BB Min", &m_voxel_data.current_bounding_box.min[0]);
-  ImGui::DragFloat3("Current VXGI BB Max", &m_voxel_data.current_bounding_box.max[0]);
-  // TODO: better place for this
+  if(ImGui::TreeNode("Render Passes")) {
+    ImGui::Checkbox("Render 3D Voxel Grid", &m_debug_draw_3d_texture);
+    ImGui::Checkbox("Render Final Pass", &m_debug_draw_final_pass);
+    ImGui::Checkbox("Render Direct Lighting Pass", &m_debug_draw_lighting_pass);
+    ImGui::Checkbox("Render Direct Lighting Pass NO TAA",
+                    &m_debug_draw_lighting_pass_no_taa);
+    ImGui::Checkbox("Render Cone Tracing Pass",
+                    &m_debug_draw_cone_tracing_pass);
+    ImGui::Checkbox("Render SSR", &m_debug_draw_ssr_pass);
+    ImGui::Checkbox("Render Cone Tracing Pass NO TAA",
+                    &m_debug_draw_cone_tracing_pass_no_taa);
+    ImGui::Separator();
+    ImGui::TreePop();
+  }
+  if(ImGui::TreeNode("Brightness / Contrast / Saturation")) {
+    ImGui::DragFloat("Brightness", &m_tonemapping_brightness);
+    ImGui::DragFloat("Contrast", &m_tonemapping_contrast);
+    ImGui::DragFloat("Saturation", &m_tonemapping_saturation);
+    ImGui::TreePop();
+  }
+
+  if(ImGui::TreeNode("VXGI Settings"))
+  {
+    ImGui::Checkbox("Enable Grid Reprojection", & m_debug_enable_voxel_reprojection);
+    ImGui::DragFloat("Trace Distance", &m_vxgi_cone_trace_distance);
+    ImGui::DragFloat("Diffuse / Spec Mix", &m_vxgi_diffuse_specular_mix, 1.0f,
+                     0.0f, 1.0f);
+    ImGui::TreePop();
+  }
+  if(ImGui::TreeNode("VXGI Voxel Grid Debug")) {
+    ImGui::DragFloat3("AABB Dimensions", &m_voxel_data.aabb_dim[0]);
+    ImGui::DragFloat("AABB Debug Visual Model Matrix Scale",
+                     &m_voxel_visualiser.m_debug_scale, 0.01f, 3000.0f);
+    ImGui::DragFloat3("AABB Position Offset",
+                      &m_voxel_visualiser.m_debug_position_offset[0]);
+    ImGui::DragFloat3("Current VXGI BB Min",
+                      &m_voxel_data.current_bounding_box.min[0]);
+    ImGui::DragFloat3("Current VXGI BB Max",
+                      &m_voxel_data.current_bounding_box.max[0]);
+    ImGui::TreePop();
+  }
+  if(ImGui::TreeNode("Denoise Settings")) {
+    ImGui::DragFloat("Sigma", &m_denoise_sigma);
+    ImGui::DragFloat("Threshold", &m_denoise_threshold);
+    ImGui::DragFloat("KSigma", &m_denoise_k_sigma);
+    ImGui::TreePop();
+  }
+  ImGui::End();
+
+  // TODO: Find a better place for this jesus
   Im3d::DrawAlignedBox(ToIm3D(m_voxel_data.current_bounding_box.min),
                        ToIm3D(m_voxel_data.current_bounding_box.max));
-  ImGui::Separator();
-  ImGui::Text("Denoise Settings");
-  ImGui::DragFloat("Sigma", &m_denoise_sigma);
-  ImGui::DragFloat("Threshold", &m_denoise_threshold);
-  ImGui::DragFloat("KSigma", &m_denoise_k_sigma);
-  ImGui::Separator();
-  ImGui::End();
+
 }
 } // namespace gem

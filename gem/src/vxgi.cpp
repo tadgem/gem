@@ -117,6 +117,8 @@ void tech::vxgi::dispatch_voxel_reprojection(shader &voxel_reprojection,
   voxel_reprojection.set_vec3("u_current_aabb.max", new_bb.max);
   texture::bind_image_handle(voxel_data.voxel_texture.m_handle, 0, 0,
                              GL_RGBA16F);
+  texture::bind_image_handle(voxel_data.history_voxel_texture.m_handle, 1, 0,
+                             GL_RGBA16F);
   glAssert(glDispatchCompute(_3d_tex_res_vec.x / 8, _3d_tex_res_vec.y / 8,_3d_tex_res_vec.z / 8));
   glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 }

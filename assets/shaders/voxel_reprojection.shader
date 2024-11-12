@@ -9,7 +9,8 @@ struct AABB
 	vec3 max;
 };
 
-layout(binding = 0, rgba16f) uniform image3D u_grid;
+layout(binding = 0, rgba16f) uniform image3D u_current_grid;
+layout(binding = 1, rgba16f) uniform image3D u_history_grid;
 
 uniform vec3 u_resolution;
 uniform AABB u_previous_aabb;
@@ -31,40 +32,38 @@ ivec3 get_texel_from_pos(vec3 position, vec3 resolution, AABB bb)
 	vec3 aabb_dim = bb.max - bb.min;
 	vec3 unit = vec3((aabb_dim.x / resolution.x), (aabb_dim.y / resolution.y) , (aabb_dim.z / resolution.z));
 
-	/// <summary>
-	/// 0,0,0 is aabb.min
-	/// </summary>
 	vec3 new_pos = position - bb.min;
 	int x = int(new_pos.x / unit.x) ;
 	int y = int(new_pos.y / unit.y) ;
 	int z = int(new_pos.z / unit.z) ;
 
 	return ivec3(x, y, z);
+}
 
+vec3 get_pos_from_texel(ivec3 texel, vec3 resolution, AABB bb)
+{
+	vec3 aabb_dim = bb.max - bb.min;
+	vec3 unit = vec3((aabb_dim.x / resolution.x), (aabb_dim.y / resolution.y) , (aabb_dim.z / resolution.z));
+
+	return bb.min + (texel * unit);
 }
 
 void main() {
-	ivec3 pix = ivec3(gl_GlobalInvocationID.xyz);
-	vec3 uv = pix / u_resolution;
+	ivec3 	pix 					= ivec3(gl_GlobalInvocationID.xyz);
+	vec3 	uv 						= pix / u_resolution;
+	vec3 	last_world_position 	= get_pos_from_texel(pix, u_resolution, u_previous_aabb);
 
-	if(distance(u_previous_aabb.min, u_current_aabb.min) < 0.5)
+	if(!is_in_aabb(last_world_position, u_current_aabb))
 	{
-		return;
+		imageStore(u_current_grid, pix, vec4(0.0));
 	}
 
-	vec3 prev_unit 		= (u_previous_aabb.max - u_previous_aabb.min) / u_resolution;
-	vec3 last_world_position 	= u_previous_aabb.min + (prev_unit * pix);
+	vec3 	new_world_position		= get_pos_from_texel(pix, u_resolution, u_current_aabb);
 
-	vec3 current_unit 	= (u_current_aabb.max - u_current_aabb.min) / u_resolution;
-	vec3 new_world_position		= u_current_aabb.min + (current_unit * pix);
+	ivec3 last_uv_coord 			= get_texel_from_pos(last_world_position, u_resolution, u_previous_aabb);
+	ivec3 current_uv_coord 			= get_texel_from_pos(new_world_position, u_resolution, u_current_aabb);
+	vec4 history_colour 					= imageLoad(u_history_grid, last_uv_coord);
+	vec4 current_colour = imageLoad(u_current_grid, current_uv_coord);
 
-	if(!is_in_aabb(new_world_position, u_previous_aabb))
-	{
-		imageStore(u_grid, pix, vec4(0.0));
-	}
-
-	ivec3 last_uv_coord = get_texel_from_pos(last_world_position, u_resolution, u_previous_aabb);
-	vec4 colour = imageLoad(u_grid, last_uv_coord);
-	imageStore(u_grid, pix, colour);
-	// convert new position to a uv coord in the old grid
+	imageStore(u_current_grid, current_uv_coord, mix(current_colour, history_colour, 0.5));
 }
