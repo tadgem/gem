@@ -204,8 +204,8 @@ void voxel::grid_visualiser::dispatch_draw(voxel::grid& vg, camera& cam)
   m_compute_instances_shader.set_vec3("u_current_aabb.max", vg.current_bounding_box.max);
 
   // dispatch
-  glm::ivec3 dispatch_dims = vg.resolution / m_texel_resolution / 8;
-  glAssert(glDispatchCompute(dispatch_dims.x, dispatch_dims.y, dispatch_dims.z));
+  glm::ivec3 dispatch_dims = vg.resolution / m_texel_resolution;
+  glAssert(glDispatchCompute(m_total_invocations, 1, 1));
 
 
   // draw

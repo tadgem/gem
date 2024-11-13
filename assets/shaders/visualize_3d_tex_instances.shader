@@ -1,7 +1,7 @@
 #version 430 core
 #compute
 
-layout(local_size_x = 8, local_size_y = 8, local_size_z = 8) in;
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 
 layout(std430, binding=1) buffer ssbo_instance_matrices { //GL_VERTEX_BUFFER?/ GL_STATIC_DRAW
 	mat4 u_instance_matrices[];
@@ -102,27 +102,36 @@ mat4 get_model_matrix(vec3 pos, vec3 scalev)
 {
 	mat4 m = mat4(1.0);
 	m = translate(m, pos);
-	vec3 euler = vec3(0.0001);
-	vec4 quat = quat_from_euler(euler);
-	mat4 rot_mat = mat4(mat3_cast(quat));
+	//vec3 euler = vec3(0.0001);
+	//vec4 quat = quat_fewrom_euler(euler);
+	//mat4 rot_mat = mat4(mat3_cast(quat));
 	mat4 scale_mat = scale(m, scalev);
-	return m * rot_mat * scale_mat;
+	return m *  scale_mat;
 }
 
-uint get_buffer_index(ivec3 texel, ivec3 resolution)
+uint get_texel_index(ivec3 texel, ivec3 resolution)
 {
-	return (texel.z * resolution.x * resolution.y) + (texel.y * resolution.x) + texel.x;
+	return texel.x + texel.y * resolution.x + texel.z * resolution.x * resolution.y;
 }
+
+ivec3 get_index_texel (int index, int xSize, int ySize, int zSize) {
+	ivec3 result = ivec3(0, 0, 0);
+	result.x = index % xSize;
+	result.y = (index / xSize) % ySize;
+	result.z = index / (xSize * ySize);
+	return result;
+}
+
 
 void main() {
-	ivec3 	texel 					= ivec3(gl_GlobalInvocationID.xyz);
-	vec3 	uv2 						= texel / u_resolution;
-
+	uint 	index =	gl_GlobalInvocationID.x;
 	vec3 	start_position = u_current_aabb.min;
 	vec3	step_increment = (u_voxel_unit * u_instance_resolution);
-	vec3	final_position = start_position + (step_increment * texel);
+	vec3	matrix_res = u_resolution / u_instance_resolution;
 
-	uint index = get_buffer_index(texel, ivec3(u_resolution));
-	u_instance_matrices[index] = get_model_matrix(final_position, u_voxel_unit);
+	ivec3 	texel = get_index_texel(int(index), int(matrix_res.x),int(matrix_res.y), int(matrix_res.z));
+	vec3	final_position = start_position + (texel * step_increment);
+
+	u_instance_matrices[index] = get_model_matrix(vec3(final_position.x, final_position.y, final_position.z), u_voxel_unit);
 	// get instance X,Y,Z
 }

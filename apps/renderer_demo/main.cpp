@@ -79,7 +79,7 @@ int main()
         spdlog::info("adding model to scene");
         model_asset* ma = static_cast<model_asset*>(a);
         ma->m_data.update_aabb();
-        s->create_entity_from_model(ma->m_handle, ma->m_data, renderer.m_gbuffer_shader->m_handle, renderer.m_gbuffer_shader->m_data, glm::vec3(0.01), glm::vec3(0.0, 0.0, 0.0),
+        s->create_entity_from_model(ma->m_handle, ma->m_data, renderer.m_gbuffer_shader->m_handle, renderer.m_gbuffer_shader->m_data, glm::vec3(0.03), glm::vec3(0.0, 0.0, 0.0),
             {
                 {"u_diffuse_map", texture_map_type::diffuse},
                 {"u_normal_map", texture_map_type::normal},

@@ -214,8 +214,10 @@ void gl_renderer::render(asset_manager &am, camera &cam,
   {
     TracyGpuZone("Voxel Histroy Blit");
     tech::vxgi::dispatch_blit_voxel(m_compute_voxel_blit_shader->m_data, m_voxel_data, s_voxel_resolution);
-    m_voxel_data.update_grid_history(cam);
-    m_voxel_data.update_voxel_unit();
+    if(!m_debug_freeze_voxel_grid_pos) {
+      m_voxel_data.update_grid_history(cam);
+      m_voxel_data.update_voxel_unit();
+    }
   }
   if(m_debug_enable_voxel_reprojection)
   {
@@ -494,6 +496,7 @@ void gl_renderer::on_imgui(asset_manager &am) {
   if(ImGui::TreeNode("VXGI Settings"))
   {
     ImGui::Checkbox("Enable Grid Reprojection", & m_debug_enable_voxel_reprojection);
+    ImGui::Checkbox("Freeze Voxel Grid", & m_debug_freeze_voxel_grid_pos);
     ImGui::DragFloat("Trace Distance", &m_vxgi_cone_trace_distance);
     ImGui::DragFloat("Diffuse / Spec Mix", &m_vxgi_diffuse_specular_mix, 1.0f,
                      0.0f, 1.0f);
