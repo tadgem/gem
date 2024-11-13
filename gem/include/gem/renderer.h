@@ -68,7 +68,7 @@ public:
   GLfloat m_vxgi_diffuse_specular_mix = 0.0f;
   GLfloat m_vxgi_resolution_scale = 0.75f;
 
-  GLfloat m_ssr_resolution_scale = 0.66f;
+  GLfloat m_ssr_resolution_scale = 1.0f;
 
   GLfloat m_denoise_sigma = 0.01f;
   GLfloat m_denoise_threshold = 0.1f;
@@ -85,7 +85,7 @@ public:
   bool m_debug_draw_ssr_pass = true;
   bool m_debug_draw_3d_texture = false;
   bool m_debug_draw_final_pass = true;
-  bool m_debug_enable_voxel_reprojection = true;
+  bool m_debug_enable_voxel_reprojection = false;
 
   inline static constexpr int s_voxel_square_resolution = 256;
   inline static constexpr glm::ivec3 s_voxel_resolution =

@@ -73,12 +73,10 @@ void main() {
 	light.w = 1.0;
 
 	ivec3 sample_pos = get_texel_from_pos(pos.xyz, u_voxel_resolution);
-	vec4 current = imageLoad(imgOutput, sample_pos);
-	vec4 val = mix(light, current, 0.95);
-	if(isnan(val.x) || isnan(val.y) || isnan(val.z))
+	if(isnan(light.x) || isnan(light.y) || isnan(light.z))
 	{
 		return;
 	}
 
-	imageStore(imgOutput,sample_pos, val);
+	imageStore(imgOutput,sample_pos, light);
 }
