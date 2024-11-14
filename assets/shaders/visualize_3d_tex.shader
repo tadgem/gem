@@ -69,7 +69,7 @@ uniform sampler3D u_volume;
 void main()
 {
 	vec4 col = texture(u_volume, oUVW);
-	if (col.w < 0.5)
+	if (col.w < 0.9)
 	{
 		discard;
 	}
