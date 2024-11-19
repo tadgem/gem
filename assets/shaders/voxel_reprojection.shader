@@ -73,7 +73,7 @@ void main() {
 	vec3 reprojection_dir 			= u_current_aabb.min - u_previous_aabb.min;
 	vec3 reprojection_texel_offset 	= reprojection_dir / unit;
 	ivec3 last_grid_offset = ivec3(reprojection_texel_offset);
-	ivec3 last_texel = pix - last_grid_offset;
+	ivec3 last_texel = pix + last_grid_offset;
 
 	if(!is_in_grid(last_texel, ivec3(u_resolution)))
 	{

@@ -40,6 +40,7 @@ void gl_renderer::init(asset_manager &am) {
   am.load_asset("assets/shaders/voxel_mips.shader", asset_type::shader);
   am.load_asset("assets/shaders/voxel_reprojection.shader", asset_type::shader);
   am.load_asset("assets/shaders/voxel_blit.shader", asset_type::shader);
+  am.load_asset("assets/shaders/voxel_clear.shader", asset_type::shader);
 
   am.wait_all_assets();
   m_gbuffer_shader = am.get_asset<shader, asset_type::shader>(
@@ -74,6 +75,8 @@ void gl_renderer::init(asset_manager &am) {
       "assets/shaders/voxel_reprojection.shader");
   m_compute_voxel_blit_shader = am.get_asset<shader, asset_type::shader>(
       "assets/shaders/voxel_blit.shader");
+  m_compute_voxel_clear_shader = am.get_asset<shader, asset_type::shader>(
+      "assets/shaders/voxel_clear.shader");
 
   m_window_resolution = {1600.0, 900.0};
   const int shadow_resolution = 4096;
@@ -195,6 +198,9 @@ void gl_renderer::init(asset_manager &am) {
                           false);
 
   m_voxel_data = voxel::create_grid(s_voxel_resolution, aabb{});
+  camera cam {}; // TODO: clean this up, just need a position of 0,0,0 to init
+  m_voxel_data.update_grid_history(cam, true);
+  m_voxel_data.update_voxel_unit();
   m_voxel_visualiser = voxel::create_grid_visualiser(
       m_voxel_data, m_visualise_3d_tex_shader->m_data,
       m_visualise_3d_tex_instances_shader->m_data,
@@ -222,11 +228,33 @@ void gl_renderer::render(asset_manager &am, camera &cam,
   if(m_debug_enable_voxel_reprojection)
   {
     TracyGpuZone("Voxel Reprojection")
-    tech::vxgi::dispatch_voxel_reprojection(m_compute_voxel_reprojection_shader-> m_data,
+        tech::vxgi::dispatch_voxel_reprojection(m_compute_voxel_reprojection_shader-> m_data,
                                                 m_voxel_data, s_voxel_resolution,
                                                 m_voxel_data.previous_bounding_box,
                                                 m_voxel_data.current_bounding_box);
   }
+
+  if(p_clear_voxel_grid)
+  {
+    tech::vxgi::dispatch_clear_voxel(m_compute_voxel_clear_shader->m_data, m_voxel_data, s_voxel_resolution);
+    p_clear_voxel_grid = false;
+  }
+
+  {
+    TracyGpuZone("GBuffer Voxelization");
+    tech::vxgi::dispatch_gbuffer_voxelization(
+        m_compute_voxelize_gbuffer_shader->m_data, m_voxel_data.current_bounding_box,
+        m_voxel_data, m_gbuffer, m_lightpass_buffer_resolve,
+        m_window_resolution);
+  }
+
+  {
+    TracyGpuZone("GBuffer Voxelization MIPS");
+    tech::vxgi::dispatch_gen_voxel_mips(m_compute_voxel_mips_shader->m_data,
+                                        m_voxel_data, s_voxel_resolution);
+  }
+
+
   {
     TracyGpuZone("GBuffer");
     tech::gbuffer::dispatch_gbuffer_with_id(
@@ -257,21 +285,6 @@ void gl_renderer::render(asset_manager &am, camera &cam,
         m_lighting_shader->m_data, m_lightpass_buffer, m_gbuffer,
         m_dir_light_shadow_buffer, cam, point_lights, dir);
   }
-
-  {
-    TracyGpuZone("GBuffer Voxelization");
-    tech::vxgi::dispatch_gbuffer_voxelization(
-        m_compute_voxelize_gbuffer_shader->m_data, m_voxel_data.current_bounding_box,
-        m_voxel_data, m_gbuffer, m_lightpass_buffer_resolve,
-        m_window_resolution);
-  }
-
-  {
-    TracyGpuZone("GBuffer Voxelization MIPS");
-    tech::vxgi::dispatch_gen_voxel_mips(m_compute_voxel_mips_shader->m_data,
-                                        m_voxel_data, s_voxel_resolution);
-  }
-
 
   {
     TracyGpuZone("GBuffer Downsample");
@@ -495,6 +508,10 @@ void gl_renderer::on_imgui(asset_manager &am) {
 
   if(ImGui::TreeNode("VXGI Settings"))
   {
+    if(ImGui::Button("Clear Voxel Texture"))
+    {
+      p_clear_voxel_grid = true;
+    }
     ImGui::Checkbox("Enable Grid Reprojection", & m_debug_enable_voxel_reprojection);
     ImGui::Checkbox("Freeze Voxel Grid", & m_debug_freeze_voxel_grid_pos);
     ImGui::DragFloat("Trace Distance", &m_vxgi_cone_trace_distance);

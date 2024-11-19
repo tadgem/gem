@@ -13,12 +13,12 @@ public:
     texture     history_voxel_texture;
     glm::ivec3  resolution;
     glm::vec3   voxel_unit; // scale of each texel
-    glm::vec3   aabb_dim {150.0, 100.0, 150.0};
+    glm::vec3   aabb_dim {200.0, 100.0, 200.0};
     aabb        current_bounding_box;
     aabb        previous_bounding_box;
 
     void update_voxel_unit();
-    void update_grid_history(camera &cam);
+    void update_grid_history(camera &cam, bool force = false);
   };
 
   struct grid_visualiser {

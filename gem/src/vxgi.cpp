@@ -20,8 +20,9 @@ void tech::vxgi::dispatch_gbuffer_voxelization(shader &voxelization,
   voxelization.set_int("u_gbuffer_lighting", 1);
   voxelization.set_vec3("u_voxel_resolution", glm::vec3(256));
   voxelization.set_vec2("u_input_resolution", {window_res.x, window_res.y});
-  voxelization.set_vec3("u_aabb.min", volume_bounding_box.min);
-  voxelization.set_vec3("u_aabb.max", volume_bounding_box.max);
+  voxelization.set_vec3("u_aabb.min", voxel_data.current_bounding_box.min);
+  voxelization.set_vec3("u_aabb.max", voxel_data.current_bounding_box.max);
+  voxelization.set_vec3("u_voxel_unit", voxel_data.voxel_unit);
   texture::bind_image_handle(voxel_data.voxel_texture.m_handle, 0, 0,
                              GL_RGBA16F);
   texture::bind_sampler_handle(gbuffer.m_colour_attachments[1], GL_TEXTURE0);
@@ -132,6 +133,15 @@ void tech::vxgi::dispatch_blit_voxel(shader &blit_voxel,
                              GL_RGBA16F);
   blit_voxel.set_vec3("u_voxel_resolution", _3d_tex_res_vec);
 
+  glAssert(glDispatchCompute(_3d_tex_res_vec.x / 8, _3d_tex_res_vec.y / 8,_3d_tex_res_vec.z / 8));
+  glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+}
+void tech::vxgi::dispatch_clear_voxel(shader &clear_voxel,
+                                      voxel::grid &voxel_data,
+                                      glm::vec3 _3d_tex_res_vec) {
+  clear_voxel.use();
+  texture::bind_image_handle(voxel_data.voxel_texture.m_handle, 0, 0,
+                             GL_RGBA16F);
   glAssert(glDispatchCompute(_3d_tex_res_vec.x / 8, _3d_tex_res_vec.y / 8,_3d_tex_res_vec.z / 8));
   glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 }

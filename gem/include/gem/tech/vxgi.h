@@ -21,6 +21,10 @@ public:
                                       voxel::grid &voxel_data,
                                       glm::vec3 _3d_tex_res_vec);
 
+  static void dispatch_clear_voxel(shader &clear_voxel,
+                                  voxel::grid &voxel_data,
+                                  glm::vec3 _3d_tex_res_vec);
+
 
   static void dispatch_gen_voxel_mips(shader &voxelization_mips,
                                       voxel::grid &voxel_data,

@@ -38,6 +38,7 @@ public:
   shader_asset *m_compute_voxel_mips_shader;
   shader_asset *m_compute_voxel_reprojection_shader;
   shader_asset *m_compute_voxel_blit_shader;
+  shader_asset *m_compute_voxel_clear_shader;
 
   framebuffer m_gbuffer;
   framebuffer m_gbuffer_downsample;
@@ -93,5 +94,8 @@ public:
       glm::ivec3(s_voxel_square_resolution);
 
   void on_imgui(asset_manager &am);
+
+protected:
+  bool p_clear_voxel_grid = false;
 };
 } // namespace gem

@@ -13,13 +13,10 @@ uniform sampler2D u_gbuffer_pos;
 uniform sampler2D u_gbuffer_lighting;
 uniform AABB	  u_aabb;
 uniform vec3	  u_voxel_resolution;
+uniform vec3	  u_voxel_unit;
 uniform vec2	  u_input_resolution;
+
 layout(binding = 0, rgba16f) uniform image3D imgOutput;
-layout(binding = 1, rgba16f) uniform image3D imgOutput1;
-layout(binding = 2, rgba16f) uniform image3D imgOutput2;
-layout(binding = 3, rgba16f) uniform image3D imgOutput3;
-layout(binding = 4, rgba16f) uniform image3D imgOutput4;
-layout(binding = 5, rgba16f) uniform image3D imgOutput5;
 
 bool is_in_aabb(vec3 pos)
 {
@@ -36,16 +33,13 @@ bool is_in_aabb(vec3 pos)
 
 ivec3 get_texel_from_pos(vec3 position, vec3 resolution)
 {
-	vec3 aabb_dim = u_aabb.max - u_aabb.min;
-	vec3 unit = vec3((aabb_dim.x / resolution.x), (aabb_dim.y / resolution.y) , (aabb_dim.z / resolution.z));
-
 	/// <summary>
 	/// 0,0,0 is aabb.min
 	/// </summary>
 	vec3 new_pos = position - u_aabb.min;
-	int x = int(new_pos.x / unit.x) ;
-	int y = int(new_pos.y / unit.y) ;
-	int z = int(new_pos.z / unit.z) ;
+	int x = int(new_pos.x / u_voxel_unit.x) ;
+	int y = int(new_pos.y / u_voxel_unit.y) ;
+	int z = int(new_pos.z / u_voxel_unit.z) ;
 
 	return ivec3(x, y, z);
 

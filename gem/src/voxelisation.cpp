@@ -14,14 +14,20 @@ void voxel::grid::update_voxel_unit() {
                 (aabb_dim.z / resolution.z));
 }
 
-void voxel::grid::update_grid_history(camera &cam) {
+void voxel::grid::update_grid_history(camera &cam, bool force) {
   ZoneScoped;
 
   aabb new_bb;
   new_bb.max = cam.m_pos + (aabb_dim * 0.5f);
   new_bb.min = cam.m_pos - (aabb_dim * 0.5f);
 
-  if(glm::length(new_bb.min - current_bounding_box.min) > glm::length(voxel_unit))
+  glm::vec3 movement_velocity = new_bb.min - current_bounding_box.min;
+
+  if( force                              ||
+      movement_velocity.x > voxel_unit.x ||
+      movement_velocity.y > voxel_unit.y ||
+      movement_velocity.z > voxel_unit.z ||
+      glm::length(voxel_unit) < 0.1f)
   {
     current_bounding_box = new_bb;
   }
