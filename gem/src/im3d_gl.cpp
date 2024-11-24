@@ -1,5 +1,6 @@
 #include "gem/im3d_gl.h"
 #include "gem/backend.h"
+#include "gem/debug.h"
 #include "gem/input.h"
 #include "gem/profile.h"
 #include "gem/utils.h"
@@ -204,6 +205,7 @@ void im3d_gl::end_frame_im3d(im3d_state &state, glm::ivec2 screen_dim,
                              camera &cam) {
   ZoneScoped;
   Im3d::EndFrame();
+  GPU_MARKER("Im3d");
   // TODO: Enable blending to allow transparent filled im3d shapes
   // glEnable(GL_BLEND);
   // glBlendEquation(GL_FUNC_ADD);

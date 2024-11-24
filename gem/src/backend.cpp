@@ -7,6 +7,7 @@
 #include <iostream>
 
 #include "gem/backend.h"
+#include "gem/debug.h"
 #include "gem/dbg_memory.h"
 #include "gem/funnelsans.ttf.h"
 #include "gem/input.h"
@@ -486,9 +487,12 @@ void gl_backend::engine_pre_frame() {
 
 void gl_backend::engine_post_frame() {
   ZoneScoped;
-  ImGui::Render();
-  ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-  SDL_GL_SwapWindow(s_window);
+  {
+    GPU_MARKER("ImGui");
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    SDL_GL_SwapWindow(s_window);
+  }
 }
 
 void gl_backend::engine_shut_down() {

@@ -11,7 +11,6 @@ namespace tech {
 class vxgi {
 public:
   static void dispatch_gbuffer_voxelization(shader &voxelization,
-                                            aabb &volume_bounding_box,
                                             voxel::grid &voxel_data,
                                             framebuffer &gbuffer,
                                             framebuffer &lightpass_buffer,

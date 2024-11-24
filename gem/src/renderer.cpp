@@ -2,6 +2,7 @@
 #include "gem/renderer.h"
 #include "gem/asset_manager.h"
 #include "gem/backend.h"
+#include "gem/debug.h"
 #include "gem/input.h"
 #include "gem/lights.h"
 #include "gem/profile.h"
@@ -84,7 +85,7 @@ void gl_renderer::init(asset_manager &am) {
       framebuffer::create(m_window_resolution,
                           {
                               {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
-                              {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
+                              {GL_RGBA, GL_RGBA32F, GL_LINEAR, GL_FLOAT},
                               {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
                               {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
                               {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
@@ -219,7 +220,7 @@ void gl_renderer::render(asset_manager &am, camera &cam,
   FrameMark;
   {
     TracyGpuZone("Voxel Histroy Blit");
-    tech::vxgi::dispatch_blit_voxel(m_compute_voxel_blit_shader->m_data, m_voxel_data, s_voxel_resolution);
+    //tech::vxgi::dispatch_blit_voxel(m_compute_voxel_blit_shader->m_data, m_voxel_data, s_voxel_resolution);
     if(!m_debug_freeze_voxel_grid_pos) {
       m_voxel_data.update_grid_history(cam);
       m_voxel_data.update_voxel_unit();
@@ -243,8 +244,8 @@ void gl_renderer::render(asset_manager &am, camera &cam,
   {
     TracyGpuZone("GBuffer Voxelization");
     tech::vxgi::dispatch_gbuffer_voxelization(
-        m_compute_voxelize_gbuffer_shader->m_data, m_voxel_data.current_bounding_box,
-        m_voxel_data, m_gbuffer, m_lightpass_buffer_resolve,
+        m_compute_voxelize_gbuffer_shader->m_data, m_voxel_data,
+        m_gbuffer, m_lightpass_buffer_resolve,
         m_window_resolution);
   }
 
@@ -408,6 +409,7 @@ void gl_renderer::render(asset_manager &am, camera &cam,
   glClear(GL_DEPTH_BUFFER_BIT);
   if (m_debug_draw_final_pass) {
     TracyGpuZone("Composite Final Pass");
+    GPU_MARKER("Composite Final Pass");
     m_final_pass.bind();
     shapes::s_screen_quad.use();
     m_combine_shader->m_data.use();

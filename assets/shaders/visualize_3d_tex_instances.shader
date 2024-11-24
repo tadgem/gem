@@ -133,5 +133,4 @@ void main() {
 	vec3	final_position = start_position + (texel * step_increment);
 
 	u_instance_matrices[index] = get_model_matrix(vec3(final_position.x, final_position.y, final_position.z), u_voxel_unit * 2);
-	// get instance X,Y,Z
 }

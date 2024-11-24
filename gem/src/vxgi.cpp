@@ -8,7 +8,6 @@
 namespace gem {
 
 void tech::vxgi::dispatch_gbuffer_voxelization(shader &voxelization,
-                                               aabb &volume_bounding_box,
                                                voxel::grid &voxel_data,
                                                framebuffer &gbuffer,
                                                framebuffer &lightpass_buffer,
@@ -18,7 +17,7 @@ void tech::vxgi::dispatch_gbuffer_voxelization(shader &voxelization,
   voxelization.use();
   voxelization.set_int("u_gbuffer_pos", 0);
   voxelization.set_int("u_gbuffer_lighting", 1);
-  voxelization.set_vec3("u_voxel_resolution", glm::vec3(256));
+  voxelization.set_vec3("u_voxel_resolution", voxel_data.resolution);
   voxelization.set_vec2("u_input_resolution", {window_res.x, window_res.y});
   voxelization.set_vec3("u_aabb.min", voxel_data.current_bounding_box.min);
   voxelization.set_vec3("u_aabb.max", voxel_data.current_bounding_box.max);
@@ -126,6 +125,8 @@ void tech::vxgi::dispatch_voxel_reprojection(shader &voxel_reprojection,
 void tech::vxgi::dispatch_blit_voxel(shader &blit_voxel,
                                      voxel::grid &voxel_data,
                                      glm::vec3 _3d_tex_res_vec) {
+  ZoneScoped;
+  GPU_MARKER("Voxel History Blit");
   blit_voxel.use();
   texture::bind_image_handle(voxel_data.voxel_texture.m_handle, 0, 0,
                              GL_RGBA16F);
@@ -139,6 +140,8 @@ void tech::vxgi::dispatch_blit_voxel(shader &blit_voxel,
 void tech::vxgi::dispatch_clear_voxel(shader &clear_voxel,
                                       voxel::grid &voxel_data,
                                       glm::vec3 _3d_tex_res_vec) {
+  ZoneScoped;
+  GPU_MARKER("Clear Voxel Grid");
   clear_voxel.use();
   texture::bind_image_handle(voxel_data.voxel_texture.m_handle, 0, 0,
                              GL_RGBA16F);
