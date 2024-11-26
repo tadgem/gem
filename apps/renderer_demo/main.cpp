@@ -57,11 +57,12 @@ float get_aabb_area(aabb& bb)
 
 int main()
 {
-    gl_backend::init(backend_init{ {1600, 900}, true });
+    glm::ivec2 resolution = {1920, 1080};
+    gl_backend::init(backend_init{ resolution, true });
     engine::init();
     gl_renderer renderer{};
 
-    renderer.init(engine::assets);
+    renderer.init(engine::assets, resolution);
 
     custom_orientation = glm::vec3(0, 1, 0);
     camera cam{};

@@ -19,7 +19,7 @@
 
 namespace gem {
 
-void gl_renderer::init(asset_manager &am) {
+void gl_renderer::init(asset_manager &am, glm::ivec2 resolution) {
   ZoneScoped;
   TracyGpuContext;
   m_frame_index = 0;
@@ -79,7 +79,7 @@ void gl_renderer::init(asset_manager &am) {
   m_compute_voxel_clear_shader = am.get_asset<shader, asset_type::shader>(
       "assets/shaders/voxel_clear.shader");
 
-  m_window_resolution = {1600.0, 900.0};
+  m_window_resolution = resolution;
   const int shadow_resolution = 4096;
   m_gbuffer =
       framebuffer::create(m_window_resolution,
@@ -245,7 +245,7 @@ void gl_renderer::render(asset_manager &am, camera &cam,
     TracyGpuZone("GBuffer Voxelization");
     tech::vxgi::dispatch_gbuffer_voxelization(
         m_compute_voxelize_gbuffer_shader->m_data, m_voxel_data,
-        m_gbuffer, m_lightpass_buffer_resolve,
+        m_gbuffer, m_lightpass_buffer,
         m_window_resolution);
   }
 

@@ -15,7 +15,7 @@ class gl_renderer {
 public:
   gl_renderer() = default;
 
-  void init(asset_manager &am);
+  void init(asset_manager &am, glm::ivec2 resolution);
   void pre_frame(camera &cam);
   void render(asset_manager &am, camera &cam, std::vector<scene *> &scenes);
   void cleanup(asset_manager &am);

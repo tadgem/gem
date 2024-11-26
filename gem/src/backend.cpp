@@ -15,6 +15,10 @@
 #include "gem/shape.h"
 #include "gem/texture.h"
 
+#ifdef __WIN32__
+#include "windows.h"
+#endif
+
 #undef main
 #if defined(IMGUI_IMPL_OPENGL_ES2)
 #include <SDL_opengles2.h>
@@ -337,6 +341,11 @@ void gl_backend::init(backend_init &init_props) {
 #ifdef ENABLE_MEMORY_TRACKING
   debug_memory_tracker::s_instance = new debug_memory_tracker();
 #endif
+
+#ifdef __WIN32__
+  SetProcessDPIAware();
+#endif
+
   // Setup SDL
   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) !=
       0) {
