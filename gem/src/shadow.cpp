@@ -1,9 +1,9 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include "gem/tech/shadow.h"
 #include "gem/framebuffer.h"
+#include "gem/gl/open_gl_dbg.h"
 #include "gem/material.h"
 #include "gem/mesh.h"
-#include "gem/open_gl_dbg.h"
 #include "gem/profile.h"
 #include "gem/scene.h"
 #include "gem/transform.h"

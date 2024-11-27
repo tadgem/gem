@@ -5,6 +5,8 @@
 #include "gem/profile.h"
 #include "gem/transform.h"
 #include "gem/utils.h"
+#include "gem/gl/gl_backend.h"
+
 namespace gem {
 
 void engine::init() {

@@ -1,7 +1,7 @@
 #pragma once
-#include "camera.h"
+#include "gem/camera.h"
+#include "gem/shader.h"
 #include "im3d/im3d.h"
-#include "shader.h"
 
 namespace gem {
 Im3d::Vec3 ToIm3D(glm::vec3 &input);

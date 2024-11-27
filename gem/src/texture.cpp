@@ -3,6 +3,7 @@
 #include <iostream>
 #define STB_IMAGE_IMPLEMENTATION
 #include "gem/backend.h"
+#include "gem/gl/open_gl_dbg.h"
 #include "gem/profile.h"
 #include "gem/stb_image.h"
 #include "gem/texture.h"

@@ -1,17 +1,19 @@
 #pragma once
 #include <SDL.h>
 #undef main
-#include "GL/glew.h"
 #include "glm.hpp"
 #include "imgui.h"
 #include <iostream>
 #include <string>
-GLenum glCheckError_(const char *file, int line);
-#define glAssert(X)                                                            \
-  X;                                                                           \
-  glCheckError_(__FILE__, __LINE__)
 
 namespace gem {
+
+
+void set_imgui_style();
+
+void init_built_in_assets();
+
+void init_imgui_file_dialog();
 
 struct backend_init {
   glm::vec2 window_resolution;
@@ -22,6 +24,7 @@ class gpu_backend
 {
 protected:
   float         p_frametime = 0.0f;
+  uint64_t      m_now_counter, m_last_counter;
 private:
   inline static gpu_backend*  s_selected_backend = nullptr;
 public:
@@ -49,19 +52,6 @@ public:
     backend->init(props);
     s_selected_backend = static_cast<gpu_backend*>(backend);
   }
-
-};
-
-class gl_backend : public gpu_backend
-{
-public:
-  void init(backend_init &init_props) override;
-  void process_sdl_event() override;
-  void engine_pre_frame() override;
-  void engine_post_frame() override;
-  void engine_shut_down() override;
-  void engine_handle_input_events(SDL_Event &input_event) override;
-  glm::vec2 get_window_dim() override;
 
 };
 } // namespace gem

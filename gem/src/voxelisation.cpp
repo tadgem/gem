@@ -1,6 +1,7 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include "gem/voxelisation.h"
 #include "gem/backend.h"
+#include "gem/gl/open_gl_dbg.h"
 #include "gem/profile.h"
 #include "gem/utils.h"
 #include "glm/vec3.hpp"

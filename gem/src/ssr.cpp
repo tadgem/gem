@@ -3,7 +3,7 @@
 #include "gem/tech/ssr.h"
 #include "gem/camera.h"
 #include "gem/framebuffer.h"
-#include "gem/open_gl_dbg.h"
+#include "gem/gl/open_gl_dbg.h"
 #include "gem/profile.h"
 #include "gem/shape.h"
 #include "gem/texture.h"

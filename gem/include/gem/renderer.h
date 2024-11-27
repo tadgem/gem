@@ -2,7 +2,7 @@
 #include "gem/asset_definitions.h"
 #include "gem/camera.h"
 #include "gem/framebuffer.h"
-#include "gem/im3d_gl.h"
+#include "gem/gl/im3d_gl.h"
 #include "gem/scene.h"
 #include "gem/voxelisation.h"
 #include <memory>
