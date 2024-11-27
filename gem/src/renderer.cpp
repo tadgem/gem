@@ -485,8 +485,8 @@ void gl_renderer::on_imgui(asset_manager &am) {
   glm::vec2 mouse_pos = input::get_mouse_position();
   ImGui::Begin("Renderer Settings");
   ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
-              1000.0f / gl_backend::s_imgui_io->Framerate,
-              gl_backend::s_imgui_io->Framerate);
+              1000.0f / gpu_backend::selected()->m_imgui_io->Framerate,
+              gpu_backend::selected()->m_imgui_io->Framerate);
   ImGui::Text("Mouse Pos : %.3f, %.3f", mouse_pos.x, mouse_pos.y);
   ImGui::Text("Selected Entity ID : %d", m_last_selected_entity);
   ImGui::Separator();

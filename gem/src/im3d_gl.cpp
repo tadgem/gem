@@ -184,7 +184,7 @@ void im3d_gl::new_frame_im3d(im3d_state &state, glm::vec2 screen_dim,
   ad.m_keyDown[Im3d::Key::Key_R] = input::get_keyboard_key(keyboard_key::r);
   ad.m_keyDown[Im3d::Key::Key_S] = input::get_keyboard_key(keyboard_key::s);
   ad.m_keyDown[Im3d::Key::Key_T] = input::get_keyboard_key(keyboard_key::t);
-  ad.m_deltaTime = gl_backend::get_frame_time();
+  ad.m_deltaTime = gpu_backend::selected()->get_frame_time();
 
   glm::vec2 cursor_pos = input::get_mouse_position();
 

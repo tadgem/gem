@@ -58,7 +58,6 @@ float get_aabb_area(aabb& bb)
 int main()
 {
     glm::ivec2 resolution = {1920, 1080};
-    gl_backend::init(backend_init{ resolution, true });
     engine::init();
     gl_renderer renderer{};
 
@@ -93,7 +92,9 @@ int main()
         std::string scene_json_str = scene_json.dump();
         spdlog::info("finished adding model to scene, dumping scene json");
         spdlog::info(scene_json_str);
-        scene* s2 = engine::scenes.load_scene(engine::scenes.save_scene(s));
+
+        auto scene_json2 = engine::scenes.save_scene(s);
+        scene* s2 = engine::scenes.load_scene(scene_json2);
         engine::scenes.save_scene_to_disk("test.scene", s2);
         scene* s3 = engine::scenes.load_scene_from_disk("test.scene");
     });
@@ -117,14 +118,14 @@ int main()
 
 
 
-    while (!gl_backend::s_quit)
+    while (!gpu_backend::selected()->m_quit)
     {
         glEnable(GL_DEPTH_TEST);
         engine::update();
         
-        gl_backend::process_sdl_event();
-        gl_backend::engine_pre_frame();      
-        glm::vec2 window_dim = gl_backend::get_window_dim();
+        gpu_backend::selected()->process_sdl_event();
+        gpu_backend::selected()->engine_pre_frame();
+        glm::vec2 window_dim = gpu_backend::selected()->get_window_dim();
         renderer.pre_frame(cam);
         controller.update(window_dim, cam);
         cam.update(window_dim);
@@ -153,7 +154,10 @@ int main()
             renderer.on_imgui(engine::assets);
 
             ImGui::Begin("Demo Settings");
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / gl_backend::s_imgui_io->Framerate, gl_backend::s_imgui_io->Framerate);
+            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
+                        1000.0f / gpu_backend::selected()->m_imgui_io->Framerate,
+                        gpu_backend::selected()->m_imgui_io->Framerate);
+
             ImGui::Text("Mouse Pos : %.3f, %.3f", mouse_pos.x, mouse_pos.y);
             ImGui::Text("Selected Entity ID : %d", renderer.m_last_selected_entity);
             ImGui::Separator();
@@ -181,9 +185,9 @@ int main()
         }
 
         renderer.render(engine::assets, cam, scenes);
-        gl_backend::engine_post_frame();
+        gpu_backend::selected()->engine_post_frame();
     }
-    gl_backend::engine_shut_down();
+    gpu_backend::selected()->engine_shut_down();
     engine::shutdown();
 
     return 0;

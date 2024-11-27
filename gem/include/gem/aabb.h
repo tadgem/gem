@@ -1,6 +1,7 @@
 #pragma once
 #include "glm/glm.hpp"
 #include "gem/dbg_memory.h"
+
 namespace gem {
   struct aabb {
     glm::vec3 min;

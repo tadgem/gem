@@ -3,11 +3,12 @@
 #include <future>
 #include <map>
 #include <memory>
-#include "asset.h"
-#include "asset_hot_reload.h"
+#include "gem/asset.h"
+#include "gem/asset_hot_reload.h"
+
 namespace gem {
 
-using asset_load_callback = void (*)(asset_intermediate *);
+using asset_load_callback   = void (*)(asset_intermediate *);
 using asset_loaded_callback = std::function<void(asset *)>;
 using asset_unload_callback = void (*)(asset *);
 
@@ -30,11 +31,9 @@ struct asset_load_info {
 
 struct asset_load_return {
   asset_intermediate *m_loaded_asset_intermediate = nullptr;
-  // additional assets that may be required for this asset
-  // e.g. textures for a model
+  // additional assets that may be required to completely load this asset
   std::vector<asset_load_info> m_new_assets_to_load;
-  // tasks associated with this asset to be performed.
-  // e.g. submit mesh / texture to GPU.
+  // synchronous tasks associated with this asset e.g. submit texture mem to GPU
   std::vector<asset_load_callback> m_asset_load_sync_callbacks;
 };
 
@@ -45,7 +44,9 @@ public:
 
   asset_handle  load_asset(const std::string &path, const asset_type &assetType,
                           asset_loaded_callback on_asset_loaded = nullptr);
+
   void          unload_asset(const asset_handle &handle);
+
   asset *       get_asset(asset_handle &handle);
 
   template<typename _Ty, asset_type _AssetType>
@@ -71,6 +72,7 @@ public:
   }
 
   asset_load_progress get_asset_load_progress(const asset_handle &handle);
+
   bool any_assets_loading();
   bool any_assets_unloading();
 
@@ -83,7 +85,6 @@ public:
 
   // todo: make private after debugging and testing
   // protected:
-  // Move the Asset* into a UPtr once returned from the future
   std::unordered_map<asset_handle, std::future<asset_load_return>>
       p_pending_load_tasks;
   std::unordered_map<asset_handle, std::unique_ptr<asset>>

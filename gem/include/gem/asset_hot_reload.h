@@ -1,7 +1,3 @@
-//
-// Created by liam_ on 11/7/2024.
-//
-
 #pragma once
 #include "asset.h"
 #include "efsw/efsw.hpp"

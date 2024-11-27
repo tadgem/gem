@@ -28,9 +28,9 @@
 #include <SDL_opengl.h>
 #endif
 
-static SDL_GLContext *s_sdl_gl_context = nullptr;
-static Uint64 s_now_counter;
-static Uint64 s_last_counter;
+static SDL_GLContext *m_sdl_gl_context = nullptr;
+static Uint64 m_now_counter;
+static Uint64 m_last_counter;
 
 GLenum glCheckError_(const char *file, int line) {
   ZoneScoped;
@@ -253,7 +253,7 @@ void init_built_in_assets() {
 
   shapes::init_built_in_assets(engine::assets);
 
-  //mesh::s_cube = mesh {shapes::s_cube, 36, gem::aabb{{0,0,0}, {1,1,1}}};
+  //mesh::m_cube = mesh {shapes::m_cube, 36, gem::aabb{{0,0,0}, {1,1,1}}};
 }
 
 void init_imgui_file_dialog() {
@@ -337,22 +337,22 @@ void gl_backend::init(backend_init &init_props) {
   SDL_WindowFlags window_flags =
       (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE |
                         SDL_WINDOW_ALLOW_HIGHDPI);
-  s_window =
+  m_window =
       SDL_CreateWindow("graphics engine", SDL_WINDOWPOS_CENTERED,
                        SDL_WINDOWPOS_CENTERED, init_props.window_resolution.x,
                        init_props.window_resolution.y, window_flags);
-  if (s_window == nullptr) {
+  if (m_window == nullptr) {
     printf("Error: SDL_CreateWindow(): %s\n", SDL_GetError());
     return;
   }
 
-  s_sdl_gl_context = new SDL_GLContext(SDL_GL_CreateContext(s_window));
-  SDL_GL_MakeCurrent(s_window, *s_sdl_gl_context);
+  m_sdl_gl_context = new SDL_GLContext(SDL_GL_CreateContext(m_window));
+  SDL_GL_MakeCurrent(m_window, *m_sdl_gl_context);
   glewExperimental = true;
 
   if (glewInit() != GLEW_OK) {
     printf("GLEW init failed!");
-    SDL_DestroyWindow(s_window);
+    SDL_DestroyWindow(m_window);
     SDL_Quit();
     return;
   }
@@ -371,23 +371,23 @@ void gl_backend::init(backend_init &init_props) {
   // Setup Dear ImGui context
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
-  s_imgui_io = &ImGui::GetIO();
-  s_imgui_io->ConfigFlags |=
+  m_imgui_io = &ImGui::GetIO();
+  m_imgui_io->ConfigFlags |=
       ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
-  s_imgui_io->ConfigFlags |=
+  m_imgui_io->ConfigFlags |=
       ImGuiConfigFlags_NavEnableGamepad; // Enable Gamepad Controls
-  s_imgui_io->ConfigFlags |=
+  m_imgui_io->ConfigFlags |=
       ImGuiConfigFlags_DockingEnable; // Enable imgui window docking
 
   // Setup Dear ImGui style
   set_imgui_style();
 
   // Setup Platform/Renderer backends
-  ImGui_ImplSDL2_InitForOpenGL(s_window, *s_sdl_gl_context);
+  ImGui_ImplSDL2_InitForOpenGL(m_window, *m_sdl_gl_context);
   ImGui_ImplOpenGL3_Init(glsl_version);
 
-  s_now_counter = SDL_GetPerformanceCounter();
-  s_last_counter = 0;
+  m_now_counter = SDL_GetPerformanceCounter();
+  m_last_counter = 0;
 
   init_built_in_assets();
   init_imgui_file_dialog();
@@ -399,17 +399,17 @@ void gl_backend::process_sdl_event() {
   while (SDL_PollEvent(&event)) {
     ImGui_ImplSDL2_ProcessEvent(&event);
     if (event.type == SDL_QUIT) {
-      s_quit = true;
+      m_quit = true;
     }
     if (event.type == SDL_WINDOWEVENT &&
         event.window.event == SDL_WINDOWEVENT_CLOSE &&
-        event.window.windowID == SDL_GetWindowID(s_window)) {
-      s_quit = true;
+        event.window.windowID == SDL_GetWindowID(m_window)) {
+      m_quit = true;
     }
 
     engine_handle_input_events(event);
   }
-  if (SDL_GetWindowFlags(s_window) & SDL_WINDOW_MINIMIZED) {
+  if (SDL_GetWindowFlags(m_window) & SDL_WINDOW_MINIMIZED) {
     SDL_Delay(10);
   }
 }
@@ -417,14 +417,14 @@ void gl_backend::process_sdl_event() {
 void gl_backend::engine_pre_frame() {
   ZoneScoped;
   static ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 1.00f);
-  s_last_counter = s_now_counter;
-  s_now_counter = SDL_GetPerformanceCounter();
+  m_last_counter = m_now_counter;
+  m_now_counter = SDL_GetPerformanceCounter();
 
-  s_frametime =         static_cast<float>((s_now_counter - s_last_counter) /
+  p_frametime =         static_cast<float>((m_now_counter - m_last_counter) /
                         static_cast<float>(SDL_GetPerformanceFrequency()));
 
-  glViewport(0, 0, (int)s_imgui_io->DisplaySize.x,
-             (int)s_imgui_io->DisplaySize.y);
+  glViewport(0, 0, (int)m_imgui_io->DisplaySize.x,
+             (int)m_imgui_io->DisplaySize.y);
   glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w,
                clear_color.z * clear_color.w, clear_color.w);
   glClear(GL_COLOR_BUFFER_BIT);
@@ -446,7 +446,7 @@ void gl_backend::engine_post_frame() {
     GPU_MARKER("ImGui");
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-    SDL_GL_SwapWindow(s_window);
+    SDL_GL_SwapWindow(m_window);
   }
 }
 
@@ -456,18 +456,13 @@ void gl_backend::engine_shut_down() {
   ImGui_ImplSDL2_Shutdown();
   ImGui::DestroyContext();
 
-  if(s_sdl_gl_context != nullptr)
+  if(m_sdl_gl_context != nullptr)
   {
-    SDL_GL_DeleteContext(*s_sdl_gl_context);
+    SDL_GL_DeleteContext(*m_sdl_gl_context);
   }
-  SDL_DestroyWindow(s_window);
-  delete s_sdl_gl_context;
+  SDL_DestroyWindow(m_window);
+  delete m_sdl_gl_context;
   SDL_Quit();
-}
-
-float gl_backend::get_frame_time() {
-  ZoneScoped;
-  return s_frametime;
 }
 
 void gl_backend::engine_handle_input_events(SDL_Event &input_event) {
@@ -567,7 +562,7 @@ void gl_backend::engine_handle_input_events(SDL_Event &input_event) {
 glm::vec2 gl_backend::get_window_dim() {
   ZoneScoped;
   int w, h;
-  SDL_GetWindowSize(s_window, &w, &h);
+  SDL_GetWindowSize(m_window, &w, &h);
   return glm::vec2{static_cast<float>(w), static_cast<float>(h)};
 }
 } // namespace gem
