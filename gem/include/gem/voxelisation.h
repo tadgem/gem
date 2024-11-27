@@ -1,6 +1,6 @@
 #pragma once
 #include "gem/shader.h"
-#include "gem/shape.h"
+#include "gem/aabb.h"
 #include "gem/texture.h"
 #include "gem/camera.h"
 

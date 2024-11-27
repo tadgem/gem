@@ -1,7 +1,7 @@
 #pragma once
 #include "entt.hpp"
 #include "gem/alias.h"
-#include "gem/shape.h"
+#include "gem/aabb.h"
 #include "gem/texture.h"
 #include "json.hpp"
 #include <map>

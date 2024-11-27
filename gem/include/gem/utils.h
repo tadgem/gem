@@ -2,6 +2,7 @@
 
 #include "gem/alias.h"
 #include "gem/shape.h"
+#include "gem/aabb.h"
 #include "glm.hpp"
 #include <array>
 #include <future>

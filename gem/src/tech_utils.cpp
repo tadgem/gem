@@ -1,7 +1,7 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include "gem/tech/tech_utils.h"
-#include "gem/debug.h"
 #include "gem/framebuffer.h"
+#include "gem/open_gl_dbg.h"
 #include "gem/profile.h"
 #include "gem/shader.h"
 #include "gem/shape.h"

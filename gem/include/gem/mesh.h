@@ -2,7 +2,7 @@
 
 #include "gem/asset.h"
 #include "gem/ecs_system.h"
-#include "gem/shape.h"
+#include "gem/aabb.h"
 #include "gem/vertex.h"
 
 namespace gem {

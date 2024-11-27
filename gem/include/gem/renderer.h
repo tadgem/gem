@@ -23,6 +23,7 @@ public:
   entt::entity get_mouse_entity(glm::vec2 mouse_position);
 
   shader_asset *m_gbuffer_shader;
+  shader_asset *m_gbuffer_textureless_shader;
   shader_asset *m_lighting_shader;
   shader_asset *m_visualise_3d_tex_shader;
   shader_asset *m_visualise_3d_tex_instances_shader;

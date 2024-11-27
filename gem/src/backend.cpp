@@ -7,10 +7,12 @@
 #include <iostream>
 
 #include "gem/backend.h"
-#include "gem/debug.h"
 #include "gem/dbg_memory.h"
+#include "gem/engine.h"
 #include "gem/funnelsans.ttf.h"
 #include "gem/input.h"
+#include "gem/mesh.h"
+#include "gem/open_gl_dbg.h"
 #include "gem/profile.h"
 #include "gem/shape.h"
 #include "gem/texture.h"
@@ -249,64 +251,9 @@ void init_built_in_assets() {
   texture::black = new texture(
       texture::from_data(black_data.data(), white_data.size(), 1, 1, 1, 4));
 
-  std::vector<float> screen_quad_verts{
-      // positions        texture coords
-      1.0f,  1.0f,  0.0f, 1.0f, 1.0f, // top right
-      1.0f,  -1.0f, 0.0f, 1.0f, 0.0f, // bottom right
-      -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, // bottom left
-      -1.0f, 1.0f,  0.0f, 0.0f, 1.0f  // top left
-  };
+  shapes::init_built_in_assets(engine::assets);
 
-  std::vector<unsigned int> screen_quad_indices = {
-      0, 1, 3, // first triangle
-      1, 2, 3  // second triangle
-  };
-
-  vao_builder screen_quad_builder;
-  screen_quad_builder.begin();
-  screen_quad_builder.add_vertex_buffer(screen_quad_verts);
-  screen_quad_builder.add_vertex_attribute(0, 5 * sizeof(float), 3);
-  screen_quad_builder.add_vertex_attribute(1, 5 * sizeof(float), 2);
-  screen_quad_builder.add_index_buffer(screen_quad_indices);
-  auto vao = screen_quad_builder.build();
-
-  // bottom back left :   -1, -1, -1
-  // bottom back right:   1, -1, -1
-  // top back left :      -1, 1, -1
-  // top back right:      1, 1, -1
-  // bottom front left :  -1, -1, 1
-  // bottom front right:  1, -1, 1
-  // top front left :     -1, 1, 1
-  // top front right:     1, 1, 1
-
-  //  Set up vertex attribute data and attribute pointers
-  std::vector<float> cube_data = {
-      -0.5f, -0.5f, -0.5f, 0.5f,  -0.5f, -0.5f, 0.5f,  0.5f,  -0.5f,
-      -0.5f, 0.5f,  -0.5f, -0.5f, -0.5f, 0.5f,  0.5f,  -0.5f, 0.5f,
-      0.5f,  0.5f,  0.5f,  -0.5f, 0.5f,  0.5f,  -0.5f, 0.5f,  -0.5f,
-      -0.5f, -0.5f, -0.5f, -0.5f, -0.5f, 0.5f,  -0.5f, 0.5f,  0.5f,
-      0.5f,  -0.5f, -0.5f, 0.5f,  0.5f,  -0.5f, 0.5f,  0.5f,  0.5f,
-      0.5f,  -0.5f, 0.5f,  -0.5f, -0.5f, -0.5f, 0.5f,  -0.5f, -0.5f,
-      0.5f,  -0.5f, 0.5f,  -0.5f, -0.5f, 0.5f,  0.5f,  0.5f,  -0.5f,
-      -0.5f, 0.5f,  -0.5f, -0.5f, 0.5f,  0.5f,  0.5f,  0.5f,  0.5f,
-  };
-  // index data
-  std::vector<unsigned int> cube_indices = {
-      // front and back
-      0, 3, 2, 2, 1, 0, 4, 5, 6, 6, 7, 4,
-      // left and right
-      11, 8, 9, 9, 10, 11, 12, 13, 14, 14, 15, 12,
-      // bottom and top
-      16, 17, 18, 18, 19, 16, 20, 21, 22, 22, 23, 20};
-
-  vao_builder cube_builder;
-  cube_builder.begin();
-  cube_builder.add_vertex_buffer(cube_data);
-  cube_builder.add_index_buffer(cube_indices);
-  cube_builder.add_vertex_attribute(0, 3 * sizeof(float), 3);
-
-  shapes::s_screen_quad = vao;
-  shapes::s_cube_pos_only = cube_builder.build();
+  //mesh::s_cube = mesh {shapes::s_cube, 36, gem::aabb{{0,0,0}, {1,1,1}}};
 }
 
 void init_imgui_file_dialog() {
@@ -352,7 +299,6 @@ void gl_backend::init(backend_init &init_props) {
     printf("Error: %s\n", SDL_GetError());
     return;
   }
-#define __DEBUG__
   // Decide GL+GLSL versions
 #if defined(IMGUI_IMPL_OPENGL_ES2)
   // GL ES 2.0 + GLSL 100
@@ -474,8 +420,8 @@ void gl_backend::engine_pre_frame() {
   s_last_counter = s_now_counter;
   s_now_counter = SDL_GetPerformanceCounter();
 
-  s_frametime = (float)((s_now_counter - s_last_counter) /
-                        (float)SDL_GetPerformanceFrequency());
+  s_frametime =         static_cast<float>((s_now_counter - s_last_counter) /
+                        static_cast<float>(SDL_GetPerformanceFrequency()));
 
   glViewport(0, 0, (int)s_imgui_io->DisplaySize.x,
              (int)s_imgui_io->DisplaySize.y);
@@ -510,7 +456,10 @@ void gl_backend::engine_shut_down() {
   ImGui_ImplSDL2_Shutdown();
   ImGui::DestroyContext();
 
-  SDL_GL_DeleteContext(*s_sdl_gl_context);
+  if(s_sdl_gl_context != nullptr)
+  {
+    SDL_GL_DeleteContext(*s_sdl_gl_context);
+  }
   SDL_DestroyWindow(s_window);
   delete s_sdl_gl_context;
   SDL_Quit();
@@ -570,7 +519,7 @@ void gl_backend::engine_handle_input_events(SDL_Event &input_event) {
   if (input_event.type == SDL_CONTROLLERAXISMOTION) {
     SDL_ControllerAxisEvent axisEvent = input_event.caxis;
     int index = axisEvent.which;
-    SDL_GameControllerAxis axis = (SDL_GameControllerAxis)axisEvent.axis;
+    auto axis = (SDL_GameControllerAxis)axisEvent.axis;
     float value = (float)axisEvent.value / 32767.0f;
 
     if (axis == SDL_CONTROLLER_AXIS_TRIGGERRIGHT ||

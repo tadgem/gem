@@ -43,10 +43,19 @@ public:
 
   asset_manager();
 
-  asset_handle load_asset(const std::string &path, const asset_type &assetType,
+  asset_handle  load_asset(const std::string &path, const asset_type &assetType,
                           asset_loaded_callback on_asset_loaded = nullptr);
-  void unload_asset(const asset_handle &handle);
-  asset *get_asset(asset_handle &handle);
+  void          unload_asset(const asset_handle &handle);
+  asset *       get_asset(asset_handle &handle);
+
+  template<typename _Ty, asset_type _AssetType>
+  asset_handle  provide_asset(const std::string& name, _Ty data)
+  {
+    asset_t<_Ty,_AssetType>* to_asset = new asset_t<_Ty, _AssetType>(data, name);
+    p_loaded_assets.emplace(
+        to_asset->m_handle, std::move(std::unique_ptr<asset>(to_asset)));
+    return to_asset->m_handle;
+  }
 
   template <typename _Ty, asset_type _AssetType>
   asset_t<_Ty, _AssetType> *get_asset(asset_handle &handle) {

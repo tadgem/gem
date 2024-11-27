@@ -1,7 +1,7 @@
 #include "gem/im3d_gl.h"
 #include "gem/backend.h"
-#include "gem/debug.h"
 #include "gem/input.h"
+#include "gem/open_gl_dbg.h"
 #include "gem/profile.h"
 #include "gem/utils.h"
 #include "gtc/type_ptr.hpp"

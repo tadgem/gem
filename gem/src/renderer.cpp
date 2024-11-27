@@ -2,9 +2,9 @@
 #include "gem/renderer.h"
 #include "gem/asset_manager.h"
 #include "gem/backend.h"
-#include "gem/debug.h"
 #include "gem/input.h"
 #include "gem/lights.h"
+#include "gem/open_gl_dbg.h"
 #include "gem/profile.h"
 #include "gem/tech/gbuffer.h"
 #include "gem/tech/lighting.h"
@@ -26,6 +26,7 @@ void gl_renderer::init(asset_manager &am, glm::ivec2 resolution) {
   m_im3d_state = im3d_gl::load_im3d();
 
   am.load_asset("assets/shaders/gbuffer.shader", asset_type::shader);
+  am.load_asset("assets/shaders/gbuffer_textureless.shader", asset_type::shader);
   am.load_asset("assets/shaders/lighting.shader", asset_type::shader);
   am.load_asset("assets/shaders/visualize_3d_tex.shader", asset_type::shader);
   am.load_asset("assets/shaders/visualize_3d_tex_instances.shader", asset_type::shader);
@@ -46,6 +47,8 @@ void gl_renderer::init(asset_manager &am, glm::ivec2 resolution) {
   am.wait_all_assets();
   m_gbuffer_shader = am.get_asset<shader, asset_type::shader>(
       "assets/shaders/gbuffer.shader");
+  m_gbuffer_textureless_shader = am.get_asset<shader, asset_type::shader>(
+      "assets/shaders/gbuffer_textureless.shader");
   m_lighting_shader = am.get_asset<shader, asset_type::shader>(
       "assets/shaders/lighting.shader");
   m_visualise_3d_tex_shader = am.get_asset<shader, asset_type::shader>(

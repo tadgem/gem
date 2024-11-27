@@ -74,7 +74,7 @@ int main()
     entity_data& data = e.get_component<entity_data>();
     material mat(renderer.m_gbuffer_shader->m_handle, renderer.m_gbuffer_shader->m_data);
     e.add_component<material>(renderer.m_gbuffer_shader->m_handle, renderer.m_gbuffer_shader->m_data);
-
+//    e.add_component<mesh_component>(mesh_component{mesh::s_cube, asset_handle(), 0});
     // model sponza_geo = model::load_model_and_textures_from_path("assets/models/sponza/Sponza.gltf");
     engine::assets.load_asset("assets/models/sponza/Sponza.gltf", asset_type::model, [s, &renderer](asset* a) {
         spdlog::info("adding model to scene");

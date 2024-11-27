@@ -2,7 +2,7 @@
 #include "gem/tech/vxgi.h"
 #include "gem/backend.h"
 #include "gem/camera.h"
-#include "gem/debug.h"
+#include "gem/open_gl_dbg.h"
 #include "gem/profile.h"
 
 namespace gem {
