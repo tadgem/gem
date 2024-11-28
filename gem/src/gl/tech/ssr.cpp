@@ -1,8 +1,8 @@
 #define GLM_ENABLE_EXPERIMENTAL
 
-#include "gem/tech/ssr.h"
+#include "gem/gl/tech/ssr.h"
 #include "gem/camera.h"
-#include "gem/framebuffer.h"
+#include "gem/gl/gl_framebuffer.h"
 #include "gem/gl/open_gl_dbg.h"
 #include "gem/profile.h"
 #include "gem/shape.h"
@@ -10,8 +10,9 @@
 namespace gem {
 
 void tech::ssr::dispatch_ssr_pass(shader &ssr, camera &cam,
-                                  framebuffer &ssr_buffer, framebuffer &gbuffer,
-                                  framebuffer &lighting_buffer,
+                                  gl_framebuffer &ssr_buffer,
+                                  gl_framebuffer &gbuffer,
+                                  gl_framebuffer &lighting_buffer,
                                   glm::vec2 screen_dim) {
   ZoneScoped;
   GPU_MARKER("SSR Pass");

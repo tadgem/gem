@@ -1,18 +1,18 @@
 #define GLM_ENABLE_EXPERIMENTAL
 
-#include "gem/tech/taa.h"
-#include "gem/framebuffer.h"
+#include "gem/gl/tech/taa.h"
+#include "gem/gl/gl_framebuffer.h"
 #include "gem/gl/open_gl_dbg.h"
+#include "gem/gl/tech/tech_utils.h"
 #include "gem/profile.h"
 #include "gem/shape.h"
-#include "gem/tech/tech_utils.h"
 #include "gem/texture.h"
 
 namespace gem {
 
-void tech::taa::dispatch_taa_pass(shader &taa, framebuffer &pass_buffer,
-                                  framebuffer pass_resolve_buffer,
-                                  framebuffer &pass_history_buffer,
+void tech::taa::dispatch_taa_pass(shader &taa, gl_framebuffer &pass_buffer,
+                                  gl_framebuffer pass_resolve_buffer,
+                                  gl_framebuffer &pass_history_buffer,
                                   gl_handle &velocity_buffer_attachment,
                                   glm::ivec2 window_res) {
   ZoneScoped;

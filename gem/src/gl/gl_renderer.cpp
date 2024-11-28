@@ -1,18 +1,18 @@
 #define GLM_ENABLE_EXPERIMENTAL
-#include "gem/renderer.h"
 #include "gem/asset_manager.h"
 #include "gem/backend.h"
 #include "gem/gl/open_gl_dbg.h"
+#include "gem/gl/renderer.h"
+#include "gem/gl/tech/gbuffer.h"
+#include "gem/gl/tech/lighting.h"
+#include "gem/gl/tech/shadow.h"
+#include "gem/gl/tech/ssr.h"
+#include "gem/gl/tech/taa.h"
+#include "gem/gl/tech/tech_utils.h"
+#include "gem/gl/tech/vxgi.h"
 #include "gem/input.h"
 #include "gem/lights.h"
 #include "gem/profile.h"
-#include "gem/tech/gbuffer.h"
-#include "gem/tech/lighting.h"
-#include "gem/tech/shadow.h"
-#include "gem/tech/ssr.h"
-#include "gem/tech/taa.h"
-#include "gem/tech/tech_utils.h"
-#include "gem/tech/vxgi.h"
 #include "gem/transform.h"
 #include "im3d/im3d_math.h"
 #include "imgui.h"
@@ -85,7 +85,7 @@ void gl_renderer::init(asset_manager &am, glm::ivec2 resolution) {
   m_window_resolution = resolution;
   const int shadow_resolution = 4096;
   m_gbuffer =
-      framebuffer::create(m_window_resolution,
+      gl_framebuffer::create(m_window_resolution,
                           {
                               {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
                               {GL_RGBA, GL_RGBA32F, GL_LINEAR, GL_FLOAT},
@@ -97,38 +97,38 @@ void gl_renderer::init(asset_manager &am, glm::ivec2 resolution) {
                           true);
 
   m_gbuffer_downsample =
-      framebuffer::create(m_window_resolution,
+      gl_framebuffer::create(m_window_resolution,
                           {
                               {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
                           },
                           false);
 
   m_dir_light_shadow_buffer =
-      framebuffer::create({shadow_resolution, shadow_resolution}, {}, true);
+      gl_framebuffer::create({shadow_resolution, shadow_resolution}, {}, true);
 
   m_lightpass_buffer =
-      framebuffer::create(m_window_resolution,
+      gl_framebuffer::create(m_window_resolution,
                           {
                               {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
                           },
                           false);
 
   m_lightpass_buffer_resolve =
-      framebuffer::create(m_window_resolution,
+      gl_framebuffer::create(m_window_resolution,
                           {
                               {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
                           },
                           false);
 
   m_lightpass_buffer_history =
-      framebuffer::create(m_window_resolution,
+      gl_framebuffer::create(m_window_resolution,
                           {
                               {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
                           },
                           false);
 
   m_position_buffer_history =
-      framebuffer::create(m_window_resolution,
+      gl_framebuffer::create(m_window_resolution,
                           {
                               {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
                           },
@@ -137,28 +137,28 @@ void gl_renderer::init(asset_manager &am, glm::ivec2 resolution) {
   glm::vec2 gi_res = {m_window_resolution.x * m_vxgi_resolution_scale,
                       m_window_resolution.y * m_vxgi_resolution_scale};
   m_conetracing_buffer =
-      framebuffer::create(gi_res,
+      gl_framebuffer::create(gi_res,
                           {
                               {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
                           },
                           false);
 
   m_conetracing_buffer_denoise =
-      framebuffer::create(gi_res,
+      gl_framebuffer::create(gi_res,
                           {
                               {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
                           },
                           false);
 
   m_conetracing_buffer_resolve =
-      framebuffer::create(m_window_resolution,
+      gl_framebuffer::create(m_window_resolution,
                           {
                               {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
                           },
                           false);
 
   m_conetracing_buffer_history =
-      framebuffer::create(m_window_resolution,
+      gl_framebuffer::create(m_window_resolution,
                           {
                               {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
                           },
@@ -167,35 +167,35 @@ void gl_renderer::init(asset_manager &am, glm::ivec2 resolution) {
   glm::vec2 ssr_res = {m_window_resolution.x * m_ssr_resolution_scale,
                        m_window_resolution.y * m_ssr_resolution_scale};
   m_ssr_buffer =
-      framebuffer::create(ssr_res,
+      gl_framebuffer::create(ssr_res,
                           {
                               {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
                           },
                           false);
 
   m_ssr_buffer_denoise =
-      framebuffer::create(ssr_res,
+      gl_framebuffer::create(ssr_res,
                           {
                               {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
                           },
                           false);
 
   m_ssr_buffer_resolve =
-      framebuffer::create(m_window_resolution,
+      gl_framebuffer::create(m_window_resolution,
                           {
                               {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
                           },
                           false);
 
   m_ssr_buffer_history =
-      framebuffer::create(m_window_resolution,
+      gl_framebuffer::create(m_window_resolution,
                           {
                               {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
                           },
                           false);
 
   m_final_pass =
-      framebuffer::create(m_window_resolution,
+      gl_framebuffer::create(m_window_resolution,
                           {
                               {GL_RGBA, GL_RGBA8, GL_LINEAR, GL_FLOAT},
                           },

@@ -1,15 +1,15 @@
 #pragma once
 #include "GL/glew.h"
-#include "alias.h"
+#include "gem/alias.h"
 #include "glm.hpp"
 #include <array>
 #include <cstdint>
 #include <vector>
 
 namespace gem {
-class framebuffer {
+class gl_framebuffer {
 public:
-  framebuffer();
+  gl_framebuffer();
 
   void bind();
   void unbind();
@@ -45,7 +45,7 @@ public:
     GLenum m_pixel_format;
   };
 
-  static framebuffer create(glm::vec2 resolution,
+  static gl_framebuffer create(glm::vec2 resolution,
                             std::vector<attachment_info> colour_attachments,
                             bool add_depth = true);
 

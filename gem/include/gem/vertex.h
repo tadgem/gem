@@ -1,9 +1,12 @@
 #pragma once
 #include "GL/glew.h"
 #include "gem/alias.h"
+#include "backend.h"
 #include <vector>
 
 namespace gem {
+// TODO: turn this into a union based on the backend
+// vulkan version will have buffer & alloc for vertex buffer and index buffer
 struct VAO {
   gl_handle m_vao_id;
   gl_handle m_ibo = 0;
@@ -20,13 +23,15 @@ public:
   void begin();
 
   template <typename _Ty> void add_vertex_buffer(_Ty *data, uint32_t count, GLenum usage_flags = GL_STATIC_DRAW) {
-    gl_handle vbo;
-    glGenBuffers(1, &vbo);
+    if(gpu_backend::get_backend_api() == backend_api::open_gl) {
+      gl_handle vbo;
+      glGenBuffers(1, &vbo);
 
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    auto data_size = sizeof(_Ty) * count;
-    glBufferData(GL_ARRAY_BUFFER, data_size, data, usage_flags);
-    m_vbos.push_back(vbo);
+      glBindBuffer(GL_ARRAY_BUFFER, vbo);
+      auto data_size = sizeof(_Ty) * count;
+      glBufferData(GL_ARRAY_BUFFER, data_size, data, usage_flags);
+      m_vbos.push_back(vbo);
+    }
   }
 
   template <typename _Ty> void add_vertex_buffer(std::vector<_Ty> data, GLenum usage_flags = GL_STATIC_DRAW) {

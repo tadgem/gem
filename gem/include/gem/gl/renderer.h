@@ -1,7 +1,7 @@
 #pragma once
 #include "gem/asset_definitions.h"
 #include "gem/camera.h"
-#include "gem/framebuffer.h"
+#include "gem/gl/gl_framebuffer.h"
 #include "gem/gl/im3d_gl.h"
 #include "gem/scene.h"
 #include "gem/voxelisation.h"
@@ -41,22 +41,22 @@ public:
   shader_asset *m_compute_voxel_blit_shader;
   shader_asset *m_compute_voxel_clear_shader;
 
-  framebuffer m_gbuffer;
-  framebuffer m_gbuffer_downsample;
-  framebuffer m_dir_light_shadow_buffer;
-  framebuffer m_lightpass_buffer;
-  framebuffer m_lightpass_buffer_resolve;
-  framebuffer m_lightpass_buffer_history;
-  framebuffer m_position_buffer_history;
-  framebuffer m_conetracing_buffer;
-  framebuffer m_conetracing_buffer_denoise;
-  framebuffer m_conetracing_buffer_resolve;
-  framebuffer m_conetracing_buffer_history;
-  framebuffer m_ssr_buffer;
-  framebuffer m_ssr_buffer_denoise;
-  framebuffer m_ssr_buffer_resolve;
-  framebuffer m_ssr_buffer_history;
-  framebuffer m_final_pass;
+  gl_framebuffer m_gbuffer;
+  gl_framebuffer m_gbuffer_downsample;
+  gl_framebuffer m_dir_light_shadow_buffer;
+  gl_framebuffer m_lightpass_buffer;
+  gl_framebuffer m_lightpass_buffer_resolve;
+  gl_framebuffer m_lightpass_buffer_history;
+  gl_framebuffer m_position_buffer_history;
+  gl_framebuffer m_conetracing_buffer;
+  gl_framebuffer m_conetracing_buffer_denoise;
+  gl_framebuffer m_conetracing_buffer_resolve;
+  gl_framebuffer m_conetracing_buffer_history;
+  gl_framebuffer m_ssr_buffer;
+  gl_framebuffer m_ssr_buffer_denoise;
+  gl_framebuffer m_ssr_buffer_resolve;
+  gl_framebuffer m_ssr_buffer_history;
+  gl_framebuffer m_final_pass;
 
   im3d_state m_im3d_state;
   voxel::grid m_voxel_data;

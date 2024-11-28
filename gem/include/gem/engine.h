@@ -3,8 +3,8 @@
 #include "backend.h"
 #include "ecs_system.h"
 #include "events.h"
+#include "gem/gl/renderer.h"
 #include "project.h"
-#include "renderer.h"
 #include "scene.h"
 
 struct debug_callbacks_collection

@@ -1,19 +1,19 @@
 #include <sstream>
 #define GLM_ENABLE_EXPERIMENTAL
 #include "gem/camera.h"
-#include "gem/framebuffer.h"
+#include "gem/gl/gl_framebuffer.h"
 #include "gem/gl/open_gl_dbg.h"
+#include "gem/gl/tech/lighting.h"
 #include "gem/profile.h"
 #include "gem/shape.h"
-#include "gem/tech/lighting.h"
 #include "gem/texture.h"
 #include "gem/utils.h"
 #include "gtc/quaternion.hpp"
 namespace gem {
 
 void tech::lighting::dispatch_light_pass(
-    shader &lighting_shader, framebuffer &lighting_buffer, framebuffer &gbuffer,
-    framebuffer &dir_light_shadow_buffer, camera &cam,
+    shader &lighting_shader, gl_framebuffer &lighting_buffer,
+    gl_framebuffer &gbuffer, gl_framebuffer &dir_light_shadow_buffer, camera &cam,
     std::vector<point_light> &point_lights, dir_light &sun) {
   ZoneScoped;
   GPU_MARKER("Lighting Pass");

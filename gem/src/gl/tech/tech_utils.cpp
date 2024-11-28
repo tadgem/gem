@@ -1,6 +1,6 @@
 #define GLM_ENABLE_EXPERIMENTAL
-#include "gem/tech/tech_utils.h"
-#include "gem/framebuffer.h"
+#include "gem/gl/tech/tech_utils.h"
+#include "gem/gl/gl_framebuffer.h"
 #include "gem/gl/open_gl_dbg.h"
 #include "gem/profile.h"
 #include "gem/shader.h"
@@ -10,8 +10,8 @@
 namespace gem {
 
 void tech::utils::dispatch_denoise_image(shader &denoise_shader,
-                                         framebuffer &input,
-                                         framebuffer &denoised, float aSigma,
+                                         gl_framebuffer &input,
+                                         gl_framebuffer &denoised, float aSigma,
                                          float aThreshold, float aKSigma,
                                          glm::ivec2 window_res) {
   ZoneScoped;
@@ -42,7 +42,7 @@ void tech::utils::dispatch_present_image(shader &present_shader,
   texture::bind_sampler_handle(0, GL_TEXTURE0);
 }
 
-void tech::utils::blit_to_fb(framebuffer &fb, shader &present_shader,
+void tech::utils::blit_to_fb(gl_framebuffer &fb, shader &present_shader,
                              const std::string &uniform_name,
                              const int texture_slot, gl_handle texture) {
   ZoneScoped;

@@ -3,13 +3,14 @@
 namespace gem {
 
 class camera;
-class framebuffer;
+class gl_framebuffer;
 namespace tech {
 class ssr {
 public:
   static void dispatch_ssr_pass(shader &ssr, camera &cam,
-                                framebuffer &ssr_buffer, framebuffer &gbuffer,
-                                framebuffer &lighting_buffer,
+                                gl_framebuffer &ssr_buffer,
+                                gl_framebuffer &gbuffer,
+                                gl_framebuffer &lighting_buffer,
                                 glm::vec2 screen_dim);
 };
 } // namespace tech

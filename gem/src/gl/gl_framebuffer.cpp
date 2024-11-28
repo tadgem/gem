@@ -1,25 +1,25 @@
-#include "gem/framebuffer.h"
+#include "gem/gl/gl_framebuffer.h"
 #include "gem/profile.h"
 #include <iostream>
 
 namespace gem {
 
-framebuffer::framebuffer() {
+gl_framebuffer::gl_framebuffer() {
   ZoneScoped;
   m_handle = INVALID_GL_HANDLE;
 }
 
-void framebuffer::unbind() {
+void gl_framebuffer::unbind() {
   ZoneScoped;
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void framebuffer::cleanup() {
+void gl_framebuffer::cleanup() {
   ZoneScoped;
   glDeleteFramebuffers(1, &m_handle);
 }
 
-void framebuffer::add_colour_attachment(GLenum attachment_index, uint32_t width,
+void gl_framebuffer::add_colour_attachment(GLenum attachment_index, uint32_t width,
                                         uint32_t height, GLenum internal_format,
                                         GLenum format, GLenum filter,
                                         GLenum pixel_format) {
@@ -40,7 +40,7 @@ void framebuffer::add_colour_attachment(GLenum attachment_index, uint32_t width,
   m_height = height;
 }
 
-void framebuffer::add_depth_attachment(uint32_t width, uint32_t height,
+void gl_framebuffer::add_depth_attachment(uint32_t width, uint32_t height,
                                        GLenum format) {
   ZoneScoped;
   gl_handle rbo;
@@ -57,7 +57,7 @@ void framebuffer::add_depth_attachment(uint32_t width, uint32_t height,
   m_height = height;
 }
 
-void framebuffer::add_depth_attachment_sampler_friendly(uint32_t width,
+void gl_framebuffer::add_depth_attachment_sampler_friendly(uint32_t width,
                                                         uint32_t height,
                                                         GLenum format) {
   ZoneScoped;
@@ -80,7 +80,7 @@ void framebuffer::add_depth_attachment_sampler_friendly(uint32_t width,
   m_height = height;
 }
 
-void framebuffer::check() {
+void gl_framebuffer::check() {
   ZoneScoped;
   auto zero = GL_COLOR_ATTACHMENT0;
   std::vector<unsigned int> attachments;
@@ -103,12 +103,12 @@ void framebuffer::check() {
   }
 }
 
-framebuffer framebuffer::create(glm::vec2 resolution,
+gl_framebuffer gl_framebuffer::create(glm::vec2 resolution,
                                 std::vector<attachment_info> attachments,
                                 bool add_depth) {
   ZoneScoped;
   GLenum attachment = GL_COLOR_ATTACHMENT0;
-  framebuffer fb{};
+  gl_framebuffer fb{};
   fb.bind();
   for (auto &info : attachments) {
     fb.add_colour_attachment(attachment, resolution.x, resolution.y,
@@ -125,7 +125,7 @@ framebuffer framebuffer::create(glm::vec2 resolution,
   return fb;
 }
 
-void framebuffer::bind() {
+void gl_framebuffer::bind() {
   ZoneScoped;
   if (m_handle == INVALID_GL_HANDLE) {
     glGenFramebuffers(1, &m_handle);

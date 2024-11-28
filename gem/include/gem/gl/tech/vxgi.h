@@ -1,5 +1,5 @@
 #pragma once
-#include "gem/framebuffer.h"
+#include "gem/gl/gl_framebuffer.h"
 #include "gem/shape.h"
 #include "gem/voxelisation.h"
 
@@ -12,8 +12,8 @@ class vxgi {
 public:
   static void dispatch_gbuffer_voxelization(shader &voxelization,
                                             voxel::grid &voxel_data,
-                                            framebuffer &gbuffer,
-                                            framebuffer &lightpass_buffer,
+                                            gl_framebuffer &gbuffer,
+                                            gl_framebuffer &lightpass_buffer,
                                             glm::ivec2 window_res);
 
   static void dispatch_blit_voxel(shader &blit_voxel,
@@ -35,7 +35,7 @@ public:
 
   static void dispatch_cone_tracing_pass(
       shader &voxel_cone_tracing, voxel::grid &voxel_data,
-      framebuffer &buffer_conetracing, framebuffer &gbuffer,
+      gl_framebuffer &buffer_conetracing, gl_framebuffer &gbuffer,
       glm::ivec2 window_res, aabb &bounding_volume, glm::vec3 _3d_tex_res,
       camera &cam, float max_trace_distance, float resolution_scale,
       float diffuse_spec_mix);
