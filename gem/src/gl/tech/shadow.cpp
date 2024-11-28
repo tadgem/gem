@@ -1,7 +1,7 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include "gem/gl/tech/shadow.h"
+#include "gem/gl/gl_dbg.h"
 #include "gem/gl/gl_framebuffer.h"
-#include "gem/gl/open_gl_dbg.h"
 #include "gem/material.h"
 #include "gem/mesh.h"
 #include "gem/profile.h"
@@ -13,7 +13,7 @@
 namespace gem {
 
 void tech::shadow::dispatch_shadow_pass(gl_framebuffer &shadow_fb,
-                                        shader &shadow_shader, dir_light &sun,
+                                        gl_shader &shadow_shader, dir_light &sun,
                                         std::vector<scene *> &scenes,
                                         glm::ivec2 window_res) {
   ZoneScoped;

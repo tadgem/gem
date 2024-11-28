@@ -3,7 +3,7 @@
 #include "backend.h"
 #include "ecs_system.h"
 #include "events.h"
-#include "gem/gl/renderer.h"
+#include "gem/gl/gl_renderer.h"
 #include "project.h"
 #include "scene.h"
 

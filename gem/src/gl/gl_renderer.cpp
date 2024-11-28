@@ -1,8 +1,8 @@
 #define GLM_ENABLE_EXPERIMENTAL
+#include "gem/gl/gl_renderer.h"
 #include "gem/asset_manager.h"
 #include "gem/backend.h"
-#include "gem/gl/open_gl_dbg.h"
-#include "gem/gl/renderer.h"
+#include "gem/gl/gl_dbg.h"
 #include "gem/gl/tech/gbuffer.h"
 #include "gem/gl/tech/lighting.h"
 #include "gem/gl/tech/shadow.h"
@@ -23,7 +23,7 @@ void gl_renderer::init(asset_manager &am, glm::ivec2 resolution) {
   ZoneScoped;
   TracyGpuContext;
   m_frame_index = 0;
-  m_im3d_state = im3d_gl::load_im3d();
+  m_im3d_state = gl_im3d::load_im3d();
 
   am.load_asset("assets/shaders/gbuffer.shader", asset_type::shader);
   am.load_asset("assets/shaders/gbuffer_textureless.shader", asset_type::shader);
@@ -45,41 +45,41 @@ void gl_renderer::init(asset_manager &am, glm::ivec2 resolution) {
   am.load_asset("assets/shaders/voxel_clear.shader", asset_type::shader);
 
   am.wait_all_assets();
-  m_gbuffer_shader = am.get_asset<shader, asset_type::shader>(
+  m_gbuffer_shader = am.get_asset<gl_shader, asset_type::shader>(
       "assets/shaders/gbuffer.shader");
-  m_gbuffer_textureless_shader = am.get_asset<shader, asset_type::shader>(
+  m_gbuffer_textureless_shader = am.get_asset<gl_shader, asset_type::shader>(
       "assets/shaders/gbuffer_textureless.shader");
-  m_lighting_shader = am.get_asset<shader, asset_type::shader>(
+  m_lighting_shader = am.get_asset<gl_shader, asset_type::shader>(
       "assets/shaders/lighting.shader");
-  m_visualise_3d_tex_shader = am.get_asset<shader, asset_type::shader>(
+  m_visualise_3d_tex_shader = am.get_asset<gl_shader, asset_type::shader>(
       "assets/shaders/visualize_3d_tex.shader");
-  m_visualise_3d_tex_instances_shader = am.get_asset<shader, asset_type::shader>(
+  m_visualise_3d_tex_instances_shader = am.get_asset<gl_shader, asset_type::shader>(
       "assets/shaders/visualize_3d_tex_instances.shader");
-  m_present_shader = am.get_asset<shader, asset_type::shader>(
+  m_present_shader = am.get_asset<gl_shader, asset_type::shader>(
       "assets/shaders/present.shader");
-  m_dir_light_shadow_shader = am.get_asset<shader, asset_type::shader>(
+  m_dir_light_shadow_shader = am.get_asset<gl_shader, asset_type::shader>(
       "assets/shaders/dir_light_shadow.shader");
-  m_voxel_cone_tracing_shader = am.get_asset<shader, asset_type::shader>(
+  m_voxel_cone_tracing_shader = am.get_asset<gl_shader, asset_type::shader>(
       "assets/shaders/voxel_cone_tracing.shader");
   m_ssr_shader =
-      am.get_asset<shader, asset_type::shader>("assets/shaders/ssr.shader");
+      am.get_asset<gl_shader, asset_type::shader>("assets/shaders/ssr.shader");
   m_taa_shader =
-      am.get_asset<shader, asset_type::shader>("assets/shaders/taa.shader");
-  m_denoise_shader = am.get_asset<shader, asset_type::shader>(
+      am.get_asset<gl_shader, asset_type::shader>("assets/shaders/taa.shader");
+  m_denoise_shader = am.get_asset<gl_shader, asset_type::shader>(
       "assets/shaders/denoise.shader");
-  m_combine_shader = am.get_asset<shader, asset_type::shader>(
+  m_combine_shader = am.get_asset<gl_shader, asset_type::shader>(
       "assets/shaders/gi_combine.shader");
-  m_downsample_shader = am.get_asset<shader, asset_type::shader>(
+  m_downsample_shader = am.get_asset<gl_shader, asset_type::shader>(
       "assets/shaders/downsample.shader");
-  m_compute_voxelize_gbuffer_shader = am.get_asset<shader, asset_type::shader>(
+  m_compute_voxelize_gbuffer_shader = am.get_asset<gl_shader, asset_type::shader>(
       "assets/shaders/gbuffer_voxelization.shader");
-  m_compute_voxel_mips_shader = am.get_asset<shader, asset_type::shader>(
+  m_compute_voxel_mips_shader = am.get_asset<gl_shader, asset_type::shader>(
       "assets/shaders/voxel_mips.shader");
-  m_compute_voxel_reprojection_shader = am.get_asset<shader, asset_type::shader>(
+  m_compute_voxel_reprojection_shader = am.get_asset<gl_shader, asset_type::shader>(
       "assets/shaders/voxel_reprojection.shader");
-  m_compute_voxel_blit_shader = am.get_asset<shader, asset_type::shader>(
+  m_compute_voxel_blit_shader = am.get_asset<gl_shader, asset_type::shader>(
       "assets/shaders/voxel_blit.shader");
-  m_compute_voxel_clear_shader = am.get_asset<shader, asset_type::shader>(
+  m_compute_voxel_clear_shader = am.get_asset<gl_shader, asset_type::shader>(
       "assets/shaders/voxel_clear.shader");
 
   m_window_resolution = resolution;
@@ -214,7 +214,7 @@ void gl_renderer::init(asset_manager &am, glm::ivec2 resolution) {
 void gl_renderer::pre_frame(camera &cam) {
   ZoneScoped;
 
-  im3d_gl::new_frame_im3d(m_im3d_state, m_window_resolution, cam);
+  gl_im3d::new_frame_im3d(m_im3d_state, m_window_resolution, cam);
 }
 
 void gl_renderer::render(asset_manager &am, camera &cam,
@@ -443,7 +443,7 @@ void gl_renderer::render(asset_manager &am, camera &cam,
 
   {
     TracyGpuZone("Im3D Pass");
-    im3d_gl::end_frame_im3d(m_im3d_state, m_window_resolution, cam);
+    gl_im3d::end_frame_im3d(m_im3d_state, m_window_resolution, cam);
   }
   TracyGpuCollect;
 }
@@ -466,7 +466,7 @@ void gl_renderer::cleanup(asset_manager &am) {
   m_ssr_buffer_resolve.cleanup();
   m_ssr_buffer_history.cleanup();
   m_final_pass.cleanup();
-  im3d_gl::shutdown_im3d(m_im3d_state);
+  gl_im3d::shutdown_im3d(m_im3d_state);
 }
 
 entt::entity gl_renderer::get_mouse_entity(glm::vec2 mouse_position) {

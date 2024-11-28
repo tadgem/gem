@@ -1,6 +1,6 @@
 #include "gem/gl/gl_backend.h"
 #include "gem/dbg_memory.h"
-#include "gem/gl/open_gl_dbg.h"
+#include "gem/gl/gl_dbg.h"
 #include "gem/input.h"
 #include "gem/profile.h"
 #include "imgui.h"

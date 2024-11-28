@@ -2,10 +2,10 @@
 
 #include "gem/scene.h"
 #include "gem/engine.h"
+#include "gem/gl/gl_shader.h"
 #include "gem/material.h"
 #include "gem/model.h"
 #include "gem/profile.h"
-#include "gem/shader.h"
 #include "gem/transform.h"
 #include "gem/utils.h"
 #include <sstream>
@@ -27,7 +27,7 @@ entity scene::create_entity(const std::string &name) {
 
 std::vector<entity> scene::create_entity_from_model(
     asset_handle model_asset_handle, model &model_to_load,
-    asset_handle shader_asset_handle, shader &material_shader, glm::vec3 scale,
+    asset_handle shader_asset_handle, gl_shader &material_shader, glm::vec3 scale,
     glm::vec3 euler, std::map<std::string, texture_map_type> known_maps) {
   ZoneScoped;
   std::vector<entity> entities{};

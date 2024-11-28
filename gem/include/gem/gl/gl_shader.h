@@ -7,7 +7,7 @@
 
 namespace gem {
 
-class shader {
+class gl_shader {
 public:
   enum class uniform_type {
     UNKNOWN,
@@ -28,10 +28,10 @@ public:
 
   unsigned int m_shader_id;
 
-  shader() = default;
-  shader(const std::string &comp);
-  shader(const std::string &vert, const std::string &frag);
-  shader(const std::string &vert, const std::string &geom,
+  gl_shader() = default;
+  gl_shader(const std::string &comp);
+  gl_shader(const std::string &vert, const std::string &frag);
+  gl_shader(const std::string &vert, const std::string &geom,
          const std::string &frag);
 
   void use();
@@ -56,10 +56,10 @@ public:
   static int link_shader(gl_handle vert, gl_handle frag);
   static int link_shader(gl_handle vert, gl_handle geom, gl_handle frag);
 
-  static std::unordered_map<shader::stage, std::string>
+  static std::unordered_map<gl_shader::stage, std::string>
   split_composite_shader(const std::string &input);
 
-  static shader create_from_composite(const std::string& composite_shader);
+  static gl_shader create_from_composite(const std::string& composite_shader);
 
   static uniform_type get_type_from_gl(GLenum type);
 };

@@ -1,5 +1,5 @@
 #pragma once
-#include "gem/shader.h"
+#include "gem/gl/gl_shader.h"
 
 namespace gem {
 class gl_framebuffer;
@@ -7,7 +7,7 @@ class gl_framebuffer;
 namespace tech {
 class taa {
 public:
-  static void dispatch_taa_pass(shader &taa, gl_framebuffer &pass_buffer,
+  static void dispatch_taa_pass(gl_shader &taa, gl_framebuffer &pass_buffer,
                                 gl_framebuffer pass_resolve_buffer,
                                 gl_framebuffer &pass_history_buffer,
                                 gl_handle &velocity_buffer_attachment,

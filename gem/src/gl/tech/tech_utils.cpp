@@ -1,15 +1,15 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include "gem/gl/tech/tech_utils.h"
+#include "gem/gl/gl_dbg.h"
 #include "gem/gl/gl_framebuffer.h"
-#include "gem/gl/open_gl_dbg.h"
+#include "gem/gl/gl_shader.h"
 #include "gem/profile.h"
-#include "gem/shader.h"
 #include "gem/shape.h"
 #include "gem/texture.h"
 
 namespace gem {
 
-void tech::utils::dispatch_denoise_image(shader &denoise_shader,
+void tech::utils::dispatch_denoise_image(gl_shader &denoise_shader,
                                          gl_framebuffer &input,
                                          gl_framebuffer &denoised, float aSigma,
                                          float aThreshold, float aKSigma,
@@ -28,7 +28,7 @@ void tech::utils::dispatch_denoise_image(shader &denoise_shader,
   denoised.unbind();
 }
 
-void tech::utils::dispatch_present_image(shader &present_shader,
+void tech::utils::dispatch_present_image(gl_shader &present_shader,
                                          const std::string &uniform_name,
                                          const int texture_slot,
                                          gl_handle texture) {
@@ -42,7 +42,7 @@ void tech::utils::dispatch_present_image(shader &present_shader,
   texture::bind_sampler_handle(0, GL_TEXTURE0);
 }
 
-void tech::utils::blit_to_fb(gl_framebuffer &fb, shader &present_shader,
+void tech::utils::blit_to_fb(gl_framebuffer &fb, gl_shader &present_shader,
                              const std::string &uniform_name,
                              const int texture_slot, gl_handle texture) {
   ZoneScoped;

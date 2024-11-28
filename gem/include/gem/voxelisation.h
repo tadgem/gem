@@ -1,8 +1,8 @@
 #pragma once
-#include "gem/shader.h"
 #include "gem/aabb.h"
-#include "gem/texture.h"
 #include "gem/camera.h"
+#include "gem/gl/gl_shader.h"
+#include "gem/texture.h"
 
 namespace gem {
 
@@ -22,8 +22,8 @@ public:
   };
 
   struct grid_visualiser {
-    shader        m_visual_shader;
-    shader        m_compute_instances_shader;
+    gl_shader m_visual_shader;
+    gl_shader m_compute_instances_shader;
     VAO           m_texel_shape;
     GLuint        m_instance_matrices_ssbo;
     int           m_texel_resolution;
@@ -36,9 +36,8 @@ public:
   };
 
   static grid create_grid(glm::ivec3 resolution, aabb bb);
-  static grid_visualiser create_grid_visualiser(grid &vg,
-                                                shader &visualisation_shader,
-                                                shader &compute_matrices_shader,
+  static grid_visualiser create_grid_visualiser(grid &vg, gl_shader &visualisation_shader,
+                         gl_shader &compute_matrices_shader,
                                                 int texel_resolution = 8);
 };
 } // namespace gem

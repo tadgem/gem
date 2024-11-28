@@ -1,7 +1,7 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include "gem/voxelisation.h"
 #include "gem/backend.h"
-#include "gem/gl/open_gl_dbg.h"
+#include "gem/gl/gl_dbg.h"
 #include "gem/profile.h"
 #include "gem/utils.h"
 #include "glm/vec3.hpp"
@@ -58,8 +58,8 @@ voxel::grid voxel::create_grid(glm::ivec3 resolution, aabb bb) {
   return grid;
 }
 voxel::grid_visualiser
-voxel::create_grid_visualiser(voxel::grid &vg, shader &visualisation_shader,
-                              shader &compute_matrices_shader,
+voxel::create_grid_visualiser(voxel::grid &vg, gl_shader &visualisation_shader,
+                              gl_shader &compute_matrices_shader,
                               int texel_resolution) {
   ZoneScoped;
   grid_visualiser vgv{  visualisation_shader,

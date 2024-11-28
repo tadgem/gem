@@ -2,12 +2,12 @@
 #include "gem/gl/tech/vxgi.h"
 #include "gem/backend.h"
 #include "gem/camera.h"
-#include "gem/gl/open_gl_dbg.h"
+#include "gem/gl/gl_dbg.h"
 #include "gem/profile.h"
 
 namespace gem {
 
-void tech::vxgi::dispatch_gbuffer_voxelization(shader &voxelization,
+void tech::vxgi::dispatch_gbuffer_voxelization(gl_shader &voxelization,
                                                voxel::grid &voxel_data,
                                                gl_framebuffer &gbuffer,
                                                gl_framebuffer &lightpass_buffer,
@@ -31,7 +31,7 @@ void tech::vxgi::dispatch_gbuffer_voxelization(shader &voxelization,
   glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 }
 
-void tech::vxgi::dispatch_gen_voxel_mips(shader &voxelization_mips,
+void tech::vxgi::dispatch_gen_voxel_mips(gl_shader &voxelization_mips,
                                          voxel::grid &voxel_data,
                                          glm::vec3 _3d_tex_res_vec) {
   ZoneScoped;
@@ -61,7 +61,7 @@ void tech::vxgi::dispatch_gen_voxel_mips(shader &voxelization_mips,
 }
 
 void tech::vxgi::dispatch_cone_tracing_pass(
-    shader &voxel_cone_tracing, voxel::grid &voxel_data,
+    gl_shader &voxel_cone_tracing, voxel::grid &voxel_data,
     gl_framebuffer &buffer_conetracing, gl_framebuffer &gbuffer,
     glm::ivec2 window_res, aabb &bounding_volume, glm::vec3 _3d_tex_res,
     camera &cam, float max_trace_distance, float resolution_scale,
@@ -101,7 +101,7 @@ void tech::vxgi::dispatch_cone_tracing_pass(
   glViewport(0, 0, window_res.x, window_res.y);
 }
 
-void tech::vxgi::dispatch_voxel_reprojection(shader &voxel_reprojection,
+void tech::vxgi::dispatch_voxel_reprojection(gl_shader &voxel_reprojection,
                                              voxel::grid &voxel_data,
                                              glm::vec3 _3d_tex_res_vec,
                                              aabb old_bb, aabb new_bb) {
@@ -122,7 +122,7 @@ void tech::vxgi::dispatch_voxel_reprojection(shader &voxel_reprojection,
   glAssert(glDispatchCompute(_3d_tex_res_vec.x / 8, _3d_tex_res_vec.y / 8,_3d_tex_res_vec.z / 8));
   glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 }
-void tech::vxgi::dispatch_blit_voxel(shader &blit_voxel,
+void tech::vxgi::dispatch_blit_voxel(gl_shader &blit_voxel,
                                      voxel::grid &voxel_data,
                                      glm::vec3 _3d_tex_res_vec) {
   ZoneScoped;
@@ -137,7 +137,7 @@ void tech::vxgi::dispatch_blit_voxel(shader &blit_voxel,
   glAssert(glDispatchCompute(_3d_tex_res_vec.x / 8, _3d_tex_res_vec.y / 8,_3d_tex_res_vec.z / 8));
   glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 }
-void tech::vxgi::dispatch_clear_voxel(shader &clear_voxel,
+void tech::vxgi::dispatch_clear_voxel(gl_shader &clear_voxel,
                                       voxel::grid &voxel_data,
                                       glm::vec3 _3d_tex_res_vec) {
   ZoneScoped;

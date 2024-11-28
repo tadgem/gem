@@ -2,14 +2,14 @@
 
 #include "gem/gl/tech/ssr.h"
 #include "gem/camera.h"
+#include "gem/gl/gl_dbg.h"
 #include "gem/gl/gl_framebuffer.h"
-#include "gem/gl/open_gl_dbg.h"
 #include "gem/profile.h"
 #include "gem/shape.h"
 #include "gem/texture.h"
 namespace gem {
 
-void tech::ssr::dispatch_ssr_pass(shader &ssr, camera &cam,
+void tech::ssr::dispatch_ssr_pass(gl_shader &ssr, camera &cam,
                                   gl_framebuffer &ssr_buffer,
                                   gl_framebuffer &gbuffer,
                                   gl_framebuffer &lighting_buffer,

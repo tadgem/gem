@@ -1,7 +1,7 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include "gem/gl/tech/gbuffer.h"
 #include "gem/camera.h"
-#include "gem/gl/open_gl_dbg.h"
+#include "gem/gl/gl_dbg.h"
 #include "gem/material.h"
 #include "gem/mesh.h"
 #include "gem/profile.h"
@@ -11,7 +11,7 @@ namespace gem {
 
 void tech::gbuffer::dispatch_gbuffer(u32 frame_index, gl_framebuffer &gbuffer,
                                      gl_framebuffer &previous_position_buffer,
-                                     shader &gbuffer_shader, asset_manager &am,
+                                     gl_shader &gbuffer_shader, asset_manager &am,
                                      camera &cam, std::vector<scene *> &scenes,
                                      glm::ivec2 win_res) {
   ZoneScoped;
@@ -61,7 +61,7 @@ void tech::gbuffer::dispatch_gbuffer(u32 frame_index, gl_framebuffer &gbuffer,
 
 void tech::gbuffer::dispatch_gbuffer_with_id(
     u32 frame_index, gl_framebuffer &gbuffer,
-    gl_framebuffer &previous_position_buffer, shader &gbuffer_shader,
+    gl_framebuffer &previous_position_buffer, gl_shader &gbuffer_shader,
     asset_manager &am, camera &cam, std::vector<scene *> &scenes,
     glm::ivec2 win_res) {
   ZoneScoped;

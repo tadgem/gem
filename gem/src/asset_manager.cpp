@@ -1,13 +1,12 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include "gem/asset_manager.h"
+#include "gem/gl/gl_shader.h"
 #include "gem/hash_string.h"
 #include "gem/model.h"
 #include "gem/profile.h"
-#include "gem/shader.h"
 #include "gem/utils.h"
 #include "spdlog/spdlog.h"
 #include <filesystem>
-
 
 namespace gem {
 
@@ -18,7 +17,7 @@ using model_intermediate_asset =
     asset_t_intermediate<model, std::vector<model::mesh_entry>,
                          asset_type::model>;
 using shader_intermediate_asset =
-    asset_t_intermediate<shader, std::string, asset_type::shader>;
+    asset_t_intermediate<gl_shader, std::string, asset_type::shader>;
 
 asset_handle asset_manager::load_asset(const std::string &path,
                                        const asset_type &assetType,
@@ -304,8 +303,8 @@ void link_shader_program(asset_intermediate *shader_asset) {
   shader_intermediate_asset *shader_inter =
       static_cast<shader_intermediate_asset *>(shader_asset);
 
-  shader_inter->get_concrete_asset()->m_data
-      = shader::create_from_composite(shader_inter->m_intermediate);
+  shader_inter->get_concrete_asset()->m_data =
+      gl_shader::create_from_composite(shader_inter->m_intermediate);
 }
 
 asset_load_return load_model_asset_manager(const std::string &path) {
@@ -377,7 +376,7 @@ asset_load_return load_shader_asset_manager(const std::string &path) {
   std::string source = utils::load_string_from_path(path);
   asset_load_return ret{};
   ret.m_loaded_asset_intermediate = new shader_intermediate_asset(
-      new asset_t<shader, asset_type::shader>(shader{}, path), source, path);
+      new asset_t<gl_shader, asset_type::shader>(gl_shader{}, path), source, path);
   ret.m_asset_load_sync_callbacks.push_back(link_shader_program);
   ret.m_new_assets_to_load = {};
 
@@ -386,8 +385,8 @@ asset_load_return load_shader_asset_manager(const std::string &path) {
 
 void unload_shader_asset_manager(asset *_asset) {
   ZoneScoped;
-  asset_t<shader, asset_type::shader> *sa =
-      static_cast<asset_t<shader, asset_type::shader> *>(_asset);
+  asset_t<gl_shader, asset_type::shader> *sa =
+      static_cast<asset_t<gl_shader, asset_type::shader> *>(_asset);
   sa->m_data.release();
 }
 

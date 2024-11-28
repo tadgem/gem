@@ -14,7 +14,7 @@ namespace gem {
 
 class entity;
 class model;
-class shader;
+class gl_shader;
 
 class scene {
 public:
@@ -23,7 +23,7 @@ public:
   entity create_entity(const std::string &name);
   std::vector<entity> create_entity_from_model(
       asset_handle model_asset_handle, model &model_to_load,
-      asset_handle shader_asset_handle, shader &material_shader,
+      asset_handle shader_asset_handle, gl_shader &material_shader,
       glm::vec3 scale = glm::vec3(1.0f), glm::vec3 euler = glm::vec3(0.0f),
       std::map<std::string, texture_map_type> known_maps = {});
 

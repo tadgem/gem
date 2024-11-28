@@ -1,7 +1,7 @@
 #pragma once
 #include "gem/ecs_system.h"
+#include "gem/gl/gl_shader.h"
 #include "gem/model.h"
-#include "gem/shader.h"
 #include "gem/texture.h"
 #include <any>
 #include <map>
@@ -14,9 +14,9 @@ class asset_manager;
 
 class material {
 public:
-  material(asset_handle shader_handle, shader &shader_program);
+  material(asset_handle shader_handle, gl_shader &shader_program);
 
-  std::map<std::string, shader::uniform_type> m_uniforms;
+  std::map<std::string, gl_shader::uniform_type> m_uniforms;
   std::map<std::string, std::any> m_uniform_values;
 
   template <typename _Ty>
@@ -36,7 +36,7 @@ public:
 
   void bind_material_uniforms(asset_manager &am);
 
-  shader &m_prog;
+  gl_shader &m_prog;
   const asset_handle m_shader_handle;
 };
 

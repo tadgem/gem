@@ -1,8 +1,8 @@
 #define GLM_ENABLE_EXPERIMENTAL
 
 #include "gem/gl/tech/taa.h"
+#include "gem/gl/gl_dbg.h"
 #include "gem/gl/gl_framebuffer.h"
-#include "gem/gl/open_gl_dbg.h"
 #include "gem/gl/tech/tech_utils.h"
 #include "gem/profile.h"
 #include "gem/shape.h"
@@ -10,7 +10,7 @@
 
 namespace gem {
 
-void tech::taa::dispatch_taa_pass(shader &taa, gl_framebuffer &pass_buffer,
+void tech::taa::dispatch_taa_pass(gl_shader &taa, gl_framebuffer &pass_buffer,
                                   gl_framebuffer pass_resolve_buffer,
                                   gl_framebuffer &pass_history_buffer,
                                   gl_handle &velocity_buffer_attachment,

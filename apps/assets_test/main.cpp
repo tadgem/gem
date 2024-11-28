@@ -13,7 +13,8 @@
 #include "gem/camera.h"
 #include "gem/events.h"
 #include "gem/gl/gl_framebuffer.h"
-#include "gem/gl/im3d_gl.h"
+#include "gem/gl/gl_im3d.h"
+#include "gem/gl/gl_shader.h"
 #include "gem/gl/tech/gbuffer.h"
 #include "gem/gl/tech/lighting.h"
 #include "gem/gl/tech/shadow.h"
@@ -27,7 +28,6 @@
 #include "gem/material.h"
 #include "gem/model.h"
 #include "gem/scene.h"
-#include "gem/shader.h"
 #include "gem/shape.h"
 #include "gem/texture.h"
 #include "gem/transform.h"
@@ -43,13 +43,13 @@ int main()
     gl_backend::init(backend_init{ window_res, true });
     asset_manager am{};
 
-    auto im3d_s =  im3d_gl::load_im3d();
+    auto im3d_s = gl_im3d::load_im3d();
     while (!gl_backend::s_quit)
     {       
         gl_backend::process_sdl_event();
         gl_backend::engine_pre_frame();        
         glm::vec2 window_dim = gl_backend::get_window_dim();
-        im3d_gl::new_frame_im3d(im3d_s, window_dim, camera{});
+        gl_im3d::new_frame_im3d(im3d_s, window_dim, camera{});
 
         am.update();
 
@@ -137,13 +137,13 @@ int main()
             ifd::FileDialog::Instance().Close();
         }
         ImGui::End();
-        
-        im3d_gl::end_frame_im3d(im3d_s, { window_res.x, window_res.y }, camera{});
+
+        gl_im3d::end_frame_im3d(im3d_s, { window_res.x, window_res.y }, camera{});
         gl_backend::engine_post_frame();
     }
 
     am.shutdown();
-    im3d_gl::shutdown_im3d(im3d_s);
+    gl_im3d::shutdown_im3d(im3d_s);
     gl_backend::engine_shut_down();
 
     return 0;

@@ -6,7 +6,7 @@
 namespace gem
 {
 
-void reload_shader(asset_t<shader, asset_type::shader> *shader_asset,
+void reload_shader(asset_t<gl_shader, asset_type::shader> *shader_asset,
                    std::string shader_source) {
 
 }
@@ -42,12 +42,12 @@ void GemFileListener::handleFileAction(efsw::WatchID watchid,
         asset_load_progress::loaded) {
       spdlog::info("GemFileListener : Reloading : {}{}", dir, filename);
       std::string shader_source = utils::load_string_from_path(full_path);
-      auto* shader_asset = engine::assets.get_asset<shader, asset_type::shader>(ah);
+      auto* shader_asset = engine::assets.get_asset<gl_shader, asset_type::shader>(ah);
 
       engine::debug_callbacks.add([shader_asset, shader_source]()
       {
           shader_asset->m_data.release();
-          shader_asset->m_data = shader::create_from_composite(shader_source);
+          shader_asset->m_data = gl_shader::create_from_composite(shader_source);
       });
     }
     break;
