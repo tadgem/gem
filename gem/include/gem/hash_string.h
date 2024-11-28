@@ -1,5 +1,6 @@
 #pragma once
 #include "alias.h"
+#include "gem/profile.h"
 #include "ctti/type_id.hpp"
 #include "json.hpp"
 #include "spdlog/spdlog.h"
@@ -16,10 +17,12 @@ namespace gem {
 class hash_utils {
 public:
   template <typename T> static std::string get_type_name() {
+    ZoneScoped;
     return ctti::type_id<T>().name().str();
   }
 
   template <typename T> static u64 get_type_hash() {
+    ZoneScoped;
     return ctti::type_id<T>().hash();
   }
 
@@ -37,6 +40,7 @@ struct hash_string {
 
   hash_string(const std::string &input)
       : m_value(hash_utils::get_string_hash(input)) {
+    ZoneScoped;
 #ifdef TRACK_HASH_STRING_ORIGINALS
 #ifdef CHECK_FOR_HASH_STRING_COLLISIONS
     if (s_hash_string_originals.find(m_value) !=

@@ -27,6 +27,8 @@ struct asset_load_info {
   }
 
   asset_handle to_handle();
+
+  GEM_IMPL_ALLOC(asset_load_info)
 };
 
 struct asset_load_return {
@@ -35,6 +37,8 @@ struct asset_load_return {
   std::vector<asset_load_info> m_new_assets_to_load;
   // synchronous tasks associated with this asset e.g. submit texture mem to GPU
   std::vector<asset_load_callback> m_asset_load_sync_callbacks;
+
+  GEM_IMPL_ALLOC(asset_load_return)
 };
 
 class asset_manager {
@@ -83,8 +87,9 @@ public:
   void update();
   void shutdown();
 
-  // todo: make private after debugging and testing
-  // protected:
+  GEM_IMPL_ALLOC(asset_manager)
+
+protected:
   std::unordered_map<asset_handle, std::future<asset_load_return>>
       p_pending_load_tasks;
   std::unordered_map<asset_handle, std::unique_ptr<asset>>
@@ -98,8 +103,8 @@ public:
   std::vector<asset_load_info>
       p_queued_loads;
 
-  std::unique_ptr<efsw::FileWatcher>  p_file_watcher;
-  std::unique_ptr<GemFileListener>    p_gem_listener;
+  std::unique_ptr<efsw::FileWatcher>    p_file_watcher;
+  std::unique_ptr<gem_file_listener>    p_gem_listener;
 
   const uint16_t p_callback_tasks_per_tick = 1;
   const uint16_t p_max_async_tasks_in_flight = 8;

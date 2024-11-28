@@ -3,6 +3,7 @@
 #include "gem/alias.h"
 #include "gem/aabb.h"
 #include "gem/texture.h"
+#include "gem/dbg_memory.h"
 #include "json.hpp"
 #include <map>
 #include <memory>
@@ -36,6 +37,8 @@ public:
   const hash_string m_name_hash;
   entt::registry m_registry;
   aabb m_scene_bounding_volume;
+
+  GEM_IMPL_ALLOC(scene)
 
 protected:
   u32 p_created_entity_count;
@@ -74,6 +77,8 @@ public:
     }
     return true;
   }
+
+  GEM_IMPL_ALLOC(entity)
 };
 
 // component which all entities must have
@@ -94,6 +99,7 @@ public:
   nlohmann::json save_scene(scene *ser_scene);
   void save_scene_to_disk(const std::string& path, scene *ser_scene);
 
+  GEM_IMPL_ALLOC(scene_manager)
 protected:
   std::vector<std::unique_ptr<scene>> p_active_scenes;
 };

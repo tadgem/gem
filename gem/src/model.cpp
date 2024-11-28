@@ -340,7 +340,7 @@ void model::update_aabb() {
 void model::release() {
   ZoneScoped;
   for (mesh &m : m_meshes) {
-    m.m_vao.free();
+    m.m_vao.release();
   }
 }
 } // namespace gem

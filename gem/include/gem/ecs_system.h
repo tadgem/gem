@@ -1,6 +1,7 @@
 #pragma once
+#include "gem/dbg_memory.h"
+#include "gem/hash_string.h"
 #include "entt/entt.hpp"
-#include "hash_string.h"
 #include "json.hpp"
 #include <type_traits>
 #include <unordered_map>
@@ -46,5 +47,8 @@ public:
     m_system_type_aliases.emplace(type_str_hash, m_systems.back().get());
     return m_system_type_aliases[type_str_hash];
   }
+
+  GEM_IMPL_ALLOC(system_manager)
+
 };
 } // namespace gem

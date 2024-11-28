@@ -40,6 +40,8 @@ struct asset_handle {
   }
 
   NLOHMANN_DEFINE_TYPE_INTRUSIVE(asset_handle, m_type, m_path_hash);
+
+  GEM_IMPL_ALLOC(asset_handle)
 };
 
 struct serializable_asset_handle {
@@ -47,6 +49,8 @@ struct serializable_asset_handle {
   std::string m_path;
 
   NLOHMANN_DEFINE_TYPE_INTRUSIVE(serializable_asset_handle, m_handle, m_path)
+
+  GEM_IMPL_ALLOC(serializable_asset_handle)
 };
 
 class asset {
@@ -54,6 +58,8 @@ public:
   asset(const std::string &path, asset_type type);
 
   virtual ~asset(){};
+
+  GEM_IMPL_ALLOC(asset)
 
   const std::string m_path;
   const asset_handle m_handle;

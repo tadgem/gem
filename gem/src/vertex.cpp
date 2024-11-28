@@ -7,7 +7,7 @@ void VAO::use() {
   ZoneScoped;
   glBindVertexArray(m_vao_id);
 }
-void VAO::free() {
+void VAO::release() {
   ZoneScoped;
   if (m_ibo > 0) {
     glDeleteBuffers(1, &m_ibo);

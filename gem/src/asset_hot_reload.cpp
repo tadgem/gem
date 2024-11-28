@@ -22,7 +22,7 @@ void clean_delimiters(std::string& input)
   }
 }
 
-void GemFileListener::handleFileAction(efsw::WatchID watchid,
+void gem_file_listener::handleFileAction(efsw::WatchID watchid,
                                        const std::string &dir,
                                        const std::string &filename,
                                        efsw::Action action,

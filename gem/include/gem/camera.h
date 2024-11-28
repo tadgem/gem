@@ -1,4 +1,5 @@
 #pragma once
+#include "gem/dbg_memory.h"
 #include "glm.hpp"
 #include <array>
 
@@ -6,6 +7,9 @@ namespace gem {
 
 struct frustum_planes {
   std::array<glm::vec4, 6> m_planes; // L,R,B,T,N,F
+
+  GEM_IMPL_ALLOC(frustum_planes)
+
 };
 
 struct camera {
@@ -25,6 +29,9 @@ struct camera {
   void update(glm::vec2 screen_dim);
 
   glm::mat4 get_rotation_matrix();
+
+  GEM_IMPL_ALLOC(camera)
+
 };
 
 struct debug_camera_controller {
@@ -36,5 +43,8 @@ struct debug_camera_controller {
   static constexpr float rotational_factor = 360.0f;
 
   bool show_mouse = true;
+
+  GEM_IMPL_ALLOC(debug_camera_controller)
+
 };
 } // namespace gem

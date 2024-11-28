@@ -92,5 +92,8 @@ struct sampler_info {
   GLenum sampler_slot;
   GLenum texture_target;
   texture_entry tex_entry;
+
+  GEM_IMPL_ALLOC(sampler_info)
+
 };
 } // namespace gem

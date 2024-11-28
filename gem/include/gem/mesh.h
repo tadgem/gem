@@ -4,6 +4,7 @@
 #include "gem/ecs_system.h"
 #include "gem/aabb.h"
 #include "gem/vertex.h"
+#include "gem/dbg_memory.h"
 
 namespace gem {
 
@@ -24,6 +25,7 @@ struct mesh_component {
   mesh m_mesh;
   asset_handle m_handle;
   u32 m_mesh_index;
+
 };
 
 class mesh_sys : public ecs_system {

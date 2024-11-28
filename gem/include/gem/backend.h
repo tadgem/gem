@@ -5,7 +5,7 @@
 #include "imgui.h"
 #include <iostream>
 #include <string>
-
+#include "gem/dbg_memory.h"
 namespace gem {
 
 enum class backend_api
@@ -24,6 +24,8 @@ void init_imgui_file_dialog();
 struct backend_init {
   glm::vec2 window_resolution;
   bool enable_vsync;
+
+  GEM_IMPL_ALLOC(backend_init)
 };
 
 class gpu_backend

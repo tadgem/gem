@@ -14,5 +14,7 @@ public:
 
   nlohmann::json serialize(asset_manager &am);
   void deserialize(asset_manager &am, nlohmann::json &proj_json);
+
+  GEM_IMPL_ALLOC(project)
 };
 } // namespace gem
