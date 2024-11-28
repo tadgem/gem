@@ -205,7 +205,7 @@ void gl_im3d::end_frame_im3d(im3d_state &state, glm::ivec2 screen_dim,
                              camera &cam) {
   ZoneScoped;
   Im3d::EndFrame();
-  GPU_MARKER("Im3d");
+  GEM_GPU_MARKER("Im3d");
   // TODO: Enable blending to allow transparent filled im3d shapes
   // glEnable(GL_BLEND);
   // glBlendEquation(GL_FUNC_ADD);

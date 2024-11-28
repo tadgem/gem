@@ -15,7 +15,7 @@ void tech::utils::dispatch_denoise_image(gl_shader &denoise_shader,
                                          float aThreshold, float aKSigma,
                                          glm::ivec2 window_res) {
   ZoneScoped;
-  GPU_MARKER("Denoise Image Pass");
+  GEM_GPU_MARKER("Denoise Image Pass");
   denoised.bind();
   denoise_shader.use();
   denoise_shader.set_int("imageData", 0);
@@ -33,7 +33,7 @@ void tech::utils::dispatch_present_image(gl_shader &present_shader,
                                          const int texture_slot,
                                          gl_handle texture) {
   ZoneScoped;
-  GPU_MARKER("Present Image Pass");
+  GEM_GPU_MARKER("Present Image Pass");
   present_shader.use();
   shapes::s_screen_quad.use();
   present_shader.set_int(uniform_name.c_str(), texture_slot);
@@ -46,7 +46,7 @@ void tech::utils::blit_to_fb(gl_framebuffer &fb, gl_shader &present_shader,
                              const std::string &uniform_name,
                              const int texture_slot, gl_handle texture) {
   ZoneScoped;
-  GPU_MARKER("Blit Pass");
+  GEM_GPU_MARKER("Blit Pass");
   fb.bind();
   tech::utils::dispatch_present_image(present_shader, uniform_name,
                                       texture_slot, texture);

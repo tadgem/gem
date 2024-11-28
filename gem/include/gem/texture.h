@@ -71,7 +71,7 @@ public:
   inline static texture *white;
   inline static texture *black;
 
-  DEBUG_IMPL_ALLOC(texture);
+  GEM_IMPL_ALLOC(texture);
 };
 
 struct texture_entry {
@@ -83,7 +83,7 @@ struct texture_entry {
   texture_entry() { m_texture = nullptr; };
   texture_entry(texture_map_type tmt, asset_handle ah, const std::string &path,
                 texture *data);
-  DEBUG_IMPL_ALLOC(texture_entry);
+  GEM_IMPL_ALLOC(texture_entry);
 
   NLOHMANN_DEFINE_TYPE_INTRUSIVE(texture_entry, m_map_type, m_handle, m_path)
 };

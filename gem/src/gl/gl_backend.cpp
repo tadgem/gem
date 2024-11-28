@@ -16,7 +16,7 @@ namespace gem {
 // todo: rework this to allow rendering backend to init
 void gl_backend::init(backend_init &init_props) {
   ZoneScoped;
-#ifdef ENABLE_MEMORY_TRACKING
+#ifdef GEM_ENABLE_MEMORY_TRACKING
   debug_memory_tracker::s_instance = new debug_memory_tracker();
 #endif
 
@@ -174,7 +174,7 @@ void gl_backend::engine_pre_frame() {
 void gl_backend::engine_post_frame() {
   ZoneScoped;
   {
-    GPU_MARKER("ImGui");
+    GEM_GPU_MARKER("ImGui");
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     SDL_GL_SwapWindow(m_window);

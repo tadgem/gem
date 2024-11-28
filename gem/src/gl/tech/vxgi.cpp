@@ -14,7 +14,7 @@ void tech::vxgi::dispatch_gbuffer_voxelization(gl_shader &voxelization,
                                                gl_framebuffer &lightpass_buffer,
                                                glm::ivec2 window_res) {
   ZoneScoped;
-  GPU_MARKER("GBuffer Voxelisation");
+  GEM_GPU_MARKER("GBuffer Voxelisation");
   voxelization.use();
   voxelization.set_int("u_gbuffer_pos", 0);
   voxelization.set_int("u_gbuffer_lighting", 1);
@@ -36,7 +36,7 @@ void tech::vxgi::dispatch_gen_voxel_mips(gl_shader &voxelization_mips,
                                          voxel::grid &voxel_data,
                                          glm::vec3 _3d_tex_res_vec) {
   ZoneScoped;
-  GPU_MARKER("Voxel Mips Generation");
+  GEM_GPU_MARKER("Voxel Mips Generation");
   constexpr int MAX_MIPS = 5;
   voxelization_mips.use();
   // for each mip in remaining_mipps
@@ -68,7 +68,7 @@ void tech::vxgi::dispatch_cone_tracing_pass(
     camera &cam, float max_trace_distance, float resolution_scale,
     float diffuse_spec_mix) {
   ZoneScoped;
-  GPU_MARKER("Cone Tracing Pass");
+  GEM_GPU_MARKER("Cone Tracing Pass");
 
   glBindTexture(GL_TEXTURE_3D, voxel_data.voxel_texture.m_handle);
 
@@ -108,7 +108,7 @@ void tech::vxgi::dispatch_voxel_reprojection(gl_shader &voxel_reprojection,
                                              aabb old_bb, aabb new_bb) {
 
   ZoneScoped;
-  GPU_MARKER("Voxel Reprojection");
+  GEM_GPU_MARKER("Voxel Reprojection");
   voxel_reprojection.use();
   voxel_reprojection.set_int("u_grid", 0);
   voxel_reprojection.set_vec3("u_resolution", _3d_tex_res_vec);
@@ -128,7 +128,7 @@ void tech::vxgi::dispatch_blit_voxel(gl_shader &blit_voxel,
                                      voxel::grid &voxel_data,
                                      glm::vec3 _3d_tex_res_vec) {
   ZoneScoped;
-  GPU_MARKER("Voxel History Blit");
+  GEM_GPU_MARKER("Voxel History Blit");
   blit_voxel.use();
   texture::bind_image_handle(voxel_data.voxel_texture.m_handle, 0, 0,
                              GL_RGBA16F);
@@ -144,7 +144,7 @@ void tech::vxgi::dispatch_clear_voxel(gl_shader &clear_voxel,
                                       voxel::grid &voxel_data,
                                       glm::vec3 _3d_tex_res_vec) {
   ZoneScoped;
-  GPU_MARKER("Clear Voxel Grid");
+  GEM_GPU_MARKER("Clear Voxel Grid");
   clear_voxel.use();
   texture::bind_image_handle(voxel_data.voxel_texture.m_handle, 0, 0,
                              GL_RGBA16F);

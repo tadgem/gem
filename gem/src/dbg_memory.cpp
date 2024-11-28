@@ -1,7 +1,7 @@
 #include "gem/dbg_memory.h"
 #include "gem/profile.h"
 
-#ifdef ENABLE_MEMORY_TRACKING
+#ifdef GEM_ENABLE_MEMORY_TRACKING
 namespace gem {
 
 debug_memory_tracker::debug_memory_tracker() {

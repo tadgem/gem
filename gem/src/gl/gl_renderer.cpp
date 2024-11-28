@@ -412,7 +412,7 @@ void gl_renderer::render(asset_manager &am, camera &cam,
   glClear(GL_DEPTH_BUFFER_BIT);
   if (m_debug_draw_final_pass) {
     TracyGpuZone("Composite Final Pass");
-    GPU_MARKER("Composite Final Pass");
+    GEM_GPU_MARKER("Composite Final Pass");
     m_final_pass.bind();
     shapes::s_screen_quad.use();
     m_combine_shader->m_data.use();

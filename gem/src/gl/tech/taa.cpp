@@ -16,7 +16,7 @@ void tech::taa::dispatch_taa_pass(gl_shader &taa, gl_framebuffer &pass_buffer,
                                   gl_handle &velocity_buffer_attachment,
                                   glm::ivec2 window_res) {
   ZoneScoped;
-  GPU_MARKER("TAA Pass");
+  GEM_GPU_MARKER("TAA Pass");
   pass_resolve_buffer.bind();
   shapes::s_screen_quad.use();
   taa.use();

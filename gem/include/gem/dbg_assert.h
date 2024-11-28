@@ -1,8 +1,10 @@
 #pragma once
-#include <iostream>
-#define AASSERT(_cond_, msg)                                                   \
+#include "spdlog/spdlog.h"
+#include "cpptrace/cpptrace.hpp"
+
+#define GEM_ASSERT(_cond_, msg)                                                   \
   if (!_cond_) {                                                               \
-    std::cerr << "Assertion Failed : " << __FILE__ << " : " << __LINE__        \
-              << " : " << msg;                                                 \
+       spdlog::error("ASSERTION FAILED : {}:{} : {}", __FILE__, __LINE__, msg);   \
+       spdlog::error(cpptrace::generate_trace().to_string(true));\
     exit(-1);                                                                  \
   }

@@ -18,12 +18,12 @@ public:
     aabb m_mesh_aabb;
     u32 m_material_index;
 
-    DEBUG_IMPL_ALLOC(mesh_entry)
+    GEM_IMPL_ALLOC(mesh_entry)
   };
 
   struct material_entry {
     std::unordered_map<texture_map_type, texture_entry> m_material_maps;
-    DEBUG_IMPL_ALLOC(material_entry);
+    GEM_IMPL_ALLOC(material_entry);
   };
 
   std::vector<mesh> m_meshes;
@@ -39,7 +39,7 @@ public:
   void update_aabb();
   void release();
 
-  DEBUG_IMPL_ALLOC(model);
+  GEM_IMPL_ALLOC(model);
 };
 
 using model_asset = asset_t<model, asset_type::model>;

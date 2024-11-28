@@ -7,6 +7,6 @@ namespace gem {
     glm::vec3 min;
     glm::vec3 max;
 
-    DEBUG_IMPL_ALLOC(aabb)
+    GEM_IMPL_ALLOC(aabb)
   };
 }

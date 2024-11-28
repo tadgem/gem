@@ -13,7 +13,7 @@ public:
   ~GL_DEBUG() { glPopDebugGroup(); }
 };
 
-#define GPU_MARKER(X) GL_DEBUG __marker__(X)
+#define GEM_GPU_MARKER(X) GL_DEBUG __marker__(X)
 } // namespace gem
 
 

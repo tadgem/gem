@@ -16,7 +16,7 @@ void tech::ssr::dispatch_ssr_pass(gl_shader &ssr, camera &cam,
                                   gl_framebuffer &lighting_buffer,
                                   glm::vec2 screen_dim) {
   ZoneScoped;
-  GPU_MARKER("SSR Pass");
+  GEM_GPU_MARKER("SSR Pass");
   shapes::s_screen_quad.use();
   ssr_buffer.bind();
   glClearColor(0, 0, 0, 1.0f);

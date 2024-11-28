@@ -17,7 +17,7 @@ void tech::lighting::dispatch_light_pass(
     gl_framebuffer &gbuffer, gl_framebuffer &dir_light_shadow_buffer,
     camera &cam, std::vector<point_light> &point_lights, dir_light &sun) {
   ZoneScoped;
-  GPU_MARKER("Lighting Pass");
+  GEM_GPU_MARKER("Lighting Pass");
   lighting_buffer.bind();
   lighting_shader.use();
   shapes::s_screen_quad.use();

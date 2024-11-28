@@ -19,7 +19,7 @@ void tech::shadow::dispatch_shadow_pass(gl_framebuffer &shadow_fb,
                                         std::vector<scene *> &scenes,
                                         glm::ivec2 window_res) {
   ZoneScoped;
-  GPU_MARKER("Shadow Map Pass");
+  GEM_GPU_MARKER("Shadow Map Pass");
   float near_plane = 0.01f, far_plane = 1000.0f;
   glm::mat4 lightProjection =
       glm::ortho(-100.0f, 100.0f, -100.0f, 100.0f, near_plane, far_plane);

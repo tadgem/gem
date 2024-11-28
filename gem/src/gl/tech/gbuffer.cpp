@@ -17,7 +17,7 @@ void tech::gbuffer::dispatch_gbuffer(u32 frame_index, gl_framebuffer &gbuffer,
                                      std::vector<scene *> &scenes,
                                      glm::ivec2 win_res) {
   ZoneScoped;
-  GPU_MARKER("GBuffer");
+  GEM_GPU_MARKER("GBuffer");
   glDisable(GL_DITHER);
   gbuffer.bind();
   glm::mat4 current_vp = cam.m_proj * cam.m_view;
@@ -67,7 +67,7 @@ void tech::gbuffer::dispatch_gbuffer_with_id(
     asset_manager &am, camera &cam, std::vector<scene *> &scenes,
     glm::ivec2 win_res) {
   ZoneScoped;
-  GPU_MARKER("GBuffer-EntityID");
+  GEM_GPU_MARKER("GBuffer-EntityID");
   glDisable(GL_DITHER);
 
   gbuffer.bind();

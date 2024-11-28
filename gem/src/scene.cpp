@@ -1,6 +1,7 @@
 #define GLM_ENABLE_EXPERIMENTAL
 
 #include "gem/scene.h"
+#include "gem/dbg_assert.h"
 #include "gem/engine.h"
 #include "gem/gl/gl_shader.h"
 #include "gem/material.h"
@@ -153,6 +154,8 @@ scene *scene_manager::load_scene(nlohmann::json &scene_json) {
 
 nlohmann::json scene_manager::save_scene(scene *ser_scene) {
   ZoneScoped;
+  GEM_ASSERT(ser_scene, "Trying to save an invalid scene");
+
   nlohmann::json json{};
 
   json["name"] = ser_scene->m_name;
@@ -179,6 +182,7 @@ scene *scene_manager::load_scene_from_disk(const std::string &scene_path) {
     return nullptr;
   }
   nlohmann::json scene_json = nlohmann::json::parse(scene_json_str);
+  GEM_ASSERT(!scene_json.empty(), "Failed to deserialize scene json at path : " + scene_path);
   return load_scene(scene_json);
 }
 } // namespace gem

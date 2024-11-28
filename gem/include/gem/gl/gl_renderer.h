@@ -22,24 +22,24 @@ public:
 
   entt::entity get_mouse_entity(glm::vec2 mouse_position);
 
-  shader_asset *m_gbuffer_shader;
-  shader_asset *m_gbuffer_textureless_shader;
-  shader_asset *m_lighting_shader;
-  shader_asset *m_visualise_3d_tex_shader;
-  shader_asset *m_visualise_3d_tex_instances_shader;
-  shader_asset *m_present_shader;
-  shader_asset *m_dir_light_shadow_shader;
-  shader_asset *m_voxel_cone_tracing_shader;
-  shader_asset *m_ssr_shader;
-  shader_asset *m_taa_shader;
-  shader_asset *m_denoise_shader;
-  shader_asset *m_combine_shader;
-  shader_asset *m_downsample_shader;
-  shader_asset *m_compute_voxelize_gbuffer_shader;
-  shader_asset *m_compute_voxel_mips_shader;
-  shader_asset *m_compute_voxel_reprojection_shader;
-  shader_asset *m_compute_voxel_blit_shader;
-  shader_asset *m_compute_voxel_clear_shader;
+  gl_shader_asset *m_gbuffer_shader;
+  gl_shader_asset *m_gbuffer_textureless_shader;
+  gl_shader_asset *m_lighting_shader;
+  gl_shader_asset *m_visualise_3d_tex_shader;
+  gl_shader_asset *m_visualise_3d_tex_instances_shader;
+  gl_shader_asset *m_present_shader;
+  gl_shader_asset *m_dir_light_shadow_shader;
+  gl_shader_asset *m_voxel_cone_tracing_shader;
+  gl_shader_asset *m_ssr_shader;
+  gl_shader_asset *m_taa_shader;
+  gl_shader_asset *m_denoise_shader;
+  gl_shader_asset *m_combine_shader;
+  gl_shader_asset *m_downsample_shader;
+  gl_shader_asset *m_compute_voxelize_gbuffer_shader;
+  gl_shader_asset *m_compute_voxel_mips_shader;
+  gl_shader_asset *m_compute_voxel_reprojection_shader;
+  gl_shader_asset *m_compute_voxel_blit_shader;
+  gl_shader_asset *m_compute_voxel_clear_shader;
 
   gl_framebuffer m_gbuffer;
   gl_framebuffer m_gbuffer_downsample;
