@@ -4,9 +4,10 @@
 #include <string>
 
 namespace gem {
-
 class gl_shader;
 class gl_framebuffer;
+
+namespace open_gl {
 
 namespace tech {
 class utils {
@@ -24,4 +25,5 @@ public:
                          const int texture_slot, gl_handle texture);
 };
 } // namespace tech
+} // namespace open_gl
 } // namespace gem

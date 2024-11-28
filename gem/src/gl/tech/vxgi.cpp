@@ -6,6 +6,7 @@
 #include "gem/profile.h"
 
 namespace gem {
+namespace open_gl {
 
 void tech::vxgi::dispatch_gbuffer_voxelization(gl_shader &voxelization,
                                                voxel::grid &voxel_data,
@@ -119,7 +120,8 @@ void tech::vxgi::dispatch_voxel_reprojection(gl_shader &voxel_reprojection,
                              GL_RGBA16F);
   texture::bind_image_handle(voxel_data.history_voxel_texture.m_handle, 1, 0,
                              GL_RGBA16F);
-  glAssert(glDispatchCompute(_3d_tex_res_vec.x / 8, _3d_tex_res_vec.y / 8,_3d_tex_res_vec.z / 8));
+  glAssert(glDispatchCompute(_3d_tex_res_vec.x / 8, _3d_tex_res_vec.y / 8,
+                             _3d_tex_res_vec.z / 8));
   glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 }
 void tech::vxgi::dispatch_blit_voxel(gl_shader &blit_voxel,
@@ -134,7 +136,8 @@ void tech::vxgi::dispatch_blit_voxel(gl_shader &blit_voxel,
                              GL_RGBA16F);
   blit_voxel.set_vec3("u_voxel_resolution", _3d_tex_res_vec);
 
-  glAssert(glDispatchCompute(_3d_tex_res_vec.x / 8, _3d_tex_res_vec.y / 8,_3d_tex_res_vec.z / 8));
+  glAssert(glDispatchCompute(_3d_tex_res_vec.x / 8, _3d_tex_res_vec.y / 8,
+                             _3d_tex_res_vec.z / 8));
   glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 }
 void tech::vxgi::dispatch_clear_voxel(gl_shader &clear_voxel,
@@ -145,7 +148,12 @@ void tech::vxgi::dispatch_clear_voxel(gl_shader &clear_voxel,
   clear_voxel.use();
   texture::bind_image_handle(voxel_data.voxel_texture.m_handle, 0, 0,
                              GL_RGBA16F);
-  glAssert(glDispatchCompute(_3d_tex_res_vec.x / 8, _3d_tex_res_vec.y / 8,_3d_tex_res_vec.z / 8));
+  glAssert(glDispatchCompute(_3d_tex_res_vec.x / 8, _3d_tex_res_vec.y / 8,
+                             _3d_tex_res_vec.z / 8));
   glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+}
+void tech::vxgi::dispatch_voxelisation_gbuffer_pass(
+    gl_shader &gbuffer_shader, voxel::grid &grid_data, gl_framebuffer gbuffer,
+    gl_framebuffer lighting_buffer, glm::ivec2 window_res) {}
 }
 } // namespace gem

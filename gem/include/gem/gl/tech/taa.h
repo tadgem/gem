@@ -4,6 +4,7 @@
 namespace gem {
 class gl_framebuffer;
 
+namespace open_gl {
 namespace tech {
 class taa {
 public:
@@ -14,4 +15,5 @@ public:
                                 glm::ivec2 window_res);
 };
 } // namespace tech
+} // namespace open_gl
 } // namespace gem

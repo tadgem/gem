@@ -4,6 +4,7 @@ namespace gem {
 
 class camera;
 class gl_framebuffer;
+namespace open_gl {
 namespace tech {
 class ssr {
 public:
@@ -14,4 +15,5 @@ public:
                                 glm::vec2 screen_dim);
 };
 } // namespace tech
+} // namespace open_gl
 } // namespace gem

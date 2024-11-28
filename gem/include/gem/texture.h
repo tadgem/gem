@@ -28,13 +28,18 @@ public:
   ~texture();
 
   void bind_sampler(GLenum texture_slot, GLenum texture_target = GL_TEXTURE_2D);
+
   static void bind_sampler_handle(gl_handle handle, GLenum texture_slot,
                                   GLenum texture_target = GL_TEXTURE_2D);
+
   static void bind_image_handle(gl_handle handle, uint32_t binding,
                                 uint32_t mip_level, GLenum format);
+
   static void unbind_image(uint32_t binding);
 
   int m_width, m_height, m_depth, m_num_channels;
+
+  // TODO: Support Vulkan texture handles
   gl_handle m_handle = INVALID_GL_HANDLE;
   mode m_mode = mode::memory;
 

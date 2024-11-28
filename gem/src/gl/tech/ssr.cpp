@@ -8,6 +8,7 @@
 #include "gem/shape.h"
 #include "gem/texture.h"
 namespace gem {
+namespace open_gl {
 
 void tech::ssr::dispatch_ssr_pass(gl_shader &ssr, camera &cam,
                                   gl_framebuffer &ssr_buffer,
@@ -42,7 +43,6 @@ void tech::ssr::dispatch_ssr_pass(gl_shader &ssr, camera &cam,
   ssr.set_int("u_depth_buffer", 3);
   texture::bind_sampler_handle(gbuffer.m_depth_attachment, GL_TEXTURE3);
 
-
   glStencilFunc(GL_EQUAL, 1, 0xFF);
   glStencilMask(0x00);
 
@@ -50,4 +50,5 @@ void tech::ssr::dispatch_ssr_pass(gl_shader &ssr, camera &cam,
   glDepthMask(GL_TRUE);
   ssr_buffer.unbind();
 }
+} // namespace open_gl
 } // namespace gem

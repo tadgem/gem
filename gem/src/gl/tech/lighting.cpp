@@ -10,11 +10,12 @@
 #include "gem/utils.h"
 #include "gtc/quaternion.hpp"
 namespace gem {
+namespace open_gl {
 
 void tech::lighting::dispatch_light_pass(
     gl_shader &lighting_shader, gl_framebuffer &lighting_buffer,
-    gl_framebuffer &gbuffer, gl_framebuffer &dir_light_shadow_buffer, camera &cam,
-    std::vector<point_light> &point_lights, dir_light &sun) {
+    gl_framebuffer &gbuffer, gl_framebuffer &dir_light_shadow_buffer,
+    camera &cam, std::vector<point_light> &point_lights, dir_light &sun) {
   ZoneScoped;
   GPU_MARKER("Lighting Pass");
   lighting_buffer.bind();
@@ -70,4 +71,5 @@ void tech::lighting::dispatch_light_pass(
   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
   lighting_buffer.unbind();
 }
+} // namespace open_gl
 } // namespace gem

@@ -8,11 +8,13 @@
 #include "gem/scene.h"
 #include "gem/transform.h"
 namespace gem {
+namespace open_gl {
 
 void tech::gbuffer::dispatch_gbuffer(u32 frame_index, gl_framebuffer &gbuffer,
                                      gl_framebuffer &previous_position_buffer,
-                                     gl_shader &gbuffer_shader, asset_manager &am,
-                                     camera &cam, std::vector<scene *> &scenes,
+                                     gl_shader &gbuffer_shader,
+                                     asset_manager &am, camera &cam,
+                                     std::vector<scene *> &scenes,
                                      glm::ivec2 win_res) {
   ZoneScoped;
   GPU_MARKER("GBuffer");
@@ -112,4 +114,5 @@ void tech::gbuffer::dispatch_gbuffer_with_id(
   gbuffer.unbind();
   glEnable(GL_DITHER);
 }
+} // namespace open_gl
 } // namespace gem

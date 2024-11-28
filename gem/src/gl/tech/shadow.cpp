@@ -11,9 +11,11 @@
 #include "gtc/quaternion.hpp"
 
 namespace gem {
+namespace open_gl {
 
 void tech::shadow::dispatch_shadow_pass(gl_framebuffer &shadow_fb,
-                                        gl_shader &shadow_shader, dir_light &sun,
+                                        gl_shader &shadow_shader,
+                                        dir_light &sun,
                                         std::vector<scene *> &scenes,
                                         glm::ivec2 window_res) {
   ZoneScoped;
@@ -54,5 +56,5 @@ void tech::shadow::dispatch_shadow_pass(gl_framebuffer &shadow_fb,
   glDisable(GL_CULL_FACE);
   glViewport(0, 0, window_res.x, window_res.y);
 }
-
+} // namespace open_gl
 } // namespace gem

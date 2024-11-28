@@ -7,7 +7,7 @@ namespace gem {
 class camera;
 class scene;
 class asset_manager;
-
+namespace open_gl {
 namespace tech {
 class gbuffer {
 public:
@@ -25,4 +25,5 @@ public:
                                        glm::ivec2 win_res);
 };
 } // namespace tech
+} // namespace open_gl
 } // namespace gem

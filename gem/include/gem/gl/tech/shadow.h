@@ -6,7 +6,7 @@ namespace gem {
 
 class gl_framebuffer;
 class scene;
-
+namespace open_gl {
 namespace tech {
 class shadow {
 public:
@@ -16,4 +16,5 @@ public:
                                    glm::ivec2 window_res);
 };
 } // namespace tech
+} // namespace open_gl
 } // namespace gem

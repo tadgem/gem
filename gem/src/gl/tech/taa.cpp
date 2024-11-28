@@ -9,7 +9,7 @@
 #include "gem/texture.h"
 
 namespace gem {
-
+namespace open_gl {
 void tech::taa::dispatch_taa_pass(gl_shader &taa, gl_framebuffer &pass_buffer,
                                   gl_framebuffer pass_resolve_buffer,
                                   gl_framebuffer &pass_history_buffer,
@@ -36,4 +36,5 @@ void tech::taa::dispatch_taa_pass(gl_shader &taa, gl_framebuffer &pass_buffer,
   texture::bind_sampler_handle(0, GL_TEXTURE1);
   texture::bind_sampler_handle(0, GL_TEXTURE2);
 }
+} // namespace open_gl
 } // namespace gem

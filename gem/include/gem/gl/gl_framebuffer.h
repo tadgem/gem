@@ -19,10 +19,11 @@ public:
                              uint32_t height, GLenum internal_format,
                              GLenum format, GLenum filter = GL_LINEAR,
                              GLenum pixel_format = GL_UNSIGNED_BYTE);
+
   void add_depth_attachment(uint32_t width, uint32_t height,
                             GLenum format = GL_DEPTH24_STENCIL8);
-  void
-  add_depth_attachment_sampler_friendly(uint32_t width, uint32_t height,
+
+  void add_depth_attachment_sampler_friendly(uint32_t width, uint32_t height,
                                         GLenum format = GL_DEPTH24_STENCIL8);
   void check();
 

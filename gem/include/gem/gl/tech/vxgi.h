@@ -6,10 +6,16 @@
 namespace gem {
 
 class camera;
-
+namespace open_gl {
 namespace tech {
 class vxgi {
 public:
+  static void dispatch_voxelisation_gbuffer_pass(gl_shader &gbuffer_shader,
+                                                 voxel::grid &grid_data,
+                                                 gl_framebuffer gbuffer,
+                                                 gl_framebuffer lighting_buffer,
+                                                 glm::ivec2 window_res);
+
   static void dispatch_gbuffer_voxelization(gl_shader &voxelization,
                                             voxel::grid &voxel_data,
                                             gl_framebuffer &gbuffer,
@@ -17,21 +23,21 @@ public:
                                             glm::ivec2 window_res);
 
   static void dispatch_blit_voxel(gl_shader &blit_voxel,
-                                      voxel::grid &voxel_data,
-                                      glm::vec3 _3d_tex_res_vec);
-
-  static void dispatch_clear_voxel(gl_shader &clear_voxel,
                                   voxel::grid &voxel_data,
                                   glm::vec3 _3d_tex_res_vec);
 
+  static void dispatch_clear_voxel(gl_shader &clear_voxel,
+                                   voxel::grid &voxel_data,
+                                   glm::vec3 _3d_tex_res_vec);
 
   static void dispatch_gen_voxel_mips(gl_shader &voxelization_mips,
                                       voxel::grid &voxel_data,
                                       glm::vec3 _3d_tex_res_vec);
 
   static void dispatch_voxel_reprojection(gl_shader &voxel_reprojection,
-                                      voxel::grid &voxel_data,
-                                      glm::vec3 _3d_tex_res_vec, aabb old_bb, aabb new_bb);
+                                          voxel::grid &voxel_data,
+                                          glm::vec3 _3d_tex_res_vec,
+                                          aabb old_bb, aabb new_bb);
 
   static void dispatch_cone_tracing_pass(
       gl_shader &voxel_cone_tracing, voxel::grid &voxel_data,
@@ -41,4 +47,5 @@ public:
       float diffuse_spec_mix);
 };
 } // namespace tech
+} // namesspace open_gl
 } // namespace gem

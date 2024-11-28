@@ -8,7 +8,7 @@
 #include "gem/texture.h"
 
 namespace gem {
-
+namespace open_gl {
 void tech::utils::dispatch_denoise_image(gl_shader &denoise_shader,
                                          gl_framebuffer &input,
                                          gl_framebuffer &denoised, float aSigma,
@@ -52,4 +52,5 @@ void tech::utils::blit_to_fb(gl_framebuffer &fb, gl_shader &present_shader,
                                       texture_slot, texture);
   fb.unbind();
 }
+} // namespace open_gl
 } // namespace gem
