@@ -17,11 +17,22 @@ void VAO::release() {
   }
   glDeleteVertexArrays(1, &m_vao_id);
 }
+void VAO::draw() {
+  use();
+  if(m_ibo != INVALID_GL_HANDLE)
+  {
+    glDrawElements(GL_TRIANGLES, static_cast<GLsizei >(m_index_count), GL_UNSIGNED_INT,0);
+  }
+  else
+  {
+    glDrawArrays(GL_TRIANGLES,0, static_cast<GLsizei >(m_index_count));
+  }
+}
 
 void vao_builder::begin() {
   ZoneScoped;
   m_offset_counter = 0;
-  m_ibo = 0;
+  m_ibo = INVALID_GL_HANDLE;
   m_vbos.clear();
   glGenVertexArrays(1, &m_vao);
   glBindVertexArray(m_vao);
@@ -36,6 +47,7 @@ void vao_builder::add_index_buffer(uint32_t *data, uint32_t data_count) {
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * data_count, data,
                GL_STATIC_DRAW);
   m_ibo = ibo;
+  m_index_count = data_count;
 }
 
 void vao_builder::add_index_buffer(std::vector<uint32_t> data) {
@@ -58,6 +70,6 @@ void vao_builder::add_vertex_attribute(uint32_t binding,
 
 VAO vao_builder::build() {
   ZoneScoped;
-  return VAO{m_vao, m_ibo, m_vbos};
+  return VAO{m_vao, m_ibo, m_index_count, m_vbos};
 }
 } // namespace gem

@@ -74,11 +74,11 @@ layout(location = 3) out vec3 oPBR;
 layout(location = 4) out vec2 oVelocity;
 layout(location = 5) out vec3 oEntityID;
 
-uniform vec3    u_diffuse_map;
-uniform float   u_metallic_map;
-uniform float   u_roughness_map;
-uniform float   u_ao_map;
-uniform sampler2D u_prev_position_map;
+uniform vec3        u_diffuse_map;
+uniform float       u_metallic_map;
+uniform float       u_roughness_map;
+uniform float       u_ao_map;
+uniform sampler2D   u_prev_position_map;
 
 uniform mat4    u_last_vp;
 uniform int     u_frame_index;
@@ -106,7 +106,6 @@ const vec2 halton_seq[16] = vec2[16]
 
 vec3 UnpackNormalMap( vec3 TextureSample )
 {
-
 	vec2 NormalXY = TextureSample.rg;
 	
 	NormalXY = NormalXY * vec2(2.0,2.0) - vec2(1.0,1.0);
@@ -115,7 +114,7 @@ vec3 UnpackNormalMap( vec3 TextureSample )
 }
 
 vec3 getNormalFromMap() {
-    vec3 tangentNormal = texture(u_normal_map, aUV).xyz * 2.0 - 1.0;
+    vec3 tangentNormal = aNormal;
 
     if(abs(tangentNormal.z) < 0.0001) {
         tangentNormal = UnpackNormalMap(tangentNormal);

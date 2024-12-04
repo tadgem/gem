@@ -9,9 +9,11 @@ namespace gem {
 // vulkan version will have buffer & alloc for vertex buffer and index buffer
 struct VAO {
   gl_handle m_vao_id;
-  gl_handle m_ibo = 0;
+  gl_handle m_ibo = INVALID_GL_HANDLE;
+  uint32_t  m_index_count;
   std::vector<gl_handle> m_vbos;
   void use();
+  void draw();
   void release();
 
 };
@@ -48,7 +50,8 @@ public:
   VAO build();
 
   gl_handle m_vao;
-  gl_handle m_ibo;
+  gl_handle m_ibo = INVALID_GL_HANDLE;
+  uint32_t  m_index_count = 0;
   std::vector<gl_handle> m_vbos;
   uint32_t m_offset_counter;
 };

@@ -73,8 +73,7 @@ int main()
     entity_data& data = e.get_component<entity_data>();
     material mat(renderer.m_gbuffer_shader->m_handle, renderer.m_gbuffer_shader->m_data);
     e.add_component<material>(renderer.m_gbuffer_shader->m_handle, renderer.m_gbuffer_shader->m_data);
-//    e.add_component<mesh_component>(mesh_component{mesh::s_cube, asset_handle(), 0});
-    // model sponza_geo = model::load_model_and_textures_from_path("assets/models/sponza/Sponza.gltf");
+
     engine::assets.load_asset("assets/models/sponza/Sponza.gltf", asset_type::model, [s, &renderer](asset* a) {
         spdlog::info("adding model to scene");
         model_asset* ma = static_cast<model_asset*>(a);
@@ -98,6 +97,20 @@ int main()
         engine::scenes.save_scene_to_disk("test.scene", s2);
         scene* s3 = engine::scenes.load_scene_from_disk("test.scene");
     });
+
+    auto cube_entity = s->create_entity("Test Cube");
+    auto& cube_trans = cube_entity.add_component<transform>();
+    auto& cube_mat = cube_entity.add_component<material>(
+        renderer.m_gbuffer_textureless_shader->m_handle,
+                renderer.m_gbuffer_textureless_shader->m_data);
+
+    cube_mat.set_uniform_value("u_diffuse_map", glm::vec3(255, 0.0, 0.0));
+    cube_mat.set_uniform_value("u_metallic_map", 0.5f);
+    cube_mat.set_uniform_value("u_roughness_map", 0.5f);
+
+    cube_entity.add_component<mesh_component>(
+        mesh_component {shapes::s_sphere_mesh, {}, 0});
+
 
     dir_light dir
     {
@@ -160,6 +173,11 @@ int main()
 
             ImGui::Text("Mouse Pos : %.3f, %.3f", mouse_pos.x, mouse_pos.y);
             ImGui::Text("Selected Entity ID : %d", renderer.m_last_selected_entity);
+            ImGui::Separator();
+            ImGui::Text("Debug Cube");
+            ImGui::DragFloat3("Cube Position", &cube_trans.m_position[0], 1.0f);
+            ImGui::DragFloat3("Cube Euler", &cube_trans.m_euler[0], 1.0f, 0.0, 360.0f);
+            ImGui::DragFloat3("Cube Scale", &cube_trans.m_scale[0], 1.0f);
             ImGui::Separator();
             ImGui::Text("Lights");
             ImGui::ColorEdit3("Dir Light Colour", &dir2.colour[0]);

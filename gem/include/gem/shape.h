@@ -13,6 +13,7 @@ public:
   inline static VAO             s_cube_vao;
   inline static mesh            s_cube_mesh;
 
+
   inline static VAO             s_sphere_vao;
   inline static mesh            s_sphere_mesh;
 

@@ -16,8 +16,7 @@ struct mesh {
   uint32_t m_material_index;
 
   void draw() {
-    m_vao.use();
-    glDrawElements(GL_TRIANGLES, m_index_count, GL_UNSIGNED_INT, 0);
+    m_vao.draw();
   }
 };
 

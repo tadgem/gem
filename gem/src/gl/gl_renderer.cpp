@@ -261,9 +261,15 @@ void gl_renderer::render(asset_manager &am, camera &cam,
 
   {
     TracyGpuZone("GBuffer");
+    m_gbuffer.bind();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     open_gl::tech::gbuffer::dispatch_gbuffer_with_id(
         m_frame_index, m_gbuffer, m_position_buffer_history,
         m_gbuffer_shader->m_data, am, cam, scenes, m_window_resolution);
+
+    open_gl::tech::gbuffer::dispatch_gbuffer_textureless_with_id(
+        m_frame_index, m_gbuffer, m_position_buffer_history,
+        m_gbuffer_textureless_shader->m_data, am, cam, scenes, m_window_resolution);
 
     m_frame_index++;
   }
@@ -307,6 +313,8 @@ void gl_renderer::render(asset_manager &am, camera &cam,
         m_lightpass_buffer_history, m_gbuffer.m_colour_attachments[4],
         m_window_resolution);
   }
+
+
   if (m_debug_draw_cone_tracing_pass || m_debug_draw_cone_tracing_pass_no_taa) {
     TracyGpuZone("Voxel Cone Tracing Pass");
     open_gl::tech::vxgi::dispatch_cone_tracing_pass(
@@ -439,6 +447,10 @@ void gl_renderer::render(asset_manager &am, camera &cam,
     open_gl::tech::utils::dispatch_present_image(
         m_present_shader->m_data, "u_image_sampler", 0,
         m_final_pass.m_colour_attachments.front());
+
+    m_conetracing_buffer_resolve.bind();
+    glClear(GL_COLOR_BUFFER_BIT);
+    m_conetracing_buffer.unbind();
   }
 
   {
