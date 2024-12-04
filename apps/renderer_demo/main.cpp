@@ -109,7 +109,7 @@ int main()
     cube_mat.set_uniform_value("u_roughness_map", 0.5f);
 
     cube_entity.add_component<mesh_component>(
-        mesh_component {shapes::s_sphere_mesh, {}, 0});
+        mesh_component {shapes::s_cone_mesh, {}, 0});
 
 
     dir_light dir
