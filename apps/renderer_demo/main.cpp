@@ -105,11 +105,11 @@ int main()
                 renderer.m_gbuffer_textureless_shader->m_data);
 
     cube_mat.set_uniform_value("u_diffuse_map", glm::vec3(255, 0.0, 0.0));
-    cube_mat.set_uniform_value("u_metallic_map", 0.5f);
-    cube_mat.set_uniform_value("u_roughness_map", 0.5f);
+    cube_mat.set_uniform_value("u_metallic_map", 0.0f);
+    cube_mat.set_uniform_value("u_roughness_map", 1.0f);
 
     cube_entity.add_component<mesh_component>(
-        mesh_component {shapes::s_cone_mesh, {}, 0});
+        mesh_component {shapes::s_torus_mesh, {}, 0});
 
 
     dir_light dir

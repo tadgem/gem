@@ -22,6 +22,9 @@ public:
   inline static VAO             s_cone_vao;
   inline static mesh            s_cone_mesh;
 
+  inline static VAO             s_torus_vao;
+  inline static mesh            s_torus_mesh;
+
   static void init_built_in_assets(asset_manager& am);
 
   static VAO gen_cube_instanced_vao(std::vector<glm::mat4> &matrices,
