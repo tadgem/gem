@@ -155,5 +155,5 @@ void tech::vxgi::dispatch_clear_voxel(gl_shader &clear_voxel,
 void tech::vxgi::dispatch_voxelisation_gbuffer_pass(
     gl_shader &gbuffer_shader, voxel::grid &grid_data, gl_framebuffer gbuffer,
     gl_framebuffer lighting_buffer, glm::ivec2 window_res) {}
-}
+} // namespace open_gl
 } // namespace gem

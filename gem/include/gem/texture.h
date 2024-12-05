@@ -94,6 +94,5 @@ struct sampler_info {
   texture_entry tex_entry;
 
   GEM_IMPL_ALLOC(sampler_info)
-
 };
 } // namespace gem

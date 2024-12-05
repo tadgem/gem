@@ -27,7 +27,7 @@ public:
   inline static debug_memory_tracker *s_instance = nullptr;
 };
 
-#define GEM_IMPL_ALLOC(X)                                                    \
+#define GEM_IMPL_ALLOC(X)                                                      \
   void *operator new(size_t size) {                                            \
     if (debug_memory_tracker::s_instance->s_allocation_info.find(#X) ==        \
         debug_memory_tracker::s_instance->s_allocation_info.end()) {           \

@@ -28,8 +28,9 @@ entity scene::create_entity(const std::string &name) {
 
 std::vector<entity> scene::create_entity_from_model(
     asset_handle model_asset_handle, model &model_to_load,
-    asset_handle shader_asset_handle, gl_shader &material_shader, glm::vec3 scale,
-    glm::vec3 euler, std::map<std::string, texture_map_type> known_maps) {
+    asset_handle shader_asset_handle, gl_shader &material_shader,
+    glm::vec3 scale, glm::vec3 euler,
+    std::map<std::string, texture_map_type> known_maps) {
   ZoneScoped;
   std::vector<entity> entities{};
   for (u32 i = 0; i < model_to_load.m_meshes.size(); i++) {
@@ -168,8 +169,8 @@ nlohmann::json scene_manager::save_scene(scene *ser_scene) {
 
   return json;
 }
-void  scene_manager::save_scene_to_disk(const std::string &path,
-                                                 scene *ser_scene) {
+void scene_manager::save_scene_to_disk(const std::string &path,
+                                       scene *ser_scene) {
 
   nlohmann::json scene_json = save_scene(ser_scene);
   utils::save_string_to_path(path, scene_json.dump());
@@ -177,12 +178,12 @@ void  scene_manager::save_scene_to_disk(const std::string &path,
 
 scene *scene_manager::load_scene_from_disk(const std::string &scene_path) {
   std::string scene_json_str = utils::load_string_from_path(scene_path);
-  if(scene_json_str.empty())
-  {
+  if (scene_json_str.empty()) {
     return nullptr;
   }
   nlohmann::json scene_json = nlohmann::json::parse(scene_json_str);
-  GEM_ASSERT(!scene_json.empty(), "Failed to deserialize scene json at path : " + scene_path);
+  GEM_ASSERT(!scene_json.empty(),
+             "Failed to deserialize scene json at path : " + scene_path);
   return load_scene(scene_json);
 }
 } // namespace gem

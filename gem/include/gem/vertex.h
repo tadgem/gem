@@ -1,7 +1,7 @@
 #pragma once
 #include "GL/glew.h"
-#include "gem/alias.h"
 #include "backend.h"
+#include "gem/alias.h"
 #include <vector>
 
 namespace gem {
@@ -10,12 +10,11 @@ namespace gem {
 struct VAO {
   gl_handle m_vao_id;
   gl_handle m_ibo = INVALID_GL_HANDLE;
-  uint32_t  m_index_count;
+  uint32_t m_index_count;
   std::vector<gl_handle> m_vbos;
   void use();
   void draw();
   void release();
-
 };
 
 class vao_builder {
@@ -24,8 +23,10 @@ public:
 
   void begin();
 
-  template <typename _Ty> void add_vertex_buffer(_Ty *data, uint32_t count, GLenum usage_flags = GL_STATIC_DRAW) {
-    if(gpu_backend::get_backend_api() == backend_api::open_gl) {
+  template <typename _Ty>
+  void add_vertex_buffer(_Ty *data, uint32_t count,
+                         GLenum usage_flags = GL_STATIC_DRAW) {
+    if (gpu_backend::get_backend_api() == backend_api::open_gl) {
       gl_handle vbo;
       glGenBuffers(1, &vbo);
 
@@ -36,7 +37,9 @@ public:
     }
   }
 
-  template <typename _Ty> void add_vertex_buffer(std::vector<_Ty> data, GLenum usage_flags = GL_STATIC_DRAW) {
+  template <typename _Ty>
+  void add_vertex_buffer(std::vector<_Ty> data,
+                         GLenum usage_flags = GL_STATIC_DRAW) {
     add_vertex_buffer<_Ty>(&data[0], data.size(), usage_flags);
   }
 
@@ -51,7 +54,7 @@ public:
 
   gl_handle m_vao;
   gl_handle m_ibo = INVALID_GL_HANDLE;
-  uint32_t  m_index_count = 0;
+  uint32_t m_index_count = 0;
   std::vector<gl_handle> m_vbos;
   uint32_t m_offset_counter;
 };

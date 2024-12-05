@@ -23,7 +23,8 @@ public:
   void add_depth_attachment(uint32_t width, uint32_t height,
                             GLenum format = GL_DEPTH24_STENCIL8);
 
-  void add_depth_attachment_sampler_friendly(uint32_t width, uint32_t height,
+  void
+  add_depth_attachment_sampler_friendly(uint32_t width, uint32_t height,
                                         GLenum format = GL_DEPTH24_STENCIL8);
   void check();
 
@@ -47,8 +48,8 @@ public:
   };
 
   static gl_framebuffer create(glm::vec2 resolution,
-                            std::vector<attachment_info> colour_attachments,
-                            bool add_depth = true);
+                               std::vector<attachment_info> colour_attachments,
+                               bool add_depth = true);
 
   gl_handle m_handle;
   std::vector<gl_handle> m_colour_attachments;

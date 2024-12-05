@@ -63,8 +63,7 @@ void debug_camera_controller::update(glm::vec2 screen_dim, camera &cam) {
 
   float speed = movement_speed;
 
-  if(input::get_keyboard_key(keyboard_key::left_shift))
-  {
+  if (input::get_keyboard_key(keyboard_key::left_shift)) {
     speed *= 3.0f;
   }
 

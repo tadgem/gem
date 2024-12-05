@@ -7,8 +7,7 @@
 #include "project.h"
 #include "scene.h"
 
-struct debug_callbacks_collection
-{
+struct debug_callbacks_collection {
   std::vector<std::function<void()>> m_callbacks;
 
   void add(std::function<void()> debug_callback);

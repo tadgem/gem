@@ -19,13 +19,11 @@ void VAO::release() {
 }
 void VAO::draw() {
   use();
-  if(m_ibo != INVALID_GL_HANDLE)
-  {
-    glDrawElements(GL_TRIANGLES, static_cast<GLsizei >(m_index_count), GL_UNSIGNED_INT,0);
-  }
-  else
-  {
-    glDrawArrays(GL_TRIANGLES,0, static_cast<GLsizei >(m_index_count));
+  if (m_ibo != INVALID_GL_HANDLE) {
+    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(m_index_count),
+                   GL_UNSIGNED_INT, 0);
+  } else {
+    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(m_index_count));
   }
 }
 

@@ -151,8 +151,9 @@ void gl_backend::engine_pre_frame() {
   m_last_counter = m_now_counter;
   m_now_counter = SDL_GetPerformanceCounter();
 
-  p_frametime =         static_cast<float>((m_now_counter - m_last_counter) /
-                                   static_cast<float>(SDL_GetPerformanceFrequency()));
+  p_frametime =
+      static_cast<float>((m_now_counter - m_last_counter) /
+                         static_cast<float>(SDL_GetPerformanceFrequency()));
 
   glViewport(0, 0, (int)m_imgui_io->DisplaySize.x,
              (int)m_imgui_io->DisplaySize.y);
@@ -187,8 +188,7 @@ void gl_backend::engine_shut_down() {
   ImGui_ImplSDL2_Shutdown();
   ImGui::DestroyContext();
 
-  if(m_sdl_gl_context != nullptr)
-  {
+  if (m_sdl_gl_context != nullptr) {
     SDL_GL_DeleteContext(*m_sdl_gl_context);
   }
   SDL_DestroyWindow(m_window);

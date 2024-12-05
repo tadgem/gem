@@ -1,18 +1,18 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include "gem/engine.h"
+#include "gem/gl/gl_backend.h"
 #include "gem/material.h"
 #include "gem/mesh.h"
 #include "gem/profile.h"
 #include "gem/transform.h"
 #include "gem/utils.h"
-#include "gem/gl/gl_backend.h"
 
 namespace gem {
 
 void engine::init() {
   ZoneScoped;
   glm::ivec2 resolution = {1920, 1080};
-  gpu_backend::init_backend<gl_backend>(backend_init{ resolution, true });
+  gpu_backend::init_backend<gl_backend>(backend_init{resolution, true});
 
   systems.add_system<transform_sys>();
   systems.add_system<mesh_sys>();
@@ -44,8 +44,7 @@ void engine::shutdown() {
 void engine::update() {
   assets.update();
 
-  for(auto& cb : debug_callbacks.m_callbacks)
-  {
+  for (auto &cb : debug_callbacks.m_callbacks) {
     cb();
   }
   debug_callbacks.m_callbacks.clear();

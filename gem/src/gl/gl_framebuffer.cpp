@@ -19,10 +19,11 @@ void gl_framebuffer::cleanup() {
   glDeleteFramebuffers(1, &m_handle);
 }
 
-void gl_framebuffer::add_colour_attachment(GLenum attachment_index, uint32_t width,
-                                        uint32_t height, GLenum internal_format,
-                                        GLenum format, GLenum filter,
-                                        GLenum pixel_format) {
+void gl_framebuffer::add_colour_attachment(GLenum attachment_index,
+                                           uint32_t width, uint32_t height,
+                                           GLenum internal_format,
+                                           GLenum format, GLenum filter,
+                                           GLenum pixel_format) {
   ZoneScoped;
   gl_handle textureColorbuffer;
   glGenTextures(1, &textureColorbuffer);
@@ -41,7 +42,7 @@ void gl_framebuffer::add_colour_attachment(GLenum attachment_index, uint32_t wid
 }
 
 void gl_framebuffer::add_depth_attachment(uint32_t width, uint32_t height,
-                                       GLenum format) {
+                                          GLenum format) {
   ZoneScoped;
   gl_handle rbo;
   glGenRenderbuffers(1, &rbo);
@@ -58,8 +59,8 @@ void gl_framebuffer::add_depth_attachment(uint32_t width, uint32_t height,
 }
 
 void gl_framebuffer::add_depth_attachment_sampler_friendly(uint32_t width,
-                                                        uint32_t height,
-                                                        GLenum format) {
+                                                           uint32_t height,
+                                                           GLenum format) {
   ZoneScoped;
   gl_handle depthMap;
   glGenTextures(1, &depthMap);
@@ -104,8 +105,8 @@ void gl_framebuffer::check() {
 }
 
 gl_framebuffer gl_framebuffer::create(glm::vec2 resolution,
-                                std::vector<attachment_info> attachments,
-                                bool add_depth) {
+                                      std::vector<attachment_info> attachments,
+                                      bool add_depth) {
   ZoneScoped;
   GLenum attachment = GL_COLOR_ATTACHMENT0;
   gl_framebuffer fb{};

@@ -125,7 +125,7 @@ void DrawIm3dTextListsImGui(const Im3d::TextDrawList _textDrawLists[],
 
 im3d_state gl_im3d::load_im3d() {
   ZoneScoped;
-  std::string tris=
+  std::string tris =
       utils::load_string_from_path("assets/shaders/im3d/im3d.tris.shader");
 
   std::string points =
@@ -134,14 +134,17 @@ im3d_state gl_im3d::load_im3d() {
   std::string lines =
       utils::load_string_from_path("assets/shaders/im3d/im3d.lines.shader");
 
-
   auto tris_stages = gl_shader::split_composite_shader(tris);
   auto points_stages = gl_shader::split_composite_shader(points);
   auto lines_stages = gl_shader::split_composite_shader(lines);
 
-  gl_shader points_shader(points_stages[gl_shader::stage::vertex], points_stages[gl_shader::stage::fragment]);
-  gl_shader tris_shader(tris_stages[gl_shader::stage::vertex], tris_stages[gl_shader::stage::fragment]);
-  gl_shader lines_shader(lines_stages[gl_shader::stage::vertex], lines_stages[gl_shader::stage::geometry], lines_stages[gl_shader::stage::fragment]);
+  gl_shader points_shader(points_stages[gl_shader::stage::vertex],
+                          points_stages[gl_shader::stage::fragment]);
+  gl_shader tris_shader(tris_stages[gl_shader::stage::vertex],
+                        tris_stages[gl_shader::stage::fragment]);
+  gl_shader lines_shader(lines_stages[gl_shader::stage::vertex],
+                         lines_stages[gl_shader::stage::geometry],
+                         lines_stages[gl_shader::stage::fragment]);
 
   gl_handle im3d_vertex_buffer;
   gl_handle im3d_vao;
@@ -260,8 +263,8 @@ void gl_im3d::end_frame_im3d(im3d_state &state, glm::ivec2 screen_dim,
   }
 
   DrawIm3dTextListsImGui(Im3d::GetContext().getTextDrawLists(),
-                         Im3d::GetContext().getTextDrawListCount(), screen_dim.x, screen_dim.y,
-                         viewProj);
+                         Im3d::GetContext().getTextDrawListCount(),
+                         screen_dim.x, screen_dim.y, viewProj);
 }
 
 Im3d::Vec3 ToIm3D(glm::vec3 &input) {

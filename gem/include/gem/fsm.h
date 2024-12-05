@@ -1,8 +1,8 @@
 #pragma once
-#include <functional>
-#include <vector>
 #include "gem/dbg_memory.h"
 #include "gem/profile.h"
+#include <functional>
+#include <vector>
 
 #include <vector>
 namespace gem {
@@ -24,7 +24,6 @@ public:
 
     GEM_IMPL_ALLOC(fsm_t<_StateEnum>::state)
 
-
   protected:
     callback m_entry_procedure;
     callback m_exit_procedure;
@@ -39,7 +38,6 @@ public:
     _StateEnum dst_state;
 
     GEM_IMPL_ALLOC(fsm_t<_StateEnum>::state_transition)
-
   };
 };
 
@@ -49,7 +47,6 @@ public:
 
   GEM_IMPL_ALLOC(fsm_lambda)
 
-
   class state {
   public:
     state(int state, std::function<int()> action,
@@ -58,7 +55,6 @@ public:
     bool m_has_entry;
     bool m_has_exit;
     GEM_IMPL_ALLOC(fsm_lambda::state)
-
 
   protected:
     std::function<void()> m_entry_procedure;
@@ -73,7 +69,6 @@ public:
     int m_dst_state;
 
     GEM_IMPL_ALLOC(fsm_lambda::state_transition)
-
   };
 
 public:

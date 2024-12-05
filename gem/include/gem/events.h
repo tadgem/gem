@@ -37,7 +37,6 @@ struct asset_loaded_data : a_event_data {
   EVENT_DATA_IMPL(asset_loaded_data, event_queue::engine,
                   engine_event::asset_loaded)
   GEM_IMPL_ALLOC(asset_loaded_data)
-
 };
 
 // helper struct to quickly find subscribed events
@@ -58,7 +57,6 @@ struct event_comparator {
   };
 
   GEM_IMPL_ALLOC(event_comparator)
-
 };
 } // namespace gem
 
@@ -145,6 +143,5 @@ public:
   }
 
   GEM_IMPL_ALLOC(event_handler)
-
 };
 } // namespace gem

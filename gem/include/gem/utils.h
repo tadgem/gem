@@ -1,13 +1,13 @@
 #pragma once
 
+#include "gem/aabb.h"
 #include "gem/alias.h"
 #include "gem/shape.h"
-#include "gem/aabb.h"
 #include "glm.hpp"
+#include "spdlog/spdlog.h"
 #include <array>
 #include <future>
 #include <string>
-#include "spdlog/spdlog.h"
 
 namespace gem {
 
@@ -57,48 +57,32 @@ public:
 };
 } // namespace gem
 
-template<>
-struct fmt::formatter<glm::vec2> : fmt::formatter<std::string>
-{
-  auto format(glm::vec2 my, format_context &ctx) const -> decltype(ctx.out())
-  {
+template <> struct fmt::formatter<glm::vec2> : fmt::formatter<std::string> {
+  auto format(glm::vec2 my, format_context &ctx) const -> decltype(ctx.out()) {
     return format_to(ctx.out(), "[{},{}]", my.x, my.y);
   }
 };
 
-template<>
-struct fmt::formatter<glm::vec3> : fmt::formatter<std::string>
-{
-  auto format(glm::vec3 my, format_context &ctx) const -> decltype(ctx.out())
-  {
+template <> struct fmt::formatter<glm::vec3> : fmt::formatter<std::string> {
+  auto format(glm::vec3 my, format_context &ctx) const -> decltype(ctx.out()) {
     return format_to(ctx.out(), "[{},{},{}]", my.x, my.y, my.z);
   }
 };
 
-template<>
-struct fmt::formatter<glm::vec4> : fmt::formatter<std::string>
-{
-  auto format(glm::vec4 my, format_context &ctx) const -> decltype(ctx.out())
-  {
+template <> struct fmt::formatter<glm::vec4> : fmt::formatter<std::string> {
+  auto format(glm::vec4 my, format_context &ctx) const -> decltype(ctx.out()) {
     return format_to(ctx.out(), "[{},{},{},{}]", my.x, my.y, my.z, my.w);
   }
 };
 
-template<>
-struct fmt::formatter<glm::mat3> : fmt::formatter<std::string>
-{
-  auto format(glm::mat3 my, format_context &ctx) const -> decltype(ctx.out())
-  {
+template <> struct fmt::formatter<glm::mat3> : fmt::formatter<std::string> {
+  auto format(glm::mat3 my, format_context &ctx) const -> decltype(ctx.out()) {
     return format_to(ctx.out(), "[{},{},{}]", my[0], my[1], my[2]);
   }
 };
 
-template<>
-struct fmt::formatter<glm::mat4> : fmt::formatter<std::string>
-{
-  auto format(glm::mat4 my, format_context &ctx) const -> decltype(ctx.out())
-  {
+template <> struct fmt::formatter<glm::mat4> : fmt::formatter<std::string> {
+  auto format(glm::mat4 my, format_context &ctx) const -> decltype(ctx.out()) {
     return format_to(ctx.out(), "[{},{},{},{}]", my[0], my[1], my[2], my[3]);
   }
 };
-

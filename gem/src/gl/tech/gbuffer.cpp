@@ -10,57 +10,6 @@
 namespace gem {
 namespace open_gl {
 
-void tech::gbuffer::dispatch_gbuffer(u32 frame_index, gl_framebuffer &gbuffer,
-                                     gl_framebuffer &previous_position_buffer,
-                                     gl_shader &gbuffer_shader,
-                                     asset_manager &am, camera &cam,
-                                     std::vector<scene *> &scenes,
-                                     glm::ivec2 win_res) {
-  ZoneScoped;
-  GEM_GPU_MARKER("GBuffer");
-  glDisable(GL_DITHER);
-  gbuffer.bind();
-  glm::mat4 current_vp = cam.m_proj * cam.m_view;
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-  gbuffer_shader.use();
-  gbuffer_shader.set_vec2("u_resolution", {win_res.x, win_res.y});
-  gbuffer_shader.set_mat4("u_vp", current_vp);
-  gbuffer_shader.set_mat4("u_last_vp", cam.m_last_vp);
-  gbuffer_shader.set_int("u_frame_index", frame_index);
-  gbuffer_shader.set_int("u_diffuse_map", 0);
-  gbuffer_shader.set_int("u_normal_map", 1);
-  gbuffer_shader.set_int("u_metallic_map", 2);
-  gbuffer_shader.set_int("u_roughness_map", 3);
-  gbuffer_shader.set_int("u_ao_map", 4);
-  gbuffer_shader.set_int("u_prev_position_map", 5);
-
-  texture::bind_sampler_handle(0, GL_TEXTURE0);
-  texture::bind_sampler_handle(0, GL_TEXTURE1);
-  texture::bind_sampler_handle(0, GL_TEXTURE2);
-  texture::bind_sampler_handle(texture::white->m_handle, GL_TEXTURE3);
-  texture::bind_sampler_handle(0, GL_TEXTURE4);
-
-  texture::bind_sampler_handle(
-      previous_position_buffer.m_colour_attachments.front(), GL_TEXTURE5);
-
-  for (scene *current_scene : scenes) {
-    auto renderables =
-        current_scene->m_registry.view<transform, mesh, material>();
-
-    for (auto [e, trans, emesh, ematerial] : renderables.each()) {
-      ematerial.bind_material_uniforms(am);
-      gbuffer_shader.set_mat4("u_model", trans.m_model);
-      gbuffer_shader.set_mat4("u_last_model", trans.m_last_model);
-      gbuffer_shader.set_mat4("u_normal", trans.m_normal_matrix);
-      emesh.m_vao.use();
-      glDrawElements(GL_TRIANGLES, emesh.m_index_count, GL_UNSIGNED_INT, 0);
-    }
-  }
-  gbuffer.unbind();
-  glEnable(GL_DITHER);
-}
-
 void tech::gbuffer::dispatch_gbuffer_with_id(
     u32 frame_index, gl_framebuffer &gbuffer,
     gl_framebuffer &previous_position_buffer, gl_shader &gbuffer_shader,
@@ -100,8 +49,7 @@ void tech::gbuffer::dispatch_gbuffer_with_id(
 
     for (auto [e, trans, emesh, ematerial] : renderables.each()) {
 
-      if(ematerial.m_prog.m_shader_id != gbuffer_shader.m_shader_id)
-      {
+      if (ematerial.m_prog.m_shader_id != gbuffer_shader.m_shader_id) {
         continue;
       }
 
@@ -119,9 +67,9 @@ void tech::gbuffer::dispatch_gbuffer_with_id(
 }
 void tech::gbuffer::dispatch_gbuffer_textureless_with_id(
     u32 frame_index, gl_framebuffer &gbuffer,
-    gl_framebuffer &previous_position_buffer, gl_shader &gbuffer_textureless_shader,
-    asset_manager &am, camera &cam, std::vector<scene *> &scenes,
-    glm::ivec2 win_res) {
+    gl_framebuffer &previous_position_buffer,
+    gl_shader &gbuffer_textureless_shader, asset_manager &am, camera &cam,
+    std::vector<scene *> &scenes, glm::ivec2 win_res) {
   ZoneScoped;
   GEM_GPU_MARKER("GBuffer-Textureless-EntityID");
   glDisable(GL_DITHER);
@@ -137,7 +85,6 @@ void tech::gbuffer::dispatch_gbuffer_textureless_with_id(
   gbuffer_textureless_shader.set_int("u_frame_index", frame_index);
   gbuffer_textureless_shader.set_int("u_prev_position_map", 0);
 
-
   texture::bind_sampler_handle(
       previous_position_buffer.m_colour_attachments.front(), GL_TEXTURE0);
 
@@ -146,8 +93,8 @@ void tech::gbuffer::dispatch_gbuffer_textureless_with_id(
         current_scene->m_registry.view<transform, mesh_component, material>();
 
     for (auto [e, trans, emesh, ematerial] : renderables.each()) {
-      if(ematerial.m_prog.m_shader_id != gbuffer_textureless_shader.m_shader_id)
-      {
+      if (ematerial.m_prog.m_shader_id !=
+          gbuffer_textureless_shader.m_shader_id) {
         continue;
       }
 
@@ -163,7 +110,6 @@ void tech::gbuffer::dispatch_gbuffer_textureless_with_id(
   gbuffer.unbind();
   texture::bind_sampler_handle(0, GL_TEXTURE0);
   glEnable(GL_DITHER);
-
 }
 } // namespace open_gl
 } // namespace gem

@@ -1,9 +1,9 @@
 #pragma once
 #include "entt.hpp"
-#include "gem/alias.h"
 #include "gem/aabb.h"
-#include "gem/texture.h"
+#include "gem/alias.h"
 #include "gem/dbg_memory.h"
+#include "gem/texture.h"
 #include "json.hpp"
 #include <map>
 #include <memory>
@@ -93,11 +93,11 @@ public:
 
   scene *create_scene(const std::string &name);
   scene *load_scene(nlohmann::json &scene_json);
-  scene *load_scene_from_disk(const std::string& scene_path);
+  scene *load_scene_from_disk(const std::string &scene_path);
   scene *get_scene(hash_string scene_hash);
   void close_scene(hash_string scene_hash);
   nlohmann::json save_scene(scene *ser_scene);
-  void save_scene_to_disk(const std::string& path, scene *ser_scene);
+  void save_scene_to_disk(const std::string &path, scene *ser_scene);
 
   GEM_IMPL_ALLOC(scene_manager)
 protected:

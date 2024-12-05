@@ -32,7 +32,7 @@ public:
   gl_shader(const std::string &comp);
   gl_shader(const std::string &vert, const std::string &frag);
   gl_shader(const std::string &vert, const std::string &geom,
-         const std::string &frag);
+            const std::string &frag);
 
   void use();
   void release();
@@ -59,7 +59,7 @@ public:
   static std::unordered_map<gl_shader::stage, std::string>
   split_composite_shader(const std::string &input);
 
-  static gl_shader create_from_composite(const std::string& composite_shader);
+  static gl_shader create_from_composite(const std::string &composite_shader);
 
   static uniform_type get_type_from_gl(GLenum type);
 };

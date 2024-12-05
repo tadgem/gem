@@ -16,8 +16,6 @@
 #include "gem/shape.h"
 #include "gem/texture.h"
 
-
-
 #undef main
 #if defined(IMGUI_IMPL_OPENGL_ES2)
 #include <SDL_opengles2.h>
@@ -125,7 +123,7 @@ void init_built_in_assets() {
 
   shapes::init_built_in_assets(engine::assets);
 
-  //mesh::m_cube = mesh {shapes::m_cube, 36, gem::aabb{{0,0,0}, {1,1,1}}};
+  // mesh::m_cube = mesh {shapes::m_cube, 36, gem::aabb{{0,0,0}, {1,1,1}}};
 }
 
 void init_imgui_file_dialog() {

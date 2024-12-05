@@ -16,7 +16,6 @@ public:
 #define GEM_GPU_MARKER(X) GL_DEBUG __marker__(X)
 } // namespace gem
 
-
 GLenum glCheckError_(const char *file, int line);
 #define glAssert(X)                                                            \
   X;                                                                           \

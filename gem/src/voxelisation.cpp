@@ -24,12 +24,9 @@ void voxel::grid::update_grid_history(camera &cam, bool force) {
 
   glm::vec3 movement_velocity = new_bb.min - current_bounding_box.min;
 
-  if( force                              ||
-      movement_velocity.x > voxel_unit.x ||
+  if (force || movement_velocity.x > voxel_unit.x ||
       movement_velocity.y > voxel_unit.y ||
-      movement_velocity.z > voxel_unit.z ||
-      glm::length(voxel_unit) < 0.1f)
-  {
+      movement_velocity.z > voxel_unit.z || glm::length(voxel_unit) < 0.1f) {
     current_bounding_box = new_bb;
   }
 }
@@ -39,7 +36,8 @@ voxel::grid voxel::create_grid(glm::ivec3 resolution, aabb bb) {
   grid grid{};
   grid.resolution = resolution;
   grid.update_voxel_unit();
-  grid.history_voxel_texture = texture::create_3d_texture_empty(resolution, GL_RGBA, GL_RGBA16F, GL_FLOAT);
+  grid.history_voxel_texture = texture::create_3d_texture_empty(
+      resolution, GL_RGBA, GL_RGBA16F, GL_FLOAT);
   grid.voxel_texture = texture::create_3d_texture_empty(resolution, GL_RGBA,
                                                         GL_RGBA16F, GL_FLOAT);
   glAssert(glBindImageTexture(0, grid.voxel_texture.m_handle, 0, GL_TRUE, 0,
@@ -62,7 +60,7 @@ voxel::create_grid_visualiser(voxel::grid &vg, gl_shader &visualisation_shader,
                               gl_shader &compute_matrices_shader,
                               int texel_resolution) {
   ZoneScoped;
-  grid_visualiser vgv{  visualisation_shader,
+  grid_visualiser vgv{visualisation_shader,
                       compute_matrices_shader,
                       {},
                       0,
@@ -144,13 +142,11 @@ voxel::create_grid_visualiser(voxel::grid &vg, gl_shader &visualisation_shader,
   auto scaled_unit =
       glm::vec3{vg.voxel_unit.x, vg.voxel_unit.y, vg.voxel_unit.z};
 
-  for(int z = 0; z < vg.resolution.z; z += texel_resolution)
-  {
-    for(int y = 0; y < vg.resolution.y; y += texel_resolution)
-    {
-      for(int x = 0; x < vg.resolution.x; x += texel_resolution)
-      {
-        instance_matrices.push_back(utils::get_model_matrix(glm::vec3{x,y,z}, glm::vec3(0.0), scaled_unit));
+  for (int z = 0; z < vg.resolution.z; z += texel_resolution) {
+    for (int y = 0; y < vg.resolution.y; y += texel_resolution) {
+      for (int x = 0; x < vg.resolution.x; x += texel_resolution) {
+        instance_matrices.push_back(utils::get_model_matrix(
+            glm::vec3{x, y, z}, glm::vec3(0.0), scaled_unit));
       }
     }
   }
@@ -165,32 +161,34 @@ voxel::create_grid_visualiser(voxel::grid &vg, gl_shader &visualisation_shader,
   GLuint matrices_ssbo;
   glGenBuffers(1, &matrices_ssbo);
   glBindBuffer(GL_SHADER_STORAGE_BUFFER, matrices_ssbo);
-  glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(glm::mat4) * instance_matrices.size(), instance_matrices.data(), GL_DYNAMIC_COPY);
+  glBufferData(GL_SHADER_STORAGE_BUFFER,
+               sizeof(glm::mat4) * instance_matrices.size(),
+               instance_matrices.data(), GL_DYNAMIC_COPY);
   glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, matrices_ssbo);
   glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
   vgv.m_instance_matrices_ssbo = matrices_ssbo;
-//  constexpr std::size_t vec4Size = sizeof(glm::vec4);
-//  glEnableVertexAttribArray(1);
-//  glBindBuffer(GL_ARRAY_BUFFER, matrices_vbo);
-//  glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void *)0);
-//  glEnableVertexAttribArray(2);
-//  glBindBuffer(GL_ARRAY_BUFFER, matrices_vbo);
-//  glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size,
-//                        (void *)(1 * vec4Size));
-//  glEnableVertexAttribArray(3);
-//  glBindBuffer(GL_ARRAY_BUFFER, matrices_vbo);
-//  glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size,
-//                        (void *)(2 * vec4Size));
-//  glEnableVertexAttribArray(4);
-//  glBindBuffer(GL_ARRAY_BUFFER, matrices_vbo);
-//  glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size,
-//                        (void *)(3 * vec4Size));
-//
-//  glVertexAttribDivisor(1, 1);
-//  glVertexAttribDivisor(2, 1);
-//  glVertexAttribDivisor(3, 1);
-//  glVertexAttribDivisor(4, 1);
+  //  constexpr std::size_t vec4Size = sizeof(glm::vec4);
+  //  glEnableVertexAttribArray(1);
+  //  glBindBuffer(GL_ARRAY_BUFFER, matrices_vbo);
+  //  glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void *)0);
+  //  glEnableVertexAttribArray(2);
+  //  glBindBuffer(GL_ARRAY_BUFFER, matrices_vbo);
+  //  glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size,
+  //                        (void *)(1 * vec4Size));
+  //  glEnableVertexAttribArray(3);
+  //  glBindBuffer(GL_ARRAY_BUFFER, matrices_vbo);
+  //  glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size,
+  //                        (void *)(2 * vec4Size));
+  //  glEnableVertexAttribArray(4);
+  //  glBindBuffer(GL_ARRAY_BUFFER, matrices_vbo);
+  //  glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size,
+  //                        (void *)(3 * vec4Size));
+  //
+  //  glVertexAttribDivisor(1, 1);
+  //  glVertexAttribDivisor(2, 1);
+  //  glVertexAttribDivisor(3, 1);
+  //  glVertexAttribDivisor(4, 1);
 
   vgv.m_texel_shape = builder.build();
   vgv.m_total_invocations = instance_matrices.size();
@@ -198,38 +196,43 @@ voxel::create_grid_visualiser(voxel::grid &vg, gl_shader &visualisation_shader,
   return vgv;
 }
 
-void voxel::grid_visualiser::dispatch_draw(voxel::grid& vg, camera& cam)
-{
+void voxel::grid_visualiser::dispatch_draw(voxel::grid &vg, camera &cam) {
   // compute instance matrices
   glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, m_instance_matrices_ssbo);
   m_compute_instances_shader.use();
   // set uniforms
   m_compute_instances_shader.set_vec3("u_resolution", vg.resolution);
   m_compute_instances_shader.set_vec3("u_voxel_unit", vg.voxel_unit);
-  m_compute_instances_shader.set_vec3("u_instance_resolution", glm::vec3(m_texel_resolution));
-  m_compute_instances_shader.set_vec3("u_current_aabb.min", vg.current_bounding_box.min);
-  m_compute_instances_shader.set_vec3("u_current_aabb.max", vg.current_bounding_box.max);
+  m_compute_instances_shader.set_vec3("u_instance_resolution",
+                                      glm::vec3(m_texel_resolution));
+  m_compute_instances_shader.set_vec3("u_current_aabb.min",
+                                      vg.current_bounding_box.min);
+  m_compute_instances_shader.set_vec3("u_current_aabb.max",
+                                      vg.current_bounding_box.max);
 
   // dispatch
   glm::ivec3 dispatch_dims = vg.resolution / m_texel_resolution;
   glAssert(glDispatchCompute(m_total_invocations, 1, 1));
 
-
   // draw
   m_texel_shape.use();
-  auto& vs = m_visual_shader;
+  auto &vs = m_visual_shader;
   vs.use();
   vs.set_ivec3("u_texture_resolution", vg.resolution);
   vs.set_ivec3("u_voxel_group_resolution", glm::ivec3(m_texel_resolution));
   vs.set_mat4("u_view_projection", cam.m_proj * cam.m_view);
-  vs.set_mat4("u_model", utils::get_model_matrix(vg.current_bounding_box.min + m_debug_position_offset, glm::vec3(0.0f), vg.voxel_unit * m_debug_scale));
+  vs.set_mat4("u_model",
+              utils::get_model_matrix(
+                  vg.current_bounding_box.min + m_debug_position_offset,
+                  glm::vec3(0.0f), vg.voxel_unit * m_debug_scale));
   vs.set_vec3("u_aabb.min", vg.current_bounding_box.min);
   vs.set_vec3("u_aabb.max", vg.current_bounding_box.max);
   vs.set_int("u_volume", 0);
-  texture::bind_sampler_handle(vg.voxel_texture.m_handle, GL_TEXTURE0, GL_TEXTURE_3D);
-  glDrawElementsInstanced(GL_TRIANGLES, static_cast<GLsizei>(m_index_count), GL_UNSIGNED_INT, GL_ZERO,
-                          m_total_invocations);
+  texture::bind_sampler_handle(vg.voxel_texture.m_handle, GL_TEXTURE0,
+                               GL_TEXTURE_3D);
+  glDrawElementsInstanced(GL_TRIANGLES, static_cast<GLsizei>(m_index_count),
+                          GL_UNSIGNED_INT, GL_ZERO, m_total_invocations);
   texture::bind_sampler_handle(0, GL_TEXTURE0);
-  glBindBufferBase(GL_SHADER_STORAGE_BUFFER,1, 0);
+  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, 0);
 }
 } // namespace gem
