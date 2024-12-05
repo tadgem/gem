@@ -34,11 +34,6 @@ public:
                                       voxel::grid &voxel_data,
                                       glm::vec3 _3d_tex_res_vec);
 
-  static void dispatch_voxel_reprojection(gl_shader &voxel_reprojection,
-                                          voxel::grid &voxel_data,
-                                          glm::vec3 _3d_tex_res_vec,
-                                          aabb old_bb, aabb new_bb);
-
   static void dispatch_cone_tracing_pass(
       gl_shader &voxel_cone_tracing, voxel::grid &voxel_data,
       gl_framebuffer &buffer_conetracing, gl_framebuffer &gbuffer,

@@ -87,7 +87,6 @@ public:
   bool m_debug_draw_ssr_pass = true;
   bool m_debug_draw_3d_texture = false;
   bool m_debug_draw_final_pass = true;
-  bool m_debug_enable_voxel_reprojection = false;
   bool m_debug_freeze_voxel_grid_pos = false;
 
   inline static constexpr int s_voxel_square_resolution = 256;

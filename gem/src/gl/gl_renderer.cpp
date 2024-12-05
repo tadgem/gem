@@ -209,7 +209,6 @@ void gl_renderer::init(asset_manager &am, glm::ivec2 resolution) {
 
   m_voxel_data = voxel::create_grid(s_voxel_resolution, aabb{});
   camera cam{}; // TODO: clean this up, just need a position of 0,0,0 to init
-  m_voxel_data.update_grid_history(cam, true);
   m_voxel_data.update_voxel_unit();
   m_voxel_visualiser = voxel::create_grid_visualiser(
       m_voxel_data, m_visualise_3d_tex_shader->m_data,
@@ -226,22 +225,7 @@ void gl_renderer::render(asset_manager &am, camera &cam,
                          std::vector<scene *> &scenes) {
   ZoneScoped;
   FrameMark;
-  {
-    TracyGpuZone("Voxel Histroy Blit");
-    // open_gl::tech::vxgi::dispatch_blit_voxel(m_compute_voxel_blit_shader->m_data,
-    // m_voxel_data, s_voxel_resolution);
-    if (!m_debug_freeze_voxel_grid_pos) {
-      m_voxel_data.update_grid_history(cam);
-      m_voxel_data.update_voxel_unit();
-    }
-  }
-  if (m_debug_enable_voxel_reprojection) {
-    TracyGpuZone("Voxel Reprojection")
-        open_gl::tech::vxgi::dispatch_voxel_reprojection(
-            m_compute_voxel_reprojection_shader->m_data, m_voxel_data,
-            s_voxel_resolution, m_voxel_data.previous_bounding_box,
-            m_voxel_data.current_bounding_box);
-  }
+
 
   if (p_clear_voxel_grid) {
     open_gl::tech::vxgi::dispatch_clear_voxel(
@@ -529,8 +513,6 @@ void gl_renderer::on_imgui(asset_manager &am) {
     if (ImGui::Button("Clear Voxel Texture")) {
       p_clear_voxel_grid = true;
     }
-    ImGui::Checkbox("Enable Grid Reprojection",
-                    &m_debug_enable_voxel_reprojection);
     ImGui::Checkbox("Freeze Voxel Grid", &m_debug_freeze_voxel_grid_pos);
     ImGui::DragFloat("Trace Distance", &m_vxgi_cone_trace_distance);
     ImGui::DragFloat("Diffuse / Spec Mix", &m_vxgi_diffuse_specular_mix, 1.0f,
