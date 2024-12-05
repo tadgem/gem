@@ -13,9 +13,9 @@ layout(location = 4) out vec4 oLastClipPos;
 
 uniform mat4      u_vp;
 uniform mat4      u_model;
+uniform mat4      u_view;
 uniform mat4      u_last_vp;
 uniform mat4      u_last_model;
-uniform mat4      u_normal;
 uniform int       u_frame_index;
 uniform vec2      u_resolution;
 
@@ -42,7 +42,7 @@ const vec2 halton_seq[16] = vec2[16]
 void main()
 {
     oUV = aUV;
-    oNormal = (vec4(aNormal, 1.0) * u_normal).xyz;
+    oNormal = aNormal;
     oPosition = (u_model * vec4(aPos , 1.0));
     vec4 pos =  u_vp * u_model * vec4(aPos, 1.0);
     oClipPos = pos;
@@ -80,9 +80,11 @@ uniform float       u_roughness_map;
 uniform float       u_ao_map;
 uniform sampler2D   u_prev_position_map;
 
-uniform mat4    u_last_vp;
-uniform int     u_frame_index;
-uniform int     u_entity_index;
+uniform mat4      u_model;
+uniform mat4      u_view;
+uniform mat4      u_last_vp;
+uniform int       u_frame_index;
+uniform int       u_entity_index;
 
 const vec2 halton_seq[16] = vec2[16] 
 (
@@ -104,36 +106,6 @@ const vec2 halton_seq[16] = vec2[16]
     vec2(0.031250, 0.592593)
 );
 
-vec3 UnpackNormalMap( vec3 TextureSample )
-{
-	vec2 NormalXY = TextureSample.rg;
-	
-	NormalXY = NormalXY * vec2(2.0,2.0) - vec2(1.0,1.0);
-	float NormalZ = sqrt( clamp(( 1.0f - dot( NormalXY, NormalXY ) ),0.0,1.0));
-	return vec3( NormalXY.xy, NormalZ);
-}
-
-vec3 getNormalFromMap() {
-    vec3 tangentNormal = aNormal;
-
-    if(abs(tangentNormal.z) < 0.0001) {
-        tangentNormal = UnpackNormalMap(tangentNormal);
-    }
-
-    vec3 Q1 = dFdx(aPosition.xyz);
-    vec3 Q2 = dFdy(aPosition.xyz);
-
-    vec2 st1 = dFdx(aUV);
-    vec2 st2 = dFdy(aUV);
-
-    vec3 N = normalize(aNormal);
-    vec3 T = normalize(Q1 * st2.t - Q2 * st1.t);
-    vec3 B = -normalize(cross(N, T));
-    mat3 TBN = mat3(T, B, N);
-
-    return normalize(TBN * tangentNormal);
-}
-
 void main()
 {
     vec4 inDiffuse = vec4(u_diffuse_map, 1.0);
@@ -144,7 +116,9 @@ void main()
 
     oDiffuse = pow(inDiffuse.xyz, vec3(2.2));
 	oPosition = aPosition;
-    oNormal = aNormal;
+
+    mat3 normalMatrix = transpose(inverse(mat3(u_view * u_model)));
+    oNormal = normalMatrix * aNormal;
 
     float r = ((u_entity_index & 0x000000FF) >>  0);
     float g = ((u_entity_index & 0x0000FF00) >>  8);

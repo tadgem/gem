@@ -133,6 +133,7 @@ void tech::gbuffer::dispatch_gbuffer_textureless_with_id(
   gbuffer_textureless_shader.set_vec2("u_resolution", {win_res.x, win_res.y});
   gbuffer_textureless_shader.set_mat4("u_vp", current_vp);
   gbuffer_textureless_shader.set_mat4("u_last_vp", cam.m_last_vp);
+  gbuffer_textureless_shader.set_mat4("u_view", cam.m_view);
   gbuffer_textureless_shader.set_int("u_frame_index", frame_index);
   gbuffer_textureless_shader.set_int("u_prev_position_map", 0);
 
@@ -153,7 +154,7 @@ void tech::gbuffer::dispatch_gbuffer_textureless_with_id(
       ematerial.bind_material_uniforms(am);
       gbuffer_textureless_shader.set_mat4("u_model", trans.m_model);
       gbuffer_textureless_shader.set_mat4("u_last_model", trans.m_last_model);
-      gbuffer_textureless_shader.set_mat4("u_normal", trans.m_normal_matrix);
+
       int entity_index = static_cast<int>(e);
       gbuffer_textureless_shader.set_int("u_entity_index", entity_index);
       emesh.m_mesh.m_vao.draw();

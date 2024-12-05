@@ -104,7 +104,7 @@ int main()
         renderer.m_gbuffer_textureless_shader->m_handle,
                 renderer.m_gbuffer_textureless_shader->m_data);
 
-    cube_mat.set_uniform_value("u_diffuse_map", glm::vec3(255, 0.0, 0.0));
+    cube_mat.set_uniform_value("u_diffuse_map", glm::vec3(1.0, 0.0, 0.0));
     cube_mat.set_uniform_value("u_metallic_map", 0.0f);
     cube_mat.set_uniform_value("u_roughness_map", 1.0f);
 

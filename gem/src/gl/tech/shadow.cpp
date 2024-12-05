@@ -22,7 +22,7 @@ void tech::shadow::dispatch_shadow_pass(gl_framebuffer &shadow_fb,
   GEM_GPU_MARKER("Shadow Map Pass");
   float near_plane = 0.01f, far_plane = 1000.0f;
   glm::mat4 lightProjection =
-      glm::ortho(-100.0f, 100.0f, -100.0f, 100.0f, near_plane, far_plane);
+      glm::ortho(-150.0f, 150.0f, -150.0f, 150.0f, near_plane, far_plane);
 
   glm::vec3 dir =
       glm::quat(glm::radians(sun.direction)) * glm::vec3(0.0f, 0.0f, 1.0f);

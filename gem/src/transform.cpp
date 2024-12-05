@@ -17,6 +17,8 @@ void transform::update_transforms(scene &current_scene) {
     trans.m_last_model = trans.m_model;
     trans.m_model =
         utils::get_model_matrix(trans.m_position, trans.m_euler, trans.m_scale);
+
+
     trans.m_normal_matrix = utils::get_normal_matrix(trans.m_model);
   }
 
