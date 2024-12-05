@@ -73,7 +73,6 @@ int main()
     glm::ivec2 resolution = {1920, 1080};
     engine::init();
     gl_renderer renderer{};
-
     renderer.init(engine::assets, resolution);
 
     camera cam{};
@@ -110,15 +109,14 @@ int main()
     auto& cube_mat = cube_entity.add_component<material>(
         renderer.m_gbuffer_textureless_shader->m_handle,
                 renderer.m_gbuffer_textureless_shader->m_data);
-
     cube_mat.set_uniform_value("u_diffuse_map", glm::vec3(1.0, 0.0, 0.0));
     cube_mat.set_uniform_value("u_metallic_map", 0.0f);
     cube_mat.set_uniform_value("u_roughness_map", 0.0f);
-
     cube_entity.add_component<mesh_component>(
         mesh_component {shapes::s_torus_mesh, {}, 0});
 
 
+    std::vector<point_light> lights;
     dir_light dir
     {
         {90.01f, 0.0f, 0.0f},
@@ -126,16 +124,12 @@ int main()
         2.75f
     };
     auto& dir2 = e.add_component<dir_light>(dir);
-
-    std::vector<point_light> lights;
     lights.push_back({ {0.0, 0.0, 0.0}, {255.0, 0.0, 0.0}, 10.0f});
     lights.push_back({ {10.0, 0.0, 10.0}, {255.0, 255.0, 0.0}, 20.0f });
     lights.push_back({ {-10.0, 0.0, -10.0}, {0.0, 255.0, 0.0}, 30.0f });
     lights.push_back({ {-10.0, 0.0, 10.0}, {0.0, 0.0, 255.0} , 40.0f});
 
     std::vector<scene*> scenes{ s };
-
-
 
     while (!gpu_backend::selected()->m_quit)
     {
