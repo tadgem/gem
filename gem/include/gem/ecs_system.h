@@ -1,7 +1,7 @@
 #pragma once
+#include "entt/entt.hpp"
 #include "gem/dbg_memory.h"
 #include "gem/hash_string.h"
-#include "entt/entt.hpp"
 #include "json.hpp"
 #include <type_traits>
 #include <unordered_map>
@@ -49,6 +49,5 @@ public:
   }
 
   GEM_IMPL_ALLOC(system_manager)
-
 };
 } // namespace gem

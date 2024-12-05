@@ -1,9 +1,9 @@
 #pragma once
+#include "gem/dbg_memory.h"
 #include "gem/ecs_system.h"
 #include "gem/gl/gl_shader.h"
 #include "gem/model.h"
 #include "gem/texture.h"
-#include "gem/dbg_memory.h"
 #include <any>
 #include <map>
 #include <string>
@@ -39,7 +39,6 @@ public:
 
   gl_shader &m_prog;
   const asset_handle m_shader_handle;
-
 };
 
 class material_sys : public ecs_system {

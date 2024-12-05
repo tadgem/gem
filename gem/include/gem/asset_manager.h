@@ -1,14 +1,14 @@
 #pragma once
+#include "gem/asset.h"
+#include "gem/asset_hot_reload.h"
 #include <functional>
 #include <future>
 #include <map>
 #include <memory>
-#include "gem/asset.h"
-#include "gem/asset_hot_reload.h"
 
 namespace gem {
 
-using asset_load_callback   = void (*)(asset_intermediate *);
+using asset_load_callback = void (*)(asset_intermediate *);
 using asset_loaded_callback = std::function<void(asset *)>;
 using asset_unload_callback = void (*)(asset *);
 
@@ -43,22 +43,21 @@ struct asset_load_return {
 
 class asset_manager {
 public:
-
   asset_manager();
 
-  asset_handle  load_asset(const std::string &path, const asset_type &assetType,
+  asset_handle load_asset(const std::string &path, const asset_type &assetType,
                           asset_loaded_callback on_asset_loaded = nullptr);
 
-  void          unload_asset(const asset_handle &handle);
+  void unload_asset(const asset_handle &handle);
 
-  asset *       get_asset(asset_handle &handle);
+  asset *get_asset(asset_handle &handle);
 
-  template<typename _Ty, asset_type _AssetType>
-  asset_handle  provide_asset(const std::string& name, _Ty data)
-  {
-    asset_t<_Ty,_AssetType>* to_asset = new asset_t<_Ty, _AssetType>(data, name);
-    p_loaded_assets.emplace(
-        to_asset->m_handle, std::move(std::unique_ptr<asset>(to_asset)));
+  template <typename _Ty, asset_type _AssetType>
+  asset_handle provide_asset(const std::string &name, _Ty data) {
+    asset_t<_Ty, _AssetType> *to_asset =
+        new asset_t<_Ty, _AssetType>(data, name);
+    p_loaded_assets.emplace(to_asset->m_handle,
+                            std::move(std::unique_ptr<asset>(to_asset)));
     return to_asset->m_handle;
   }
 
@@ -92,19 +91,16 @@ public:
 protected:
   std::unordered_map<asset_handle, std::future<asset_load_return>>
       p_pending_load_tasks;
-  std::unordered_map<asset_handle, std::unique_ptr<asset>>
-      p_loaded_assets;
-  std::unordered_map<asset_handle, asset_load_return>
-      p_pending_load_callbacks;
+  std::unordered_map<asset_handle, std::unique_ptr<asset>> p_loaded_assets;
+  std::unordered_map<asset_handle, asset_load_return> p_pending_load_callbacks;
   std::unordered_map<asset_handle, asset_unload_callback>
       p_pending_unload_callbacks;
   std::unordered_map<asset_handle, asset_loaded_callback>
       p_asset_loaded_callbacks;
-  std::vector<asset_load_info>
-      p_queued_loads;
+  std::vector<asset_load_info> p_queued_loads;
 
-  std::unique_ptr<efsw::FileWatcher>    p_file_watcher;
-  std::unique_ptr<gem_file_listener>    p_gem_listener;
+  std::unique_ptr<efsw::FileWatcher> p_file_watcher;
+  std::unique_ptr<gem_file_listener> p_gem_listener;
 
   const uint16_t p_callback_tasks_per_tick = 1;
   const uint16_t p_max_async_tasks_in_flight = 8;

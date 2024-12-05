@@ -28,7 +28,7 @@ gl_shader::gl_shader(const std::string &vert, const std::string &frag) {
 }
 
 gl_shader::gl_shader(const std::string &vert, const std::string &geom,
-               const std::string &frag) {
+                     const std::string &frag) {
   ZoneScoped;
   auto v = compile_shader(vert, GL_VERTEX_SHADER);
   auto g = compile_shader(geom, GL_GEOMETRY_SHADER);
@@ -120,7 +120,7 @@ void gl_shader::set_mat4(const std::string &name, glm::mat4 value) const {
 }
 
 gl_handle gl_shader::compile_shader(const std::string &source,
-                                 GLenum shader_stage) {
+                                    GLenum shader_stage) {
   ZoneScoped;
   const char *src = source.c_str();
   gl_handle s = glCreateShader(shader_stage);
@@ -208,7 +208,8 @@ gl_shader::split_composite_shader(const std::string &input) {
       {"#vert", gl_shader::stage::vertex},
       {"#geom", gl_shader::stage::geometry},
       {"#compute", gl_shader::stage::compute}};
-  // static std::unordered_map<std::string, gl_shader::stage> s_known_stages = { };
+  // static std::unordered_map<std::string, gl_shader::stage> s_known_stages = {
+  // };
   auto stages = std::unordered_map<gl_shader::stage, std::string>();
   std::string version = "";
 
@@ -254,7 +255,8 @@ gl_shader::split_composite_shader(const std::string &input) {
   return stages;
 }
 
-gl_shader gl_shader::create_from_composite(const std::string &composite_shader) {
+gl_shader
+gl_shader::create_from_composite(const std::string &composite_shader) {
   std::unordered_map<gl_shader::stage, std::string> stages =
       gl_shader::split_composite_shader(composite_shader);
 
@@ -265,14 +267,16 @@ gl_shader gl_shader::create_from_composite(const std::string &composite_shader) 
   if (stages.find(gl_shader::stage::vertex) != stages.end() &&
       stages.find(gl_shader::stage::fragment) != stages.end() &&
       stages.find(gl_shader::stage::geometry) == stages.end()) {
-    return gl_shader(stages[gl_shader::stage::vertex], stages[gl_shader::stage::fragment]);
+    return gl_shader(stages[gl_shader::stage::vertex],
+                     stages[gl_shader::stage::fragment]);
   }
 
   if (stages.find(gl_shader::stage::vertex) != stages.end() &&
       stages.find(gl_shader::stage::fragment) != stages.end() &&
       stages.find(gl_shader::stage::geometry) != stages.end()) {
-    return gl_shader(stages[gl_shader::stage::vertex], stages[gl_shader::stage::geometry],
-               stages[gl_shader::stage::fragment]);
+    return gl_shader(stages[gl_shader::stage::vertex],
+                     stages[gl_shader::stage::geometry],
+                     stages[gl_shader::stage::fragment]);
   }
   return {};
 }

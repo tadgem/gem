@@ -1,10 +1,10 @@
 #pragma once
 
-#include "gem/asset.h"
-#include "gem/ecs_system.h"
 #include "gem/aabb.h"
-#include "gem/vertex.h"
+#include "gem/asset.h"
 #include "gem/dbg_memory.h"
+#include "gem/ecs_system.h"
+#include "gem/vertex.h"
 
 namespace gem {
 
@@ -15,16 +15,13 @@ struct mesh {
   aabb m_transformed_aabb;
   uint32_t m_material_index;
 
-  void draw() {
-    m_vao.draw();
-  }
+  void draw() { m_vao.draw(); }
 };
 
 struct mesh_component {
   mesh m_mesh;
   asset_handle m_handle;
   u32 m_mesh_index;
-
 };
 
 class mesh_sys : public ecs_system {

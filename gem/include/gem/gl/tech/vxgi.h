@@ -47,5 +47,5 @@ public:
       float diffuse_spec_mix);
 };
 } // namespace tech
-} // namesspace open_gl
+} // namespace open_gl
 } // namespace gem

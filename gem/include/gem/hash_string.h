@@ -1,7 +1,7 @@
 #pragma once
 #include "alias.h"
-#include "gem/profile.h"
 #include "ctti/type_id.hpp"
+#include "gem/profile.h"
 #include "json.hpp"
 #include "spdlog/spdlog.h"
 

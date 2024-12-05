@@ -376,7 +376,8 @@ asset_load_return load_shader_asset_manager(const std::string &path) {
   std::string source = utils::load_string_from_path(path);
   asset_load_return ret{};
   ret.m_loaded_asset_intermediate = new shader_intermediate_asset(
-      new asset_t<gl_shader, asset_type::shader>(gl_shader{}, path), source, path);
+      new asset_t<gl_shader, asset_type::shader>(gl_shader{}, path), source,
+      path);
   ret.m_asset_load_sync_callbacks.push_back(link_shader_program);
   ret.m_new_assets_to_load = {};
 
@@ -459,7 +460,8 @@ void asset_manager::unload_asset(const asset_handle &handle) {
 asset_manager::asset_manager() {
   p_file_watcher = std::make_unique<efsw::FileWatcher>();
   p_gem_listener = std::make_unique<gem_file_listener>();
-  p_gem_listener->m_watch_id = p_file_watcher->addWatch("assets", p_gem_listener.get(), true);
+  p_gem_listener->m_watch_id =
+      p_file_watcher->addWatch("assets", p_gem_listener.get(), true);
   p_file_watcher->watch();
 }
 } // namespace gem
