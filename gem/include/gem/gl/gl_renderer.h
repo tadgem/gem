@@ -80,7 +80,7 @@ public:
   GLfloat m_tonemapping_contrast = 1.07f;
   GLfloat m_tonemapping_saturation = 1.05f;
 
-  bool m_debug_draw_cone_tracing_pass = true;
+  bool m_debug_draw_cone_tracing_pass = false;
   bool m_debug_draw_cone_tracing_pass_no_taa = false;
   bool m_debug_draw_lighting_pass = true;
   bool m_debug_draw_lighting_pass_no_taa = false;
