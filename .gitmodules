@@ -13,3 +13,6 @@
 [submodule "submodules/efsw"]
 	path = submodules/efsw
 	url = https://github.com/SpartanJ/efsw.git
+[submodule "submodules/sdl-shadercross"]
+	path = submodules/sdl-shadercross
+	url = https://github.com/libsdl-org/SDL_shadercross.git

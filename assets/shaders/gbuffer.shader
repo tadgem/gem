@@ -51,8 +51,8 @@ void main()
 
     int jitter_index = u_frame_index % 16;
     vec2 offset = halton_seq[jitter_index];
-    offset.x = ((offset.x-0.5) / u_resolution.x) * 2.0;
-    offset.y = ((offset.y-0.5) / u_resolution.y ) * 2.0;
+    offset.x = ((offset.x-0.5) / u_resolution.x) * 4.0;
+    offset.y = ((offset.y-0.5) / u_resolution.y ) * 4.0;
 
     pos += vec4(offset * pos.z, 0.0, 0.0);
     gl_Position = pos;

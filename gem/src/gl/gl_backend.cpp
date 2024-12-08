@@ -69,7 +69,7 @@ void gl_backend::init(backend_init &init_props) {
       (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE |
                         SDL_WINDOW_HIGH_PIXEL_DENSITY);
   m_window =
-      SDL_CreateWindow("graphics engine", init_props.window_resolution.x,
+      SDL_CreateWindow("GEM Engine", init_props.window_resolution.x,
                        init_props.window_resolution.y, window_flags);
   if (m_window == nullptr) {
     printf("Error: SDL_CreateWindow(): %s\n", SDL_GetError());
