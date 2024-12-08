@@ -18,16 +18,15 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "../../SDL_internal.h"
+#include "SDL_internal.h"
 
-/* An implementation of mutexes using the Symbian API. */
+// An implementation of mutexes using the Symbian API.
 
 #include <e32std.h>
 
-#include "SDL_thread.h"
 #include "SDL_systhread_c.h"
 
-struct SDL_mutex
+struct SDL_Mutex
 {
     TInt handle;
 };
@@ -39,8 +38,8 @@ static TInt NewMutex(const TDesC &aName, TAny *aPtr1, TAny *)
     return ((RMutex *)aPtr1)->CreateGlobal(aName);
 }
 
-/* Create a mutex */
-SDL_mutex *SDL_CreateMutex(void)
+// Create a mutex
+SDL_Mutex *SDL_CreateMutex(void)
 {
     RMutex rmutex;
 
@@ -49,13 +48,13 @@ SDL_mutex *SDL_CreateMutex(void)
         SDL_SetError("Couldn't create mutex.");
         return NULL;
     }
-    SDL_mutex *mutex = new /*(ELeave)*/ SDL_mutex;
+    SDL_Mutex *mutex = new /*(ELeave)*/ SDL_Mutex;
     mutex->handle = rmutex.Handle();
     return mutex;
 }
 
-/* Free the mutex */
-void SDL_DestroyMutex(SDL_mutex *mutex)
+// Free the mutex
+void SDL_DestroyMutex(SDL_Mutex *mutex)
 {
     if (mutex) {
         RMutex rmutex;
@@ -67,46 +66,35 @@ void SDL_DestroyMutex(SDL_mutex *mutex)
     }
 }
 
-/* Lock the mutex */
-int SDL_LockMutex(SDL_mutex *mutex) SDL_NO_THREAD_SAFETY_ANALYSIS /* clang doesn't know about NULL mutexes */
+// Lock the mutex
+void SDL_LockMutex(SDL_Mutex *mutex) SDL_NO_THREAD_SAFETY_ANALYSIS // clang doesn't know about NULL mutexes
 {
-    if (mutex == NULL) {
-        return 0;
+    if (mutex) {
+        RMutex rmutex;
+        rmutex.SetHandle(mutex->handle);
+        rmutex.Wait();
     }
-
-    RMutex rmutex;
-    rmutex.SetHandle(mutex->handle);
-    rmutex.Wait();
-
-    return 0;
 }
 
-/* Try to lock the mutex */
+// Try to lock the mutex
 #if 0
-int SDL_TryLockMutex(SDL_mutex *mutex)
+bool SDL_TryLockMutex(SDL_Mutex *mutex)
 {
-    if (mutex == NULL)
-    {
-        return 0;
+    if (mutex) {
+        // Not yet implemented.
+        return true;
     }
-
-    // Not yet implemented.
-    return 0;
+    return true;
 }
 #endif
 
-/* Unlock the mutex */
-int SDL_UnlockMutex(SDL_mutex *mutex) SDL_NO_THREAD_SAFETY_ANALYSIS /* clang doesn't know about NULL mutexes */
+// Unlock the mutex
+void SDL_UnlockMutex(SDL_Mutex *mutex) SDL_NO_THREAD_SAFETY_ANALYSIS // clang doesn't know about NULL mutexes
 {
-    if (mutex == NULL) {
-        return 0;
+    if (mutex) {
+        RMutex rmutex;
+        rmutex.SetHandle(mutex->handle);
+        rmutex.Signal();
     }
-
-    RMutex rmutex;
-    rmutex.SetHandle(mutex->handle);
-    rmutex.Signal();
-
-    return 0;
 }
 
-/* vi: set ts=4 sw=4 expandtab: */

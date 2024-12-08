@@ -40,27 +40,27 @@ float input::get_mouse_scroll() {
   return s_mouse_state.current_frame_scroll;
 }
 
-gamepad_stick input::get_stick_from_sdl(SDL_GameControllerAxis &sdlAxis) {
+gamepad_stick input::get_stick_from_sdl(SDL_GamepadAxis &sdlAxis) {
   ZoneScoped;
   switch (sdlAxis) {
-  case SDL_GameControllerAxis::SDL_CONTROLLER_AXIS_LEFTX:
+  case SDL_GamepadAxis::SDL_GAMEPAD_AXIS_LEFTX:
     return gamepad_stick::LS;
-  case SDL_GameControllerAxis::SDL_CONTROLLER_AXIS_LEFTY:
+  case SDL_GamepadAxis::SDL_GAMEPAD_AXIS_LEFTY:
     return gamepad_stick::LS;
-  case SDL_GameControllerAxis::SDL_CONTROLLER_AXIS_RIGHTX:
+  case SDL_GamepadAxis::SDL_GAMEPAD_AXIS_RIGHTX:
     return gamepad_stick::RS;
-  case SDL_GameControllerAxis::SDL_CONTROLLER_AXIS_RIGHTY:
+  case SDL_GamepadAxis::SDL_GAMEPAD_AXIS_RIGHTY:
     return gamepad_stick::RS;
   }
   return gamepad_stick::invalid;
 }
 
-gamepad_trigger input::get_trigger_from_sdl(SDL_GameControllerAxis &sdlAxis) {
+gamepad_trigger input::get_trigger_from_sdl(SDL_GamepadAxis &sdlAxis) {
   ZoneScoped;
   switch (sdlAxis) {
-  case SDL_GameControllerAxis::SDL_CONTROLLER_AXIS_TRIGGERLEFT:
+  case SDL_GAMEPAD_AXIS_LEFT_TRIGGER:
     return gamepad_trigger::LT;
-  case SDL_GameControllerAxis::SDL_CONTROLLER_AXIS_TRIGGERRIGHT:
+  case SDL_GAMEPAD_AXIS_RIGHT_TRIGGER:
     return gamepad_trigger::RT;
   }
   return gamepad_trigger::invalid;
@@ -69,33 +69,33 @@ gamepad_trigger input::get_trigger_from_sdl(SDL_GameControllerAxis &sdlAxis) {
 gamepad_button input::get_button_from_sdl(uint8_t sdlButton) {
   ZoneScoped;
   switch (sdlButton) {
-  case SDL_CONTROLLER_BUTTON_A:
+  case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_SOUTH:
     return gamepad_button::face_south;
-  case SDL_CONTROLLER_BUTTON_B:
+  case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_EAST:
     return gamepad_button::face_east;
-  case SDL_CONTROLLER_BUTTON_X:
+  case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_WEST:
     return gamepad_button::face_west;
-  case SDL_CONTROLLER_BUTTON_Y:
+  case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_NORTH:
     return gamepad_button::face_north;
-  case SDL_CONTROLLER_BUTTON_DPAD_UP:
+  case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_DPAD_UP:
     return gamepad_button::up;
-  case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
+  case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_DPAD_DOWN:
     return gamepad_button::down;
-  case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
+  case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_DPAD_LEFT:
     return gamepad_button::left;
-  case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
+  case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_DPAD_RIGHT:
     return gamepad_button::right;
-  case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:
+  case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER:
     return gamepad_button::right_bumper;
-  case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:
+  case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_LEFT_SHOULDER:
     return gamepad_button::left_bumper;
-  case SDL_CONTROLLER_BUTTON_LEFTSTICK:
+  case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_LEFT_STICK:
     return gamepad_button::LS_click;
-  case SDL_CONTROLLER_BUTTON_RIGHTSTICK:
+  case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_RIGHT_STICK:
     return gamepad_button::RS_click;
-  case SDL_CONTROLLER_BUTTON_START:
+  case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_START:
     return gamepad_button::start;
-  case SDL_CONTROLLER_BUTTON_BACK:
+  case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_BACK:
     return gamepad_button::home;
   default:
     return gamepad_button::invalid;
@@ -110,8 +110,8 @@ keyboard_key input::get_key_from_sdl(SDL_Keycode keyCode) {
       return static_cast<keyboard_key>((int)keyboard_key::zero + diff);
     }
 
-    if (keyCode >= SDLK_a && keyCode <= SDLK_z) {
-      int diff = keyCode - SDLK_a;
+    if (keyCode >= SDLK_A && keyCode <= SDLK_Z) {
+      int diff = keyCode - SDLK_A;
       return static_cast<keyboard_key>((int)keyboard_key::a + diff);
     }
 
@@ -173,7 +173,7 @@ keyboard_key input::get_key_from_sdl(SDL_Keycode keyCode) {
       return keyboard_key::right;
     case SDLK_ESCAPE:
       return keyboard_key::escape;
-    case SDLK_BACKQUOTE:
+    case SDLK_GRAVE:
       return keyboard_key::tilde;
     default:
       return keyboard_key::invalid;

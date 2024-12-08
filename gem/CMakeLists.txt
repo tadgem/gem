@@ -10,7 +10,7 @@ set(GEM_SRC
         ${THIRD_PARTY_DIR}/imgui/imgui.cpp
         ${THIRD_PARTY_DIR}/imgui/ImFileDialog.cpp
         ${THIRD_PARTY_DIR}/imgui/backends/imgui_impl_opengl3.cpp
-        ${THIRD_PARTY_DIR}/imgui/backends/imgui_impl_sdl2.cpp
+        ${THIRD_PARTY_DIR}/imgui/backends/imgui_impl_sdl3.cpp
         ${THIRD_PARTY_DIR}/im3d/im3d.cpp
         ${THIRD_PARTY_DIR}/im3d/im3d_config.h
         ${THIRD_PARTY_DIR}/im3d/im3d_math.h
@@ -42,5 +42,5 @@ set(GEM_INCLUDES
         ${CMAKE_CURRENT_SOURCE_DIR}/include
         CACHE INTERNAL "")
 
-target_link_libraries(gem PRIVATE efsw glew_s SDL2-static glm assimp cpptrace::cpptrace spdlog TracyClient)
+target_link_libraries(gem PRIVATE efsw glew_s SDL3-static glm assimp cpptrace::cpptrace spdlog TracyClient)
 target_include_directories(gem PUBLIC ${GEM_INCLUDES})

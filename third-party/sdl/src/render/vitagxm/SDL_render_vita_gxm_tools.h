@@ -22,9 +22,8 @@
 #ifndef SDL_RENDER_VITA_GXM_TOOLS_H
 #define SDL_RENDER_VITA_GXM_TOOLS_H
 
-#include "../../SDL_internal.h"
+#include "SDL_internal.h"
 
-#include "SDL_hints.h"
 #include "../SDL_sysrender.h"
 
 #include <psp2/kernel/processmgr.h>
@@ -61,6 +60,4 @@ void gxm_init_for_common_dialog(void);
 void gxm_swap_for_common_dialog(void);
 void gxm_term_for_common_dialog(void);
 
-#endif /* SDL_RENDER_VITA_GXM_TOOLS_H */
-
-/* vi: set ts=4 sw=4 expandtab: */
+#endif // SDL_RENDER_VITA_GXM_TOOLS_H

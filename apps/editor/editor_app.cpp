@@ -6,8 +6,10 @@ using namespace gem;
 
 editor_application::editor_application()
 {
-    gl_backend::init(backend_init{ {1920, 1080}, true });
+    glm::ivec2 resolution = {1920, 1080};
     engine::init();
+    gl_renderer renderer{};
+    renderer.init(engine::assets, resolution);
 
     m_editor_fsm.set_starting_state(editor_mode::no_open_project);
     m_editor_fsm.add_state(editor_mode::no_open_project, [this]() {
@@ -33,20 +35,20 @@ editor_application::editor_application()
 
 void editor_application::run()
 {
-    while (!gl_backend::s_quit)
+    while (!gpu_backend::selected()->m_quit)
     {
         engine::assets.update();
 
-        gl_backend::process_sdl_event();
-        gl_backend::engine_pre_frame();
+        gpu_backend::selected()->process_sdl_event();
+        gpu_backend::selected()->engine_pre_frame();
 
         main_menu_bar();
 
         m_editor_fsm.update();
 
-        gl_backend::engine_post_frame();
+        gpu_backend::selected()->engine_post_frame();
     }
-    gl_backend::engine_shut_down();
+    gpu_backend::selected()->engine_shut_down();
     engine::shutdown();
 }
 

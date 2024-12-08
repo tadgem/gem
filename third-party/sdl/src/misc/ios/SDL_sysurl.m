@@ -18,19 +18,26 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
+#include "SDL_internal.h"
+
+#if defined(SDL_PLATFORM_IOS) || defined(SDL_PLATFORM_TVOS)
 
 #include "../SDL_sysurl.h"
 
 #import <UIKit/UIKit.h>
 
-int SDL_SYS_OpenURL(const char *url)
+bool SDL_SYS_OpenURL(const char *url)
 {
     @autoreleasepool {
 
+#ifdef SDL_PLATFORM_VISIONOS
+        return SDL_Unsupported();  // openURL is not supported on visionOS
+#else
         NSString *nsstr = [NSString stringWithUTF8String:url];
         NSURL *nsurl = [NSURL URLWithString:nsstr];
-        return [[UIApplication sharedApplication] openURL:nsurl] ? 0 : -1;
+        return [[UIApplication sharedApplication] openURL:nsurl];
+#endif
     }
 }
 
-/* vi: set ts=4 sw=4 expandtab: */
+#endif // SDL_PLATFORM_IOS || SDL_PLATFORM_TVOS

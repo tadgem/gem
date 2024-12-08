@@ -58,13 +58,13 @@ public:
   gl_framebuffer m_ssr_buffer_history;
   gl_framebuffer m_final_pass;
 
-  im3d_state m_im3d_state;
-  voxel::grid m_voxel_data;
-  voxel::grid_visualiser m_voxel_visualiser;
+  im3d_state              m_im3d_state;
+  voxel::grid             m_voxel_data;
+  voxel::grid_visualiser  m_voxel_visualiser;
 
-  glm::vec2 m_window_resolution;
-  u32 m_frame_index;
-  entt::entity m_last_selected_entity;
+  glm::vec2     m_window_resolution;
+  u32           m_frame_index;
+  entt::entity  m_last_selected_entity;
 
   GLfloat m_vxgi_cone_trace_distance = 45.0f;
   GLfloat m_vxgi_diffuse_specular_mix = 0.0f;

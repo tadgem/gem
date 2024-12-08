@@ -1,5 +1,5 @@
 #pragma once
-#include "SDL.h"
+#include "SDL3/SDL.h"
 #include "glm.hpp"
 #include "unordered_map"
 
@@ -137,8 +137,8 @@ public:
 
 protected:
   friend class gl_backend;
-  static gamepad_stick get_stick_from_sdl(SDL_GameControllerAxis &sdlAxis);
-  static gamepad_trigger get_trigger_from_sdl(SDL_GameControllerAxis &sdlAxis);
+  static gamepad_stick get_stick_from_sdl(SDL_GamepadAxis &sdlAxis);
+  static gamepad_trigger get_trigger_from_sdl(SDL_GamepadAxis &sdlAxis);
   static gamepad_button get_button_from_sdl(uint8_t sdlButton);
   static keyboard_key get_key_from_sdl(SDL_Keycode keyCode);
 

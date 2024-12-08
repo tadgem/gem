@@ -21,9 +21,14 @@
 #ifndef SDL_internal_h_
 #define SDL_internal_h_
 
-/* Many of SDL's features require _GNU_SOURCE on various platforms */
+// Many of SDL's features require _GNU_SOURCE on various platforms
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
+
+// Need this so Linux systems define fseek64o, ftell64o and off64_t
+#ifndef _LARGEFILE64_SOURCE
+#define _LARGEFILE64_SOURCE 1
 #endif
 
 /* This is for a variable-length array at the end of a struct:
@@ -35,6 +40,17 @@
 #define SDL_VARIABLE_LENGTH_ARRAY
 #endif
 
+#if (defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6))) || defined(__clang__)
+#define HAVE_GCC_DIAGNOSTIC_PRAGMA 1
+#endif
+
+#ifdef _MSC_VER // We use constant comparison for generated code
+#pragma warning(disable : 6326)
+#endif
+
+#ifdef _MSC_VER // SDL_MAX_SMALL_ALLOC_STACKSIZE is smaller than _ALLOCA_S_THRESHOLD and should be generally safe
+#pragma warning(disable : 6255)
+#endif
 #define SDL_MAX_SMALL_ALLOC_STACKSIZE          128
 #define SDL_small_alloc(type, count, pisstack) ((*(pisstack) = ((sizeof(type) * (count)) < SDL_MAX_SMALL_ALLOC_STACKSIZE)), (*(pisstack) ? SDL_stack_alloc(type, count) : (type *)SDL_malloc(sizeof(type) * (count))))
 #define SDL_small_free(ptr, isstack) \
@@ -44,23 +60,73 @@
         SDL_free(ptr);               \
     }
 
+#include "SDL_build_config.h"
+
 #include "dynapi/SDL_dynapi.h"
 
 #if SDL_DYNAMIC_API
 #include "dynapi/SDL_dynapi_overrides.h"
-/* force DECLSPEC off...it's all internal symbols now.
+/* force SDL_DECLSPEC off...it's all internal symbols now.
    These will have actual #defines during SDL_dynapi.c only */
-#define DECLSPEC
+#ifdef SDL_DECLSPEC
+#undef SDL_DECLSPEC
+#endif
+#define SDL_DECLSPEC
 #endif
 
-#include "SDL_config.h"
+#ifdef SDL_PLATFORM_APPLE
+#ifndef _DARWIN_C_SOURCE
+#define _DARWIN_C_SOURCE 1 // for memset_pattern4()
+#endif
+#endif
 
-/* If you run into a warning that O_CLOEXEC is redefined, update the SDL configuration header for your platform to add HAVE_O_CLOEXEC */
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_STDIO_H
+#include <stdio.h>
+#endif
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#elif defined(HAVE_MALLOC_H)
+#include <malloc.h>
+#endif
+#ifdef HAVE_STDDEF_H
+#include <stddef.h>
+#endif
+#ifdef HAVE_STDARG_H
+#include <stdarg.h>
+#endif
+#ifdef HAVE_STRING_H
+#ifdef HAVE_MEMORY_H
+#include <memory.h>
+#endif
+#include <string.h>
+#endif
+#ifdef HAVE_STRINGS_H
+#include <strings.h>
+#endif
+#ifdef HAVE_WCHAR_H
+#include <wchar.h>
+#endif
+#ifdef HAVE_INTTYPES_H
+#include <inttypes.h>
+#elif defined(HAVE_STDINT_H)
+#include <stdint.h>
+#endif
+#ifdef HAVE_MATH_H
+#include <math.h>
+#endif
+#ifdef HAVE_FLOAT_H
+#include <float.h>
+#endif
+
+// If you run into a warning that O_CLOEXEC is redefined, update the SDL configuration header for your platform to add HAVE_O_CLOEXEC
 #ifndef HAVE_O_CLOEXEC
 #define O_CLOEXEC 0
 #endif
 
-/* A few #defines to reduce SDL2 footprint.
+/* A few #defines to reduce SDL footprint.
    Only effective when library is statically linked.
    You have to manually edit this file. */
 #ifndef SDL_LEAN_AND_MEAN
@@ -68,13 +134,13 @@
 #endif
 
 /* Optimized functions from 'SDL_blit_0.c'
-   - blit with source BitsPerPixel < 8, palette */
+   - blit with source bits_per_pixel < 8, palette */
 #ifndef SDL_HAVE_BLIT_0
 #define SDL_HAVE_BLIT_0 !SDL_LEAN_AND_MEAN
 #endif
 
 /* Optimized functions from 'SDL_blit_1.c'
-   - blit with source BytesPerPixel == 1, palette */
+   - blit with source bytes_per_pixel == 1, palette */
 #ifndef SDL_HAVE_BLIT_1
 #define SDL_HAVE_BLIT_1 !SDL_LEAN_AND_MEAN
 #endif
@@ -105,7 +171,7 @@
 #endif
 
 /* Run-Length-Encoding
-   - SDL_SetColorKey() called with SDL_RLEACCEL flag */
+   - SDL_SetSurfaceColorKey() called with SDL_RLEACCEL flag */
 #ifndef SDL_HAVE_RLE
 #define SDL_HAVE_RLE !SDL_LEAN_AND_MEAN
 #endif
@@ -125,91 +191,67 @@
 #define SDL_HAVE_YUV !SDL_LEAN_AND_MEAN
 #endif
 
-#ifndef SDL_RENDER_DISABLED
-/* define the not defined ones as 0 */
-#ifndef SDL_VIDEO_RENDER_D3D
-#define SDL_VIDEO_RENDER_D3D 0
-#endif
-#ifndef SDL_VIDEO_RENDER_D3D11
-#define SDL_VIDEO_RENDER_D3D11 0
-#endif
-#ifndef SDL_VIDEO_RENDER_D3D12
-#define SDL_VIDEO_RENDER_D3D12 0
-#endif
-#ifndef SDL_VIDEO_RENDER_METAL
-#define SDL_VIDEO_RENDER_METAL 0
-#endif
-#ifndef SDL_VIDEO_RENDER_OGL
-#define SDL_VIDEO_RENDER_OGL  0
-#endif
-#ifndef SDL_VIDEO_RENDER_OGL_ES
-#define SDL_VIDEO_RENDER_OGL_ES 0
-#endif
-#ifndef SDL_VIDEO_RENDER_OGL_ES2
-#define SDL_VIDEO_RENDER_OGL_ES2 0
-#endif
-#ifndef SDL_VIDEO_RENDER_DIRECTFB
-#define SDL_VIDEO_RENDER_DIRECTFB 0
-#endif
-#ifndef SDL_VIDEO_RENDER_PS2
-#define SDL_VIDEO_RENDER_PS2 0
-#endif
-#ifndef SDL_VIDEO_RENDER_PSP
-#define SDL_VIDEO_RENDER_PSP 0
-#endif
-#ifndef SDL_VIDEO_RENDER_VITA_GXM
-#define SDL_VIDEO_RENDER_VITA_GXM 0
-#endif
-#else /* define all as 0 */
+#ifdef SDL_RENDER_DISABLED
 #undef SDL_VIDEO_RENDER_SW
-#define SDL_VIDEO_RENDER_SW 0
 #undef SDL_VIDEO_RENDER_D3D
-#define SDL_VIDEO_RENDER_D3D 0
 #undef SDL_VIDEO_RENDER_D3D11
-#define SDL_VIDEO_RENDER_D3D11 0
 #undef SDL_VIDEO_RENDER_D3D12
-#define SDL_VIDEO_RENDER_D3D12 0
+#undef SDL_VIDEO_RENDER_GPU
 #undef SDL_VIDEO_RENDER_METAL
-#define SDL_VIDEO_RENDER_METAL 0
 #undef SDL_VIDEO_RENDER_OGL
-#define SDL_VIDEO_RENDER_OGL  0
-#undef SDL_VIDEO_RENDER_OGL_ES
-#define SDL_VIDEO_RENDER_OGL_ES 0
 #undef SDL_VIDEO_RENDER_OGL_ES2
-#define SDL_VIDEO_RENDER_OGL_ES2 0
-#undef SDL_VIDEO_RENDER_DIRECTFB
-#define SDL_VIDEO_RENDER_DIRECTFB 0
 #undef SDL_VIDEO_RENDER_PS2
-#define SDL_VIDEO_RENDER_PS2 0
 #undef SDL_VIDEO_RENDER_PSP
-#define SDL_VIDEO_RENDER_PSP 0
 #undef SDL_VIDEO_RENDER_VITA_GXM
-#define SDL_VIDEO_RENDER_VITA_GXM 0
-#endif /* SDL_RENDER_DISABLED */
+#undef SDL_VIDEO_RENDER_VULKAN
+#endif // SDL_RENDER_DISABLED
 
-#define SDL_HAS_RENDER_DRIVER \
-       (SDL_VIDEO_RENDER_SW       | \
-        SDL_VIDEO_RENDER_D3D      | \
-        SDL_VIDEO_RENDER_D3D11    | \
-        SDL_VIDEO_RENDER_D3D12    | \
-        SDL_VIDEO_RENDER_METAL    | \
-        SDL_VIDEO_RENDER_OGL      | \
-        SDL_VIDEO_RENDER_OGL_ES   | \
-        SDL_VIDEO_RENDER_OGL_ES2  | \
-        SDL_VIDEO_RENDER_DIRECTFB | \
-        SDL_VIDEO_RENDER_PS2      | \
-        SDL_VIDEO_RENDER_PSP      | \
-        SDL_VIDEO_RENDER_VITA_GXM)
+#ifdef SDL_GPU_DISABLED
+#undef SDL_GPU_D3D11
+#undef SDL_GPU_D3D12
+#undef SDL_GPU_METAL
+#undef SDL_GPU_VULKAN
+#undef SDL_VIDEO_RENDER_GPU
+#endif // SDL_GPU_DISABLED
 
-#if !defined(SDL_RENDER_DISABLED) && !SDL_HAS_RENDER_DRIVER
-#error SDL_RENDER enabled without any backend drivers.
+#if !defined(HAVE_LIBC)
+// If not using _any_ C runtime, these have to be defined before SDL_thread.h
+// gets included, so internal SDL_CreateThread calls will not try to reference
+// the (unavailable and unneeded) _beginthreadex/_endthreadex functions.
+#define SDL_BeginThreadFunction NULL
+#define SDL_EndThreadFunction NULL
 #endif
 
-#include "SDL_assert.h"
-#include "SDL_log.h"
+/* Enable internal definitions in SDL API headers */
+#define SDL_INTERNAL
 
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_intrin.h>
+
+#define SDL_MAIN_NOIMPL // don't drag in header-only implementation of SDL_main
+#include <SDL3/SDL_main.h>
+
+// Set up for C function definitions, even when using C++
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "SDL_utils_c.h"
+#include "SDL_hashtable.h"
+
+// Do any initialization that needs to happen before threads are started
 extern void SDL_InitMainThread(void);
 
-#endif /* SDL_internal_h_ */
+/* The internal implementations of these functions have up to nanosecond precision.
+   We can expose these functions as part of the API if we want to later.
+*/
+extern bool SDLCALL SDL_WaitSemaphoreTimeoutNS(SDL_Semaphore *sem, Sint64 timeoutNS);
+extern bool SDLCALL SDL_WaitConditionTimeoutNS(SDL_Condition *cond, SDL_Mutex *mutex, Sint64 timeoutNS);
+extern bool SDLCALL SDL_WaitEventTimeoutNS(SDL_Event *event, Sint64 timeoutNS);
 
-/* vi: set ts=4 sw=4 expandtab: */
+// Ends C function definitions when using C++
+#ifdef __cplusplus
+}
+#endif
+
+#endif // SDL_internal_h_

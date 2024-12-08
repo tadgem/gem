@@ -1,17 +1,14 @@
 /**
  * Pixels test suite
  */
-
-#include <stdio.h>
-
-#include "SDL.h"
-#include "SDL_test.h"
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_test.h>
+#include "testautomation_suites.h"
 
 /* Test case functions */
 
 /* Definition of all RGB formats used to test pixel conversions */
-const int _numRGBPixelFormats = 31;
-Uint32 _RGBPixelFormats[] = {
+static const SDL_PixelFormat g_AllFormats[] = {
     SDL_PIXELFORMAT_INDEX1LSB,
     SDL_PIXELFORMAT_INDEX1MSB,
     SDL_PIXELFORMAT_INDEX2LSB,
@@ -20,10 +17,10 @@ Uint32 _RGBPixelFormats[] = {
     SDL_PIXELFORMAT_INDEX4MSB,
     SDL_PIXELFORMAT_INDEX8,
     SDL_PIXELFORMAT_RGB332,
-    SDL_PIXELFORMAT_RGB444,
-    SDL_PIXELFORMAT_BGR444,
-    SDL_PIXELFORMAT_RGB555,
-    SDL_PIXELFORMAT_BGR555,
+    SDL_PIXELFORMAT_XRGB4444,
+    SDL_PIXELFORMAT_XBGR4444,
+    SDL_PIXELFORMAT_XRGB1555,
+    SDL_PIXELFORMAT_XBGR1555,
     SDL_PIXELFORMAT_ARGB4444,
     SDL_PIXELFORMAT_RGBA4444,
     SDL_PIXELFORMAT_ABGR4444,
@@ -36,17 +33,29 @@ Uint32 _RGBPixelFormats[] = {
     SDL_PIXELFORMAT_BGR565,
     SDL_PIXELFORMAT_RGB24,
     SDL_PIXELFORMAT_BGR24,
-    SDL_PIXELFORMAT_RGB888,
+    SDL_PIXELFORMAT_XRGB8888,
     SDL_PIXELFORMAT_RGBX8888,
-    SDL_PIXELFORMAT_BGR888,
+    SDL_PIXELFORMAT_XBGR8888,
     SDL_PIXELFORMAT_BGRX8888,
     SDL_PIXELFORMAT_ARGB8888,
     SDL_PIXELFORMAT_RGBA8888,
     SDL_PIXELFORMAT_ABGR8888,
     SDL_PIXELFORMAT_BGRA8888,
-    SDL_PIXELFORMAT_ARGB2101010
+    SDL_PIXELFORMAT_XRGB2101010,
+    SDL_PIXELFORMAT_XBGR2101010,
+    SDL_PIXELFORMAT_ARGB2101010,
+    SDL_PIXELFORMAT_ABGR2101010,
+    SDL_PIXELFORMAT_YV12,
+    SDL_PIXELFORMAT_IYUV,
+    SDL_PIXELFORMAT_YUY2,
+    SDL_PIXELFORMAT_UYVY,
+    SDL_PIXELFORMAT_YVYU,
+    SDL_PIXELFORMAT_NV12,
+    SDL_PIXELFORMAT_NV21
 };
-const char *_RGBPixelFormatsVerbose[] = {
+static const int g_numAllFormats = SDL_arraysize(g_AllFormats);
+
+static const char *g_AllFormatsVerbose[] = {
     "SDL_PIXELFORMAT_INDEX1LSB",
     "SDL_PIXELFORMAT_INDEX1MSB",
     "SDL_PIXELFORMAT_INDEX2LSB",
@@ -55,10 +64,10 @@ const char *_RGBPixelFormatsVerbose[] = {
     "SDL_PIXELFORMAT_INDEX4MSB",
     "SDL_PIXELFORMAT_INDEX8",
     "SDL_PIXELFORMAT_RGB332",
-    "SDL_PIXELFORMAT_RGB444",
-    "SDL_PIXELFORMAT_BGR444",
-    "SDL_PIXELFORMAT_RGB555",
-    "SDL_PIXELFORMAT_BGR555",
+    "SDL_PIXELFORMAT_XRGB4444",
+    "SDL_PIXELFORMAT_XBGR4444",
+    "SDL_PIXELFORMAT_XRGB1555",
+    "SDL_PIXELFORMAT_XBGR1555",
     "SDL_PIXELFORMAT_ARGB4444",
     "SDL_PIXELFORMAT_RGBA4444",
     "SDL_PIXELFORMAT_ABGR4444",
@@ -71,29 +80,18 @@ const char *_RGBPixelFormatsVerbose[] = {
     "SDL_PIXELFORMAT_BGR565",
     "SDL_PIXELFORMAT_RGB24",
     "SDL_PIXELFORMAT_BGR24",
-    "SDL_PIXELFORMAT_RGB888",
+    "SDL_PIXELFORMAT_XRGB8888",
     "SDL_PIXELFORMAT_RGBX8888",
-    "SDL_PIXELFORMAT_BGR888",
+    "SDL_PIXELFORMAT_XBGR8888",
     "SDL_PIXELFORMAT_BGRX8888",
     "SDL_PIXELFORMAT_ARGB8888",
     "SDL_PIXELFORMAT_RGBA8888",
     "SDL_PIXELFORMAT_ABGR8888",
     "SDL_PIXELFORMAT_BGRA8888",
-    "SDL_PIXELFORMAT_ARGB2101010"
-};
-
-/* Definition of all Non-RGB formats used to test pixel conversions */
-const int _numNonRGBPixelFormats = 7;
-Uint32 _nonRGBPixelFormats[] = {
-    SDL_PIXELFORMAT_YV12,
-    SDL_PIXELFORMAT_IYUV,
-    SDL_PIXELFORMAT_YUY2,
-    SDL_PIXELFORMAT_UYVY,
-    SDL_PIXELFORMAT_YVYU,
-    SDL_PIXELFORMAT_NV12,
-    SDL_PIXELFORMAT_NV21
-};
-const char *_nonRGBPixelFormatsVerbose[] = {
+    "SDL_PIXELFORMAT_XRGB2101010",
+    "SDL_PIXELFORMAT_XBGR2101010",
+    "SDL_PIXELFORMAT_ARGB2101010",
+    "SDL_PIXELFORMAT_ABGR2101010",
     "SDL_PIXELFORMAT_YV12",
     "SDL_PIXELFORMAT_IYUV",
     "SDL_PIXELFORMAT_YUY2",
@@ -104,124 +102,264 @@ const char *_nonRGBPixelFormatsVerbose[] = {
 };
 
 /* Definition of some invalid formats for negative tests */
-const int _numInvalidPixelFormats = 2;
-Uint32 _invalidPixelFormats[] = {
+static Uint32 g_invalidPixelFormats[] = {
     SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_PACKED32, SDL_PACKEDORDER_ABGR, SDL_PACKEDLAYOUT_1010102 + 1, 32, 4),
     SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_PACKED32, SDL_PACKEDORDER_ABGR, SDL_PACKEDLAYOUT_1010102 + 2, 32, 4)
 };
-const char *_invalidPixelFormatsVerbose[] = {
+static const int g_numInvalidPixelFormats = SDL_arraysize(g_invalidPixelFormats);
+static const char *g_invalidPixelFormatsVerbose[] = {
     "SDL_PIXELFORMAT_UNKNOWN",
     "SDL_PIXELFORMAT_UNKNOWN"
 };
 
+/* Verify the pixel formats are laid out as expected */
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_INDEX1LSB_FORMAT, SDL_PIXELFORMAT_INDEX1LSB == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_INDEX1, SDL_BITMAPORDER_4321, 0, 1, 0));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_INDEX1MSB_FORMAT, SDL_PIXELFORMAT_INDEX1MSB == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_INDEX1, SDL_BITMAPORDER_1234, 0, 1, 0));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_INDEX2LSB_FORMAT, SDL_PIXELFORMAT_INDEX2LSB == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_INDEX2, SDL_BITMAPORDER_4321, 0, 2, 0));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_INDEX2MSB_FORMAT, SDL_PIXELFORMAT_INDEX2MSB == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_INDEX2, SDL_BITMAPORDER_1234, 0, 2, 0));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_INDEX4LSB_FORMAT, SDL_PIXELFORMAT_INDEX4LSB == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_INDEX4, SDL_BITMAPORDER_4321, 0, 4, 0));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_INDEX4MSB_FORMAT, SDL_PIXELFORMAT_INDEX4MSB == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_INDEX4, SDL_BITMAPORDER_1234, 0, 4, 0));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_INDEX8_FORMAT, SDL_PIXELFORMAT_INDEX8 == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_INDEX8, 0, 0, 8, 1));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_RGB332_FORMAT, SDL_PIXELFORMAT_RGB332 == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_PACKED8, SDL_PACKEDORDER_XRGB, SDL_PACKEDLAYOUT_332, 8, 1));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_XRGB4444_FORMAT, SDL_PIXELFORMAT_XRGB4444 == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_PACKED16, SDL_PACKEDORDER_XRGB, SDL_PACKEDLAYOUT_4444, 12, 2));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_XBGR4444_FORMAT, SDL_PIXELFORMAT_XBGR4444 == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_PACKED16, SDL_PACKEDORDER_XBGR, SDL_PACKEDLAYOUT_4444, 12, 2));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_XRGB1555_FORMAT, SDL_PIXELFORMAT_XRGB1555 == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_PACKED16, SDL_PACKEDORDER_XRGB, SDL_PACKEDLAYOUT_1555, 15, 2));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_XBGR1555_FORMAT, SDL_PIXELFORMAT_XBGR1555 == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_PACKED16, SDL_PACKEDORDER_XBGR, SDL_PACKEDLAYOUT_1555, 15, 2));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_ARGB4444_FORMAT, SDL_PIXELFORMAT_ARGB4444 == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_PACKED16, SDL_PACKEDORDER_ARGB, SDL_PACKEDLAYOUT_4444, 16, 2));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_RGBA4444_FORMAT, SDL_PIXELFORMAT_RGBA4444 == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_PACKED16, SDL_PACKEDORDER_RGBA, SDL_PACKEDLAYOUT_4444, 16, 2));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_ABGR4444_FORMAT, SDL_PIXELFORMAT_ABGR4444 == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_PACKED16, SDL_PACKEDORDER_ABGR, SDL_PACKEDLAYOUT_4444, 16, 2));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_BGRA4444_FORMAT, SDL_PIXELFORMAT_BGRA4444 == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_PACKED16, SDL_PACKEDORDER_BGRA, SDL_PACKEDLAYOUT_4444, 16, 2));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_ARGB1555_FORMAT, SDL_PIXELFORMAT_ARGB1555 == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_PACKED16, SDL_PACKEDORDER_ARGB, SDL_PACKEDLAYOUT_1555, 16, 2));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_RGBA5551_FORMAT, SDL_PIXELFORMAT_RGBA5551 == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_PACKED16, SDL_PACKEDORDER_RGBA, SDL_PACKEDLAYOUT_5551, 16, 2));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_ABGR1555_FORMAT, SDL_PIXELFORMAT_ABGR1555 == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_PACKED16, SDL_PACKEDORDER_ABGR, SDL_PACKEDLAYOUT_1555, 16, 2));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_BGRA5551_FORMAT, SDL_PIXELFORMAT_BGRA5551 == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_PACKED16, SDL_PACKEDORDER_BGRA, SDL_PACKEDLAYOUT_5551, 16, 2));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_RGB565_FORMAT, SDL_PIXELFORMAT_RGB565 == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_PACKED16, SDL_PACKEDORDER_XRGB, SDL_PACKEDLAYOUT_565, 16, 2));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_BGR565_FORMAT, SDL_PIXELFORMAT_BGR565 == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_PACKED16, SDL_PACKEDORDER_XBGR, SDL_PACKEDLAYOUT_565, 16, 2));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_RGB24_FORMAT, SDL_PIXELFORMAT_RGB24 == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_ARRAYU8, SDL_ARRAYORDER_RGB, 0, 24, 3));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_BGR24_FORMAT, SDL_PIXELFORMAT_BGR24 == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_ARRAYU8, SDL_ARRAYORDER_BGR, 0, 24, 3));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_XRGB8888_FORMAT, SDL_PIXELFORMAT_XRGB8888 == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_PACKED32, SDL_PACKEDORDER_XRGB, SDL_PACKEDLAYOUT_8888, 24, 4));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_RGBX8888_FORMAT, SDL_PIXELFORMAT_RGBX8888 == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_PACKED32, SDL_PACKEDORDER_RGBX, SDL_PACKEDLAYOUT_8888, 24, 4));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_XBGR8888_FORMAT, SDL_PIXELFORMAT_XBGR8888 == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_PACKED32, SDL_PACKEDORDER_XBGR, SDL_PACKEDLAYOUT_8888, 24, 4));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_BGRX8888_FORMAT, SDL_PIXELFORMAT_BGRX8888 == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_PACKED32, SDL_PACKEDORDER_BGRX, SDL_PACKEDLAYOUT_8888, 24, 4));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_ARGB8888_FORMAT, SDL_PIXELFORMAT_ARGB8888 == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_PACKED32, SDL_PACKEDORDER_ARGB, SDL_PACKEDLAYOUT_8888, 32, 4));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_RGBA8888_FORMAT, SDL_PIXELFORMAT_RGBA8888 == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_PACKED32, SDL_PACKEDORDER_RGBA, SDL_PACKEDLAYOUT_8888, 32, 4));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_ABGR8888_FORMAT, SDL_PIXELFORMAT_ABGR8888 == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_PACKED32, SDL_PACKEDORDER_ABGR, SDL_PACKEDLAYOUT_8888, 32, 4));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_BGRA8888_FORMAT, SDL_PIXELFORMAT_BGRA8888 == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_PACKED32, SDL_PACKEDORDER_BGRA, SDL_PACKEDLAYOUT_8888, 32, 4));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_XRGB2101010_FORMAT, SDL_PIXELFORMAT_XRGB2101010 == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_PACKED32, SDL_PACKEDORDER_XRGB, SDL_PACKEDLAYOUT_2101010, 32, 4));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_XBGR2101010_FORMAT, SDL_PIXELFORMAT_XBGR2101010 == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_PACKED32, SDL_PACKEDORDER_XBGR, SDL_PACKEDLAYOUT_2101010, 32, 4));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_ARGB2101010_FORMAT, SDL_PIXELFORMAT_ARGB2101010 == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_PACKED32, SDL_PACKEDORDER_ARGB, SDL_PACKEDLAYOUT_2101010, 32, 4));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_ABGR2101010_FORMAT, SDL_PIXELFORMAT_ABGR2101010 == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_PACKED32, SDL_PACKEDORDER_ABGR, SDL_PACKEDLAYOUT_2101010, 32, 4));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_RGB48_FORMAT, SDL_PIXELFORMAT_RGB48 == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_ARRAYU16, SDL_ARRAYORDER_RGB, 0, 48, 6));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_BGR48_FORMAT, SDL_PIXELFORMAT_BGR48 == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_ARRAYU16, SDL_ARRAYORDER_BGR, 0, 48, 6));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_RGBA64_FORMAT, SDL_PIXELFORMAT_RGBA64 == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_ARRAYU16, SDL_ARRAYORDER_RGBA, 0, 64, 8));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_ARGB64_FORMAT, SDL_PIXELFORMAT_ARGB64 == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_ARRAYU16, SDL_ARRAYORDER_ARGB, 0, 64, 8));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_BGRA64_FORMAT, SDL_PIXELFORMAT_BGRA64 == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_ARRAYU16, SDL_ARRAYORDER_BGRA, 0, 64, 8));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_ABGR64_FORMAT, SDL_PIXELFORMAT_ABGR64 == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_ARRAYU16, SDL_ARRAYORDER_ABGR, 0, 64, 8));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_RGB48_FLOAT_FORMAT, SDL_PIXELFORMAT_RGB48_FLOAT == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_ARRAYF16, SDL_ARRAYORDER_RGB, 0, 48, 6));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_BGR48_FLOAT_FORMAT, SDL_PIXELFORMAT_BGR48_FLOAT == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_ARRAYF16, SDL_ARRAYORDER_BGR, 0, 48, 6));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_RGBA64_FLOAT_FORMAT, SDL_PIXELFORMAT_RGBA64_FLOAT == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_ARRAYF16, SDL_ARRAYORDER_RGBA, 0, 64, 8));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_ARGB64_FLOAT_FORMAT, SDL_PIXELFORMAT_ARGB64_FLOAT == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_ARRAYF16, SDL_ARRAYORDER_ARGB, 0, 64, 8));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_BGRA64_FLOAT_FORMAT, SDL_PIXELFORMAT_BGRA64_FLOAT == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_ARRAYF16, SDL_ARRAYORDER_BGRA, 0, 64, 8));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_ABGR64_FLOAT_FORMAT, SDL_PIXELFORMAT_ABGR64_FLOAT == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_ARRAYF16, SDL_ARRAYORDER_ABGR, 0, 64, 8));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_RGB96_FLOAT_FORMAT, SDL_PIXELFORMAT_RGB96_FLOAT == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_ARRAYF32, SDL_ARRAYORDER_RGB, 0, 96, 12));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_BGR96_FLOAT_FORMAT, SDL_PIXELFORMAT_BGR96_FLOAT == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_ARRAYF32, SDL_ARRAYORDER_BGR, 0, 96, 12));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_RGBA128_FLOAT_FORMAT, SDL_PIXELFORMAT_RGBA128_FLOAT == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_ARRAYF32, SDL_ARRAYORDER_RGBA, 0, 128, 16));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_ARGB128_FLOAT_FORMAT, SDL_PIXELFORMAT_ARGB128_FLOAT == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_ARRAYF32, SDL_ARRAYORDER_ARGB, 0, 128, 16));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_BGRA128_FLOAT_FORMAT, SDL_PIXELFORMAT_BGRA128_FLOAT == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_ARRAYF32, SDL_ARRAYORDER_BGRA, 0, 128, 16));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_ABGR128_FLOAT_FORMAT, SDL_PIXELFORMAT_ABGR128_FLOAT == SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_ARRAYF32, SDL_ARRAYORDER_ABGR, 0, 128, 16));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_YV12_FORMAT, SDL_PIXELFORMAT_YV12 == SDL_DEFINE_PIXELFOURCC('Y', 'V', '1', '2'));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_IYUV_FORMAT, SDL_PIXELFORMAT_IYUV == SDL_DEFINE_PIXELFOURCC('I', 'Y', 'U', 'V'));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_YUY2_FORMAT, SDL_PIXELFORMAT_YUY2 == SDL_DEFINE_PIXELFOURCC('Y', 'U', 'Y', '2'));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_UYVY_FORMAT, SDL_PIXELFORMAT_UYVY == SDL_DEFINE_PIXELFOURCC('U', 'Y', 'V', 'Y'));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_YVYU_FORMAT, SDL_PIXELFORMAT_YVYU == SDL_DEFINE_PIXELFOURCC('Y', 'V', 'Y', 'U'));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_NV12_FORMAT, SDL_PIXELFORMAT_NV12 == SDL_DEFINE_PIXELFOURCC('N', 'V', '1', '2'));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_NV21_FORMAT, SDL_PIXELFORMAT_NV21 == SDL_DEFINE_PIXELFOURCC('N', 'V', '2', '1'));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_P010_FORMAT, SDL_PIXELFORMAT_P010 == SDL_DEFINE_PIXELFOURCC('P', '0', '1', '0'));
+SDL_COMPILE_TIME_ASSERT(SDL_PIXELFORMAT_EXTERNAL_OES_FORMAT, SDL_PIXELFORMAT_EXTERNAL_OES == SDL_DEFINE_PIXELFOURCC('O', 'E', 'S', ' '));
+
+/* Verify the colorspaces are laid out as expected */
+SDL_COMPILE_TIME_ASSERT(SDL_COLORSPACE_SRGB_FORMAT, SDL_COLORSPACE_SRGB ==
+        SDL_DEFINE_COLORSPACE(SDL_COLOR_TYPE_RGB,
+                                 SDL_COLOR_RANGE_FULL,
+                                 SDL_COLOR_PRIMARIES_BT709,
+                                 SDL_TRANSFER_CHARACTERISTICS_SRGB,
+                                 SDL_MATRIX_COEFFICIENTS_IDENTITY,
+                                 SDL_CHROMA_LOCATION_NONE));
+SDL_COMPILE_TIME_ASSERT(SDL_COLORSPACE_SRGB_LINEAR_FORMAT, SDL_COLORSPACE_SRGB_LINEAR ==
+        SDL_DEFINE_COLORSPACE(SDL_COLOR_TYPE_RGB,
+                                 SDL_COLOR_RANGE_FULL,
+                                 SDL_COLOR_PRIMARIES_BT709,
+                                 SDL_TRANSFER_CHARACTERISTICS_LINEAR,
+                                 SDL_MATRIX_COEFFICIENTS_IDENTITY,
+                                 SDL_CHROMA_LOCATION_NONE));
+
+SDL_COMPILE_TIME_ASSERT(SDL_COLORSPACE_HDR10_FORMAT, SDL_COLORSPACE_HDR10 ==
+        SDL_DEFINE_COLORSPACE(SDL_COLOR_TYPE_RGB,
+                                 SDL_COLOR_RANGE_FULL,
+                                 SDL_COLOR_PRIMARIES_BT2020,
+                                 SDL_TRANSFER_CHARACTERISTICS_PQ,
+                                 SDL_MATRIX_COEFFICIENTS_IDENTITY,
+                                 SDL_CHROMA_LOCATION_NONE));
+
+SDL_COMPILE_TIME_ASSERT(SDL_COLORSPACE_JPEG_FORMAT, SDL_COLORSPACE_JPEG ==
+        SDL_DEFINE_COLORSPACE(SDL_COLOR_TYPE_YCBCR,
+                                 SDL_COLOR_RANGE_FULL,
+                                 SDL_COLOR_PRIMARIES_BT709,
+                                 SDL_TRANSFER_CHARACTERISTICS_BT601,
+                                 SDL_MATRIX_COEFFICIENTS_BT601,
+                                 SDL_CHROMA_LOCATION_NONE));
+
+SDL_COMPILE_TIME_ASSERT(SDL_COLORSPACE_BT601_LIMITED_FORMAT, SDL_COLORSPACE_BT601_LIMITED ==
+        SDL_DEFINE_COLORSPACE(SDL_COLOR_TYPE_YCBCR,
+                                 SDL_COLOR_RANGE_LIMITED,
+                                 SDL_COLOR_PRIMARIES_BT601,
+                                 SDL_TRANSFER_CHARACTERISTICS_BT601,
+                                 SDL_MATRIX_COEFFICIENTS_BT601,
+                                 SDL_CHROMA_LOCATION_LEFT));
+
+SDL_COMPILE_TIME_ASSERT(SDL_COLORSPACE_BT601_FULL_FORMAT, SDL_COLORSPACE_BT601_FULL ==
+        SDL_DEFINE_COLORSPACE(SDL_COLOR_TYPE_YCBCR,
+                                 SDL_COLOR_RANGE_FULL,
+                                 SDL_COLOR_PRIMARIES_BT601,
+                                 SDL_TRANSFER_CHARACTERISTICS_BT601,
+                                 SDL_MATRIX_COEFFICIENTS_BT601,
+                                 SDL_CHROMA_LOCATION_LEFT));
+
+SDL_COMPILE_TIME_ASSERT(SDL_COLORSPACE_BT709_LIMITED_FORMAT, SDL_COLORSPACE_BT709_LIMITED ==
+        SDL_DEFINE_COLORSPACE(SDL_COLOR_TYPE_YCBCR,
+                                 SDL_COLOR_RANGE_LIMITED,
+                                 SDL_COLOR_PRIMARIES_BT709,
+                                 SDL_TRANSFER_CHARACTERISTICS_BT709,
+                                 SDL_MATRIX_COEFFICIENTS_BT709,
+                                 SDL_CHROMA_LOCATION_LEFT));
+
+SDL_COMPILE_TIME_ASSERT(SDL_COLORSPACE_BT709_FULL_FORMAT, SDL_COLORSPACE_BT709_FULL ==
+        SDL_DEFINE_COLORSPACE(SDL_COLOR_TYPE_YCBCR,
+                                 SDL_COLOR_RANGE_FULL,
+                                 SDL_COLOR_PRIMARIES_BT709,
+                                 SDL_TRANSFER_CHARACTERISTICS_BT709,
+                                 SDL_MATRIX_COEFFICIENTS_BT709,
+                                 SDL_CHROMA_LOCATION_LEFT));
+
+SDL_COMPILE_TIME_ASSERT(SDL_COLORSPACE_BT2020_LIMITED_FORMAT, SDL_COLORSPACE_BT2020_LIMITED ==
+        SDL_DEFINE_COLORSPACE(SDL_COLOR_TYPE_YCBCR,
+                                 SDL_COLOR_RANGE_LIMITED,
+                                 SDL_COLOR_PRIMARIES_BT2020,
+                                 SDL_TRANSFER_CHARACTERISTICS_PQ,
+                                 SDL_MATRIX_COEFFICIENTS_BT2020_NCL,
+                                 SDL_CHROMA_LOCATION_LEFT));
+
+SDL_COMPILE_TIME_ASSERT(SDL_COLORSPACE_BT2020_FULL_FORMAT, SDL_COLORSPACE_BT2020_FULL ==
+        SDL_DEFINE_COLORSPACE(SDL_COLOR_TYPE_YCBCR,
+                                 SDL_COLOR_RANGE_FULL,
+                                 SDL_COLOR_PRIMARIES_BT2020,
+                                 SDL_TRANSFER_CHARACTERISTICS_PQ,
+                                 SDL_MATRIX_COEFFICIENTS_BT2020_NCL,
+                                 SDL_CHROMA_LOCATION_LEFT));
 /* Test case functions */
 
 /**
- * @brief Call to SDL_AllocFormat and SDL_FreeFormat
- *
- * @sa http://wiki.libsdl.org/SDL_AllocFormat
- * @sa http://wiki.libsdl.org/SDL_FreeFormat
+ * Call to SDL_GetPixelFormatDetails
  */
-int pixels_allocFreeFormat(void *arg)
+static int SDLCALL pixels_getPixelFormatDetails(void *arg)
 {
     const char *unknownFormat = "SDL_PIXELFORMAT_UNKNOWN";
+    const char *expectedError = "Unknown pixel format";
     const char *error;
     int i;
-    Uint32 format;
+    SDL_PixelFormat format;
     Uint32 masks;
-    SDL_PixelFormat *result;
+    const SDL_PixelFormatDetails *result;
 
     /* Blank/unknown format */
-    format = 0;
-    SDLTest_Log("RGB Format: %s (%" SDL_PRIu32 ")", unknownFormat, format);
+    format = SDL_PIXELFORMAT_UNKNOWN;
+    SDLTest_Log("Pixel Format: %s (%d)", unknownFormat, format);
 
     /* Allocate format */
-    result = SDL_AllocFormat(format);
-    SDLTest_AssertPass("Call to SDL_AllocFormat()");
+    result = SDL_GetPixelFormatDetails(format);
+    SDLTest_AssertPass("Call to SDL_GetPixelFormatDetails()");
     SDLTest_AssertCheck(result != NULL, "Verify result is not NULL");
     if (result != NULL) {
-        SDLTest_AssertCheck(result->format == format, "Verify value of result.format; expected: %" SDL_PRIu32 ", got %" SDL_PRIu32, format, result->format);
-        SDLTest_AssertCheck(result->BitsPerPixel == 0, "Verify value of result.BitsPerPixel; expected: 0, got %u", result->BitsPerPixel);
-        SDLTest_AssertCheck(result->BytesPerPixel == 0, "Verify value of result.BytesPerPixel; expected: 0, got %u", result->BytesPerPixel);
+        SDLTest_AssertCheck(result->format == format, "Verify value of result.format; expected: %d, got %d", format, result->format);
+        SDLTest_AssertCheck(result->bits_per_pixel == 0,
+                            "Verify value of result.bits_per_pixel; expected: 0, got %u",
+                            result->bits_per_pixel);
+        SDLTest_AssertCheck(result->bytes_per_pixel == 0,
+                            "Verify value of result.bytes_per_pixel; expected: 0, got %u",
+                            result->bytes_per_pixel);
         masks = result->Rmask | result->Gmask | result->Bmask | result->Amask;
         SDLTest_AssertCheck(masks == 0, "Verify value of result.[RGBA]mask combined; expected: 0, got %" SDL_PRIu32, masks);
-
-        /* Deallocate again */
-        SDL_FreeFormat(result);
-        SDLTest_AssertPass("Call to SDL_FreeFormat()");
     }
 
     /* RGB formats */
-    for (i = 0; i < _numRGBPixelFormats; i++) {
-        format = _RGBPixelFormats[i];
-        SDLTest_Log("RGB Format: %s (%" SDL_PRIu32 ")", _RGBPixelFormatsVerbose[i], format);
+    for (i = 0; i < g_numAllFormats; i++) {
+        format = g_AllFormats[i];
+        SDLTest_Log("Pixel Format: %s (%d)", g_AllFormatsVerbose[i], format);
 
         /* Allocate format */
-        result = SDL_AllocFormat(format);
-        SDLTest_AssertPass("Call to SDL_AllocFormat()");
+        result = SDL_GetPixelFormatDetails(format);
+        SDLTest_AssertPass("Call to SDL_GetPixelFormatDetails()");
         SDLTest_AssertCheck(result != NULL, "Verify result is not NULL");
         if (result != NULL) {
-            SDLTest_AssertCheck(result->format == format, "Verify value of result.format; expected: %" SDL_PRIu32 ", got %" SDL_PRIu32, format, result->format);
-            SDLTest_AssertCheck(result->BitsPerPixel > 0, "Verify value of result.BitsPerPixel; expected: >0, got %u", result->BitsPerPixel);
-            SDLTest_AssertCheck(result->BytesPerPixel > 0, "Verify value of result.BytesPerPixel; expected: >0, got %u", result->BytesPerPixel);
-            if (result->palette != NULL) {
-                masks = result->Rmask | result->Gmask | result->Bmask | result->Amask;
-                SDLTest_AssertCheck(masks > 0, "Verify value of result.[RGBA]mask combined; expected: >0, got %" SDL_PRIu32, masks);
+            SDLTest_AssertCheck(result->format == format, "Verify value of result.format; expected: %d, got %d", format, result->format);
+            if (!SDL_ISPIXELFORMAT_FOURCC(format)) {
+                SDLTest_AssertCheck(result->bits_per_pixel > 0,
+                                    "Verify value of result.bits_per_pixel; expected: >0, got %u",
+                                    result->bits_per_pixel);
+                SDLTest_AssertCheck(result->bytes_per_pixel > 0,
+                                    "Verify value of result.bytes_per_pixel; expected: >0, got %u",
+                                    result->bytes_per_pixel);
+                if (!SDL_ISPIXELFORMAT_INDEXED(format)) {
+                    masks = result->Rmask | result->Gmask | result->Bmask | result->Amask;
+                    SDLTest_AssertCheck(masks > 0, "Verify value of result.[RGBA]mask combined; expected: >0, got %" SDL_PRIu32, masks);
+                    if (SDL_ISPIXELFORMAT_10BIT(format)) {
+                        SDLTest_AssertCheck(result->Rbits == 10 && result->Gbits == 10 && result->Bbits == 10, "Verify value of result.[RGB]bits; expected: 10, got %d/%d/%d", result->Rbits, result->Gbits, result->Bbits);
+                    } else if (SDL_BITSPERPIXEL(format) == 32) {
+                        SDLTest_AssertCheck(result->Rbits == 8 && result->Gbits == 8 && result->Bbits == 8, "Verify value of result.[RGB]bits; expected: 8, got %d/%d/%d", result->Rbits, result->Gbits, result->Bbits);
+                    }
+                }
             }
-
-            /* Deallocate again */
-            SDL_FreeFormat(result);
-            SDLTest_AssertPass("Call to SDL_FreeFormat()");
         }
     }
-
-#if 0 /* This succeeds for SDL3, but we don't expect SDL2 applications to call SDL_AllocFormat() for FOURCC formats directly */
-    /* Non-RGB formats */
-    for (i = 0; i < _numNonRGBPixelFormats; i++) {
-        format = _nonRGBPixelFormats[i];
-        SDLTest_Log("non-RGB Format: %s (%" SDL_PRIu32 ")", _nonRGBPixelFormatsVerbose[i], format);
-
-        /* Try to allocate format */
-        result = SDL_AllocFormat(format);
-        SDLTest_AssertPass("Call to SDL_AllocFormat()");
-        SDLTest_AssertCheck(result == NULL, "Verify result is NULL");
-    }
-#endif
 
     /* Negative cases */
 
     /* Invalid Formats */
-    for (i = 0; i < _numInvalidPixelFormats; i++) {
+    for (i = 0; i < g_numInvalidPixelFormats; i++) {
         SDL_ClearError();
         SDLTest_AssertPass("Call to SDL_ClearError()");
-        format = _invalidPixelFormats[i];
-        result = SDL_AllocFormat(format);
-        SDLTest_AssertPass("Call to SDL_AllocFormat(%" SDL_PRIu32 ")", format);
+        format = g_invalidPixelFormats[i];
+        result = SDL_GetPixelFormatDetails(format);
+        SDLTest_AssertPass("Call to SDL_GetPixelFormatDetails(%d)", format);
         SDLTest_AssertCheck(result == NULL, "Verify result is NULL");
         error = SDL_GetError();
         SDLTest_AssertPass("Call to SDL_GetError()");
         SDLTest_AssertCheck(error != NULL, "Validate that error message was not NULL");
+        if (error != NULL) {
+            SDLTest_AssertCheck(SDL_strcmp(error, expectedError) == 0,
+                                "Validate error message, expected: '%s', got: '%s'", expectedError, error);
+        }
     }
 
     return TEST_COMPLETED;
 }
 
 /**
- * @brief Call to SDL_GetPixelFormatName
+ * Call to SDL_GetPixelFormatName
  *
- * @sa http://wiki.libsdl.org/SDL_GetPixelFormatName
+ * \sa SDL_GetPixelFormatName
  */
-int pixels_getPixelFormatName(void *arg)
+static int SDLCALL pixels_getPixelFormatName(void *arg)
 {
     const char *unknownFormat = "SDL_PIXELFORMAT_UNKNOWN";
     const char *error;
     int i;
-    Uint32 format;
+    SDL_PixelFormat format;
     const char *result;
 
     /* Blank/undefined format */
-    format = 0;
-    SDLTest_Log("RGB Format: %s (%" SDL_PRIu32 ")", unknownFormat, format);
+    format = SDL_PIXELFORMAT_UNKNOWN;
+    SDLTest_Log("RGB Format: %s (%d)", unknownFormat, format);
 
     /* Get name of format */
     result = SDL_GetPixelFormatName(format);
@@ -234,9 +372,9 @@ int pixels_getPixelFormatName(void *arg)
     }
 
     /* RGB formats */
-    for (i = 0; i < _numRGBPixelFormats; i++) {
-        format = _RGBPixelFormats[i];
-        SDLTest_Log("RGB Format: %s (%" SDL_PRIu32 ")", _RGBPixelFormatsVerbose[i], format);
+    for (i = 0; i < g_numAllFormats; i++) {
+        format = g_AllFormats[i];
+        SDLTest_Log("RGB Format: %s (%d)", g_AllFormatsVerbose[i], format);
 
         /* Get name of format */
         result = SDL_GetPixelFormatName(format);
@@ -244,24 +382,8 @@ int pixels_getPixelFormatName(void *arg)
         SDLTest_AssertCheck(result != NULL, "Verify result is not NULL");
         if (result != NULL) {
             SDLTest_AssertCheck(result[0] != '\0', "Verify result is non-empty");
-            SDLTest_AssertCheck(SDL_strcmp(result, _RGBPixelFormatsVerbose[i]) == 0,
-                                "Verify result text; expected: %s, got %s", _RGBPixelFormatsVerbose[i], result);
-        }
-    }
-
-    /* Non-RGB formats */
-    for (i = 0; i < _numNonRGBPixelFormats; i++) {
-        format = _nonRGBPixelFormats[i];
-        SDLTest_Log("non-RGB Format: %s (%" SDL_PRIu32 ")", _nonRGBPixelFormatsVerbose[i], format);
-
-        /* Get name of format */
-        result = SDL_GetPixelFormatName(format);
-        SDLTest_AssertPass("Call to SDL_GetPixelFormatName()");
-        SDLTest_AssertCheck(result != NULL, "Verify result is not NULL");
-        if (result != NULL) {
-            SDLTest_AssertCheck(result[0] != '\0', "Verify result is non-empty");
-            SDLTest_AssertCheck(SDL_strcmp(result, _nonRGBPixelFormatsVerbose[i]) == 0,
-                                "Verify result text; expected: %s, got %s", _nonRGBPixelFormatsVerbose[i], result);
+            SDLTest_AssertCheck(SDL_strcmp(result, g_AllFormatsVerbose[i]) == 0,
+                                "Verify result text; expected: %s, got %s", g_AllFormatsVerbose[i], result);
         }
     }
 
@@ -270,16 +392,16 @@ int pixels_getPixelFormatName(void *arg)
     /* Invalid Formats */
     SDL_ClearError();
     SDLTest_AssertPass("Call to SDL_ClearError()");
-    for (i = 0; i < _numInvalidPixelFormats; i++) {
-        format = _invalidPixelFormats[i];
+    for (i = 0; i < g_numInvalidPixelFormats; i++) {
+        format = g_invalidPixelFormats[i];
         result = SDL_GetPixelFormatName(format);
-        SDLTest_AssertPass("Call to SDL_GetPixelFormatName(%" SDL_PRIu32 ")", format);
+        SDLTest_AssertPass("Call to SDL_GetPixelFormatName(%d)", format);
         SDLTest_AssertCheck(result != NULL, "Verify result is not NULL");
         if (result != NULL) {
             SDLTest_AssertCheck(result[0] != '\0',
                                 "Verify result is non-empty; got: %s", result);
-            SDLTest_AssertCheck(SDL_strcmp(result, _invalidPixelFormatsVerbose[i]) == 0,
-                                "Validate name is UNKNOWN, expected: '%s', got: '%s'", _invalidPixelFormatsVerbose[i], result);
+            SDLTest_AssertCheck(SDL_strcmp(result, g_invalidPixelFormatsVerbose[i]) == 0,
+                                "Validate name is UNKNOWN, expected: '%s', got: '%s'", g_invalidPixelFormatsVerbose[i], result);
         }
         error = SDL_GetError();
         SDLTest_AssertPass("Call to SDL_GetError()");
@@ -290,14 +412,14 @@ int pixels_getPixelFormatName(void *arg)
 }
 
 /**
- * @brief Call to SDL_AllocPalette and SDL_FreePalette
+ * Call to SDL_CreatePalette and SDL_DestroyPalette
  *
- * @sa http://wiki.libsdl.org/SDL_AllocPalette
- * @sa http://wiki.libsdl.org/SDL_FreePalette
+ * \sa SDL_CreatePalette
+ * \sa SDL_DestroyPalette
  */
-int pixels_allocFreePalette(void *arg)
+static int SDLCALL pixels_allocFreePalette(void *arg)
 {
-    const char *expectedError1 = "Parameter 'ncolors' is invalid";
+    const char *expectedError = "Parameter 'ncolors' is invalid";
     const char *error;
     int variation;
     int i;
@@ -322,8 +444,8 @@ int pixels_allocFreePalette(void *arg)
             break;
         }
 
-        result = SDL_AllocPalette(ncolors);
-        SDLTest_AssertPass("Call to SDL_AllocPalette(%d)", ncolors);
+        result = SDL_CreatePalette(ncolors);
+        SDLTest_AssertPass("Call to SDL_CreatePalette(%d)", ncolors);
         SDLTest_AssertCheck(result != NULL, "Verify result is not NULL");
         if (result != NULL) {
             SDLTest_AssertCheck(result->ncolors == ncolors, "Verify value of result.ncolors; expected: %u, got %u", ncolors, result->ncolors);
@@ -339,8 +461,8 @@ int pixels_allocFreePalette(void *arg)
             }
 
             /* Deallocate again */
-            SDL_FreePalette(result);
-            SDLTest_AssertPass("Call to SDL_FreePalette()");
+            SDL_DestroyPalette(result);
+            SDLTest_AssertPass("Call to SDL_DestroyPalette()");
         }
     }
 
@@ -350,145 +472,48 @@ int pixels_allocFreePalette(void *arg)
     for (ncolors = 0; ncolors > -3; ncolors--) {
         SDL_ClearError();
         SDLTest_AssertPass("Call to SDL_ClearError()");
-        result = SDL_AllocPalette(ncolors);
-        SDLTest_AssertPass("Call to SDL_AllocPalette(%d)", ncolors);
+        result = SDL_CreatePalette(ncolors);
+        SDLTest_AssertPass("Call to SDL_CreatePalette(%d)", ncolors);
         SDLTest_AssertCheck(result == NULL, "Verify result is NULL");
         error = SDL_GetError();
         SDLTest_AssertPass("Call to SDL_GetError()");
         SDLTest_AssertCheck(error != NULL, "Validate that error message was not NULL");
         if (error != NULL) {
-            SDLTest_AssertCheck(SDL_strcmp(error, expectedError1) == 0,
-                                "Validate error message, expected: '%s', got: '%s'", expectedError1, error);
+            SDLTest_AssertCheck(SDL_strcmp(error, expectedError) == 0,
+                                "Validate error message, expected: '%s', got: '%s'", expectedError, error);
         }
     }
 
+    /* Invalid free pointer */
+    SDL_ClearError();
+    SDLTest_AssertPass("Call to SDL_ClearError()");
+    SDL_DestroyPalette(NULL);
+    SDLTest_AssertPass("Call to SDL_DestroyPalette(NULL)");
+    error = SDL_GetError();
+    SDLTest_AssertPass("Call to SDL_GetError()");
+    SDLTest_AssertCheck(error == NULL || error[0] == '\0', "Validate that error message is empty");
+
     return TEST_COMPLETED;
-}
-
-/**
- * @brief Call to SDL_CalculateGammaRamp
- *
- * @sa http://wiki.libsdl.org/SDL_CalculateGammaRamp
- */
-int
-pixels_calcGammaRamp(void *arg)
-{
-  const char *expectedError1 = "Parameter 'gamma' is invalid";
-  const char *expectedError2 = "Parameter 'ramp' is invalid";
-  const char *error;
-  float gamma;
-  Uint16 *ramp;
-  int variation;
-  int i;
-  int changed;
-  Uint16 magic = 0xbeef;
-
-  /* Allocate temp ramp array and fill with some value */
-  ramp = (Uint16 *)SDL_malloc(256 * sizeof(Uint16));
-  SDLTest_AssertCheck(ramp != NULL, "Validate temp ramp array could be allocated");
-  if (ramp == NULL) return TEST_ABORTED;
-
-  /* Make call with different gamma values */
-  for (variation = 0; variation < 4; variation++) {
-    switch (variation) {
-      /* gamma = 0 all black */
-      default:
-      case 0:
-        gamma = 0.0f;
-        break;
-      /* gamma = 1 identity */
-      case 1:
-        gamma = 1.0f;
-        break;
-      /* gamma = [0.2,0.8] normal range */
-      case 2:
-        gamma = 0.2f + 0.8f * SDLTest_RandomUnitFloat();
-        break;
-      /* gamma = >1.1 non-standard range */
-      case 3:
-        gamma = 1.1f + SDLTest_RandomUnitFloat();
-        break;
-    }
-
-    /* Make call and check that values were updated */
-    for (i = 0; i < 256; i++) ramp[i] = magic;
-    SDL_CalculateGammaRamp(gamma, ramp);
-    SDLTest_AssertPass("Call to SDL_CalculateGammaRamp(%f)", gamma);
-    changed = 0;
-    for (i = 0; i < 256; i++) if (ramp[i] != magic) changed++;
-    SDLTest_AssertCheck(changed > 250, "Validate that ramp was calculated; expected: >250 values changed, got: %d values changed", changed);
-
-    /* Additional value checks for some cases */
-    i = SDLTest_RandomIntegerInRange(64,192);
-    switch (variation) {
-      case 0:
-        SDLTest_AssertCheck(ramp[i] == 0, "Validate value at position %d; expected: 0, got: %d", i, ramp[i]);
-        break;
-      case 1:
-        SDLTest_AssertCheck(ramp[i] == ((i << 8) | i), "Validate value at position %d; expected: %d, got: %d", i, (i << 8) | i, ramp[i]);
-        break;
-      case 2:
-      case 3:
-        SDLTest_AssertCheck(ramp[i] > 0, "Validate value at position %d; expected: >0, got: %d", i, ramp[i]);
-        break;
-    }
-  }
-
-  /* Negative cases */
-  SDL_ClearError();
-  SDLTest_AssertPass("Call to SDL_ClearError()");
-  gamma = -1;
-  for (i=0; i<256; i++) ramp[i] = magic;
-  SDL_CalculateGammaRamp(gamma, ramp);
-  SDLTest_AssertPass("Call to SDL_CalculateGammaRamp(%f)", gamma);
-  error = SDL_GetError();
-  SDLTest_AssertPass("Call to SDL_GetError()");
-  SDLTest_AssertCheck(error != NULL, "Validate that error message was not NULL");
-  if (error != NULL) {
-      SDLTest_AssertCheck(SDL_strcmp(error, expectedError1) == 0,
-          "Validate error message, expected: '%s', got: '%s'", expectedError1, error);
-  }
-  changed = 0;
-  for (i = 0; i < 256; i++) if (ramp[i] != magic) changed++;
-  SDLTest_AssertCheck(changed ==0, "Validate that ramp unchanged; expected: 0 values changed got: %d values changed", changed);
-
-  SDL_CalculateGammaRamp(0.5f, NULL);
-  SDLTest_AssertPass("Call to SDL_CalculateGammaRamp(0.5,NULL)");
-  error = SDL_GetError();
-  SDLTest_AssertPass("Call to SDL_GetError()");
-  SDLTest_AssertCheck(error != NULL, "Validate that error message was not NULL");
-  if (error != NULL) {
-      SDLTest_AssertCheck(SDL_strcmp(error, expectedError2) == 0,
-          "Validate error message, expected: '%s', got: '%s'", expectedError2, error);
-  }
-
-  /* Cleanup */
-  SDL_free(ramp);
-
-
-  return TEST_COMPLETED;
 }
 
 /* ================= Test References ================== */
 
 /* Pixels test cases */
 static const SDLTest_TestCaseReference pixelsTest1 = {
-    (SDLTest_TestCaseFp)pixels_allocFreeFormat, "pixels_allocFreeFormat", "Call to SDL_AllocFormat and SDL_FreeFormat", TEST_ENABLED
+    pixels_getPixelFormatDetails, "pixels_allocFreeFormat", "Call to SDL_GetPixelFormatDetails", TEST_ENABLED
 };
 
 static const SDLTest_TestCaseReference pixelsTest2 = {
-    (SDLTest_TestCaseFp)pixels_allocFreePalette, "pixels_allocFreePalette", "Call to SDL_AllocPalette and SDL_FreePalette", TEST_ENABLED
+    pixels_allocFreePalette, "pixels_allocFreePalette", "Call to SDL_CreatePalette and SDL_DestroyPalette", TEST_ENABLED
 };
 
-static const SDLTest_TestCaseReference pixelsTest3 =
-        { (SDLTest_TestCaseFp)pixels_calcGammaRamp, "pixels_calcGammaRamp", "Call to SDL_CalculateGammaRamp", TEST_ENABLED };
-
-static const SDLTest_TestCaseReference pixelsTest4 =
-        { (SDLTest_TestCaseFp)pixels_getPixelFormatName, "pixels_getPixelFormatName", "Call to SDL_GetPixelFormatName", TEST_ENABLED };
+static const SDLTest_TestCaseReference pixelsTest3 = {
+    pixels_getPixelFormatName, "pixels_getPixelFormatName", "Call to SDL_GetPixelFormatName", TEST_ENABLED
+};
 
 /* Sequence of Pixels test cases */
-static const SDLTest_TestCaseReference *pixelsTests[] =  {
-    &pixelsTest1, &pixelsTest2, &pixelsTest3, &pixelsTest4, NULL
+static const SDLTest_TestCaseReference *pixelsTests[] = {
+    &pixelsTest1, &pixelsTest2, &pixelsTest3, NULL
 };
 
 /* Pixels test suite (global) */

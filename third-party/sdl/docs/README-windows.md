@@ -1,5 +1,11 @@
 # Windows
 
+## Old systems
+
+WinRT, Windows Phone, and UWP are no longer supported.
+
+All desktop Windows versions, back to Windows XP, are still supported.
+
 ## LLVM and Intel C++ compiler support
 
 SDL will build with the Visual Studio project files with LLVM-based compilers, such as the Intel oneAPI C++
@@ -56,3 +62,11 @@ it change the value of `SDL_VIDEO_VULKAN` to 0 in `SDL_config_windows.h`. You
 must install the [Vulkan SDK](https://www.lunarg.com/vulkan-sdk/) in order to
 use Vulkan graphics in your application.
 
+## Transparent Window Support
+
+SDL uses the Desktop Window Manager (DWM) to create transparent windows. DWM is
+always enabled from Windows 8 and above. Windows 7 only enables DWM with Aero Glass
+theme.
+
+However, it cannot be guaranteed to work on all hardware configurations (an example
+is hybrid GPU systems, such as NVIDIA Optimus laptops).

@@ -47,7 +47,7 @@ glm::mat4 camera::get_rotation_matrix() {
 void debug_camera_controller::update(glm::vec2 screen_dim, camera &cam) {
   ZoneScoped;
   if (!input::get_mouse_button(mouse_button::right) && !show_mouse) {
-    SDL_ShowCursor(SDL_ENABLE);
+    SDL_ShowCursor();
     show_mouse = true;
     return;
   }
@@ -58,7 +58,7 @@ void debug_camera_controller::update(glm::vec2 screen_dim, camera &cam) {
 
   if (show_mouse) {
     show_mouse = false;
-    SDL_ShowCursor(SDL_DISABLE);
+    SDL_HideCursor();
   }
 
   float speed = movement_speed;
