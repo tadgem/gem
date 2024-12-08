@@ -29,16 +29,15 @@ __pycache__
 *.rej
 
 # for CMake
-.cmake
 CMakeFiles/
 CMakeCache.txt
 cmake_install.cmake
 cmake_uninstall.cmake
 install_manifest.txt
-*Targets.cmake
-*Config.cmake
-*ConfigVersion.cmake
-CTestTestfile.cmake
+#*Targets.cmake
+#*Config.cmake
+#*ConfigVersion.cmake
+#CTestTestfile.cmake
 Testing
 compile_commands.json
 .cache/
