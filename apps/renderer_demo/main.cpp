@@ -6,6 +6,7 @@ using namespace gem;
 
 void on_im3d(gl_renderer& renderer, scene& current_scene)
 {
+    Im3d::DrawAlignedBox(ToIm3D(renderer.m_voxel_data.current_bounding_box.min), ToIm3D(renderer.m_voxel_data.current_bounding_box.max));
     if (!current_scene.does_entity_exist((u32)renderer.m_last_selected_entity))
     {
         return;

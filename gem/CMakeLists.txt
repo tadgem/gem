@@ -43,5 +43,7 @@ set(GEM_INCLUDES
         ${CMAKE_CURRENT_SOURCE_DIR}/include
         CACHE INTERNAL "")
 
+
 target_link_libraries(gem PRIVATE efsw glew_s SDL3-static SDL3_shadercross-static glm assimp cpptrace::cpptrace spdlog TracyClient)
 target_include_directories(gem PUBLIC ${GEM_INCLUDES})
+target_link_options(gem PUBLIC /D_ITERATOR_DEBUG_LEVEL=0)
