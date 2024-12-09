@@ -5,5 +5,13 @@
     <mapping directory="$PROJECT_DIR$/submodules/cpptrace" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/submodules/efsw" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/submodules/spdlog" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/third-party/sdl_shadercross" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/third-party/sdl_shadercross/external/DirectXShaderCompiler" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/third-party/sdl_shadercross/external/DirectXShaderCompiler/external/DirectX-Headers" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/third-party/sdl_shadercross/external/DirectXShaderCompiler/external/SPIRV-Headers" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/third-party/sdl_shadercross/external/DirectXShaderCompiler/external/SPIRV-Tools" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/third-party/sdl_shadercross/external/SPIRV-Cross" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/third-party/sdl_shadercross/external/SPIRV-Headers" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/third-party/sdl_shadercross/external/SPIRV-Tools" vcs="Git" />
   </component>
 </project>
