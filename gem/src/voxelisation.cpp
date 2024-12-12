@@ -19,6 +19,7 @@ voxel::grid voxel::create_grid(glm::ivec3 resolution, aabb bb) {
   ZoneScoped;
   grid grid{};
   grid.resolution = resolution;
+  grid.current_bounding_box = bb;
   grid.update_voxel_unit();
   grid.voxel_texture = texture::create_3d_texture_empty(resolution, GL_RGBA,
                                                         GL_RGBA16F, GL_FLOAT);

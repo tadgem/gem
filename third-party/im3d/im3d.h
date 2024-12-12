@@ -611,6 +611,9 @@ struct IM3D_API Context
 	void                begin(PrimitiveMode _mode);
 	void                end();
 
+
+        void                vertex(const float* _position, float _size, Color _color);
+
 	void                vertex(const Vec3& _position, float _size, Color _color);
 	void                vertex(const Vec3& _position )   { vertex(_position, getSize(), getColor()); }
 

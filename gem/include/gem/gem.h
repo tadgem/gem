@@ -25,4 +25,5 @@
 #include "utils.h"
 #include "vertex.h"
 #include "voxelisation.h"
+#include "im3d_gem.h"
 #include "engine.h"

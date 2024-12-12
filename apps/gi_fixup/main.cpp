@@ -4,9 +4,54 @@
 using namespace nlohmann;
 using namespace gem;
 
-void on_im3d(gl_renderer& renderer, scene& current_scene)
+struct vxgi_data
 {
-    Im3d::DrawAlignedBox(Im3d::Vec3(0.0f), Im3d::Vec3(1.0f));
+  texture                 m_voxel_texture; // 3D Texture (Voxel Data)
+  glm::ivec3              m_resolution;
+  glm::vec3               m_voxel_unit; // scale of each texel
+  glm::vec3               m_aabb_dim{200.0, 100.0, 200.0};
+  aabb                    m_bounding_volume;
+  glm::mat4               m_slice_vp_matrix;
+  uint32_t                m_current_slice_index = 0;
+
+  void update_bounding_volume(const glm::vec3& camera_pos)
+  {
+    m_voxel_unit = m_aabb_dim / glm::vec3(m_resolution);
+    glm::vec3 half_dim = m_aabb_dim * 0.5f;
+    m_bounding_volume.min = camera_pos - half_dim;
+    m_bounding_volume.max = camera_pos + half_dim;
+
+    m_current_slice_index+= 4;
+    m_current_slice_index = m_current_slice_index >= m_resolution.y ? 0 : m_current_slice_index;
+    float btm = m_bounding_volume.min.y + (m_voxel_unit.y * m_current_slice_index);
+    float top = m_bounding_volume.min.y + (m_voxel_unit.y * (m_current_slice_index + 1));
+    glm::mat4 projection = glm::ortho(
+        -half_dim.x,
+        half_dim.x,
+        btm,
+        top,
+        -half_dim.z,
+        half_dim.z
+        );
+
+    glm::mat4 view = glm::translate(glm::mat4(1.0), camera_pos);
+    m_slice_vp_matrix =  projection * view;
+  }
+
+  explicit vxgi_data(glm::ivec3 res)
+  {
+    m_resolution = res;
+    update_bounding_volume(glm::vec3(0.0));
+  }
+
+};
+
+void on_im3d(gl_renderer& renderer, scene& current_scene, vxgi_data& vxgi, camera& cam)
+{
+    vxgi.update_bounding_volume(glm::vec3(0.0f));
+
+    DebugDraw::DrawBoundingBox(vxgi.m_bounding_volume.min, vxgi.m_bounding_volume.max, 2.0f, Im3d::Color_Pink);
+    DebugDraw::DrawFrustum(vxgi.m_slice_vp_matrix, 1.0, Im3d::Color_Cyan);
     if (!current_scene.does_entity_exist((u32)renderer.m_last_selected_entity))
     {
         return;
@@ -131,6 +176,8 @@ int main()
     lights.push_back({ {-10.0, 0.0, 10.0}, {0.0, 0.0, 255.0} , 40.0f});
 
     std::vector<scene*> scenes{ s };
+    vxgi_data vxgi_dat ({256,256,256});
+    vxgi_dat.update_bounding_volume(glm::vec3(0.0f));
 
     while (!gpu_backend::selected()->m_quit)
     {
@@ -147,7 +194,7 @@ int main()
         for (auto* current_scene : scenes)
         {
             current_scene->on_update();
-            on_im3d(renderer, *s);
+            on_im3d(renderer, *s, vxgi_dat, cam);
         }
 
         glm::vec2 mouse_pos = input::get_mouse_position();

@@ -233,6 +233,8 @@ void gl_renderer::render(asset_manager &am, camera &cam,
     p_clear_voxel_grid = false;
   }
 
+  m_voxel_data.update_voxel_unit();
+
   {
     TracyGpuZone("GBuffer Voxelization");
     open_gl::tech::vxgi::dispatch_gbuffer_voxelization(

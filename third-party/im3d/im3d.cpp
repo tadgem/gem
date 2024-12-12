@@ -1580,6 +1580,63 @@ void Context::end()
 	#endif
 }
 
+void Context::vertex(const float* _position, float _size, Color _color)
+{
+        IM3D_ASSERT(m_primMode != PrimitiveMode_None); // Vertex() called without Begin*()
+        Im3d::Vec3 pos {_position[0], _position[1], _position[2]};
+
+        VertexData vd(Im3d::Vec3(pos), _size, _color);
+        if (m_matrixStack.size() > 1) // optim, skip the matrix multiplication when the stack size is 1
+        {
+            vd.m_positionSize = Vec4(m_matrixStack.back() * pos, _size);
+        }
+        vd.m_color.setA(vd.m_color.getA() * m_alphaStack.back());
+
+#if IM3D_CULL_PRIMITIVES
+        Vec3 p = Vec3(vd.m_positionSize);
+        if (m_vertCountThisPrim == 0) // p is the first vertex
+        {
+                        m_minVertThisPrim = m_maxVertThisPrim = p;
+        }
+        else
+        {
+                        m_minVertThisPrim = Min(m_minVertThisPrim, p);
+                        m_maxVertThisPrim = Max(m_maxVertThisPrim, p);
+        }
+#endif
+
+        VertexList* vertexList = getCurrentVertexList();
+        switch (m_primMode)
+        {
+        case PrimitiveMode_Points:
+        case PrimitiveMode_Lines:
+        case PrimitiveMode_Triangles:
+                        vertexList->push_back(vd);
+                        break;
+        case PrimitiveMode_LineStrip:
+        case PrimitiveMode_LineLoop:
+                        if (m_vertCountThisPrim >= 2)
+                        {
+                                vertexList->push_back(vertexList->back());
+                                ++m_vertCountThisPrim;
+                        }
+                        vertexList->push_back(vd);
+                        break;
+        case PrimitiveMode_TriangleStrip:
+                        if (m_vertCountThisPrim >= 3)
+                        {
+                                vertexList->push_back(*(vertexList->end() - 2));
+                                vertexList->push_back(*(vertexList->end() - 2));
+                                m_vertCountThisPrim += 2;
+                        }
+                        vertexList->push_back(vd);
+                        break;
+        default:
+                        break;
+        };
+        ++m_vertCountThisPrim;
+}
+
 void Context::vertex(const Vec3& _position, float _size, Color _color)
 {
 	IM3D_ASSERT(m_primMode != PrimitiveMode_None); // Vertex() called without Begin*()
