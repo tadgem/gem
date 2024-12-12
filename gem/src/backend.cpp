@@ -116,12 +116,12 @@ void init_built_in_assets() {
   ZoneScoped;
   std::vector<unsigned int> black_data = {0};
   std::vector<unsigned int> white_data = {UINT32_MAX};
-  texture::white = new texture(
-      texture::from_data(white_data.data(), white_data.size(), 1, 1, 1, 4));
-  texture::black = new texture(
-      texture::from_data(black_data.data(), white_data.size(), 1, 1, 1, 4));
+  Texture::white = new Texture(
+      Texture::from_data(white_data.data(), white_data.size(), 1, 1, 1, 4));
+  Texture::black = new Texture(
+      Texture::from_data(black_data.data(), white_data.size(), 1, 1, 1, 4));
 
-  shapes::init_built_in_assets(engine::assets);
+  Shapes::init_built_in_assets(Engine::assets);
 
   // mesh::m_cube = mesh {shapes::m_cube, 36, gem::aabb{{0,0,0}, {1,1,1}}};
 }

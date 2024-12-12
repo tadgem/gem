@@ -9,58 +9,58 @@
 
 namespace gem {
 
-class asset_manager;
+class AssetManager;
 
-class gl_renderer {
+class GLRenderer {
 public:
-  gl_renderer() = default;
+  GLRenderer() = default;
 
-  void init(asset_manager &am, glm::ivec2 resolution);
-  void pre_frame(camera &cam);
-  void render(asset_manager &am, camera &cam, std::vector<scene *> &scenes);
-  void cleanup(asset_manager &am);
+  void init(AssetManager &am, glm::ivec2 resolution);
+  void pre_frame(Camera &cam);
+  void render(AssetManager &am, Camera &cam, std::vector<Scene *> &scenes);
+  void cleanup(AssetManager &am);
 
   entt::entity get_mouse_entity(glm::vec2 mouse_position);
 
-  gl_shader_asset *m_gbuffer_shader;
-  gl_shader_asset *m_gbuffer_textureless_shader;
-  gl_shader_asset *m_lighting_shader;
-  gl_shader_asset *m_visualise_3d_tex_shader;
-  gl_shader_asset *m_visualise_3d_tex_instances_shader;
-  gl_shader_asset *m_present_shader;
-  gl_shader_asset *m_dir_light_shadow_shader;
-  gl_shader_asset *m_voxel_cone_tracing_shader;
-  gl_shader_asset *m_ssr_shader;
-  gl_shader_asset *m_taa_shader;
-  gl_shader_asset *m_denoise_shader;
-  gl_shader_asset *m_combine_shader;
-  gl_shader_asset *m_downsample_shader;
-  gl_shader_asset *m_compute_voxelize_gbuffer_shader;
-  gl_shader_asset *m_compute_voxel_mips_shader;
-  gl_shader_asset *m_compute_voxel_reprojection_shader;
-  gl_shader_asset *m_compute_voxel_blit_shader;
-  gl_shader_asset *m_compute_voxel_clear_shader;
+  GLShaderAsset *m_gbuffer_shader;
+  GLShaderAsset *m_gbuffer_textureless_shader;
+  GLShaderAsset *m_lighting_shader;
+  GLShaderAsset *m_visualise_3d_tex_shader;
+  GLShaderAsset *m_visualise_3d_tex_instances_shader;
+  GLShaderAsset *m_present_shader;
+  GLShaderAsset *m_dir_light_shadow_shader;
+  GLShaderAsset *m_voxel_cone_tracing_shader;
+  GLShaderAsset *m_ssr_shader;
+  GLShaderAsset *m_taa_shader;
+  GLShaderAsset *m_denoise_shader;
+  GLShaderAsset *m_combine_shader;
+  GLShaderAsset *m_downsample_shader;
+  GLShaderAsset *m_compute_voxelize_gbuffer_shader;
+  GLShaderAsset *m_compute_voxel_mips_shader;
+  GLShaderAsset *m_compute_voxel_reprojection_shader;
+  GLShaderAsset *m_compute_voxel_blit_shader;
+  GLShaderAsset *m_compute_voxel_clear_shader;
 
-  gl_framebuffer m_gbuffer;
-  gl_framebuffer m_gbuffer_downsample;
-  gl_framebuffer m_dir_light_shadow_buffer;
-  gl_framebuffer m_lightpass_buffer;
-  gl_framebuffer m_lightpass_buffer_resolve;
-  gl_framebuffer m_lightpass_buffer_history;
-  gl_framebuffer m_position_buffer_history;
-  gl_framebuffer m_conetracing_buffer;
-  gl_framebuffer m_conetracing_buffer_denoise;
-  gl_framebuffer m_conetracing_buffer_resolve;
-  gl_framebuffer m_conetracing_buffer_history;
-  gl_framebuffer m_ssr_buffer;
-  gl_framebuffer m_ssr_buffer_denoise;
-  gl_framebuffer m_ssr_buffer_resolve;
-  gl_framebuffer m_ssr_buffer_history;
-  gl_framebuffer m_final_pass;
+  GLFramebuffer m_gbuffer;
+  GLFramebuffer m_gbuffer_downsample;
+  GLFramebuffer m_dir_light_shadow_buffer;
+  GLFramebuffer m_lightpass_buffer;
+  GLFramebuffer m_lightpass_buffer_resolve;
+  GLFramebuffer m_lightpass_buffer_history;
+  GLFramebuffer m_position_buffer_history;
+  GLFramebuffer m_conetracing_buffer;
+  GLFramebuffer m_conetracing_buffer_denoise;
+  GLFramebuffer m_conetracing_buffer_resolve;
+  GLFramebuffer m_conetracing_buffer_history;
+  GLFramebuffer m_ssr_buffer;
+  GLFramebuffer m_ssr_buffer_denoise;
+  GLFramebuffer m_ssr_buffer_resolve;
+  GLFramebuffer m_ssr_buffer_history;
+  GLFramebuffer m_final_pass;
 
-  im3d_state              m_im3d_state;
-  voxel::grid             m_voxel_data;
-  voxel::grid_visualiser  m_voxel_visualiser;
+  Im3dState m_im3d_state;
+  Voxel::Grid m_voxel_data;
+  Voxel::GridVisualizer m_voxel_visualiser;
 
   glm::vec2     m_window_resolution;
   u32           m_frame_index;
@@ -88,12 +88,13 @@ public:
   bool m_debug_draw_3d_texture = false;
   bool m_debug_draw_final_pass = true;
   bool m_debug_freeze_voxel_grid_pos = false;
+  bool m_debug_simulate_low_framerate = false;
 
   inline static constexpr int s_voxel_square_resolution = 256;
   inline static constexpr glm::ivec3 s_voxel_resolution =
       glm::ivec3(s_voxel_square_resolution);
 
-  void on_imgui(asset_manager &am);
+  void on_imgui(AssetManager &am);
 
 protected:
   bool p_clear_voxel_grid = false;

@@ -1,15 +1,15 @@
-#include "gem/engine.h"
 #include "editor_app.h"
 #include "ImFileDialog.h"
+#include "gem/engine.h"
 
 using namespace gem;
 
 editor_application::editor_application()
 {
     glm::ivec2 resolution = {1920, 1080};
-    engine::init();
-    gl_renderer renderer{};
-    renderer.init(engine::assets, resolution);
+    Engine::init();
+    GLRenderer renderer{};
+    renderer.init(Engine::assets, resolution);
 
     m_editor_fsm.set_starting_state(editor_mode::no_open_project);
     m_editor_fsm.add_state(editor_mode::no_open_project, [this]() {
@@ -35,21 +35,21 @@ editor_application::editor_application()
 
 void editor_application::run()
 {
-    while (!gpu_backend::selected()->m_quit)
+    while (!GPUBackend::selected()->m_quit)
     {
-        engine::assets.update();
+      Engine::assets.update();
 
-        gpu_backend::selected()->process_sdl_event();
-        gpu_backend::selected()->engine_pre_frame();
+        GPUBackend::selected()->process_sdl_event();
+        GPUBackend::selected()->engine_pre_frame();
 
         main_menu_bar();
 
         m_editor_fsm.update();
 
-        gpu_backend::selected()->engine_post_frame();
+        GPUBackend::selected()->engine_post_frame();
     }
-    gpu_backend::selected()->engine_shut_down();
-    engine::shutdown();
+    GPUBackend::selected()->engine_shut_down();
+    Engine::shutdown();
 }
 
 static char s_create_project_name_buffer[256]{ 0 };
@@ -95,8 +95,8 @@ void editor_application::on_open_project()
             std::filesystem::path p = ifd::FileDialog::Instance().GetResult();
             std::string res = p.u8string();
             std::filesystem::path directory = p.parent_path();
-            engine::active_project = create_project(std::string(s_create_project_name_buffer), directory.string());
-            engine::save_project_to_disk(p.filename().string(), directory.string());
+            Engine::active_project = create_project(std::string(s_create_project_name_buffer), directory.string());
+            Engine::save_project_to_disk(p.filename().string(), directory.string());
             m_editor_fsm.trigger(editor_trigger::project_loaded);
         }
         ifd::FileDialog::Instance().Close();
@@ -106,7 +106,7 @@ void editor_application::on_open_project()
         if (ifd::FileDialog::Instance().HasResult()) {
             std::filesystem::path p = ifd::FileDialog::Instance().GetResult();
             std::string res = p.u8string();
-            engine::load_project_from_disk(res);
+            Engine::load_project_from_disk(res);
             m_editor_fsm.trigger(editor_trigger::project_loaded);
         }
         ifd::FileDialog::Instance().Close();
@@ -143,9 +143,9 @@ void editor_application::main_menu_bar()
     ImGui::EndMainMenuBar();
 }
 
-project editor_application::create_project(const std::string& name, const std::string& path)
+Project editor_application::create_project(const std::string& name, const std::string& path)
 {
-    project proj{};
+    Project proj{};
     proj.m_name = name;
     std::filesystem::current_path(std::filesystem::path(path));
     return proj;

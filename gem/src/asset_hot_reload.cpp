@@ -5,7 +5,7 @@
 
 namespace gem {
 
-void reload_shader(asset_t<gl_shader, asset_type::shader> *shader_asset,
+void reload_shader(TAsset<GLShader, AssetType::shader> *shader_asset,
                    std::string shader_source) {}
 
 void clean_delimiters(std::string &input) {
@@ -16,7 +16,7 @@ void clean_delimiters(std::string &input) {
   }
 }
 
-void gem_file_listener::handleFileAction(efsw::WatchID watchid,
+void GemFileWatchListener::handleFileAction(efsw::WatchID watchid,
                                          const std::string &dir,
                                          const std::string &filename,
                                          efsw::Action action,
@@ -31,17 +31,17 @@ void gem_file_listener::handleFileAction(efsw::WatchID watchid,
   case efsw::Actions::Modified: {
     std::string full_path = dir + filename;
     clean_delimiters(full_path);
-    asset_handle ah = asset_handle(full_path, asset_type::shader);
-    if (engine::assets.get_asset_load_progress(ah) ==
-        asset_load_progress::loaded) {
+    AssetHandle ah = AssetHandle(full_path, AssetType::shader);
+    if (Engine::assets.get_asset_load_progress(ah) ==
+        AssetLoadProgress::loaded) {
       spdlog::info("GemFileListener : Reloading : {}{}", dir, filename);
-      std::string shader_source = utils::load_string_from_path(full_path);
+      std::string shader_source = Utils::load_string_from_path(full_path);
       auto *shader_asset =
-          engine::assets.get_asset<gl_shader, asset_type::shader>(ah);
+          Engine::assets.get_asset<GLShader, AssetType::shader>(ah);
 
-      engine::debug_callbacks.add([shader_asset, shader_source]() {
+      Engine::debug_callbacks.add([shader_asset, shader_source]() {
         shader_asset->m_data.release();
-        shader_asset->m_data = gl_shader::create_from_composite(shader_source);
+        shader_asset->m_data = GLShader::GLShader(shader_source);
       });
     }
     break;

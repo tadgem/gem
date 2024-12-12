@@ -8,39 +8,39 @@
 
 namespace gem {
 
-class model {
+class Model {
 public:
-  struct mesh_entry {
+  struct MeshEntry {
     std::vector<glm::vec3> m_positions;
     std::vector<glm::vec3> m_normals;
     std::vector<glm::vec2> m_uvs;
     std::vector<u32> m_indices;
-    aabb m_mesh_aabb;
+    AABB m_mesh_aabb;
     u32 m_material_index;
 
-    GEM_IMPL_ALLOC(mesh_entry)
+    GEM_IMPL_ALLOC(MeshEntry)
   };
 
-  struct material_entry {
-    std::unordered_map<texture_map_type, texture_entry> m_material_maps;
-    GEM_IMPL_ALLOC(material_entry);
+  struct MaterialEntry {
+    std::unordered_map<TextureMapType, TextureEntry> m_material_maps;
+    GEM_IMPL_ALLOC(MaterialEntry);
   };
 
-  std::vector<mesh> m_meshes;
-  std::vector<material_entry> m_materials;
-  aabb m_aabb;
+  std::vector<Mesh> m_meshes;
+  std::vector<MaterialEntry> m_materials;
+  AABB m_aabb;
 
-  static model load_model_and_textures_from_path(const std::string &path);
-  static model
+  static Model load_model_and_textures_from_path(const std::string &path);
+  static Model
   load_model_from_path_entries(const std::string &path,
-                               std::vector<texture_entry> &texture_entries,
-                               std::vector<mesh_entry> &mesh_entries);
+                               std::vector<TextureEntry> &texture_entries,
+                               std::vector<MeshEntry> &mesh_entries);
 
   void update_aabb();
   void release();
 
-  GEM_IMPL_ALLOC(model);
+  GEM_IMPL_ALLOC(Model);
 };
 
-using model_asset = asset_t<model, asset_type::model>;
+using ModelAsset = TAsset<Model, AssetType::model>;
 } // namespace gem

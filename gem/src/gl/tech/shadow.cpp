@@ -13,10 +13,10 @@
 namespace gem {
 namespace open_gl {
 
-void tech::shadow::dispatch_shadow_pass(gl_framebuffer &shadow_fb,
-                                        gl_shader &shadow_shader,
-                                        dir_light &sun,
-                                        std::vector<scene *> &scenes,
+void tech::Shadow::dispatch_shadow_pass(GLFramebuffer &shadow_fb,
+                                        GLShader &shadow_shader,
+                                        DirectionalLight &sun,
+                                        std::vector<Scene *> &scenes,
                                         glm::ivec2 window_res) {
   ZoneScoped;
   GEM_GPU_MARKER("Shadow Map Pass");
@@ -42,9 +42,9 @@ void tech::shadow::dispatch_shadow_pass(gl_framebuffer &shadow_fb,
   shadow_shader.use();
   shadow_shader.set_mat4("lightSpaceMatrix", lightSpaceMatrix);
 
-  for (scene *current_scene : scenes) {
+  for (Scene *current_scene : scenes) {
     auto renderables =
-        current_scene->m_registry.view<transform, mesh_component, material>();
+        current_scene->m_registry.view<Transform, MeshComponent, Material>();
 
     for (auto [e, trans, emesh, ematerial] : renderables.each()) {
       shadow_shader.set_mat4("model", trans.m_model);

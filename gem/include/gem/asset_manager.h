@@ -8,73 +8,73 @@
 
 namespace gem {
 
-using asset_load_callback = void (*)(asset_intermediate *);
-using asset_loaded_callback = std::function<void(asset *)>;
-using asset_unload_callback = void (*)(asset *);
+using AssetLoadCallback = void (*)(AssetIntermediate *);
+using AssetLoadedCallback = std::function<void(Asset *)>;
+using AssetUnloadCallback = void (*)(Asset *);
 
-enum class asset_load_progress { not_loaded, loading, loaded, unloading };
+enum class AssetLoadProgress { not_loaded, loading, loaded, unloading };
 
-struct asset_load_info {
+struct AssetLoadInfo {
   std::string m_path;
-  asset_type m_type;
+  AssetType m_type;
 
-  bool operator==(const asset_load_info &o) const {
+  bool operator==(const AssetLoadInfo &o) const {
     return m_path == o.m_path && m_type == o.m_type;
   }
 
-  bool operator<(const asset_load_info &o) const {
+  bool operator<(const AssetLoadInfo &o) const {
     return m_path.size() < o.m_path.size();
   }
 
-  asset_handle to_handle();
+  AssetHandle to_handle();
 
-  GEM_IMPL_ALLOC(asset_load_info)
+  GEM_IMPL_ALLOC(AssetLoadInfo)
 };
 
-struct asset_load_return {
-  asset_intermediate *m_loaded_asset_intermediate = nullptr;
+struct AssetLoadResult {
+  AssetIntermediate *m_loaded_asset_intermediate = nullptr;
   // additional assets that may be required to completely load this asset
-  std::vector<asset_load_info> m_new_assets_to_load;
+  std::vector<AssetLoadInfo> m_new_assets_to_load;
   // synchronous tasks associated with this asset e.g. submit texture mem to GPU
-  std::vector<asset_load_callback> m_asset_load_sync_callbacks;
+  std::vector<AssetLoadCallback> m_asset_load_sync_callbacks;
 
-  GEM_IMPL_ALLOC(asset_load_return)
+  GEM_IMPL_ALLOC(AssetLoadResult)
 };
 
-class asset_manager {
+class AssetManager {
 public:
-  asset_manager();
+  AssetManager();
 
-  asset_handle load_asset(const std::string &path, const asset_type &assetType,
-                          asset_loaded_callback on_asset_loaded = nullptr);
+  AssetHandle load_asset(const std::string &path, const AssetType &assetType,
+                         AssetLoadedCallback on_asset_loaded = nullptr);
 
-  void unload_asset(const asset_handle &handle);
+  void unload_asset(const AssetHandle &handle);
 
-  asset *get_asset(asset_handle &handle);
+  Asset *get_asset(AssetHandle &handle);
 
-  template <typename _Ty, asset_type _AssetType>
-  asset_handle provide_asset(const std::string &name, _Ty data) {
-    asset_t<_Ty, _AssetType> *to_asset =
-        new asset_t<_Ty, _AssetType>(data, name);
+  template <typename _Ty, AssetType _AssetType>
+  AssetHandle provide_asset(const std::string &name, _Ty data) {
+    TAsset<_Ty, _AssetType> *to_asset =
+        new TAsset<_Ty, _AssetType>(data, name);
     p_loaded_assets.emplace(to_asset->m_handle,
-                            std::move(std::unique_ptr<asset>(to_asset)));
+                            std::move(std::unique_ptr<Asset>(to_asset)));
     return to_asset->m_handle;
   }
 
-  template <typename _Ty, asset_type _AssetType>
-  asset_t<_Ty, _AssetType> *get_asset(asset_handle &handle) {
-    asset *ass = get_asset(handle);
-    return static_cast<asset_t<_Ty, _AssetType> *>(ass);
+  template <typename _Ty, AssetType _AssetType>
+  TAsset<_Ty, _AssetType> *get_asset(AssetHandle &handle) {
+    Asset *ass = get_asset(handle);
+    return static_cast<TAsset<_Ty, _AssetType> *>(ass);
   }
 
-  template <typename _Ty, asset_type _AssetType>
-  asset_t<_Ty, _AssetType> *get_asset(const std::string &path) {
-    asset_handle handle(path, _AssetType);
-    asset *ass = get_asset(handle);
-    return static_cast<asset_t<_Ty, _AssetType> *>(ass);
+  template <typename _Ty, AssetType _AssetType>
+  TAsset<_Ty, _AssetType> *get_asset(const std::string &path) {
+    AssetHandle handle(path, _AssetType);
+    Asset *ass = get_asset(handle);
+    return static_cast<TAsset<_Ty, _AssetType> *>(ass);
   }
 
-  asset_load_progress get_asset_load_progress(const asset_handle &handle);
+  AssetLoadProgress get_asset_load_progress(const AssetHandle &handle);
 
   bool any_assets_loading();
   bool any_assets_unloading();
@@ -86,21 +86,21 @@ public:
   void update();
   void shutdown();
 
-  GEM_IMPL_ALLOC(asset_manager)
+  GEM_IMPL_ALLOC(AssetManager)
 
 protected:
-  std::unordered_map<asset_handle, std::future<asset_load_return>>
+  std::unordered_map<AssetHandle, std::future<AssetLoadResult>>
       p_pending_load_tasks;
-  std::unordered_map<asset_handle, std::unique_ptr<asset>> p_loaded_assets;
-  std::unordered_map<asset_handle, asset_load_return> p_pending_load_callbacks;
-  std::unordered_map<asset_handle, asset_unload_callback>
+  std::unordered_map<AssetHandle, std::unique_ptr<Asset>> p_loaded_assets;
+  std::unordered_map<AssetHandle, AssetLoadResult> p_pending_load_callbacks;
+  std::unordered_map<AssetHandle, AssetUnloadCallback>
       p_pending_unload_callbacks;
-  std::unordered_map<asset_handle, asset_loaded_callback>
+  std::unordered_map<AssetHandle, AssetLoadedCallback>
       p_asset_loaded_callbacks;
-  std::vector<asset_load_info> p_queued_loads;
+  std::vector<AssetLoadInfo> p_queued_loads;
 
   std::unique_ptr<efsw::FileWatcher> p_file_watcher;
-  std::unique_ptr<gem_file_listener> p_gem_listener;
+  std::unique_ptr<GemFileWatchListener> p_gem_listener;
 
   const uint16_t p_callback_tasks_per_tick = 1;
   const uint16_t p_max_async_tasks_in_flight = 8;
@@ -111,11 +111,10 @@ protected:
 
   void handle_async_tasks();
 
-  void dispatch_asset_load_task(const asset_handle &handle,
-                                asset_load_info &info);
+  void dispatch_asset_load_task(const AssetHandle &handle, AssetLoadInfo &info);
 
 private:
-  void transition_asset_to_loaded(const asset_handle &handle,
-                                  asset *asset_to_transition);
+  void transition_asset_to_loaded(const AssetHandle &handle,
+                                  Asset *asset_to_transition);
 };
 } // namespace gem

@@ -5,7 +5,7 @@
 #include "texture.h"
 
 namespace gem {
-using gl_shader_asset = asset_t<gl_shader, asset_type::shader>;
-using texture_asset = asset_t<texture, asset_type::texture>;
-using model_asset = asset_t<model, asset_type::model>;
+using GLShaderAsset = TAsset<GLShader, AssetType::shader>;
+using TextureAsset = TAsset<Texture, AssetType::texture>;
+using ModelAsset = TAsset<Model, AssetType::model>;
 } // namespace gem

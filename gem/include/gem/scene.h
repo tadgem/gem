@@ -1,6 +1,6 @@
 #pragma once
 #include "entt.hpp"
-#include "gem/aabb.h"
+#include "gem/AABB.h"
 #include "gem/alias.h"
 #include "gem/dbg_memory.h"
 #include "gem/texture.h"
@@ -13,46 +13,46 @@
 
 namespace gem {
 
-class entity;
-class model;
-class gl_shader;
+class Entity;
+class Model;
+class GLShader;
 
-class scene {
+class Scene {
 public:
-  scene(const std::string &scene_name);
+  Scene(const std::string &scene_name);
 
-  entity create_entity(const std::string &name);
-  std::vector<entity> create_entity_from_model(
-      asset_handle model_asset_handle, model &model_to_load,
-      asset_handle shader_asset_handle, gl_shader &material_shader,
+  Entity create_entity(const std::string &name);
+  std::vector<Entity> create_entity_from_model(
+      AssetHandle model_asset_handle, Model &model_to_load,
+      AssetHandle shader_asset_handle, GLShader &material_shader,
       glm::vec3 scale = glm::vec3(1.0f), glm::vec3 euler = glm::vec3(0.0f),
-      std::map<std::string, texture_map_type> known_maps = {});
+      std::map<std::string, TextureMapType> known_maps = {});
 
   bool does_entity_exist(u32 e);
 
   void on_update();
-  void update_aabb(aabb &in);
+  void update_aabb(AABB &in);
 
   const std::string m_name;
-  const hash_string m_name_hash;
+  const HashString m_name_hash;
   entt::registry m_registry;
-  aabb m_scene_bounding_volume;
+  AABB m_scene_bounding_volume;
 
-  GEM_IMPL_ALLOC(scene)
+  GEM_IMPL_ALLOC(Scene)
 
 protected:
   u32 p_created_entity_count;
 };
 
-class entity {
+class Entity {
 public:
   entt::entity m_handle;
-  scene *m_scene;
+  Scene *m_scene;
 
-  entity(scene *escene, entt::entity e);
+  Entity(Scene *escene, entt::entity e);
 
-  static entity INVALID() {
-    return entity(nullptr, static_cast<entt::entity>(UINT32_MAX));
+  static Entity INVALID() {
+    return Entity(nullptr, static_cast<entt::entity>(UINT32_MAX));
   }
 
   template <typename _Ty, typename... Args> _Ty &add_component(Args &&...args) {
@@ -78,29 +78,29 @@ public:
     return true;
   }
 
-  GEM_IMPL_ALLOC(entity)
+  GEM_IMPL_ALLOC(Entity)
 };
 
 // component which all entities must have
-struct entity_data {
+struct EntityData {
   std::string m_name;
-  entity m_parent = entity::INVALID();
+  Entity m_parent = Entity::INVALID();
 };
 
-class scene_manager {
+class SceneManager {
 public:
-  scene_manager();
+  SceneManager();
 
-  scene *create_scene(const std::string &name);
-  scene *load_scene(nlohmann::json &scene_json);
-  scene *load_scene_from_disk(const std::string &scene_path);
-  scene *get_scene(hash_string scene_hash);
-  void close_scene(hash_string scene_hash);
-  nlohmann::json save_scene(scene *ser_scene);
-  void save_scene_to_disk(const std::string &path, scene *ser_scene);
+  Scene *create_scene(const std::string &name);
+  Scene *load_scene(nlohmann::json &scene_json);
+  Scene *load_scene_from_disk(const std::string &scene_path);
+  Scene *get_scene(HashString scene_hash);
+  void close_scene(HashString scene_hash);
+  nlohmann::json save_scene(Scene *ser_scene);
+  void save_scene_to_disk(const std::string &path, Scene *ser_scene);
 
-  GEM_IMPL_ALLOC(scene_manager)
+  GEM_IMPL_ALLOC(SceneManager)
 protected:
-  std::vector<std::unique_ptr<scene>> p_active_scenes;
+  std::vector<std::unique_ptr<Scene>> p_active_scenes;
 };
 } // namespace gem

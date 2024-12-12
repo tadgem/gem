@@ -5,40 +5,40 @@
 
 namespace gem {
 
-class camera;
+class Camera;
 namespace open_gl {
 namespace tech {
-class vxgi {
+class VXGI {
 public:
-  static void dispatch_voxelisation_gbuffer_pass(gl_shader &gbuffer_shader,
-                                                 voxel::grid &grid_data,
-                                                 gl_framebuffer gbuffer,
-                                                 gl_framebuffer lighting_buffer,
+  static void dispatch_voxelisation_gbuffer_pass(GLShader &gbuffer_shader,
+                                                 Voxel::Grid &grid_data,
+                                                 GLFramebuffer gbuffer,
+                                                 GLFramebuffer lighting_buffer,
                                                  glm::ivec2 window_res);
 
-  static void dispatch_gbuffer_voxelization(gl_shader &voxelization,
-                                            voxel::grid &voxel_data,
-                                            gl_framebuffer &gbuffer,
-                                            gl_framebuffer &lightpass_buffer,
+  static void dispatch_gbuffer_voxelization(GLShader &voxelization,
+                                            Voxel::Grid &voxel_data,
+                                            GLFramebuffer &gbuffer,
+                                            GLFramebuffer &lightpass_buffer,
                                             glm::ivec2 window_res);
 
-  static void dispatch_blit_voxel(gl_shader &blit_voxel,
-                                  voxel::grid &voxel_data,
+  static void dispatch_blit_voxel(GLShader &blit_voxel,
+                                  Voxel::Grid &voxel_data,
                                   glm::vec3 _3d_tex_res_vec);
 
-  static void dispatch_clear_voxel(gl_shader &clear_voxel,
-                                   voxel::grid &voxel_data,
+  static void dispatch_clear_voxel(GLShader &clear_voxel,
+                                   Voxel::Grid &voxel_data,
                                    glm::vec3 _3d_tex_res_vec);
 
-  static void dispatch_gen_voxel_mips(gl_shader &voxelization_mips,
-                                      voxel::grid &voxel_data,
+  static void dispatch_gen_voxel_mips(GLShader &voxelization_mips,
+                                      Voxel::Grid &voxel_data,
                                       glm::vec3 _3d_tex_res_vec);
 
   static void dispatch_cone_tracing_pass(
-      gl_shader &voxel_cone_tracing, voxel::grid &voxel_data,
-      gl_framebuffer &buffer_conetracing, gl_framebuffer &gbuffer,
-      glm::ivec2 window_res, aabb &bounding_volume, glm::vec3 _3d_tex_res,
-      camera &cam, float max_trace_distance, float resolution_scale,
+      GLShader &voxel_cone_tracing, Voxel::Grid &voxel_data,
+      GLFramebuffer &buffer_conetracing, GLFramebuffer &gbuffer,
+      glm::ivec2 window_res, AABB &bounding_volume, glm::vec3 _3d_tex_res,
+      Camera &cam, float max_trace_distance, float resolution_scale,
       float diffuse_spec_mix);
 };
 } // namespace tech

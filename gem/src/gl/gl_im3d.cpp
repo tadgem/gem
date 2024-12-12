@@ -123,28 +123,28 @@ void DrawIm3dTextListsImGui(const Im3d::TextDrawList _textDrawLists[],
   ImGui::PopStyleColor(1);
 }
 
-im3d_state gl_im3d::load_im3d() {
+Im3dState GLIm3d::load_im3d() {
   ZoneScoped;
   std::string tris =
-      utils::load_string_from_path("assets/shaders/im3d/im3d.tris.shader");
+      Utils::load_string_from_path("assets/shaders/im3d/im3d.tris.shader");
 
   std::string points =
-      utils::load_string_from_path("assets/shaders/im3d/im3d.points.shader");
+      Utils::load_string_from_path("assets/shaders/im3d/im3d.points.shader");
 
   std::string lines =
-      utils::load_string_from_path("assets/shaders/im3d/im3d.lines.shader");
+      Utils::load_string_from_path("assets/shaders/im3d/im3d.lines.shader");
 
-  auto tris_stages = gl_shader::split_composite_shader(tris);
-  auto points_stages = gl_shader::split_composite_shader(points);
-  auto lines_stages = gl_shader::split_composite_shader(lines);
+  auto tris_stages = GLShader::split_composite_shader(tris);
+  auto points_stages = GLShader::split_composite_shader(points);
+  auto lines_stages = GLShader::split_composite_shader(lines);
 
-  gl_shader points_shader(points_stages[gl_shader::stage::vertex],
-                          points_stages[gl_shader::stage::fragment]);
-  gl_shader tris_shader(tris_stages[gl_shader::stage::vertex],
-                        tris_stages[gl_shader::stage::fragment]);
-  gl_shader lines_shader(lines_stages[gl_shader::stage::vertex],
-                         lines_stages[gl_shader::stage::geometry],
-                         lines_stages[gl_shader::stage::fragment]);
+  GLShader points_shader(points_stages[GLShader::stage::vertex],
+                          points_stages[GLShader::stage::fragment]);
+  GLShader tris_shader(tris_stages[GLShader::stage::vertex],
+                        tris_stages[GLShader::stage::fragment]);
+  GLShader lines_shader(lines_stages[GLShader::stage::vertex],
+                         lines_stages[GLShader::stage::geometry],
+                         lines_stages[GLShader::stage::fragment]);
 
   gl_handle im3d_vertex_buffer;
   gl_handle im3d_vao;
@@ -166,7 +166,7 @@ im3d_state gl_im3d::load_im3d() {
           im3d_vao};
 }
 
-void gl_im3d::shutdown_im3d(im3d_state &state) {
+void GLIm3d::shutdown_im3d(Im3dState &state) {
   ZoneScoped;
   glDeleteVertexArrays(1, &state.im3d_vao);
   glDeleteBuffers(1, &state.im3d_vertex_buffer);
@@ -175,23 +175,23 @@ void gl_im3d::shutdown_im3d(im3d_state &state) {
   glDeleteProgram(state.tris_shader.m_shader_id);
 }
 
-void gl_im3d::new_frame_im3d(im3d_state &state, glm::vec2 screen_dim,
-                             camera &cam) {
+void GLIm3d::new_frame_im3d(Im3dState &state, glm::vec2 screen_dim,
+                             Camera &cam) {
   ZoneScoped;
   // update app data e.g. mouse pos, viewport size keys etc.
   Im3d::AppData &ad = Im3d::GetAppData();
   ad.m_viewportSize = {screen_dim.x, screen_dim.y};
   ad.m_keyDown[Im3d::Key::Mouse_Left] =
-      input::get_mouse_button(mouse_button::left);
-  ad.m_keyDown[Im3d::Key::Key_L] = input::get_keyboard_key(keyboard_key::l);
-  ad.m_keyDown[Im3d::Key::Key_R] = input::get_keyboard_key(keyboard_key::r);
-  ad.m_keyDown[Im3d::Key::Key_S] = input::get_keyboard_key(keyboard_key::s);
-  ad.m_keyDown[Im3d::Key::Key_T] = input::get_keyboard_key(keyboard_key::t);
-  ad.m_deltaTime = gpu_backend::selected()->get_frame_time();
+      Input::get_mouse_button(MouseButton::left);
+  ad.m_keyDown[Im3d::Key::Key_L] = Input::get_keyboard_key(KeyboardKey::l);
+  ad.m_keyDown[Im3d::Key::Key_R] = Input::get_keyboard_key(KeyboardKey::r);
+  ad.m_keyDown[Im3d::Key::Key_S] = Input::get_keyboard_key(KeyboardKey::s);
+  ad.m_keyDown[Im3d::Key::Key_T] = Input::get_keyboard_key(KeyboardKey::t);
+  ad.m_deltaTime = GPUBackend::selected()->get_frame_time();
 
-  glm::vec2 cursor_pos = input::get_mouse_position();
+  glm::vec2 cursor_pos = Input::get_mouse_position();
 
-  glm::vec3 rayOrigin = utils::screen_to_world_pos(cursor_pos, screen_dim,
+  glm::vec3 rayOrigin = Utils::screen_to_world_pos(cursor_pos, screen_dim,
                                                    glm::inverse(cam.m_view),
                                                    glm::inverse(cam.m_proj));
   ;
@@ -204,8 +204,8 @@ void gl_im3d::new_frame_im3d(im3d_state &state, glm::vec2 screen_dim,
   Im3d::NewFrame();
 }
 
-void gl_im3d::end_frame_im3d(im3d_state &state, glm::ivec2 screen_dim,
-                             camera &cam) {
+void GLIm3d::end_frame_im3d(Im3dState &state, glm::ivec2 screen_dim,
+                             Camera &cam) {
   ZoneScoped;
   Im3d::EndFrame();
   GEM_GPU_MARKER("Im3d");

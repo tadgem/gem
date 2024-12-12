@@ -2,16 +2,16 @@
 #include "gem/gl/gl_shader.h"
 namespace gem {
 
-class camera;
-class gl_framebuffer;
+class Camera;
+class GLFramebuffer;
 namespace open_gl {
 namespace tech {
-class ssr {
+class ScreenSpaceReflections {
 public:
-  static void dispatch_ssr_pass(gl_shader &ssr, camera &cam,
-                                gl_framebuffer &ssr_buffer,
-                                gl_framebuffer &gbuffer,
-                                gl_framebuffer &lighting_buffer,
+  static void dispatch_ssr_pass(GLShader &ssr, Camera &cam,
+                                GLFramebuffer &ssr_buffer,
+                                GLFramebuffer &gbuffer,
+                                GLFramebuffer &lighting_buffer,
                                 glm::vec2 screen_dim);
 };
 } // namespace tech

@@ -2,15 +2,15 @@
 #include "gem/gl/gl_shader.h"
 
 namespace gem {
-class gl_framebuffer;
+class GLFramebuffer;
 
 namespace open_gl {
 namespace tech {
-class taa {
+class TemporalAntiAliasing {
 public:
-  static void dispatch_taa_pass(gl_shader &taa, gl_framebuffer &pass_buffer,
-                                gl_framebuffer pass_resolve_buffer,
-                                gl_framebuffer &pass_history_buffer,
+  static void dispatch_taa_pass(GLShader &taa, GLFramebuffer &pass_buffer,
+                                GLFramebuffer pass_resolve_buffer,
+                                GLFramebuffer &pass_history_buffer,
                                 gl_handle &velocity_buffer_attachment,
                                 glm::ivec2 window_res);
 };

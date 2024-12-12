@@ -2,34 +2,34 @@
 #include "gem/hash_string.h"
 #include "gem/profile.h"
 namespace gem {
-asset::asset(const std::string &path, asset_type type)
+Asset::Asset(const std::string &path, AssetType type)
     : m_path(path), m_handle(path, type) {
   ZoneScoped;
 }
 
-std::string get_asset_type_name(const asset_type &t) {
+std::string get_asset_type_name(const AssetType &t) {
   ZoneScoped;
   switch (t) {
-  case asset_type::model:
+  case AssetType::model:
     return "model";
-  case asset_type::text:
+  case AssetType::text:
     return "text";
-  case asset_type::texture:
+  case AssetType::texture:
     return "texture";
-  case asset_type::shader:
+  case AssetType::shader:
     return "shader";
   }
 
   return "unknown";
 }
 
-asset_handle::asset_handle(const std::string &path, asset_type type) {
+AssetHandle::AssetHandle(const std::string &path, AssetType type) {
   ZoneScoped;
   m_type = type;
-  m_path_hash = hash_utils::get_string_hash(path);
+  m_path_hash = HashUtils::get_string_hash(path);
 }
 
-asset_handle::asset_handle(const hash_string &path_hash, asset_type type) {
+AssetHandle::AssetHandle(const HashString &path_hash, AssetType type) {
   ZoneScoped;
   m_type = type;
   m_path_hash = path_hash;

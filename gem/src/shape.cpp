@@ -4,7 +4,7 @@
 #include "gem/profile.h"
 
 namespace gem {
-void add_cube(asset_manager &am) {
+void add_cube(AssetManager &am) {
   float cube_vertex_data[288] = {
       -1.000000, 1.000000,  -1.000000, -0.0000,   1.0000,    -0.0000,
       0.875000,  0.500000,  1.000000,  1.000000,  1.000000,  -0.0000,
@@ -57,7 +57,7 @@ void add_cube(asset_manager &am) {
   };
   const unsigned int cube_num_verts = 36;
 
-  vao_builder cube_with_normals_builder;
+  VAOBuilder cube_with_normals_builder;
   cube_with_normals_builder.begin();
   cube_with_normals_builder.m_index_count = 36;
   cube_with_normals_builder.add_vertex_buffer(&cube_vertex_data[0], 288);
@@ -65,18 +65,18 @@ void add_cube(asset_manager &am) {
   cube_with_normals_builder.add_vertex_attribute(1, 8 * sizeof(float), 3);
   cube_with_normals_builder.add_vertex_attribute(2, 8 * sizeof(float), 2);
 
-  shapes::s_cube_vao = cube_with_normals_builder.build();
-  aabb cube_bb{{0, 0, 0}, {1, 1, 1}};
-  shapes::s_cube_mesh = mesh{shapes::s_cube_vao, 36, cube_bb, cube_bb, 0};
+  Shapes::s_cube_vao = cube_with_normals_builder.build();
+  AABB cube_bb{{0, 0, 0}, {1, 1, 1}};
+  Shapes::s_cube_mesh = Mesh{Shapes::s_cube_vao, 36, cube_bb, cube_bb, 0};
 
-  model cube_model{};
-  cube_model.m_meshes.push_back(shapes::s_cube_mesh);
-  cube_model.m_aabb = shapes::s_cube_mesh.m_original_aabb;
+  Model cube_model{};
+  cube_model.m_meshes.push_back(Shapes::s_cube_mesh);
+  cube_model.m_aabb = Shapes::s_cube_mesh.m_original_aabb;
 
-  am.provide_asset<model, asset_type::model>("cube", cube_model);
+  am.provide_asset<Model, AssetType::model>("cube", cube_model);
 }
 
-void add_cylinder(asset_manager &am) {
+void add_cylinder(AssetManager &am) {
   float cylinder_vertex_data[2976] = {
       0.000000,  1.000000,  -1.000000, -0.0000,   -0.0000,   -1.0000,
       1.000000,  1.000000,  0.195090,  -1.000000, -0.980785, 0.1951,
@@ -577,7 +577,7 @@ void add_cylinder(asset_manager &am) {
   };
   const unsigned int cylinder_num_verts = 372;
 
-  vao_builder cylinder_builder;
+  VAOBuilder cylinder_builder;
   cylinder_builder.begin();
   cylinder_builder.m_index_count = cylinder_num_verts;
   cylinder_builder.add_vertex_buffer(&cylinder_vertex_data[0],
@@ -586,19 +586,19 @@ void add_cylinder(asset_manager &am) {
   cylinder_builder.add_vertex_attribute(1, 8 * sizeof(float), 3);
   cylinder_builder.add_vertex_attribute(2, 8 * sizeof(float), 2);
 
-  shapes::s_cylinder_vao = cylinder_builder.build();
-  aabb cube_bb{{0, 0, 0}, {1, 1, 1}};
-  shapes::s_cylinder_mesh =
-      mesh{shapes::s_cylinder_vao, 36, cube_bb, cube_bb, 0};
+  Shapes::s_cylinder_vao = cylinder_builder.build();
+  AABB cube_bb{{0, 0, 0}, {1, 1, 1}};
+  Shapes::s_cylinder_mesh =
+      Mesh{Shapes::s_cylinder_vao, 36, cube_bb, cube_bb, 0};
 
-  model cylinder_model{};
-  cylinder_model.m_meshes.push_back(shapes::s_cylinder_mesh);
-  cylinder_model.m_aabb = shapes::s_cylinder_mesh.m_original_aabb;
+  Model cylinder_model{};
+  cylinder_model.m_meshes.push_back(Shapes::s_cylinder_mesh);
+  cylinder_model.m_aabb = Shapes::s_cylinder_mesh.m_original_aabb;
 
-  am.provide_asset<model, asset_type::model>("cylinder", cylinder_model);
+  am.provide_asset<Model, AssetType::model>("cylinder", cylinder_model);
 }
 
-void add_cone(asset_manager &am) {
+void add_cone(AssetManager &am) {
   float cone_vertex_data[1488] = {
       0.000000,  -1.000000, -1.000000, -0.0000,   0.4472,    -0.8944,
       0.250000,  0.490000,  0.000000,  1.000000,  0.000000,  -0.0000,
@@ -851,7 +851,7 @@ void add_cone(asset_manager &am) {
   };
   const unsigned int cone_num_verts = 186;
 
-  vao_builder cone_builder;
+  VAOBuilder cone_builder;
   cone_builder.begin();
   cone_builder.m_index_count = cone_num_verts;
   cone_builder.add_vertex_buffer(&cone_vertex_data[0], cone_num_verts * 8);
@@ -859,18 +859,18 @@ void add_cone(asset_manager &am) {
   cone_builder.add_vertex_attribute(1, 8 * sizeof(float), 3);
   cone_builder.add_vertex_attribute(2, 8 * sizeof(float), 2);
 
-  shapes::s_cone_vao = cone_builder.build();
-  aabb cube_bb{{0, 0, 0}, {1, 1, 1}};
-  shapes::s_cone_mesh = mesh{shapes::s_cone_vao, 36, cube_bb, cube_bb, 0};
+  Shapes::s_cone_vao = cone_builder.build();
+  AABB cube_bb{{0, 0, 0}, {1, 1, 1}};
+  Shapes::s_cone_mesh = Mesh{Shapes::s_cone_vao, 36, cube_bb, cube_bb, 0};
 
-  model cone_model{};
-  cone_model.m_meshes.push_back(shapes::s_cone_mesh);
-  cone_model.m_aabb = shapes::s_cone_mesh.m_original_aabb;
+  Model cone_model{};
+  cone_model.m_meshes.push_back(Shapes::s_cone_mesh);
+  cone_model.m_aabb = Shapes::s_cone_mesh.m_original_aabb;
 
-  am.provide_asset<model, asset_type::model>("cone", cone_model);
+  am.provide_asset<Model, AssetType::model>("cone", cone_model);
 }
 
-void add_torus(asset_manager &am) {
+void add_torus(AssetManager &am) {
   float torus_vertex_data[27648] = {
       1.239306,  0.000000,  -0.163158, 0.9914,    -0.0000,   -0.1305,
       0.520833,  0.500000,  1.216506,  0.125000,  0.000000,  0.8687,
@@ -5483,7 +5483,7 @@ void add_torus(asset_manager &am) {
   };
   const unsigned int torus_num_verts = 3456;
 
-  vao_builder torus_builder;
+  VAOBuilder torus_builder;
   torus_builder.begin();
   torus_builder.m_index_count = torus_num_verts;
   torus_builder.add_vertex_buffer(&torus_vertex_data[0], torus_num_verts * 8);
@@ -5491,18 +5491,18 @@ void add_torus(asset_manager &am) {
   torus_builder.add_vertex_attribute(1, 8 * sizeof(float), 3);
   torus_builder.add_vertex_attribute(2, 8 * sizeof(float), 2);
 
-  shapes::s_torus_vao = torus_builder.build();
-  aabb cube_bb{{0, 0, 0}, {1, 1, 1}};
-  shapes::s_torus_mesh = mesh{shapes::s_torus_vao, 36, cube_bb, cube_bb, 0};
+  Shapes::s_torus_vao = torus_builder.build();
+  AABB cube_bb{{0, 0, 0}, {1, 1, 1}};
+  Shapes::s_torus_mesh = Mesh{Shapes::s_torus_vao, 36, cube_bb, cube_bb, 0};
 
-  model torus_model{};
-  torus_model.m_meshes.push_back(shapes::s_torus_mesh);
-  torus_model.m_aabb = shapes::s_torus_mesh.m_original_aabb;
+  Model torus_model{};
+  torus_model.m_meshes.push_back(Shapes::s_torus_mesh);
+  torus_model.m_aabb = Shapes::s_torus_mesh.m_original_aabb;
 
-  am.provide_asset<model, asset_type::model>("torus", torus_model);
+  am.provide_asset<Model, AssetType::model>("torus", torus_model);
 }
 
-void add_sphere(asset_manager &am) {
+void add_sphere(AssetManager &am) {
   float sphere_vertex_data[23040] = {
       0.000000,  0.195090,  -0.980785, -0.0000,   0.1939,    -0.9810,
       0.750000,  0.562500,  0.180240,  0.382683,  -0.906127, 0.1804,
@@ -9346,7 +9346,7 @@ void add_sphere(asset_manager &am) {
       -0.923879, -0.0000,   0.3805,    -0.9248,   0.750000,  0.625000,
   };
   const unsigned int sphere_num_verts = 2880;
-  vao_builder sphere_builder;
+  VAOBuilder sphere_builder;
   sphere_builder.begin();
   sphere_builder.m_index_count = sphere_num_verts;
   sphere_builder.add_vertex_buffer(&sphere_vertex_data[0], 23040);
@@ -9354,16 +9354,16 @@ void add_sphere(asset_manager &am) {
   sphere_builder.add_vertex_attribute(1, 8 * sizeof(float), 3);
   sphere_builder.add_vertex_attribute(2, 8 * sizeof(float), 2);
 
-  shapes::s_sphere_vao = sphere_builder.build();
-  aabb sphere_bb{{0, 0, 0}, {1, 1, 1}};
-  shapes::s_sphere_mesh =
-      mesh{shapes::s_sphere_vao, sphere_num_verts, sphere_bb, sphere_bb, 0};
+  Shapes::s_sphere_vao = sphere_builder.build();
+  AABB sphere_bb{{0, 0, 0}, {1, 1, 1}};
+  Shapes::s_sphere_mesh =
+      Mesh{Shapes::s_sphere_vao, sphere_num_verts, sphere_bb, sphere_bb, 0};
 
-  model sphere_model{};
-  sphere_model.m_meshes.push_back(shapes::s_sphere_mesh);
-  sphere_model.m_aabb = shapes::s_sphere_mesh.m_original_aabb;
+  Model sphere_model{};
+  sphere_model.m_meshes.push_back(Shapes::s_sphere_mesh);
+  sphere_model.m_aabb = Shapes::s_sphere_mesh.m_original_aabb;
 
-  am.provide_asset<model, asset_type::model>("sphere", sphere_model);
+  am.provide_asset<Model, AssetType::model>("sphere", sphere_model);
 }
 
 void add_cube_pos_only() {
@@ -9387,13 +9387,13 @@ void add_cube_pos_only() {
       // bottom and top
       16, 17, 18, 18, 19, 16, 20, 21, 22, 22, 23, 20};
 
-  vao_builder cube_builder;
+  VAOBuilder cube_builder;
   cube_builder.begin();
   cube_builder.add_vertex_buffer(cube_data);
   cube_builder.add_index_buffer(cube_indices);
   cube_builder.add_vertex_attribute(0, 3 * sizeof(float), 3);
 
-  shapes::s_cube_pos_only = cube_builder.build();
+  Shapes::s_cube_pos_only = cube_builder.build();
 }
 
 void add_screen_quad() {
@@ -9410,16 +9410,16 @@ void add_screen_quad() {
       1, 2, 3  // second triangle
   };
 
-  vao_builder screen_quad_builder;
+  VAOBuilder screen_quad_builder;
   screen_quad_builder.begin();
   screen_quad_builder.add_vertex_buffer(screen_quad_verts);
   screen_quad_builder.add_vertex_attribute(0, 5 * sizeof(float), 3);
   screen_quad_builder.add_vertex_attribute(1, 5 * sizeof(float), 2);
   screen_quad_builder.add_index_buffer(screen_quad_indices);
-  shapes::s_screen_quad = screen_quad_builder.build();
+  Shapes::s_screen_quad = screen_quad_builder.build();
 }
 
-VAO shapes::gen_cube_instanced_vao(std::vector<glm::mat4> &matrices,
+VAO Shapes::gen_cube_instanced_vao(std::vector<glm::mat4> &matrices,
                                    std::vector<glm::vec3> &uvs) {
   ZoneScoped;
 
@@ -9443,7 +9443,7 @@ VAO shapes::gen_cube_instanced_vao(std::vector<glm::mat4> &matrices,
       // bottom and top
       16, 17, 18, 18, 19, 16, 20, 21, 22, 22, 23, 20};
 
-  vao_builder cube_builder;
+  VAOBuilder cube_builder;
   cube_builder.begin();
   cube_builder.add_vertex_buffer(cube_data);
   cube_builder.add_vertex_attribute(0, 3 * sizeof(float), 3);
@@ -9482,7 +9482,7 @@ VAO shapes::gen_cube_instanced_vao(std::vector<glm::mat4> &matrices,
   return cube_builder.build();
 }
 
-void shapes::init_built_in_assets(asset_manager &am) {
+void Shapes::init_built_in_assets(AssetManager &am) {
   ZoneScoped;
   add_screen_quad();
   add_cube_pos_only();

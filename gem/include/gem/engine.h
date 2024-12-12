@@ -7,7 +7,7 @@
 #include "project.h"
 #include "scene.h"
 
-struct debug_callbacks_collection {
+struct DebugCallbackCollection {
   std::vector<std::function<void()>> m_callbacks;
 
   void add(std::function<void()> debug_callback);
@@ -15,15 +15,15 @@ struct debug_callbacks_collection {
 
 namespace gem {
 
-class engine {
+class Engine {
 public:
-  inline static asset_manager assets;
-  inline static event_handler events;
-  inline static gl_renderer renderer;
-  inline static scene_manager scenes;
-  inline static system_manager systems;
-  inline static project active_project;
-  inline static debug_callbacks_collection debug_callbacks;
+  inline static AssetManager assets;
+  inline static EventHandler events;
+  inline static GLRenderer renderer;
+  inline static SceneManager scenes;
+  inline static SystemManager systems;
+  inline static Project active_project;
+  inline static DebugCallbackCollection debug_callbacks;
 
   static void init();
   static void update();

@@ -19,79 +19,78 @@
 
 namespace gem {
 
-void gl_renderer::init(asset_manager &am, glm::ivec2 resolution) {
+void GLRenderer::init(AssetManager &am, glm::ivec2 resolution) {
   ZoneScoped;
   TracyGpuContext;
   m_frame_index = 0;
-  m_im3d_state = gl_im3d::load_im3d();
+  m_im3d_state = GLIm3d::load_im3d();
 
-  am.load_asset("assets/shaders/gbuffer.shader", asset_type::shader);
-  am.load_asset("assets/shaders/gbuffer_textureless.shader",
-                asset_type::shader);
-  am.load_asset("assets/shaders/lighting.shader", asset_type::shader);
-  am.load_asset("assets/shaders/visualize_3d_tex.shader", asset_type::shader);
+  am.load_asset("assets/shaders/gbuffer.shader", AssetType::shader);
+  am.load_asset("assets/shaders/gbuffer_textureless.shader", AssetType::shader);
+  am.load_asset("assets/shaders/lighting.shader", AssetType::shader);
+  am.load_asset("assets/shaders/visualize_3d_tex.shader", AssetType::shader);
   am.load_asset("assets/shaders/visualize_3d_tex_instances.shader",
-                asset_type::shader);
-  am.load_asset("assets/shaders/present.shader", asset_type::shader);
-  am.load_asset("assets/shaders/dir_light_shadow.shader", asset_type::shader);
-  am.load_asset("assets/shaders/voxel_cone_tracing.shader", asset_type::shader);
-  am.load_asset("assets/shaders/ssr.shader", asset_type::shader);
-  am.load_asset("assets/shaders/taa.shader", asset_type::shader);
-  am.load_asset("assets/shaders/denoise.shader", asset_type::shader);
-  am.load_asset("assets/shaders/gi_combine.shader", asset_type::shader);
-  am.load_asset("assets/shaders/downsample.shader", asset_type::shader);
+                AssetType::shader);
+  am.load_asset("assets/shaders/present.shader", AssetType::shader);
+  am.load_asset("assets/shaders/dir_light_shadow.shader", AssetType::shader);
+  am.load_asset("assets/shaders/voxel_cone_tracing.shader", AssetType::shader);
+  am.load_asset("assets/shaders/ssr.shader", AssetType::shader);
+  am.load_asset("assets/shaders/taa.shader", AssetType::shader);
+  am.load_asset("assets/shaders/denoise.shader", AssetType::shader);
+  am.load_asset("assets/shaders/gi_combine.shader", AssetType::shader);
+  am.load_asset("assets/shaders/downsample.shader", AssetType::shader);
   am.load_asset("assets/shaders/gbuffer_voxelization.shader",
-                asset_type::shader);
-  am.load_asset("assets/shaders/voxel_mips.shader", asset_type::shader);
-  am.load_asset("assets/shaders/voxel_reprojection.shader", asset_type::shader);
-  am.load_asset("assets/shaders/voxel_blit.shader", asset_type::shader);
-  am.load_asset("assets/shaders/voxel_clear.shader", asset_type::shader);
+                AssetType::shader);
+  am.load_asset("assets/shaders/voxel_mips.shader", AssetType::shader);
+  am.load_asset("assets/shaders/voxel_reprojection.shader", AssetType::shader);
+  am.load_asset("assets/shaders/voxel_blit.shader", AssetType::shader);
+  am.load_asset("assets/shaders/voxel_clear.shader", AssetType::shader);
 
   am.wait_all_assets();
-  m_gbuffer_shader = am.get_asset<gl_shader, asset_type::shader>(
+  m_gbuffer_shader = am.get_asset<GLShader, AssetType::shader>(
       "assets/shaders/gbuffer.shader");
-  m_gbuffer_textureless_shader = am.get_asset<gl_shader, asset_type::shader>(
+  m_gbuffer_textureless_shader = am.get_asset<GLShader, AssetType::shader>(
       "assets/shaders/gbuffer_textureless.shader");
-  m_lighting_shader = am.get_asset<gl_shader, asset_type::shader>(
+  m_lighting_shader = am.get_asset<GLShader, AssetType::shader>(
       "assets/shaders/lighting.shader");
-  m_visualise_3d_tex_shader = am.get_asset<gl_shader, asset_type::shader>(
+  m_visualise_3d_tex_shader = am.get_asset<GLShader, AssetType::shader>(
       "assets/shaders/visualize_3d_tex.shader");
   m_visualise_3d_tex_instances_shader =
-      am.get_asset<gl_shader, asset_type::shader>(
+      am.get_asset<GLShader, AssetType::shader>(
           "assets/shaders/visualize_3d_tex_instances.shader");
-  m_present_shader = am.get_asset<gl_shader, asset_type::shader>(
+  m_present_shader = am.get_asset<GLShader, AssetType::shader>(
       "assets/shaders/present.shader");
-  m_dir_light_shadow_shader = am.get_asset<gl_shader, asset_type::shader>(
+  m_dir_light_shadow_shader = am.get_asset<GLShader, AssetType::shader>(
       "assets/shaders/dir_light_shadow.shader");
-  m_voxel_cone_tracing_shader = am.get_asset<gl_shader, asset_type::shader>(
+  m_voxel_cone_tracing_shader = am.get_asset<GLShader, AssetType::shader>(
       "assets/shaders/voxel_cone_tracing.shader");
   m_ssr_shader =
-      am.get_asset<gl_shader, asset_type::shader>("assets/shaders/ssr.shader");
+      am.get_asset<GLShader, AssetType::shader>("assets/shaders/ssr.shader");
   m_taa_shader =
-      am.get_asset<gl_shader, asset_type::shader>("assets/shaders/taa.shader");
-  m_denoise_shader = am.get_asset<gl_shader, asset_type::shader>(
+      am.get_asset<GLShader, AssetType::shader>("assets/shaders/taa.shader");
+  m_denoise_shader = am.get_asset<GLShader, AssetType::shader>(
       "assets/shaders/denoise.shader");
-  m_combine_shader = am.get_asset<gl_shader, asset_type::shader>(
+  m_combine_shader = am.get_asset<GLShader, AssetType::shader>(
       "assets/shaders/gi_combine.shader");
-  m_downsample_shader = am.get_asset<gl_shader, asset_type::shader>(
+  m_downsample_shader = am.get_asset<GLShader, AssetType::shader>(
       "assets/shaders/downsample.shader");
   m_compute_voxelize_gbuffer_shader =
-      am.get_asset<gl_shader, asset_type::shader>(
+      am.get_asset<GLShader, AssetType::shader>(
           "assets/shaders/gbuffer_voxelization.shader");
-  m_compute_voxel_mips_shader = am.get_asset<gl_shader, asset_type::shader>(
+  m_compute_voxel_mips_shader = am.get_asset<GLShader, AssetType::shader>(
       "assets/shaders/voxel_mips.shader");
   m_compute_voxel_reprojection_shader =
-      am.get_asset<gl_shader, asset_type::shader>(
+      am.get_asset<GLShader, AssetType::shader>(
           "assets/shaders/voxel_reprojection.shader");
-  m_compute_voxel_blit_shader = am.get_asset<gl_shader, asset_type::shader>(
+  m_compute_voxel_blit_shader = am.get_asset<GLShader, AssetType::shader>(
       "assets/shaders/voxel_blit.shader");
-  m_compute_voxel_clear_shader = am.get_asset<gl_shader, asset_type::shader>(
+  m_compute_voxel_clear_shader = am.get_asset<GLShader, AssetType::shader>(
       "assets/shaders/voxel_clear.shader");
 
   m_window_resolution = resolution;
   const int shadow_resolution = 4096;
   m_gbuffer =
-      gl_framebuffer::create(m_window_resolution,
+      GLFramebuffer::create(m_window_resolution,
                              {
                                  {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
                                  {GL_RGBA, GL_RGBA32F, GL_LINEAR, GL_FLOAT},
@@ -103,38 +102,38 @@ void gl_renderer::init(asset_manager &am, glm::ivec2 resolution) {
                              true);
 
   m_gbuffer_downsample =
-      gl_framebuffer::create(m_window_resolution,
+      GLFramebuffer::create(m_window_resolution,
                              {
                                  {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
                              },
                              false);
 
   m_dir_light_shadow_buffer =
-      gl_framebuffer::create({shadow_resolution, shadow_resolution}, {}, true);
+      GLFramebuffer::create({shadow_resolution, shadow_resolution}, {}, true);
 
   m_lightpass_buffer =
-      gl_framebuffer::create(m_window_resolution,
+      GLFramebuffer::create(m_window_resolution,
                              {
                                  {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
                              },
                              false);
 
   m_lightpass_buffer_resolve =
-      gl_framebuffer::create(m_window_resolution,
+      GLFramebuffer::create(m_window_resolution,
                              {
                                  {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
                              },
                              false);
 
   m_lightpass_buffer_history =
-      gl_framebuffer::create(m_window_resolution,
+      GLFramebuffer::create(m_window_resolution,
                              {
                                  {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
                              },
                              false);
 
   m_position_buffer_history =
-      gl_framebuffer::create(m_window_resolution,
+      GLFramebuffer::create(m_window_resolution,
                              {
                                  {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
                              },
@@ -143,28 +142,28 @@ void gl_renderer::init(asset_manager &am, glm::ivec2 resolution) {
   glm::vec2 gi_res = {m_window_resolution.x * m_vxgi_resolution_scale,
                       m_window_resolution.y * m_vxgi_resolution_scale};
   m_conetracing_buffer =
-      gl_framebuffer::create(gi_res,
+      GLFramebuffer::create(gi_res,
                              {
                                  {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
                              },
                              false);
 
   m_conetracing_buffer_denoise =
-      gl_framebuffer::create(gi_res,
+      GLFramebuffer::create(gi_res,
                              {
                                  {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
                              },
                              false);
 
   m_conetracing_buffer_resolve =
-      gl_framebuffer::create(m_window_resolution,
+      GLFramebuffer::create(m_window_resolution,
                              {
                                  {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
                              },
                              false);
 
   m_conetracing_buffer_history =
-      gl_framebuffer::create(m_window_resolution,
+      GLFramebuffer::create(m_window_resolution,
                              {
                                  {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
                              },
@@ -173,62 +172,66 @@ void gl_renderer::init(asset_manager &am, glm::ivec2 resolution) {
   glm::vec2 ssr_res = {m_window_resolution.x * m_ssr_resolution_scale,
                        m_window_resolution.y * m_ssr_resolution_scale};
   m_ssr_buffer =
-      gl_framebuffer::create(ssr_res,
+      GLFramebuffer::create(ssr_res,
                              {
                                  {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
                              },
                              false);
 
   m_ssr_buffer_denoise =
-      gl_framebuffer::create(ssr_res,
+      GLFramebuffer::create(ssr_res,
                              {
                                  {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
                              },
                              false);
 
   m_ssr_buffer_resolve =
-      gl_framebuffer::create(m_window_resolution,
+      GLFramebuffer::create(m_window_resolution,
                              {
                                  {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
                              },
                              false);
 
   m_ssr_buffer_history =
-      gl_framebuffer::create(m_window_resolution,
+      GLFramebuffer::create(m_window_resolution,
                              {
                                  {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
                              },
                              false);
 
   m_final_pass =
-      gl_framebuffer::create(m_window_resolution,
+      GLFramebuffer::create(m_window_resolution,
                              {
                                  {GL_RGBA, GL_RGBA8, GL_LINEAR, GL_FLOAT},
                              },
                              false);
 
-  m_voxel_data = voxel::create_grid(s_voxel_resolution, aabb{});
-  camera cam{}; // TODO: clean this up, just need a position of 0,0,0 to init
+  m_voxel_data = Voxel::create_grid(s_voxel_resolution, AABB{});
+  Camera cam{}; // TODO: clean this up, just need a position of 0,0,0 to init
   m_voxel_data.update_voxel_unit();
-  m_voxel_visualiser = voxel::create_grid_visualiser(
+  m_voxel_visualiser = Voxel::create_grid_visualiser(
       m_voxel_data, m_visualise_3d_tex_shader->m_data,
       m_visualise_3d_tex_instances_shader->m_data, 8);
 }
 
-void gl_renderer::pre_frame(camera &cam) {
+void GLRenderer::pre_frame(Camera &cam) {
   ZoneScoped;
 
-  gl_im3d::new_frame_im3d(m_im3d_state, m_window_resolution, cam);
+  GLIm3d::new_frame_im3d(m_im3d_state, m_window_resolution, cam);
 }
 
-void gl_renderer::render(asset_manager &am, camera &cam,
-                         std::vector<scene *> &scenes) {
+void GLRenderer::render(AssetManager &am, Camera &cam,
+                         std::vector<Scene *> &scenes) {
   ZoneScoped;
   FrameMark;
 
+  if(m_debug_simulate_low_framerate)
+  {
+    SDL_Delay(30);
+  }
 
   if (p_clear_voxel_grid) {
-    open_gl::tech::vxgi::dispatch_clear_voxel(
+    open_gl::tech::VXGI::dispatch_clear_voxel(
         m_compute_voxel_clear_shader->m_data, m_voxel_data, s_voxel_resolution);
     p_clear_voxel_grid = false;
   }
@@ -237,14 +240,14 @@ void gl_renderer::render(asset_manager &am, camera &cam,
 
   {
     TracyGpuZone("GBuffer Voxelization");
-    open_gl::tech::vxgi::dispatch_gbuffer_voxelization(
+    open_gl::tech::VXGI::dispatch_gbuffer_voxelization(
         m_compute_voxelize_gbuffer_shader->m_data, m_voxel_data, m_gbuffer,
         m_lightpass_buffer, m_window_resolution);
   }
 
   {
     TracyGpuZone("GBuffer Voxelization MIPS");
-    open_gl::tech::vxgi::dispatch_gen_voxel_mips(
+    open_gl::tech::VXGI::dispatch_gen_voxel_mips(
         m_compute_voxel_mips_shader->m_data, m_voxel_data, s_voxel_resolution);
   }
 
@@ -252,11 +255,11 @@ void gl_renderer::render(asset_manager &am, camera &cam,
     TracyGpuZone("GBuffer");
     m_gbuffer.bind();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    open_gl::tech::gbuffer::dispatch_gbuffer_with_id(
+    open_gl::tech::GBuffer::dispatch_gbuffer_with_id(
         m_frame_index, m_gbuffer, m_position_buffer_history,
         m_gbuffer_shader->m_data, am, cam, scenes, m_window_resolution);
 
-    open_gl::tech::gbuffer::dispatch_gbuffer_textureless_with_id(
+    open_gl::tech::GBuffer::dispatch_gbuffer_textureless_with_id(
         m_frame_index, m_gbuffer, m_position_buffer_history,
         m_gbuffer_textureless_shader->m_data, am, cam, scenes,
         m_window_resolution);
@@ -264,10 +267,10 @@ void gl_renderer::render(asset_manager &am, camera &cam,
     m_frame_index++;
   }
   // TODO: Need a way to get a single instance more efficiently
-  dir_light dir{};
-  std::vector<point_light> point_lights{};
+  DirectionalLight dir{};
+  std::vector<PointLight> point_lights{};
   if (!scenes.empty()) {
-    auto dir_light_view = scenes.front()->m_registry.view<dir_light>();
+    auto dir_light_view = scenes.front()->m_registry.view<DirectionalLight>();
     for (auto [e, dir_light_c] : dir_light_view.each()) {
       dir = dir_light_c;
       break;
@@ -275,13 +278,13 @@ void gl_renderer::render(asset_manager &am, camera &cam,
   }
   {
     TracyGpuZone("Dir Light Shadow Pass");
-    open_gl::tech::shadow::dispatch_shadow_pass(
+    open_gl::tech::Shadow::dispatch_shadow_pass(
         m_dir_light_shadow_buffer, m_dir_light_shadow_shader->m_data, dir,
         scenes, m_window_resolution);
   }
   {
     TracyGpuZone("Direct Lighting Pass");
-    open_gl::tech::lighting::dispatch_light_pass(
+    open_gl::tech::PBRLighting::dispatch_light_pass(
         m_lighting_shader->m_data, m_lightpass_buffer, m_gbuffer,
         m_dir_light_shadow_buffer, cam, point_lights, dir);
   }
@@ -289,7 +292,7 @@ void gl_renderer::render(asset_manager &am, camera &cam,
   {
     TracyGpuZone("GBuffer Downsample");
     m_gbuffer_downsample.bind();
-    open_gl::tech::utils::dispatch_present_image(
+    open_gl::tech::Utils::dispatch_present_image(
         m_downsample_shader->m_data, "u_prev_mip", 0,
         m_gbuffer.m_colour_attachments[2]);
     m_gbuffer_downsample.unbind();
@@ -298,7 +301,7 @@ void gl_renderer::render(asset_manager &am, camera &cam,
   {
     TracyGpuZone("Light Pass TAA");
 
-    open_gl::tech::taa::dispatch_taa_pass(
+    open_gl::tech::TemporalAntiAliasing::dispatch_taa_pass(
         m_taa_shader->m_data, m_lightpass_buffer, m_lightpass_buffer_resolve,
         m_lightpass_buffer_history, m_gbuffer.m_colour_attachments[4],
         m_window_resolution);
@@ -306,7 +309,7 @@ void gl_renderer::render(asset_manager &am, camera &cam,
 
   if (m_debug_draw_cone_tracing_pass || m_debug_draw_cone_tracing_pass_no_taa) {
     TracyGpuZone("Voxel Cone Tracing Pass");
-    open_gl::tech::vxgi::dispatch_cone_tracing_pass(
+    open_gl::tech::VXGI::dispatch_cone_tracing_pass(
         m_voxel_cone_tracing_shader->m_data, m_voxel_data, m_conetracing_buffer,
         m_gbuffer, m_window_resolution, m_voxel_data.current_bounding_box,
         s_voxel_resolution, cam, m_vxgi_cone_trace_distance,
@@ -314,7 +317,7 @@ void gl_renderer::render(asset_manager &am, camera &cam,
   }
 
   if (m_debug_draw_lighting_pass) {
-    open_gl::tech::utils::dispatch_present_image(
+    open_gl::tech::Utils::dispatch_present_image(
         m_present_shader->m_data, "u_image_sampler", 0,
         m_lightpass_buffer_resolve.m_colour_attachments.front());
   }
@@ -327,11 +330,11 @@ void gl_renderer::render(asset_manager &am, camera &cam,
     TracyGpuZone("SSR Pass");
     glViewport(0, 0, m_window_resolution.x * m_ssr_resolution_scale,
                m_window_resolution.y * m_ssr_resolution_scale);
-    open_gl::tech::ssr::dispatch_ssr_pass(
+    open_gl::tech::ScreenSpaceReflections::dispatch_ssr_pass(
         m_ssr_shader->m_data, cam, m_ssr_buffer, m_gbuffer, m_lightpass_buffer,
         m_window_resolution * m_ssr_resolution_scale);
     glViewport(0, 0, m_window_resolution.x, m_window_resolution.y);
-    open_gl::tech::taa::dispatch_taa_pass(
+    open_gl::tech::TemporalAntiAliasing::dispatch_taa_pass(
         m_taa_shader->m_data, m_ssr_buffer, m_ssr_buffer_resolve,
         m_ssr_buffer_history, m_gbuffer.m_colour_attachments[4],
         m_window_resolution);
@@ -340,7 +343,7 @@ void gl_renderer::render(asset_manager &am, camera &cam,
   if (m_debug_draw_cone_tracing_pass) {
     {
       TracyGpuZone("Voxel Cone Tracing TAA");
-      open_gl::tech::taa::dispatch_taa_pass(
+      open_gl::tech::TemporalAntiAliasing::dispatch_taa_pass(
           m_taa_shader->m_data, m_conetracing_buffer,
           m_conetracing_buffer_resolve, m_conetracing_buffer_history,
           m_gbuffer.m_colour_attachments[4], m_window_resolution);
@@ -350,52 +353,52 @@ void gl_renderer::render(asset_manager &am, camera &cam,
     }
     {
       TracyGpuZone("Voxel Cone Tracing Denoise");
-      open_gl::tech::utils::dispatch_denoise_image(
+      open_gl::tech::Utils::dispatch_denoise_image(
           m_denoise_shader->m_data, m_conetracing_buffer_resolve,
           m_conetracing_buffer_denoise, m_denoise_sigma, m_denoise_threshold,
           m_denoise_k_sigma, m_window_resolution);
-      texture::bind_sampler_handle(0, GL_TEXTURE0);
+      Texture::bind_sampler_handle(0, GL_TEXTURE0);
       glViewport(0, 0, m_window_resolution.x, m_window_resolution.y);
     }
   }
   if (m_debug_draw_cone_tracing_pass_no_taa) {
-    open_gl::tech::utils::dispatch_present_image(
+    open_gl::tech::Utils::dispatch_present_image(
         m_present_shader->m_data, "u_image_sampler", 0,
         m_conetracing_buffer.m_colour_attachments.front());
   }
   if (m_debug_draw_lighting_pass_no_taa) {
-    open_gl::tech::utils::dispatch_present_image(
+    open_gl::tech::Utils::dispatch_present_image(
         m_present_shader->m_data, "u_image_sampler", 0,
         m_lightpass_buffer.m_colour_attachments.front());
   }
 
   if (m_debug_draw_ssr_pass) {
-    open_gl::tech::utils::dispatch_present_image(
+    open_gl::tech::Utils::dispatch_present_image(
         m_present_shader->m_data, "u_image_sampler", 0,
         m_ssr_buffer_resolve.m_colour_attachments.front());
   }
   {
     TracyGpuZone("Blit lightpass to history");
-    open_gl::tech::utils::blit_to_fb(
+    open_gl::tech::Utils::blit_to_fb(
         m_lightpass_buffer_history, m_present_shader->m_data, "u_image_sampler",
         0, m_lightpass_buffer_resolve.m_colour_attachments[0]);
   }
   {
     TracyGpuZone("Blit Gbuffer position to history");
-    open_gl::tech::utils::blit_to_fb(
+    open_gl::tech::Utils::blit_to_fb(
         m_position_buffer_history, m_present_shader->m_data, "u_image_sampler",
         0, m_gbuffer.m_colour_attachments[1]);
   }
   {
     TracyGpuZone("Blit voxel cone tracing to history");
-    open_gl::tech::utils::blit_to_fb(
+    open_gl::tech::Utils::blit_to_fb(
         m_conetracing_buffer_history, m_present_shader->m_data,
         "u_image_sampler", 0,
         m_conetracing_buffer_denoise.m_colour_attachments.front());
   }
   {
     TracyGpuZone("Blit ssr pass to history");
-    open_gl::tech::utils::blit_to_fb(
+    open_gl::tech::Utils::blit_to_fb(
         m_ssr_buffer_history, m_present_shader->m_data, "u_image_sampler", 0,
         m_ssr_buffer_resolve.m_colour_attachments.front());
   }
@@ -410,7 +413,7 @@ void gl_renderer::render(asset_manager &am, camera &cam,
     TracyGpuZone("Composite Final Pass");
     GEM_GPU_MARKER("Composite Final Pass");
     m_final_pass.bind();
-    shapes::s_screen_quad.use();
+    Shapes::s_screen_quad.use();
     m_combine_shader->m_data.use();
     m_combine_shader->m_data.set_float("u_brightness",
                                        m_tonemapping_brightness);
@@ -418,21 +421,21 @@ void gl_renderer::render(asset_manager &am, camera &cam,
     m_combine_shader->m_data.set_float("u_saturation",
                                        m_tonemapping_saturation);
     m_combine_shader->m_data.set_int("lighting_pass", 0);
-    texture::bind_sampler_handle(
+    Texture::bind_sampler_handle(
         m_lightpass_buffer_resolve.m_colour_attachments.front(), GL_TEXTURE0);
     m_combine_shader->m_data.set_int("cone_tracing_pass", 1);
-    texture::bind_sampler_handle(
+    Texture::bind_sampler_handle(
         m_conetracing_buffer_resolve.m_colour_attachments.front(), GL_TEXTURE1);
     m_combine_shader->m_data.set_int("ssr_pass", 2);
     m_combine_shader->m_data.set_int("ssr_pass", 2);
-    texture::bind_sampler_handle(
+    Texture::bind_sampler_handle(
         m_ssr_buffer_resolve.m_colour_attachments.front(), GL_TEXTURE2);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-    texture::bind_sampler_handle(0, GL_TEXTURE0);
-    texture::bind_sampler_handle(0, GL_TEXTURE1);
+    Texture::bind_sampler_handle(0, GL_TEXTURE0);
+    Texture::bind_sampler_handle(0, GL_TEXTURE1);
     m_final_pass.unbind();
-    open_gl::tech::utils::dispatch_present_image(
+    open_gl::tech::Utils::dispatch_present_image(
         m_present_shader->m_data, "u_image_sampler", 0,
         m_final_pass.m_colour_attachments.front());
 
@@ -443,12 +446,12 @@ void gl_renderer::render(asset_manager &am, camera &cam,
 
   {
     TracyGpuZone("Im3D Pass");
-    gl_im3d::end_frame_im3d(m_im3d_state, m_window_resolution, cam);
+    GLIm3d::end_frame_im3d(m_im3d_state, m_window_resolution, cam);
   }
   TracyGpuCollect;
 }
 
-void gl_renderer::cleanup(asset_manager &am) {
+void GLRenderer::cleanup(AssetManager &am) {
   ZoneScoped;
   m_gbuffer.cleanup();
   m_gbuffer_downsample.cleanup();
@@ -466,10 +469,10 @@ void gl_renderer::cleanup(asset_manager &am) {
   m_ssr_buffer_resolve.cleanup();
   m_ssr_buffer_history.cleanup();
   m_final_pass.cleanup();
-  gl_im3d::shutdown_im3d(m_im3d_state);
+  GLIm3d::shutdown_im3d(m_im3d_state);
 }
 
-entt::entity gl_renderer::get_mouse_entity(glm::vec2 mouse_position) {
+entt::entity GLRenderer::get_mouse_entity(glm::vec2 mouse_position) {
   ZoneScoped;
   auto pixels = m_gbuffer.read_pixels<glm::vec4, 1, 1>(
       mouse_position.x, m_window_resolution.y - mouse_position.y, 5, GL_RGBA,
@@ -480,16 +483,21 @@ entt::entity gl_renderer::get_mouse_entity(glm::vec2 mouse_position) {
   return m_last_selected_entity;
 }
 
-void gl_renderer::on_imgui(asset_manager &am) {
+void GLRenderer::on_imgui(AssetManager &am) {
   ZoneScoped;
-  glm::vec2 mouse_pos = input::get_mouse_position();
+  glm::vec2 mouse_pos = Input::get_mouse_position();
   ImGui::Begin("Renderer Settings");
   ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
-              1000.0f / gpu_backend::selected()->m_imgui_io->Framerate,
-              gpu_backend::selected()->m_imgui_io->Framerate);
+              1000.0f / GPUBackend::selected()->m_imgui_io->Framerate,
+              GPUBackend::selected()->m_imgui_io->Framerate);
   ImGui::Text("Mouse Pos : %.3f, %.3f", mouse_pos.x, mouse_pos.y);
   ImGui::Text("Selected Entity ID : %d", m_last_selected_entity);
+
+  ImGui::Checkbox("Simulate Low Framerate", &m_debug_simulate_low_framerate);
   ImGui::Separator();
+
+
+
   if (ImGui::TreeNode("Render Passes")) {
     ImGui::Checkbox("Render 3D Voxel Grid", &m_debug_draw_3d_texture);
     ImGui::Checkbox("Render Final Pass", &m_debug_draw_final_pass);
@@ -528,9 +536,9 @@ void gl_renderer::on_imgui(asset_manager &am) {
     ImGui::DragFloat3("AABB Position Offset",
                       &m_voxel_visualiser.m_debug_position_offset[0]);
     ImGui::DragFloat3("Current VXGI BB Min",
-                      &m_voxel_data.current_bounding_box.min[0]);
+                      &m_voxel_data.current_bounding_box.m_min[0]);
     ImGui::DragFloat3("Current VXGI BB Max",
-                      &m_voxel_data.current_bounding_box.max[0]);
+                      &m_voxel_data.current_bounding_box.m_max[0]);
     ImGui::TreePop();
   }
   if (ImGui::TreeNode("Denoise Settings")) {
@@ -542,7 +550,7 @@ void gl_renderer::on_imgui(asset_manager &am) {
   ImGui::End();
 
   // TODO: Find a better place for this jesus
-  Im3d::DrawAlignedBox(ToIm3D(m_voxel_data.current_bounding_box.min),
-                       ToIm3D(m_voxel_data.current_bounding_box.max));
+  Im3d::DrawAlignedBox(ToIm3D(m_voxel_data.current_bounding_box.m_min),
+                       ToIm3D(m_voxel_data.current_bounding_box.m_max));
 }
 } // namespace gem

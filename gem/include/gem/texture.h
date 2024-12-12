@@ -8,7 +8,7 @@
 #include "glm.hpp"
 namespace gem {
 
-enum class texture_map_type {
+enum class TextureMapType {
   diffuse,
   normal,
   specular,
@@ -18,14 +18,14 @@ enum class texture_map_type {
 
 };
 
-class texture {
+class Texture {
 public:
-  enum class mode { stb, gli, memory };
+  enum class Mode { stb, gli, memory };
 
-  texture();
-  texture(const std::string &path);
-  texture(const std::string &path, std::vector<unsigned char> data);
-  ~texture();
+  Texture();
+  Texture(const std::string &path);
+  Texture(const std::string &path, std::vector<unsigned char> data);
+  ~Texture();
 
   void bind_sampler(GLenum texture_slot, GLenum texture_target = GL_TEXTURE_2D);
 
@@ -41,22 +41,22 @@ public:
 
   // TODO: Support Vulkan texture handles
   gl_handle m_handle = INVALID_GL_HANDLE;
-  mode m_mode = mode::memory;
+  Mode m_mode = Mode::memory;
 
   union {
     unsigned char *stb_data;
     gli::texture *gli_data;
   } m_cpu_data;
 
-  static texture from_data(unsigned int *data, unsigned int count, int width,
+  static Texture from_data(unsigned int *data, unsigned int count, int width,
                            int height, int depth, int nr_channels);
 
-  static texture create_3d_texture(glm::ivec3 dim, GLenum format,
+  static Texture create_3d_texture(glm::ivec3 dim, GLenum format,
                                    GLenum pixel_format, GLenum data_type,
                                    void *data, GLenum filter = GL_LINEAR,
                                    GLenum wrap_mode = GL_REPEAT);
 
-  static texture create_3d_texture_empty(glm::ivec3 dim, GLenum format,
+  static Texture create_3d_texture_empty(glm::ivec3 dim, GLenum format,
                                          GLenum pixel_format, GLenum data_type,
                                          GLenum filter = GL_LINEAR,
                                          GLenum wrap_mode = GL_REPEAT);
@@ -68,31 +68,31 @@ public:
 
   void release();
 
-  inline static texture *white;
-  inline static texture *black;
+  inline static Texture *white;
+  inline static Texture *black;
 
-  GEM_IMPL_ALLOC(texture);
+  GEM_IMPL_ALLOC(Texture);
 };
 
-struct texture_entry {
-  texture_map_type m_map_type;
-  asset_handle m_handle;
+struct TextureEntry {
+  TextureMapType m_map_type;
+  AssetHandle m_handle;
   std::string m_path;
-  texture *m_texture = nullptr;
+  Texture *m_texture = nullptr;
 
-  texture_entry() { m_texture = nullptr; };
-  texture_entry(texture_map_type tmt, asset_handle ah, const std::string &path,
-                texture *data);
-  GEM_IMPL_ALLOC(texture_entry);
+  TextureEntry() { m_texture = nullptr; };
+  TextureEntry(TextureMapType tmt, AssetHandle ah, const std::string &path,
+                Texture *data);
+  GEM_IMPL_ALLOC(TextureEntry);
 
-  NLOHMANN_DEFINE_TYPE_INTRUSIVE(texture_entry, m_map_type, m_handle, m_path)
+  NLOHMANN_DEFINE_TYPE_INTRUSIVE(TextureEntry, m_map_type, m_handle, m_path)
 };
 
-struct sampler_info {
+struct SamplerInfo {
   GLenum sampler_slot;
   GLenum texture_target;
-  texture_entry tex_entry;
+  TextureEntry tex_entry;
 
-  GEM_IMPL_ALLOC(sampler_info)
+  GEM_IMPL_ALLOC(SamplerInfo)
 };
 } // namespace gem

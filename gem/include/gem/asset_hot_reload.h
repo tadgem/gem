@@ -6,7 +6,7 @@ class shader;
 
 namespace gem {
 
-class gem_file_listener : public efsw::FileWatchListener {
+class GemFileWatchListener : public efsw::FileWatchListener {
 public:
   void handleFileAction(efsw::WatchID watchid, const std::string &dir,
                         const std::string &filename, efsw::Action action,
@@ -15,7 +15,7 @@ public:
   efsw::WatchID m_watch_id;
 };
 
-void reload_shader(asset_t<shader, asset_type::shader> *shader_asset,
+void reload_shader(TAsset<shader, AssetType::shader> *shader_asset,
                    std::string shader_source);
 
 } // namespace gem

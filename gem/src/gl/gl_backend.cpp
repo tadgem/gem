@@ -15,10 +15,10 @@
 namespace gem {
 
 // todo: rework this to allow rendering backend to init
-void gl_backend::init(backend_init &init_props) {
+void GLBackend::init(BackendInit &init_props) {
   ZoneScoped;
 #ifdef GEM_ENABLE_MEMORY_TRACKING
-  debug_memory_tracker::s_instance = new debug_memory_tracker();
+  DebugMemoryTracker::s_instance = new DebugMemoryTracker();
 #endif
 
 #ifdef __WIN32__
@@ -123,7 +123,7 @@ void gl_backend::init(backend_init &init_props) {
   init_imgui_file_dialog();
 }
 
-void gl_backend::process_sdl_event() {
+void GLBackend::process_sdl_event() {
   ZoneScoped;
   SDL_Event event;
   while (SDL_PollEvent(&event)) {
@@ -144,7 +144,7 @@ void gl_backend::process_sdl_event() {
   }
 }
 
-void gl_backend::engine_pre_frame() {
+void GLBackend::engine_pre_frame() {
   ZoneScoped;
   static ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 1.00f);
   m_last_counter = m_now_counter;
@@ -163,7 +163,7 @@ void gl_backend::engine_pre_frame() {
 
   float mouse_x, mouse_y;
   SDL_GetMouseState(&mouse_x, &mouse_y);
-  input::update_mouse_position(get_window_dim(), glm::vec2(mouse_x, mouse_y));
+  Input::update_mouse_position(get_window_dim(), glm::vec2(mouse_x, mouse_y));
 
   // Start the Dear ImGui frame
   ImGui_ImplOpenGL3_NewFrame();
@@ -171,7 +171,7 @@ void gl_backend::engine_pre_frame() {
   ImGui::NewFrame();
 }
 
-void gl_backend::engine_post_frame() {
+void GLBackend::engine_post_frame() {
   ZoneScoped;
   {
     GEM_GPU_MARKER("ImGui");
@@ -181,7 +181,7 @@ void gl_backend::engine_post_frame() {
   }
 }
 
-void gl_backend::engine_shut_down() {
+void GLBackend::engine_shut_down() {
   ZoneScoped;
   ImGui_ImplOpenGL3_Shutdown();
   ImGui_ImplSDL3_Shutdown();
@@ -195,39 +195,39 @@ void gl_backend::engine_shut_down() {
   SDL_Quit();
 }
 
-void gl_backend::engine_handle_input_events(SDL_Event &input_event) {
+void GLBackend::engine_handle_input_events(SDL_Event &input_event) {
   ZoneScoped;
-  input::update_last_frame();
+  Input::update_last_frame();
 
   if (input_event.type == SDL_EVENT_KEY_DOWN) {
     SDL_KeyboardEvent keyEvent = input_event.key;
     SDL_Keycode keySym = keyEvent.key;
-    keyboard_key key = input::get_key_from_sdl(keySym);
-    input::update_keyboard_key(key, true);
+    KeyboardKey key = Input::get_key_from_sdl(keySym);
+    Input::update_keyboard_key(key, true);
     return;
   }
 
   if (input_event.type == SDL_EVENT_KEY_UP) {
     SDL_KeyboardEvent keyEvent = input_event.key;
     SDL_Keycode keySym = keyEvent.key;
-    keyboard_key key = input::get_key_from_sdl(keySym);
-    input::update_keyboard_key(key, false);
+    KeyboardKey key = Input::get_key_from_sdl(keySym);
+    Input::update_keyboard_key(key, false);
     return;
   }
 
   // Mouse
   if (input_event.type == SDL_EVENT_MOUSE_BUTTON_UP) {
     SDL_MouseButtonEvent buttonEvent = input_event.button;
-    mouse_button button =
-        buttonEvent.button == 3 ? mouse_button::right : mouse_button::left;
-    input::update_mouse_button(button, false);
+    MouseButton button =
+        buttonEvent.button == 3 ? MouseButton::right : MouseButton::left;
+    Input::update_mouse_button(button, false);
     return;
   }
   if (input_event.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
     SDL_MouseButtonEvent buttonEvent = input_event.button;
-    mouse_button button =
-        buttonEvent.button == 3 ? mouse_button::right : mouse_button::left;
-    input::update_mouse_button(button, true);
+    MouseButton button =
+        buttonEvent.button == 3 ? MouseButton::right : MouseButton::left;
+    Input::update_mouse_button(button, true);
     return;
   }
 
@@ -248,23 +248,23 @@ void gl_backend::engine_handle_input_events(SDL_Event &input_event) {
 
     if (axis == SDL_GAMEPAD_AXIS_RIGHT_TRIGGER ||
         axis == SDL_GAMEPAD_AXIS_LEFT_TRIGGER) {
-      input::update_gamepad_trigger(index, input::get_trigger_from_sdl(axis),
+      Input::update_gamepad_trigger(index, Input::get_trigger_from_sdl(axis),
                                     value);
     }
     if (axis == SDL_GAMEPAD_AXIS_LEFTX ||
         axis == SDL_GAMEPAD_AXIS_RIGHTX) {
       glm::vec2 current =
-          input::get_gamepad_stick(index, input::get_stick_from_sdl(axis));
+          Input::get_gamepad_stick(index, Input::get_stick_from_sdl(axis));
       current.x = value;
-      input::update_gamepad_stick(index, input::get_stick_from_sdl(axis),
+      Input::update_gamepad_stick(index, Input::get_stick_from_sdl(axis),
                                   current);
     }
     if (axis == SDL_GAMEPAD_AXIS_LEFTY ||
         axis == SDL_GAMEPAD_AXIS_RIGHTY) {
       glm::vec2 current =
-          input::get_gamepad_stick(index, input::get_stick_from_sdl(axis));
+          Input::get_gamepad_stick(index, Input::get_stick_from_sdl(axis));
       current.y = value;
-      input::update_gamepad_stick(index, input::get_stick_from_sdl(axis),
+      Input::update_gamepad_stick(index, Input::get_stick_from_sdl(axis),
                                   current);
     }
   }
@@ -272,8 +272,8 @@ void gl_backend::engine_handle_input_events(SDL_Event &input_event) {
   if (input_event.type == SDL_EVENT_GAMEPAD_BUTTON_DOWN) {
     SDL_GamepadButtonEvent buttonEvent = input_event.gbutton;
 
-    input::update_gamepad_button(buttonEvent.which,
-                                 input::get_button_from_sdl(buttonEvent.button),
+    Input::update_gamepad_button(buttonEvent.which,
+                                 Input::get_button_from_sdl(buttonEvent.button),
                                  true);
     return;
   }
@@ -281,14 +281,14 @@ void gl_backend::engine_handle_input_events(SDL_Event &input_event) {
   if (input_event.type == SDL_EVENT_GAMEPAD_BUTTON_UP) {
     SDL_GamepadButtonEvent buttonEvent = input_event.gbutton;
 
-    input::update_gamepad_button(buttonEvent.which,
-                                 input::get_button_from_sdl(buttonEvent.button),
+    Input::update_gamepad_button(buttonEvent.which,
+                                 Input::get_button_from_sdl(buttonEvent.button),
                                  false);
     return;
   }
 }
 
-glm::vec2 gl_backend::get_window_dim() {
+glm::vec2 GLBackend::get_window_dim() {
   ZoneScoped;
   int w, h;
   SDL_GetWindowSize(m_window, &w, &h);

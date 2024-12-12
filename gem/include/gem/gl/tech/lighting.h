@@ -4,18 +4,20 @@
 #include <vector>
 
 namespace gem {
-class gl_framebuffer;
-class camera;
+class GLFramebuffer;
+class Camera;
 
 namespace open_gl {
 namespace tech {
-class lighting {
+class PBRLighting {
 public:
   static void
-  dispatch_light_pass(gl_shader &lighting_shader,
-                      gl_framebuffer &lighting_buffer, gl_framebuffer &gbuffer,
-                      gl_framebuffer &dir_light_shadow_buffer, camera &cam,
-                      std::vector<point_light> &point_lights, dir_light &sun);
+  dispatch_light_pass(GLShader &lighting_shader,
+                                  GLFramebuffer &lighting_buffer,
+                                  GLFramebuffer &gbuffer,
+                                  GLFramebuffer &dir_light_shadow_buffer, Camera &cam,
+                      std::vector<PointLight> &point_lights,
+                                  DirectionalLight &sun);
 };
 } // namespace tech
 } // namespace open_gl

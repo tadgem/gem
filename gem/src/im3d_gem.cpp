@@ -34,20 +34,20 @@ void gem::DebugDraw::DrawFrustum(const glm::mat4& vp, float thickness, const Im3
     v[i].z = ff.z / ff.w;
   }
 
-  DrawLine(v[0], v[1], 2.0f,  Im3d::Color(UINT32_MAX));
-  DrawLine(v[0], v[2], 2.0f,  Im3d::Color(UINT32_MAX));
-  DrawLine(v[3], v[1], 2.0f,  Im3d::Color(UINT32_MAX));
-  DrawLine(v[3], v[2], 2.0f,  Im3d::Color(UINT32_MAX));
+  DrawLine(v[0], v[1], 2.0f,  col);
+  DrawLine(v[0], v[2], 2.0f,  col);
+  DrawLine(v[3], v[1], 2.0f,  col);
+  DrawLine(v[3], v[2], 2.0f,  col);
 
-  DrawLine(v[4], v[5], 2.0f,  Im3d::Color(UINT32_MAX));
-  DrawLine(v[4], v[6], 2.0f,  Im3d::Color(UINT32_MAX));
-  DrawLine(v[7], v[5], 2.0f,  Im3d::Color(UINT32_MAX));
-  DrawLine(v[7], v[6], 2.0f,  Im3d::Color(UINT32_MAX));
+  DrawLine(v[4], v[5], 2.0f,  col);
+  DrawLine(v[4], v[6], 2.0f,  col);
+  DrawLine(v[7], v[5], 2.0f,  col);
+  DrawLine(v[7], v[6], 2.0f,  col);
 
-  DrawLine(v[0], v[4], 2.0f,  Im3d::Color(UINT32_MAX));
-  DrawLine(v[1], v[5], 2.0f,  Im3d::Color(UINT32_MAX));
-  DrawLine(v[3], v[7], 2.0f,  Im3d::Color(UINT32_MAX));
-  DrawLine(v[2], v[6], 2.0f,  Im3d::Color(UINT32_MAX));
+  DrawLine(v[0], v[4], 2.0f,  col);
+  DrawLine(v[1], v[5], 2.0f,  col);
+  DrawLine(v[3], v[7], 2.0f,  col);
+  DrawLine(v[2], v[6], 2.0f,  col);
 
 }
 void gem::DebugDraw::DrawBoundingBox(const glm::vec3 &min, const glm::vec3 &max,

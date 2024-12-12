@@ -17,16 +17,16 @@ struct VAO {
   void release();
 };
 
-class vao_builder {
+class VAOBuilder {
 public:
-  vao_builder() = default;
+  VAOBuilder() = default;
 
   void begin();
 
   template <typename _Ty>
   void add_vertex_buffer(_Ty *data, uint32_t count,
                          GLenum usage_flags = GL_STATIC_DRAW) {
-    if (gpu_backend::get_backend_api() == backend_api::open_gl) {
+    if (GPUBackend::get_backend_api() == BackendAPI::open_gl) {
       gl_handle vbo;
       glGenBuffers(1, &vbo);
 

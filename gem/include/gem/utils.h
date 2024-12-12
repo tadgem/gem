@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gem/aabb.h"
+#include "gem/AABB.h"
 #include "gem/alias.h"
 #include "gem/shape.h"
 #include "glm.hpp"
@@ -11,7 +11,7 @@
 
 namespace gem {
 
-class utils {
+class Utils {
 public:
   static std::string load_string_from_path(const std::string &path);
   static void save_string_to_path(const std::string &path,
@@ -35,7 +35,7 @@ public:
                                        glm::vec2 resolution, glm::mat4 &proj,
                                        glm::mat4 &view);
   static float round_up(float value, int decimal_places);
-  static aabb transform_aabb(aabb &in, glm::mat4 &model);
+  static AABB transform_aabb(AABB &in, glm::mat4 &model);
   static void validate_euler_angles(glm::vec3 &input);
   static glm::vec3 screen_to_world_ray(glm::vec3 eye_pos, glm::vec2 mouse_pos,
                                        glm::vec2 screen_dim,

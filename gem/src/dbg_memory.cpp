@@ -4,7 +4,7 @@
 #ifdef GEM_ENABLE_MEMORY_TRACKING
 namespace gem {
 
-debug_memory_tracker::debug_memory_tracker() {
+DebugMemoryTracker::DebugMemoryTracker() {
   ZoneScoped;
   if (s_instance != nullptr) {
     // error;
@@ -14,7 +14,7 @@ debug_memory_tracker::debug_memory_tracker() {
   s_instance = this;
 }
 
-debug_memory_tracker::~debug_memory_tracker() {
+DebugMemoryTracker::~DebugMemoryTracker() {
   ZoneScoped;
   s_instance = nullptr;
 }

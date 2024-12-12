@@ -7,9 +7,9 @@
 #include <vector>
 
 namespace gem {
-class gl_framebuffer {
+class GLFramebuffer {
 public:
-  gl_framebuffer();
+  GLFramebuffer();
 
   void bind();
   void unbind();
@@ -47,7 +47,7 @@ public:
     GLenum m_pixel_format;
   };
 
-  static gl_framebuffer create(glm::vec2 resolution,
+  static GLFramebuffer create(glm::vec2 resolution,
                                std::vector<attachment_info> colour_attachments,
                                bool add_depth = true);
 

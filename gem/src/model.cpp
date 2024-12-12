@@ -22,15 +22,15 @@ static glm::vec2 assimp_to_glm(const aiVector2D &aiVec) {
   return glm::vec2(aiVec.x, aiVec.y);
 }
 
-texture_entry::texture_entry(texture_map_type tmt, asset_handle ah,
-                             const std::string &path, texture *data)
+TextureEntry::TextureEntry(TextureMapType tmt, AssetHandle ah,
+                             const std::string &path, Texture *data)
     : m_handle(ah), m_map_type(tmt), m_path(path), m_texture(data) {
   ZoneScoped;
 }
 
-void process_mesh(model &model, aiMesh *m, aiNode *node, const aiScene *scene,
+void process_mesh(Model &model, aiMesh *m, aiNode *node, const aiScene *scene,
                   bool use_entries,
-                  std::vector<model::mesh_entry> &mesh_entries) {
+                  std::vector<Model::MeshEntry> &mesh_entries) {
   ZoneScoped;
   bool hasPositions = m->HasPositions();
   bool hasUVs = m->HasTextureCoords(0);
@@ -46,7 +46,7 @@ void process_mesh(model &model, aiMesh *m, aiNode *node, const aiScene *scene,
   }
 
   if (use_entries) {
-    model::mesh_entry entry{};
+    Model::MeshEntry entry{};
     if (hasPositions && hasUVs && hasNormals) {
       for (unsigned int i = 0; i < m->mNumVertices; i++) {
         entry.m_positions.push_back(
@@ -73,14 +73,14 @@ void process_mesh(model &model, aiMesh *m, aiNode *node, const aiScene *scene,
         }
       }
     }
-    aabb bb = {{m->mAABB.mMin.x, m->mAABB.mMin.y, m->mAABB.mMin.z},
+    AABB bb = {{m->mAABB.mMin.x, m->mAABB.mMin.y, m->mAABB.mMin.z},
                {m->mAABB.mMax.x, m->mAABB.mMax.y, m->mAABB.mMax.z}};
     entry.m_mesh_aabb = bb;
     entry.m_material_index = m->mMaterialIndex;
     mesh_entries.push_back(entry);
   } else {
     std::vector<float> verts;
-    vao_builder mesh_builder{};
+    VAOBuilder mesh_builder{};
     mesh_builder.begin();
 
     if (hasPositions && hasUVs && hasNormals) {
@@ -117,10 +117,10 @@ void process_mesh(model &model, aiMesh *m, aiNode *node, const aiScene *scene,
       }
       mesh_builder.add_index_buffer(indices);
     }
-    aabb bb = {{m->mAABB.mMin.x, m->mAABB.mMin.y, m->mAABB.mMin.z},
+    AABB bb = {{m->mAABB.mMin.x, m->mAABB.mMin.y, m->mAABB.mMin.z},
                {m->mAABB.mMax.x, m->mAABB.mMax.y, m->mAABB.mMax.z}};
 
-    mesh new_mesh{};
+    Mesh new_mesh{};
     new_mesh.m_vao = mesh_builder.build();
     new_mesh.m_index_count = indices.size();
     new_mesh.m_original_aabb = bb;
@@ -130,9 +130,9 @@ void process_mesh(model &model, aiMesh *m, aiNode *node, const aiScene *scene,
   }
 }
 
-void process_node(model &model, aiNode *node, const aiScene *scene,
+void process_node(Model &model, aiNode *node, const aiScene *scene,
                   bool use_entries,
-                  std::vector<model::mesh_entry> &mesh_entries) {
+                  std::vector<Model::MeshEntry> &mesh_entries) {
   ZoneScoped;
   if (node->mNumMeshes > 0) {
     for (unsigned int i = 0; i < node->mNumMeshes; i++) {
@@ -152,9 +152,9 @@ void process_node(model &model, aiNode *node, const aiScene *scene,
 }
 
 void get_material_texture(const std::string &directory, aiMaterial *material,
-                          model::material_entry &mat,
+                          Model::MaterialEntry &mat,
                           aiTextureType ass_texture_type,
-                          texture_map_type gl_texture_type) {
+                          TextureMapType gl_texture_type) {
   ZoneScoped;
   uint32_t tex_count = aiGetMaterialTextureCount(material, ass_texture_type);
   if (tex_count > 0) {
@@ -162,10 +162,10 @@ void get_material_texture(const std::string &directory, aiMaterial *material,
     aiGetMaterialTexture(material, ass_texture_type, 0, &result_path);
     std::string final_path = directory + std::string(result_path.C_Str());
     spdlog::info("Loading Texture at Path: {}", final_path);
-    texture *tex = new texture(final_path);
+    Texture *tex = new Texture(final_path);
 
-    asset_handle h(final_path, asset_type::texture);
-    texture_entry tex_entry(gl_texture_type, h, final_path, tex);
+    AssetHandle h(final_path, AssetType::texture);
+    TextureEntry tex_entry(gl_texture_type, h, final_path, tex);
 
     mat.m_material_maps[gl_texture_type] = tex_entry;
   }
@@ -173,10 +173,10 @@ void get_material_texture(const std::string &directory, aiMaterial *material,
 
 void get_material_texture_entry(const std::string &directory,
                                 aiMaterial *material,
-                                model::material_entry &mat,
+                                Model::MaterialEntry &mat,
                                 aiTextureType ass_texture_type,
-                                texture_map_type gl_texture_type,
-                                std::vector<texture_entry> &texture_entries) {
+                                TextureMapType gl_texture_type,
+                                std::vector<TextureEntry> &texture_entries) {
   ZoneScoped;
   uint32_t tex_count = aiGetMaterialTextureCount(material, ass_texture_type);
   if (tex_count > 0) {
@@ -184,14 +184,14 @@ void get_material_texture_entry(const std::string &directory,
     aiGetMaterialTexture(material, ass_texture_type, 0, &resultPath);
     std::string final_path = directory + std::string(resultPath.C_Str());
 
-    asset_handle h(final_path, asset_type::texture);
-    texture_entry texture_entry(gl_texture_type, h, final_path, nullptr);
+    AssetHandle h(final_path, AssetType::texture);
+    TextureEntry texture_entry(gl_texture_type, h, final_path, nullptr);
     mat.m_material_maps[gl_texture_type] = texture_entry;
     texture_entries.push_back(texture_entry);
   }
 }
 
-model model::load_model_and_textures_from_path(const std::string &path) {
+Model Model::load_model_and_textures_from_path(const std::string &path) {
   ZoneScoped;
   Assimp::Importer importer;
   const aiScene *scene = importer.ReadFile(
@@ -204,31 +204,31 @@ model model::load_model_and_textures_from_path(const std::string &path) {
     return {};
   }
 
-  std::vector<model::mesh_entry> mesh_entries{};
+  std::vector<Model::MeshEntry> mesh_entries{};
 
-  model m{};
-  aabb model_aabb{};
+  Model m{};
+  AABB model_aabb{};
   process_node(m, scene->mRootNode, scene, false, mesh_entries);
 
   for (auto &mesh : m.m_meshes) {
-    if (mesh.m_original_aabb.min.x < model_aabb.min.x) {
-      model_aabb.min.x = mesh.m_original_aabb.min.x;
+    if (mesh.m_original_aabb.m_min.x < model_aabb.m_min.x) {
+      model_aabb.m_min.x = mesh.m_original_aabb.m_min.x;
     }
-    if (mesh.m_original_aabb.min.y < model_aabb.min.y) {
-      model_aabb.min.y = mesh.m_original_aabb.min.y;
+    if (mesh.m_original_aabb.m_min.y < model_aabb.m_min.y) {
+      model_aabb.m_min.y = mesh.m_original_aabb.m_min.y;
     }
-    if (mesh.m_original_aabb.min.z < model_aabb.min.z) {
-      model_aabb.min.z = mesh.m_original_aabb.min.z;
+    if (mesh.m_original_aabb.m_min.z < model_aabb.m_min.z) {
+      model_aabb.m_min.z = mesh.m_original_aabb.m_min.z;
     }
 
-    if (mesh.m_original_aabb.max.x > model_aabb.max.x) {
-      model_aabb.max.x = mesh.m_original_aabb.max.x;
+    if (mesh.m_original_aabb.m_max.x > model_aabb.m_max.x) {
+      model_aabb.m_max.x = mesh.m_original_aabb.m_max.x;
     }
-    if (mesh.m_original_aabb.max.y > model_aabb.max.y) {
-      model_aabb.max.y = mesh.m_original_aabb.max.y;
+    if (mesh.m_original_aabb.m_max.y > model_aabb.m_max.y) {
+      model_aabb.m_max.y = mesh.m_original_aabb.m_max.y;
     }
-    if (mesh.m_original_aabb.max.z > model_aabb.max.z) {
-      model_aabb.max.z = mesh.m_original_aabb.max.z;
+    if (mesh.m_original_aabb.m_max.z > model_aabb.m_max.z) {
+      model_aabb.m_max.z = mesh.m_original_aabb.m_max.z;
     }
   }
   m.m_aabb = model_aabb;
@@ -236,23 +236,23 @@ model model::load_model_and_textures_from_path(const std::string &path) {
   std::string directory = path.substr(0, path.find_last_of('/') + 1);
   for (int i = 0; i < scene->mNumMaterials; i++) {
     auto *material = scene->mMaterials[i];
-    material_entry mat{};
+    MaterialEntry mat{};
 
     get_material_texture(directory, material, mat, aiTextureType_DIFFUSE,
-                         texture_map_type::diffuse);
+                         TextureMapType::diffuse);
     get_material_texture(directory, material, mat, aiTextureType_NORMALS,
-                         texture_map_type::normal);
+                         TextureMapType::normal);
     get_material_texture(directory, material, mat, aiTextureType_DISPLACEMENT,
-                         texture_map_type::normal);
+                         TextureMapType::normal);
     get_material_texture(directory, material, mat, aiTextureType_SPECULAR,
-                         texture_map_type::specular);
+                         TextureMapType::specular);
     get_material_texture(directory, material, mat,
-                         aiTextureType_AMBIENT_OCCLUSION, texture_map_type::ao);
+                         aiTextureType_AMBIENT_OCCLUSION, TextureMapType::ao);
     get_material_texture(directory, material, mat,
                          aiTextureType_DIFFUSE_ROUGHNESS,
-                         texture_map_type::roughness);
+                         TextureMapType::roughness);
     get_material_texture(directory, material, mat, aiTextureType_METALNESS,
-                         texture_map_type::metallicness);
+                         TextureMapType::metallicness);
 
     m.m_materials.push_back(mat);
   }
@@ -260,9 +260,9 @@ model model::load_model_and_textures_from_path(const std::string &path) {
   return m;
 }
 
-model model::load_model_from_path_entries(
-    const std::string &path, std::vector<texture_entry> &texture_entries,
-    std::vector<mesh_entry> &mesh_entries) {
+Model Model::load_model_from_path_entries(
+    const std::string &path, std::vector<TextureEntry> &texture_entries,
+    std::vector<MeshEntry> &mesh_entries) {
   ZoneScoped;
   Assimp::Importer importer;
   const aiScene *scene = importer.ReadFile(
@@ -275,7 +275,7 @@ model model::load_model_from_path_entries(
     return {};
   }
 
-  model m{};
+  Model m{};
   process_node(m, scene->mRootNode, scene, true, mesh_entries);
 
   m.update_aabb();
@@ -283,26 +283,26 @@ model model::load_model_from_path_entries(
   std::string directory = path.substr(0, path.find_last_of('/') + 1);
   for (int i = 0; i < scene->mNumMaterials; i++) {
     auto *material = scene->mMaterials[i];
-    material_entry mat{};
+    MaterialEntry mat{};
 
     get_material_texture_entry(directory, material, mat, aiTextureType_DIFFUSE,
-                               texture_map_type::diffuse, texture_entries);
+                               TextureMapType::diffuse, texture_entries);
     get_material_texture_entry(directory, material, mat, aiTextureType_NORMALS,
-                               texture_map_type::normal, texture_entries);
+                               TextureMapType::normal, texture_entries);
     get_material_texture_entry(directory, material, mat,
                                aiTextureType_DISPLACEMENT,
-                               texture_map_type::normal, texture_entries);
+                               TextureMapType::normal, texture_entries);
     get_material_texture_entry(directory, material, mat, aiTextureType_SPECULAR,
-                               texture_map_type::specular, texture_entries);
+                               TextureMapType::specular, texture_entries);
     get_material_texture_entry(directory, material, mat,
                                aiTextureType_AMBIENT_OCCLUSION,
-                               texture_map_type::ao, texture_entries);
+                               TextureMapType::ao, texture_entries);
     get_material_texture_entry(directory, material, mat,
                                aiTextureType_DIFFUSE_ROUGHNESS,
-                               texture_map_type::roughness, texture_entries);
+                               TextureMapType::roughness, texture_entries);
     get_material_texture_entry(directory, material, mat,
                                aiTextureType_METALNESS,
-                               texture_map_type::metallicness, texture_entries);
+                               TextureMapType::metallicness, texture_entries);
 
     m.m_materials.push_back(mat);
   }
@@ -310,36 +310,36 @@ model model::load_model_from_path_entries(
   return m;
 }
 
-void model::update_aabb() {
+void Model::update_aabb() {
   ZoneScoped;
-  aabb model_aabb{};
+  AABB model_aabb{};
   for (auto &mesh : m_meshes) {
-    if (mesh.m_original_aabb.min.x < model_aabb.min.x) {
-      model_aabb.min.x = mesh.m_original_aabb.min.x;
+    if (mesh.m_original_aabb.m_min.x < model_aabb.m_min.x) {
+      model_aabb.m_min.x = mesh.m_original_aabb.m_min.x;
     }
-    if (mesh.m_original_aabb.min.y < model_aabb.min.y) {
-      model_aabb.min.y = mesh.m_original_aabb.min.y;
+    if (mesh.m_original_aabb.m_min.y < model_aabb.m_min.y) {
+      model_aabb.m_min.y = mesh.m_original_aabb.m_min.y;
     }
-    if (mesh.m_original_aabb.min.z < model_aabb.min.z) {
-      model_aabb.min.z = mesh.m_original_aabb.min.z;
+    if (mesh.m_original_aabb.m_min.z < model_aabb.m_min.z) {
+      model_aabb.m_min.z = mesh.m_original_aabb.m_min.z;
     }
 
-    if (mesh.m_original_aabb.max.x > model_aabb.max.x) {
-      model_aabb.max.x = mesh.m_original_aabb.max.x;
+    if (mesh.m_original_aabb.m_max.x > model_aabb.m_max.x) {
+      model_aabb.m_max.x = mesh.m_original_aabb.m_max.x;
     }
-    if (mesh.m_original_aabb.max.y > model_aabb.max.y) {
-      model_aabb.max.y = mesh.m_original_aabb.max.y;
+    if (mesh.m_original_aabb.m_max.y > model_aabb.m_max.y) {
+      model_aabb.m_max.y = mesh.m_original_aabb.m_max.y;
     }
-    if (mesh.m_original_aabb.max.z > model_aabb.max.z) {
-      model_aabb.max.z = mesh.m_original_aabb.max.z;
+    if (mesh.m_original_aabb.m_max.z > model_aabb.m_max.z) {
+      model_aabb.m_max.z = mesh.m_original_aabb.m_max.z;
     }
   }
   m_aabb = model_aabb;
 }
 
-void model::release() {
+void Model::release() {
   ZoneScoped;
-  for (mesh &m : m_meshes) {
+  for (Mesh &m : m_meshes) {
     m.m_vao.release();
   }
 }

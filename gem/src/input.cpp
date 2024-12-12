@@ -3,185 +3,185 @@
 
 namespace gem {
 
-bool input::get_gamepad_button(int index, gamepad_button button) {
+bool Input::get_gamepad_button(int index, GamepadButton button) {
   ZoneScoped;
   // AASSERT(index < MAX_SUPPORTED_GAMEPADS, "Invalid Gamepad Index Provided");
   return s_gamepad_state[index].current_frame_gamepad_button_state[button];
 }
 
-glm::vec2 input::get_gamepad_stick(int index, gamepad_stick stick) {
+glm::vec2 Input::get_gamepad_stick(int index, GamepadStick stick) {
   ZoneScoped;
   // AASSERT(index < MAX_SUPPORTED_GAMEPADS, "Invalid Gamepad Index Provided");
   return s_gamepad_state[index].current_frame_stick_state[stick];
 }
 
-bool input::get_keyboard_key(keyboard_key key) {
+bool Input::get_keyboard_key(KeyboardKey key) {
   ZoneScoped;
   return s_keyboard_state.current_frame_key_state[key];
 }
 
-bool input::get_mouse_button(mouse_button button) {
+bool Input::get_mouse_button(MouseButton button) {
   ZoneScoped;
   return s_mouse_state.current_frame_mouse_button_state[button];
 }
 
-glm::vec2 input::get_mouse_position() {
+glm::vec2 Input::get_mouse_position() {
   ZoneScoped;
   return s_mouse_state.current_frame_mouse_location;
 }
 
-glm::vec2 input::get_mouse_velocity() {
+glm::vec2 Input::get_mouse_velocity() {
   ZoneScoped;
   return s_mouse_state.current_frame_mouse_velocity;
 }
 
-float input::get_mouse_scroll() {
+float Input::get_mouse_scroll() {
   ZoneScoped;
   return s_mouse_state.current_frame_scroll;
 }
 
-gamepad_stick input::get_stick_from_sdl(SDL_GamepadAxis &sdlAxis) {
+GamepadStick Input::get_stick_from_sdl(SDL_GamepadAxis &sdlAxis) {
   ZoneScoped;
   switch (sdlAxis) {
   case SDL_GamepadAxis::SDL_GAMEPAD_AXIS_LEFTX:
-    return gamepad_stick::LS;
+    return GamepadStick::LS;
   case SDL_GamepadAxis::SDL_GAMEPAD_AXIS_LEFTY:
-    return gamepad_stick::LS;
+    return GamepadStick::LS;
   case SDL_GamepadAxis::SDL_GAMEPAD_AXIS_RIGHTX:
-    return gamepad_stick::RS;
+    return GamepadStick::RS;
   case SDL_GamepadAxis::SDL_GAMEPAD_AXIS_RIGHTY:
-    return gamepad_stick::RS;
+    return GamepadStick::RS;
   }
-  return gamepad_stick::invalid;
+  return GamepadStick::invalid;
 }
 
-gamepad_trigger input::get_trigger_from_sdl(SDL_GamepadAxis &sdlAxis) {
+GamepadTrigger Input::get_trigger_from_sdl(SDL_GamepadAxis &sdlAxis) {
   ZoneScoped;
   switch (sdlAxis) {
   case SDL_GAMEPAD_AXIS_LEFT_TRIGGER:
-    return gamepad_trigger::LT;
+    return GamepadTrigger::LT;
   case SDL_GAMEPAD_AXIS_RIGHT_TRIGGER:
-    return gamepad_trigger::RT;
+    return GamepadTrigger::RT;
   }
-  return gamepad_trigger::invalid;
+  return GamepadTrigger::invalid;
 }
 
-gamepad_button input::get_button_from_sdl(uint8_t sdlButton) {
+GamepadButton Input::get_button_from_sdl(uint8_t sdlButton) {
   ZoneScoped;
   switch (sdlButton) {
   case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_SOUTH:
-    return gamepad_button::face_south;
+    return GamepadButton::face_south;
   case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_EAST:
-    return gamepad_button::face_east;
+    return GamepadButton::face_east;
   case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_WEST:
-    return gamepad_button::face_west;
+    return GamepadButton::face_west;
   case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_NORTH:
-    return gamepad_button::face_north;
+    return GamepadButton::face_north;
   case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_DPAD_UP:
-    return gamepad_button::up;
+    return GamepadButton::up;
   case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_DPAD_DOWN:
-    return gamepad_button::down;
+    return GamepadButton::down;
   case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_DPAD_LEFT:
-    return gamepad_button::left;
+    return GamepadButton::left;
   case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_DPAD_RIGHT:
-    return gamepad_button::right;
+    return GamepadButton::right;
   case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER:
-    return gamepad_button::right_bumper;
+    return GamepadButton::right_bumper;
   case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_LEFT_SHOULDER:
-    return gamepad_button::left_bumper;
+    return GamepadButton::left_bumper;
   case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_LEFT_STICK:
-    return gamepad_button::LS_click;
+    return GamepadButton::LS_click;
   case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_RIGHT_STICK:
-    return gamepad_button::RS_click;
+    return GamepadButton::RS_click;
   case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_START:
-    return gamepad_button::start;
+    return GamepadButton::start;
   case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_BACK:
-    return gamepad_button::home;
+    return GamepadButton::home;
   default:
-    return gamepad_button::invalid;
+    return GamepadButton::invalid;
   }
 }
 
-keyboard_key input::get_key_from_sdl(SDL_Keycode keyCode) {
+KeyboardKey Input::get_key_from_sdl(SDL_Keycode keyCode) {
   ZoneScoped;
   {
     if (keyCode >= SDLK_0 && keyCode <= SDLK_9) {
       int diff = keyCode - SDLK_0;
-      return static_cast<keyboard_key>((int)keyboard_key::zero + diff);
+      return static_cast<KeyboardKey>((int)KeyboardKey::zero + diff);
     }
 
     if (keyCode >= SDLK_A && keyCode <= SDLK_Z) {
       int diff = keyCode - SDLK_A;
-      return static_cast<keyboard_key>((int)keyboard_key::a + diff);
+      return static_cast<KeyboardKey>((int)KeyboardKey::a + diff);
     }
 
     if (keyCode >= SDLK_F1 && keyCode <= SDLK_F12) {
       int diff = keyCode - SDLK_F1;
-      return static_cast<keyboard_key>((int)keyboard_key::F1 + diff);
+      return static_cast<KeyboardKey>((int)KeyboardKey::F1 + diff);
     }
 
     switch (keyCode) {
     case SDLK_MINUS:
-      return keyboard_key::minus;
+      return KeyboardKey::minus;
     case SDLK_UNDERSCORE:
-      return keyboard_key::underscore;
+      return KeyboardKey::underscore;
     case SDLK_EQUALS:
-      return keyboard_key::equals;
+      return KeyboardKey::equals;
     case SDLK_PLUS:
-      return keyboard_key::plus;
+      return KeyboardKey::plus;
     case SDLK_BACKSPACE:
-      return keyboard_key::backspace;
+      return KeyboardKey::backspace;
     case SDLK_RETURN:
-      return keyboard_key::enter;
+      return KeyboardKey::enter;
     case SDLK_SPACE:
-      return keyboard_key::space;
+      return KeyboardKey::space;
     case SDLK_TAB:
-      return keyboard_key::tab;
+      return KeyboardKey::tab;
     case SDLK_CAPSLOCK:
-      return keyboard_key::caps_lock;
+      return KeyboardKey::caps_lock;
     case SDLK_LSHIFT:
-      return keyboard_key::left_shift;
+      return KeyboardKey::left_shift;
     case SDLK_LCTRL:
-      return keyboard_key::left_control;
+      return KeyboardKey::left_control;
     case SDLK_LALT:
-      return keyboard_key::left_alt;
+      return KeyboardKey::left_alt;
     case SDLK_RSHIFT:
-      return keyboard_key::right_shift;
+      return KeyboardKey::right_shift;
     case SDLK_RCTRL:
-      return keyboard_key::right_control;
+      return KeyboardKey::right_control;
     case SDLK_RALT:
-      return keyboard_key::right_alt;
+      return KeyboardKey::right_alt;
     case SDLK_INSERT:
-      return keyboard_key::insert;
+      return KeyboardKey::insert;
     case SDLK_HOME:
-      return keyboard_key::home;
+      return KeyboardKey::home;
     case SDLK_PAGEUP:
-      return keyboard_key::page_up;
+      return KeyboardKey::page_up;
     case SDLK_PAGEDOWN:
-      return keyboard_key::page_down;
+      return KeyboardKey::page_down;
     case SDLK_DELETE:
-      return keyboard_key::delete_;
+      return KeyboardKey::delete_;
     case SDLK_END:
-      return keyboard_key::end;
+      return KeyboardKey::end;
     case SDLK_UP:
-      return keyboard_key::up;
+      return KeyboardKey::up;
     case SDLK_DOWN:
-      return keyboard_key::down;
+      return KeyboardKey::down;
     case SDLK_LEFT:
-      return keyboard_key::left;
+      return KeyboardKey::left;
     case SDLK_RIGHT:
-      return keyboard_key::right;
+      return KeyboardKey::right;
     case SDLK_ESCAPE:
-      return keyboard_key::escape;
+      return KeyboardKey::escape;
     case SDLK_GRAVE:
-      return keyboard_key::tilde;
+      return KeyboardKey::tilde;
     default:
-      return keyboard_key::invalid;
+      return KeyboardKey::invalid;
     }
   }
 }
 
-void input::update_gamepad_button(int gamepad_index, gamepad_button b,
+void Input::update_gamepad_button(int gamepad_index, GamepadButton b,
                                   bool value) {
   ZoneScoped;
   // AASSERT(gamepad_index < MAX_SUPPORTED_GAMEPADS, "Invalid Gamepad Index
@@ -189,7 +189,7 @@ void input::update_gamepad_button(int gamepad_index, gamepad_button b,
   s_gamepad_state->current_frame_gamepad_button_state[b] = value;
 }
 
-void input::update_gamepad_trigger(int gamepad_index, gamepad_trigger b,
+void Input::update_gamepad_trigger(int gamepad_index, GamepadTrigger b,
                                    float value) {
   ZoneScoped;
   // AASSERT(gamepad_index < MAX_SUPPORTED_GAMEPADS, "Invalid Gamepad Index
@@ -197,7 +197,7 @@ void input::update_gamepad_trigger(int gamepad_index, gamepad_trigger b,
   s_gamepad_state->current_frame_trigger_state[b] = value;
 }
 
-void input::update_gamepad_stick(int gamepad_index, gamepad_stick b,
+void Input::update_gamepad_stick(int gamepad_index, GamepadStick b,
                                  glm::vec2 value) {
   ZoneScoped;
   // AASSERT(gamepad_index < MAX_SUPPORTED_GAMEPADS, "Invalid Gamepad Index
@@ -205,17 +205,17 @@ void input::update_gamepad_stick(int gamepad_index, gamepad_stick b,
   s_gamepad_state->current_frame_stick_state[b] = value;
 }
 
-void input::update_mouse_button(mouse_button b, bool value) {
+void Input::update_mouse_button(MouseButton b, bool value) {
   ZoneScoped;
   s_mouse_state.current_frame_mouse_button_state[b] = value;
 }
 
-void input::update_mouse_scroll(float value) {
+void Input::update_mouse_scroll(float value) {
   ZoneScoped;
   s_mouse_state.current_frame_scroll = value;
 }
 
-void input::update_mouse_position(glm::vec2 screen_dim, glm::vec2 value) {
+void Input::update_mouse_position(glm::vec2 screen_dim, glm::vec2 value) {
   ZoneScoped;
   glm::vec2 val = value;
   val.x = glm::min(value.x, screen_dim.x);
@@ -227,12 +227,12 @@ void input::update_mouse_position(glm::vec2 screen_dim, glm::vec2 value) {
       value - s_mouse_state.last_frame_mouse_location;
 }
 
-void input::update_keyboard_key(keyboard_key k, bool value) {
+void Input::update_keyboard_key(KeyboardKey k, bool value) {
   ZoneScoped;
   s_keyboard_state.current_frame_key_state[k] = value;
 }
 
-void input::update_last_frame() {
+void Input::update_last_frame() {
   ZoneScoped;
   s_keyboard_state.last_frame_key_state =
       s_keyboard_state.current_frame_key_state;

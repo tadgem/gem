@@ -27,7 +27,7 @@ void VAO::draw() {
   }
 }
 
-void vao_builder::begin() {
+void VAOBuilder::begin() {
   ZoneScoped;
   m_offset_counter = 0;
   m_ibo = INVALID_GL_HANDLE;
@@ -36,7 +36,7 @@ void vao_builder::begin() {
   glBindVertexArray(m_vao);
 }
 
-void vao_builder::add_index_buffer(uint32_t *data, uint32_t data_count) {
+void VAOBuilder::add_index_buffer(uint32_t *data, uint32_t data_count) {
   ZoneScoped;
   gl_handle ibo;
   glGenBuffers(1, &ibo);
@@ -48,12 +48,12 @@ void vao_builder::add_index_buffer(uint32_t *data, uint32_t data_count) {
   m_index_count = data_count;
 }
 
-void vao_builder::add_index_buffer(std::vector<uint32_t> data) {
+void VAOBuilder::add_index_buffer(std::vector<uint32_t> data) {
   ZoneScoped;
   add_index_buffer(data.data(), data.size());
 }
 
-void vao_builder::add_vertex_attribute(uint32_t binding,
+void VAOBuilder::add_vertex_attribute(uint32_t binding,
                                        uint32_t total_vertex_size,
                                        uint32_t num_elements,
                                        uint32_t element_size,
@@ -66,7 +66,7 @@ void vao_builder::add_vertex_attribute(uint32_t binding,
   m_offset_counter += num_elements * element_size;
 }
 
-VAO vao_builder::build() {
+VAO VAOBuilder::build() {
   ZoneScoped;
   return VAO{m_vao, m_ibo, m_index_count, m_vbos};
 }

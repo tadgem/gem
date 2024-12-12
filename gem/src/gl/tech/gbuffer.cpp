@@ -10,10 +10,10 @@
 namespace gem {
 namespace open_gl {
 
-void tech::gbuffer::dispatch_gbuffer_with_id(
-    u32 frame_index, gl_framebuffer &gbuffer,
-    gl_framebuffer &previous_position_buffer, gl_shader &gbuffer_shader,
-    asset_manager &am, camera &cam, std::vector<scene *> &scenes,
+void tech::GBuffer::dispatch_gbuffer_with_id(
+    u32 frame_index, GLFramebuffer &gbuffer,
+    GLFramebuffer &previous_position_buffer, GLShader &gbuffer_shader,
+    AssetManager &am, Camera &cam, std::vector<Scene *> &scenes,
     glm::ivec2 win_res) {
   ZoneScoped;
   GEM_GPU_MARKER("GBuffer-EntityID");
@@ -34,18 +34,18 @@ void tech::gbuffer::dispatch_gbuffer_with_id(
   gbuffer_shader.set_int("u_ao_map", 4);
   gbuffer_shader.set_int("u_prev_position_map", 5);
 
-  texture::bind_sampler_handle(0, GL_TEXTURE0);
-  texture::bind_sampler_handle(0, GL_TEXTURE1);
-  texture::bind_sampler_handle(0, GL_TEXTURE2);
-  texture::bind_sampler_handle(0, GL_TEXTURE3);
-  texture::bind_sampler_handle(0, GL_TEXTURE4);
+  Texture::bind_sampler_handle(0, GL_TEXTURE0);
+  Texture::bind_sampler_handle(0, GL_TEXTURE1);
+  Texture::bind_sampler_handle(0, GL_TEXTURE2);
+  Texture::bind_sampler_handle(0, GL_TEXTURE3);
+  Texture::bind_sampler_handle(0, GL_TEXTURE4);
 
-  texture::bind_sampler_handle(
+  Texture::bind_sampler_handle(
       previous_position_buffer.m_colour_attachments.front(), GL_TEXTURE5);
 
-  for (scene *current_scene : scenes) {
+  for (Scene *current_scene : scenes) {
     auto renderables =
-        current_scene->m_registry.view<transform, mesh_component, material>();
+        current_scene->m_registry.view<Transform, MeshComponent, Material>();
 
     for (auto [e, trans, emesh, ematerial] : renderables.each()) {
 
@@ -65,11 +65,11 @@ void tech::gbuffer::dispatch_gbuffer_with_id(
   gbuffer.unbind();
   glEnable(GL_DITHER);
 }
-void tech::gbuffer::dispatch_gbuffer_textureless_with_id(
-    u32 frame_index, gl_framebuffer &gbuffer,
-    gl_framebuffer &previous_position_buffer,
-    gl_shader &gbuffer_textureless_shader, asset_manager &am, camera &cam,
-    std::vector<scene *> &scenes, glm::ivec2 win_res) {
+void tech::GBuffer::dispatch_gbuffer_textureless_with_id(
+    u32 frame_index, GLFramebuffer &gbuffer,
+    GLFramebuffer &previous_position_buffer,
+    GLShader &gbuffer_textureless_shader, AssetManager &am, Camera &cam,
+    std::vector<Scene *> &scenes, glm::ivec2 win_res) {
   ZoneScoped;
   GEM_GPU_MARKER("GBuffer-Textureless-EntityID");
   glDisable(GL_DITHER);
@@ -85,12 +85,12 @@ void tech::gbuffer::dispatch_gbuffer_textureless_with_id(
   gbuffer_textureless_shader.set_int("u_frame_index", frame_index);
   gbuffer_textureless_shader.set_int("u_prev_position_map", 0);
 
-  texture::bind_sampler_handle(
+  Texture::bind_sampler_handle(
       previous_position_buffer.m_colour_attachments.front(), GL_TEXTURE0);
 
-  for (scene *current_scene : scenes) {
+  for (Scene *current_scene : scenes) {
     auto renderables =
-        current_scene->m_registry.view<transform, mesh_component, material>();
+        current_scene->m_registry.view<Transform, MeshComponent, Material>();
 
     for (auto [e, trans, emesh, ematerial] : renderables.each()) {
       if (ematerial.m_prog.m_shader_id !=
@@ -108,7 +108,7 @@ void tech::gbuffer::dispatch_gbuffer_textureless_with_id(
     }
   }
   gbuffer.unbind();
-  texture::bind_sampler_handle(0, GL_TEXTURE0);
+  Texture::bind_sampler_handle(0, GL_TEXTURE0);
   glEnable(GL_DITHER);
 }
 } // namespace open_gl

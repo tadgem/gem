@@ -5,16 +5,16 @@
 #include <vector>
 namespace gem {
 
-class asset_manager;
-class project {
+class AssetManager;
+class Project {
 public:
   std::vector<std::string> m_scene_paths;
-  std::vector<serializable_asset_handle> m_project_assets;
+  std::vector<SerializableAssetHandle> m_project_assets;
   std::string m_name;
 
-  nlohmann::json serialize(asset_manager &am);
-  void deserialize(asset_manager &am, nlohmann::json &proj_json);
+  nlohmann::json serialize(AssetManager &am);
+  void deserialize(AssetManager &am, nlohmann::json &proj_json);
 
-  GEM_IMPL_ALLOC(project)
+  GEM_IMPL_ALLOC(Project)
 };
 } // namespace gem

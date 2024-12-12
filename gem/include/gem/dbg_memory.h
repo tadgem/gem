@@ -10,40 +10,40 @@
 
 namespace gem {
 #ifdef GEM_ENABLE_MEMORY_TRACKING
-struct alloc_info {
+struct DebugAllocInfo {
   size_t count;
   size_t size;
 };
 
-class debug_memory_tracker {
+class DebugMemoryTracker {
 public:
-  debug_memory_tracker();
+  DebugMemoryTracker();
 
-  ~debug_memory_tracker();
+  ~DebugMemoryTracker();
 
-  std::unordered_map<std::string, alloc_info> s_allocation_info;
+  std::unordered_map<std::string, DebugAllocInfo> s_allocation_info;
 
   inline static u64 s_UntrackedSize = 0;
-  inline static debug_memory_tracker *s_instance = nullptr;
+  inline static DebugMemoryTracker *s_instance = nullptr;
 };
 
 #define GEM_IMPL_ALLOC(X)                                                      \
   void *operator new(size_t size) {                                            \
-    if (debug_memory_tracker::s_instance->s_allocation_info.find(#X) ==        \
-        debug_memory_tracker::s_instance->s_allocation_info.end()) {           \
-      debug_memory_tracker::s_instance->s_allocation_info.emplace(             \
-          #X, alloc_info{0, 0});                                               \
+    if (DebugMemoryTracker::s_instance->s_allocation_info.find(#X) ==          \
+        DebugMemoryTracker::s_instance->s_allocation_info.end()) {             \
+      DebugMemoryTracker::s_instance->s_allocation_info.emplace(             \
+          #X, DebugAllocInfo{0, 0});                                               \
     }                                                                          \
-    debug_memory_tracker::s_instance->s_allocation_info[#X].count++;           \
-    debug_memory_tracker::s_instance->s_allocation_info[#X].size += size;      \
+    DebugMemoryTracker::s_instance->s_allocation_info[#X].count++;             \
+    DebugMemoryTracker::s_instance->s_allocation_info[#X].size += size;      \
     return malloc(size);                                                       \
   }                                                                            \
   void operator delete(void *p) {                                              \
     free(p);                                                                   \
-    if (!debug_memory_tracker::s_instance)                                     \
+    if (!DebugMemoryTracker::s_instance)                                     \
       return;                                                                  \
-    debug_memory_tracker::s_instance->s_allocation_info[#X].count--;           \
-    debug_memory_tracker::s_instance->s_allocation_info[#X].size -= sizeof(X); \
+    DebugMemoryTracker::s_instance->s_allocation_info[#X].count--;             \
+    DebugMemoryTracker::s_instance->s_allocation_info[#X].size -= sizeof(X); \
   }
 #else
 #define GEM_IMPL_ALLOC(X)

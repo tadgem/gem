@@ -4,7 +4,7 @@
 
 namespace gem {
 
-nlohmann::json project::serialize(asset_manager &am) {
+nlohmann::json Project::serialize(AssetManager &am) {
   ZoneScoped;
   nlohmann::json json{};
 
@@ -15,7 +15,7 @@ nlohmann::json project::serialize(asset_manager &am) {
   return json;
 }
 
-void project::deserialize(asset_manager &am, nlohmann::json &proj_json) {
+void Project::deserialize(AssetManager &am, nlohmann::json &proj_json) {
   ZoneScoped;
   m_name = proj_json["project_name"];
   m_project_assets = proj_json["project_assets"];

@@ -5,19 +5,19 @@
 
 namespace gem {
 
-enum class gamepad_stick {
+enum class GamepadStick {
   invalid = -1,
   LS,
   RS,
 };
 
-enum class gamepad_trigger {
+enum class GamepadTrigger {
   invalid = -1,
   LT,
   RT,
 };
 
-enum class gamepad_button {
+enum class GamepadButton {
   invalid = -1,
   face_north,
   face_south,
@@ -36,7 +36,7 @@ enum class gamepad_button {
   RS_click
 };
 
-enum class mouse_button {
+enum class MouseButton {
   invalid = -1,
   left,
   middle,
@@ -46,7 +46,7 @@ enum class mouse_button {
   extra3
 };
 
-enum class keyboard_key {
+enum class KeyboardKey {
   invalid = -1,
   a,
   b,
@@ -125,47 +125,47 @@ enum class keyboard_key {
   escape
 };
 
-class input {
+class Input {
 public:
-  static bool get_gamepad_button(int index, gamepad_button button);
-  static glm::vec2 get_gamepad_stick(int index, gamepad_stick stick);
-  static bool get_keyboard_key(keyboard_key key);
-  static bool get_mouse_button(mouse_button button);
+  static bool get_gamepad_button(int index, GamepadButton button);
+  static glm::vec2 get_gamepad_stick(int index, GamepadStick stick);
+  static bool get_keyboard_key(KeyboardKey key);
+  static bool get_mouse_button(MouseButton button);
   static glm::vec2 get_mouse_position();
   static glm::vec2 get_mouse_velocity();
   static float get_mouse_scroll();
 
 protected:
-  friend class gl_backend;
-  static gamepad_stick get_stick_from_sdl(SDL_GamepadAxis &sdlAxis);
-  static gamepad_trigger get_trigger_from_sdl(SDL_GamepadAxis &sdlAxis);
-  static gamepad_button get_button_from_sdl(uint8_t sdlButton);
-  static keyboard_key get_key_from_sdl(SDL_Keycode keyCode);
+  friend class GLBackend;
+  static GamepadStick get_stick_from_sdl(SDL_GamepadAxis &sdlAxis);
+  static GamepadTrigger get_trigger_from_sdl(SDL_GamepadAxis &sdlAxis);
+  static GamepadButton get_button_from_sdl(uint8_t sdlButton);
+  static KeyboardKey get_key_from_sdl(SDL_Keycode keyCode);
 
-  static void update_gamepad_button(int gamepad_index, gamepad_button b,
+  static void update_gamepad_button(int gamepad_index, GamepadButton b,
                                     bool value);
-  static void update_gamepad_trigger(int gamepad_index, gamepad_trigger b,
+  static void update_gamepad_trigger(int gamepad_index, GamepadTrigger b,
                                      float value);
-  static void update_gamepad_stick(int gamepad_index, gamepad_stick b,
+  static void update_gamepad_stick(int gamepad_index, GamepadStick b,
                                    glm::vec2 value);
-  static void update_mouse_button(mouse_button b, bool value);
+  static void update_mouse_button(MouseButton b, bool value);
   static void update_mouse_scroll(float value);
   static void update_mouse_position(glm::vec2 screen_dim, glm::vec2 value);
-  static void update_keyboard_key(keyboard_key k, bool value);
+  static void update_keyboard_key(KeyboardKey k, bool value);
   static void update_last_frame();
 
-  struct gamepad_state {
-    std::unordered_map<gamepad_button, bool> current_frame_gamepad_button_state;
-    std::unordered_map<gamepad_button, bool> last_frame_gamepad_button_state;
-    std::unordered_map<gamepad_trigger, float> current_frame_trigger_state;
-    std::unordered_map<gamepad_trigger, float> last_frame_trigger_state;
-    std::unordered_map<gamepad_stick, glm::vec2> current_frame_stick_state;
-    std::unordered_map<gamepad_stick, glm::vec2> last_frame_stick_state;
+  struct GamepadState {
+    std::unordered_map<GamepadButton, bool> current_frame_gamepad_button_state;
+    std::unordered_map<GamepadButton, bool> last_frame_gamepad_button_state;
+    std::unordered_map<GamepadTrigger, float> current_frame_trigger_state;
+    std::unordered_map<GamepadTrigger, float> last_frame_trigger_state;
+    std::unordered_map<GamepadStick, glm::vec2> current_frame_stick_state;
+    std::unordered_map<GamepadStick, glm::vec2> last_frame_stick_state;
   };
 
-  struct mouse_state {
-    std::unordered_map<mouse_button, bool> current_frame_mouse_button_state;
-    std::unordered_map<mouse_button, bool> last_frame_mouses_button_state;
+  struct MouseState {
+    std::unordered_map<MouseButton, bool> current_frame_mouse_button_state;
+    std::unordered_map<MouseButton, bool> last_frame_mouses_button_state;
     float current_frame_scroll;
     float last_frame_scroll;
     glm::vec2 current_frame_mouse_location;
@@ -174,15 +174,15 @@ protected:
     glm::vec2 last_frame_mouse_velocity;
   };
 
-  struct keyboard_state {
-    std::unordered_map<keyboard_key, bool> current_frame_key_state;
-    std::unordered_map<keyboard_key, bool> last_frame_key_state;
+  struct KeyboardState {
+    std::unordered_map<KeyboardKey, bool> current_frame_key_state;
+    std::unordered_map<KeyboardKey, bool> last_frame_key_state;
   };
 
   static constexpr int MAX_SUPPORTED_GAMEPADS = 4;
 
-  inline static mouse_state s_mouse_state;
-  inline static keyboard_state s_keyboard_state;
-  inline static gamepad_state s_gamepad_state[MAX_SUPPORTED_GAMEPADS];
+  inline static MouseState s_mouse_state;
+  inline static KeyboardState s_keyboard_state;
+  inline static GamepadState s_gamepad_state[MAX_SUPPORTED_GAMEPADS];
 };
 } // namespace gem

@@ -4,15 +4,16 @@
 
 namespace gem {
 
-class gl_framebuffer;
-class scene;
+class GLFramebuffer;
+class Scene;
 namespace open_gl {
 namespace tech {
-class shadow {
+class Shadow {
 public:
-  static void dispatch_shadow_pass(gl_framebuffer &shadow_fb,
-                                   gl_shader &shadow_shader, dir_light &sun,
-                                   std::vector<scene *> &scenes,
+  static void dispatch_shadow_pass(GLFramebuffer &shadow_fb,
+                                   GLShader &shadow_shader,
+                                   DirectionalLight &sun,
+                                   std::vector<Scene *> &scenes,
                                    glm::ivec2 window_res);
 };
 } // namespace tech

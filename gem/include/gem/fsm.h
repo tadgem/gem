@@ -6,14 +6,14 @@
 
 #include <vector>
 namespace gem {
-template <typename _StateEnum> class fsm_t {
+template <typename _StateEnum> class TFsm {
 public:
   using callback = void (*)();
   using callback_t = void (*)(_StateEnum);
 
   const unsigned char MAX_TRANSITIONS_PER_TICK = 8;
 
-  GEM_IMPL_ALLOC(fsm_t<_StateEnum>)
+  GEM_IMPL_ALLOC(TFsm<_StateEnum>)
 
   class state {
   public:
@@ -22,14 +22,14 @@ public:
     bool m_has_entry;
     bool m_has_exit;
 
-    GEM_IMPL_ALLOC(fsm_t<_StateEnum>::state)
+    GEM_IMPL_ALLOC(TFsm<_StateEnum>::state)
 
   protected:
     callback m_entry_procedure;
     callback m_exit_procedure;
     callback_t m_action;
     const _StateEnum m_state;
-    friend class fsm_t;
+    friend class TFsm;
   };
 
   struct state_transition {
@@ -37,15 +37,15 @@ public:
     _StateEnum src_state;
     _StateEnum dst_state;
 
-    GEM_IMPL_ALLOC(fsm_t<_StateEnum>::state_transition)
+    GEM_IMPL_ALLOC(TFsm<_StateEnum>::state_transition)
   };
 };
 
-class fsm_lambda {
+class FSM {
 public:
   const unsigned char MAX_TRANSITIONS_PER_TICK = 8;
 
-  GEM_IMPL_ALLOC(fsm_lambda)
+  GEM_IMPL_ALLOC(FSM)
 
   class state {
   public:
@@ -54,25 +54,25 @@ public:
           std::function<void()> exit = NULL);
     bool m_has_entry;
     bool m_has_exit;
-    GEM_IMPL_ALLOC(fsm_lambda::state)
+    GEM_IMPL_ALLOC(FSM::state)
 
   protected:
     std::function<void()> m_entry_procedure;
     std::function<void()> m_exit_procedure;
     std::function<int()> m_action;
     const int m_state;
-    friend class fsm_lambda;
+    friend class FSM;
   };
   struct state_transition {
     int m_trigger;
     int m_src_state;
     int m_dst_state;
 
-    GEM_IMPL_ALLOC(fsm_lambda::state_transition)
+    GEM_IMPL_ALLOC(FSM::state_transition)
   };
 
 public:
-  fsm_lambda();
+  FSM();
 
   void set_starting_state(int state);
   template <typename _Enum> void set_starting_state(_Enum state) {
@@ -132,5 +132,5 @@ protected:
   std::vector<state_transition> p_transitions;
 };
 
-using fsm = fsm_lambda;
+using fsm = FSM;
 } // namespace gem

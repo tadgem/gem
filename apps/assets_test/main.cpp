@@ -40,16 +40,16 @@ using namespace gem;
 int main()
 {
     glm::ivec2 window_res{ 1280, 720};
-    gl_backend::init(backend_init{ window_res, true });
-    asset_manager am{};
+    gl_backend::init(BackendInit{ window_res, true });
+    AssetManager am{};
 
-    auto im3d_s = gl_im3d::load_im3d();
+    auto im3d_s = GLIm3d::load_im3d();
     while (!gl_backend::s_quit)
     {       
         gl_backend::process_sdl_event();
         gl_backend::engine_pre_frame();        
         glm::vec2 window_dim = gl_backend::get_window_dim();
-        gl_im3d::new_frame_im3d(im3d_s, window_dim, camera{});
+        GLIm3d::new_frame_im3d(im3d_s, window_dim, Camera{});
 
         am.update();
 
@@ -57,8 +57,9 @@ int main()
         {
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / gl_backend::s_imgui_io->Framerate, gl_backend::s_imgui_io->Framerate);
             if (ImGui::CollapsingHeader("CPU Memory")) {
-                ImGui::Text("Untracked : %.4f KB", (float)debug_memory_tracker::s_UntrackedSize / 1024.0f);
-                for (auto& [k, v] : debug_memory_tracker::s_instance->s_allocation_info) {
+                ImGui::Text("Untracked : %.4f KB", (float)DebugMemoryTracker::s_UntrackedSize / 1024.0f);
+                for (auto& [k, v] :
+                     DebugMemoryTracker::s_instance->s_allocation_info) {
                     ImGui::Text("%s : %zu KB", k.c_str(), (v.size * v.count) / 1024);
                 }
             }
@@ -122,7 +123,7 @@ int main()
                 std::filesystem::path p = ifd::FileDialog::Instance().GetResult();
                 std::string res = p.u8string();
                 printf("OPEN[%s]\n", res.c_str());
-                am.load_asset(res, asset_type::model);
+                am.load_asset(res, AssetType::model);
             }
             ifd::FileDialog::Instance().Close();
         }
@@ -132,18 +133,18 @@ int main()
                 std::filesystem::path p = ifd::FileDialog::Instance().GetResult();
                 std::string res = p.u8string();
                 printf("OPEN[%s]\n", res.c_str());
-                am.load_asset(res, asset_type::shader);
+                am.load_asset(res, AssetType::shader);
             }
             ifd::FileDialog::Instance().Close();
         }
         ImGui::End();
 
-        gl_im3d::end_frame_im3d(im3d_s, { window_res.x, window_res.y }, camera{});
+        GLIm3d::end_frame_im3d(im3d_s, { window_res.x, window_res.y }, Camera{});
         gl_backend::engine_post_frame();
     }
 
     am.shutdown();
-    gl_im3d::shutdown_im3d(im3d_s);
+    GLIm3d::shutdown_im3d(im3d_s);
     gl_backend::engine_shut_down();
 
     return 0;

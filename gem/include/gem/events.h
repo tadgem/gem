@@ -8,22 +8,22 @@
 
 namespace gem {
 
-enum class event_queue : u32 {
+enum class EventQueue : u32 {
   engine,
   game,
 };
 
-enum class engine_event : u32 {
+enum class EngineEvent : u32 {
   invalid = 0,
   asset_loaded,
 
 };
 
-enum class game_event : u32 {
+enum class GameEvent : u32 {
   invalid = 0,
 };
 
-struct a_event_data {};
+struct AEventData {};
 
 #define EVENT_DATA_IMPL(NAME, QUEUE, INDEX)                                    \
   NAME(){};                                                                    \
@@ -31,38 +31,38 @@ struct a_event_data {};
   static constexpr u32 get_index() { return static_cast<u32>(INDEX); }
 
 // sample event data
-struct asset_loaded_data : a_event_data {
-  asset_handle m_handle_loaded = {};
+struct AssetLoadedData : AEventData {
+  AssetHandle m_handle_loaded = {};
 
-  EVENT_DATA_IMPL(asset_loaded_data, event_queue::engine,
-                  engine_event::asset_loaded)
-  GEM_IMPL_ALLOC(asset_loaded_data)
+  EVENT_DATA_IMPL(AssetLoadedData, EventQueue::engine,
+                  EngineEvent::asset_loaded)
+  GEM_IMPL_ALLOC(AssetLoadedData)
 };
 
 // helper struct to quickly find subscribed events
-struct event_comparator {
+struct EventComparator {
   u32 m_queue;
   u32 m_index;
 
-  event_comparator(const event_comparator &) = default;
-  event_comparator &operator=(const event_comparator &) = default;
+  EventComparator(const EventComparator &) = default;
+  EventComparator &operator=(const EventComparator &) = default;
 
-  bool operator==(event_comparator const &rhs) const {
+  bool operator==(EventComparator const &rhs) const {
     ZoneScoped;
     return m_queue == rhs.m_queue && m_index == rhs.m_index;
   }
 
-  bool operator<(const event_comparator &o) const {
+  bool operator<(const EventComparator &o) const {
     return m_index < o.m_index && m_queue < o.m_queue;
   };
 
-  GEM_IMPL_ALLOC(event_comparator)
+  GEM_IMPL_ALLOC(EventComparator)
 };
 } // namespace gem
 
 /* required to hash a container */
-template <> struct std::hash<gem::event_comparator> {
-  std::size_t operator()(const gem::event_comparator &ah) const {
+template <> struct std::hash<gem::EventComparator> {
+  std::size_t operator()(const gem::EventComparator &ah) const {
     ZoneScoped;
     return std::hash<u32>()(ah.m_queue) ^ std::hash<u32>()(ah.m_index);
   }
@@ -70,21 +70,21 @@ template <> struct std::hash<gem::event_comparator> {
 
 namespace gem {
 
-class event_handler {
+class EventHandler {
 protected:
-  std::unordered_map<event_comparator, std::vector<void *>> p_subscriptions;
+  std::unordered_map<EventComparator, std::vector<void *>> p_subscriptions;
 
 public:
   template <typename _EventData>
   void add_subscription(void (*callback)(_EventData)) {
     ZoneScoped;
-    static_assert(std::is_base_of<a_event_data, _EventData>(),
+    static_assert(std::is_base_of<AEventData, _EventData>(),
                   "_EventData does not inherit from a_event_data");
     static_assert(std::is_default_constructible<_EventData>(),
                   "_EventData is not default constructible");
 
     _EventData prototype{};
-    event_comparator ec{static_cast<u32>(prototype.get_queue()),
+    EventComparator ec{static_cast<u32>(prototype.get_queue()),
                         static_cast<u32>(prototype.get_index())};
     if (p_subscriptions.find(ec) == p_subscriptions.end()) {
       p_subscriptions.emplace(ec, std::vector<void *>());
@@ -96,13 +96,13 @@ public:
   template <typename _EventData>
   void remove_subscription(void (*callback)(_EventData)) {
     ZoneScoped;
-    static_assert(std::is_base_of<a_event_data, _EventData>(),
+    static_assert(std::is_base_of<AEventData, _EventData>(),
                   "_EventData does not inherit from a_event_data");
     static_assert(std::is_default_constructible<_EventData>(),
                   "_EventData is not default constructible");
 
     _EventData prototype{};
-    event_comparator ec{static_cast<u32>(prototype.get_queue()),
+    EventComparator ec{static_cast<u32>(prototype.get_queue()),
                         static_cast<u32>(prototype.get_index())};
     if (p_subscriptions.find(ec) == p_subscriptions.end()) {
       return;
@@ -125,12 +125,12 @@ public:
 
   template <typename _EventData> void invoke(_EventData data) {
     ZoneScoped;
-    static_assert(std::is_base_of<a_event_data, _EventData>(),
+    static_assert(std::is_base_of<AEventData, _EventData>(),
                   "_EventData does not inherit from a_event_data");
     static_assert(std::is_default_constructible<_EventData>(),
                   "_EventData is not default constructible");
     _EventData prototype{};
-    event_comparator ec{static_cast<u32>(prototype.get_queue()),
+    EventComparator ec{static_cast<u32>(prototype.get_queue()),
                         static_cast<u32>(prototype.get_index())};
     if (p_subscriptions.find(ec) == p_subscriptions.end()) {
       return;
@@ -142,6 +142,6 @@ public:
     }
   }
 
-  GEM_IMPL_ALLOC(event_handler)
+  GEM_IMPL_ALLOC(EventHandler)
 };
 } // namespace gem

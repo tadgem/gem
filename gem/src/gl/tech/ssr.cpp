@@ -10,14 +10,14 @@
 namespace gem {
 namespace open_gl {
 
-void tech::ssr::dispatch_ssr_pass(gl_shader &ssr, camera &cam,
-                                  gl_framebuffer &ssr_buffer,
-                                  gl_framebuffer &gbuffer,
-                                  gl_framebuffer &lighting_buffer,
+void tech::ScreenSpaceReflections::dispatch_ssr_pass(GLShader &ssr, Camera &cam,
+                                  GLFramebuffer &ssr_buffer,
+                                  GLFramebuffer &gbuffer,
+                                  GLFramebuffer &lighting_buffer,
                                   glm::vec2 screen_dim) {
   ZoneScoped;
   GEM_GPU_MARKER("SSR Pass");
-  shapes::s_screen_quad.use();
+  Shapes::s_screen_quad.use();
   ssr_buffer.bind();
   glClearColor(0, 0, 0, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
@@ -31,17 +31,17 @@ void tech::ssr::dispatch_ssr_pass(gl_shader &ssr, camera &cam,
   ssr.set_mat4("u_rotation", cam.get_rotation_matrix());
 
   ssr.set_int("u_gnormal_buffer", 0);
-  texture::bind_sampler_handle(gbuffer.m_colour_attachments[2], GL_TEXTURE0);
+  Texture::bind_sampler_handle(gbuffer.m_colour_attachments[2], GL_TEXTURE0);
 
   ssr.set_int("u_gcolour_buffer", 1);
-  texture::bind_sampler_handle(lighting_buffer.m_colour_attachments.front(),
+  Texture::bind_sampler_handle(lighting_buffer.m_colour_attachments.front(),
                                GL_TEXTURE1);
 
   ssr.set_int("u_gpbr_buffer", 2);
-  texture::bind_sampler_handle(gbuffer.m_colour_attachments[3], GL_TEXTURE2);
+  Texture::bind_sampler_handle(gbuffer.m_colour_attachments[3], GL_TEXTURE2);
 
   ssr.set_int("u_depth_buffer", 3);
-  texture::bind_sampler_handle(gbuffer.m_depth_attachment, GL_TEXTURE3);
+  Texture::bind_sampler_handle(gbuffer.m_depth_attachment, GL_TEXTURE3);
 
   glStencilFunc(GL_EQUAL, 1, 0xFF);
   glStencilMask(0x00);

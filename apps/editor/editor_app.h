@@ -11,8 +11,8 @@ public:
 	editor_application();
 
 	gem::fsm							m_editor_fsm;
-	gem::debug_camera_controller		m_editor_camera_controller;
-	gem::camera							m_editor_camera;
+	gem::DebugCameraController m_editor_camera_controller;
+	gem::Camera m_editor_camera;
 
 	void run();
 
@@ -21,5 +21,5 @@ public:
 	void on_play();
 	void main_menu_bar();
 	
-	gem::project create_project(const std::string& name, const std::string& path);
+	gem::Project create_project(const std::string& name, const std::string& path);
 };

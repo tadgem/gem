@@ -3,10 +3,10 @@
 #include "glm/glm.hpp"
 
 namespace gem {
-struct aabb {
-  glm::vec3 min;
-  glm::vec3 max;
+struct AABB {
+  glm::vec3 m_min;
+  glm::vec3 m_max;
 
-  GEM_IMPL_ALLOC(aabb)
+  GEM_IMPL_ALLOC(AABB)
 };
 } // namespace gem
