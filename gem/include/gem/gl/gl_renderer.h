@@ -24,6 +24,7 @@ public:
 
   GLShaderAsset *m_gbuffer_shader;
   GLShaderAsset *m_gbuffer_textureless_shader;
+  GLShaderAsset *m_forward_lighting_shader;
   GLShaderAsset *m_lighting_shader;
   GLShaderAsset *m_visualise_3d_tex_shader;
   GLShaderAsset *m_visualise_3d_tex_instances_shader;

@@ -1,5 +1,6 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include "gem/asset_manager.h"
+#include "ImFileDialog.h"
 #include "gem/gl/gl_shader.h"
 #include "gem/hash_string.h"
 #include "gem/model.h"
@@ -463,5 +464,91 @@ AssetManager::AssetManager() {
   p_gem_listener->m_watch_id =
       p_file_watcher->addWatch("assets", p_gem_listener.get(), true);
   p_file_watcher->watch();
+}
+void AssetManager::on_imgui() {
+  if (ImGui::Begin("Assets Debug"))
+  {
+    if (ImGui::CollapsingHeader("CPU Memory")) {
+      ImGui::Text("Untracked : %.4f KB", (float)DebugMemoryTracker::s_UntrackedSize / 1024.0f);
+      for (auto& [k, v] :
+           DebugMemoryTracker::s_instance->s_allocation_info) {
+        ImGui::Text("%s : %zu KB", k.c_str(), (v.size * v.count) / 1024);
+      }
+    }
+    ImGui::Separator();
+    ImGui::Text("Any Assets Loading? : %s", any_assets_loading() ? "true" : "false");
+    ImGui::Text("Any Pending Async Tasks : %d", static_cast<uint32_t>(p_pending_load_tasks.size()));
+    ImGui::Text("Any Pending Synchronous Callbacks : %d", static_cast<uint32_t>(p_pending_load_callbacks.size()));
+    ImGui::Text("Any Pending Unload Tasks: %d", static_cast<uint32_t>(p_pending_unload_callbacks.size()));
+
+    if (ImGui::CollapsingHeader("Loaded Assets"))
+    {
+      for (const auto& [handle, u_asset] : p_loaded_assets)
+      {
+        if (!u_asset) { continue; }
+        ImGui::PushID(handle.m_path_hash);
+        ImGui::Text("%s : %s", u_asset->m_path.c_str(), get_asset_type_name(handle.m_type).c_str());
+        ImGui::SameLine();
+        if (ImGui::Button("Unload"))
+        {
+          unload_asset(handle);
+        }
+        ImGui::PopID();
+      }
+    }
+
+    if (ImGui::CollapsingHeader("Enqueued Loads"))
+    {
+      for (const auto& info : p_queued_loads)
+      {
+        ImGui::Text("%s : %s", info.m_path.c_str(), get_asset_type_name(info.m_type).c_str());
+      }
+    }
+
+    if (ImGui::CollapsingHeader("In Progress Loads"))
+    {
+      for (const auto& [handle , info ]: p_pending_load_callbacks)
+      {
+        ImGui::Text("%s : %s", info.m_loaded_asset_intermediate->m_asset_data->m_path.c_str(), get_asset_type_name(handle.m_type).c_str());
+      }
+    }
+    ImGui::Separator();
+    if (ImGui::Button("Unload All Assets"))
+    {
+      unload_all_assets();
+    }
+
+    if (ImGui::Button("Load Model"))
+    {
+      ifd::FileDialog::Instance().Open("ModelOpenDialog", "Import a model", "Model file (*.dae;*.obj;*.fbx;*.gltf;){.dae,.obj,.fbx,.gltf},.*");
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Load Shader"))
+    {
+      ifd::FileDialog::Instance().Open("ShaderOpenDialog", "Import a shader", "Shader file (*.shader){.shader,.*}");
+    }
+
+  }
+
+  if (ifd::FileDialog::Instance().IsDone("ModelOpenDialog")) {
+    if (ifd::FileDialog::Instance().HasResult()) {
+      std::filesystem::path p = ifd::FileDialog::Instance().GetResult();
+      std::string res = p.u8string();
+      printf("OPEN[%s]\n", res.c_str());
+      load_asset(res, AssetType::model);
+    }
+    ifd::FileDialog::Instance().Close();
+  }
+
+  if (ifd::FileDialog::Instance().IsDone("ShaderOpenDialog")) {
+    if (ifd::FileDialog::Instance().HasResult()) {
+      std::filesystem::path p = ifd::FileDialog::Instance().GetResult();
+      std::string res = p.u8string();
+      printf("OPEN[%s]\n", res.c_str());
+      load_asset(res, AssetType::shader);
+    }
+    ifd::FileDialog::Instance().Close();
+  }
+  ImGui::End();
 }
 } // namespace gem

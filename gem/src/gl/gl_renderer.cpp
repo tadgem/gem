@@ -28,6 +28,7 @@ void GLRenderer::init(AssetManager &am, glm::ivec2 resolution) {
   am.load_asset("assets/shaders/gbuffer.shader", AssetType::shader);
   am.load_asset("assets/shaders/gbuffer_textureless.shader", AssetType::shader);
   am.load_asset("assets/shaders/lighting.shader", AssetType::shader);
+  am.load_asset("assets/shaders/forward_lighting.shader", AssetType::shader);
   am.load_asset("assets/shaders/visualize_3d_tex.shader", AssetType::shader);
   am.load_asset("assets/shaders/visualize_3d_tex_instances.shader",
                 AssetType::shader);
@@ -51,6 +52,8 @@ void GLRenderer::init(AssetManager &am, glm::ivec2 resolution) {
       "assets/shaders/gbuffer.shader");
   m_gbuffer_textureless_shader = am.get_asset<GLShader, AssetType::shader>(
       "assets/shaders/gbuffer_textureless.shader");
+  m_forward_lighting_shader = am.get_asset<GLShader, AssetType::shader>(
+      "assets/shaders/forward_lighting.shader");
   m_lighting_shader = am.get_asset<GLShader, AssetType::shader>(
       "assets/shaders/lighting.shader");
   m_visualise_3d_tex_shader = am.get_asset<GLShader, AssetType::shader>(

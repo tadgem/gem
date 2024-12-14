@@ -86,6 +86,8 @@ public:
   void update();
   void shutdown();
 
+  void on_imgui();
+
   GEM_IMPL_ALLOC(AssetManager)
 
 protected:

@@ -74,10 +74,10 @@ layout(location = 3) out vec3 oPBR;
 layout(location = 4) out vec2 oVelocity;
 layout(location = 5) out vec3 oEntityID;
 
-uniform vec3        u_diffuse_map;
-uniform float       u_metallic_map;
-uniform float       u_roughness_map;
-uniform float       u_ao_map;
+uniform vec3        u_diffuse;
+uniform float       u_metallic;
+uniform float       u_roughness;
+uniform float       u_ao;
 uniform sampler2D   u_prev_position_map;
 
 uniform mat4      u_model;

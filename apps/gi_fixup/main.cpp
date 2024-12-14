@@ -15,17 +15,19 @@ static std::array<Im3d::Color, 4> s_colours
 template<size_t _NumSlices>
 struct vxgi_data_n
 {
-  Texture m_voxel_texture; // 3D Texture (Voxel Data)
-  glm::ivec3                          m_resolution;
-  glm::vec3                           m_voxel_unit; // scale of each texel
-  glm::vec3                           m_aabb_dim{200.0, 100.0, 200.0};
-  AABB                                m_bounding_volume;
-  std::array<glm::mat4, _NumSlices>   m_slice_vp_matrices;
-  std::array<uint32_t, _NumSlices>    m_current_slice_indices;
-
+  Texture                                 m_voxel_texture; // 3D Texture (Voxel Data)
+  glm::ivec3                              m_resolution;
+  glm::vec3                               m_voxel_unit; // scale of each texel
+  glm::vec3                               m_aabb_dim{200.0, 100.0, 200.0};
+  glm::vec3                               m_center_pos{0.0, 0.0, 0.0};
+  AABB                                    m_bounding_volume;
+  std::array<glm::mat4, _NumSlices>       m_slice_vp_matrices;
+  std::array<uint32_t, _NumSlices>        m_current_slice_indices;
+  std::array<GLFramebuffer, _NumSlices>   m_slice_renders;
 
   void update_bounding_volume(const glm::vec3& camera_pos)
   {
+    ZoneScoped;
     m_voxel_unit = m_aabb_dim / glm::vec3(m_resolution);
     glm::vec3 half_dim = m_aabb_dim * 0.5f;
     m_bounding_volume.m_min = camera_pos - half_dim;
@@ -34,9 +36,13 @@ struct vxgi_data_n
     for(size_t n = 0; n < _NumSlices; n++)
     {
       m_current_slice_indices[n] += _NumSlices;
-      m_current_slice_indices[n] = m_current_slice_indices[n] >= m_resolution.y ? n : m_current_slice_indices[n];
-      float btm = m_bounding_volume.m_min.y + (m_voxel_unit.y * m_current_slice_indices[n]);
-      float top = m_bounding_volume.m_min.y + (m_voxel_unit.y * (m_current_slice_indices[n] + 1));
+      float diff = m_current_slice_indices[n] - m_resolution.y;
+      m_current_slice_indices[n] = m_current_slice_indices[n] >= m_resolution.y
+                                       ? n : m_current_slice_indices[n];
+      float btm = m_bounding_volume.m_min.y
+                  + (m_voxel_unit.y * m_current_slice_indices[n]);
+      float top = m_bounding_volume.m_min.y
+                  + (m_voxel_unit.y * (m_current_slice_indices[n] + 1));
       glm::mat4 projection = glm::ortho(
           -half_dim.x,
           half_dim.x,
@@ -53,12 +59,170 @@ struct vxgi_data_n
 
   }
 
+  void render(gem::AssetManager& am,
+              std::vector<gem::Scene*>& scenes,
+              gem::Camera& cam,
+              GLShader& forward_lighting_shader,
+              GLFramebuffer &dir_light_shadow_buffer,
+              std::vector<PointLight> &point_lights,
+              DirectionalLight &sun)
+  {
+    ZoneScoped;
+    GEM_GPU_MARKER("VXGI Forward Lighting Slices");
+    forward_lighting_shader.use();
+
+    // set sampler indices
+    forward_lighting_shader.set_int("u_diffuse_map", 0);
+    forward_lighting_shader.set_int("u_normal_map", 1);
+    forward_lighting_shader.set_int("u_metallic_map", 2);
+    forward_lighting_shader.set_int("u_roughness_map", 3);
+    forward_lighting_shader.set_int("u_ao_map", 4);
+    forward_lighting_shader.set_int("u_dir_light_shadow_map", 5);
+
+    glm::vec3 dir =
+        glm::quat(glm::radians(sun.direction)) * glm::vec3(0.0f, 0.0f, 1.0f);
+    glm::vec3 lightPos = glm::vec3(0.0) - (dir * 100.0f);
+
+    forward_lighting_shader.set_vec3("u_dir_light_pos", lightPos);
+
+    forward_lighting_shader.set_vec3("u_dir_light.direction",
+                             Utils::get_forward(sun.direction));
+    forward_lighting_shader.set_vec3("u_dir_light.colour", sun.colour);
+    forward_lighting_shader.set_mat4("u_dir_light.light_space_matrix",
+                             sun.light_space_matrix);
+    forward_lighting_shader.set_float("u_dir_light.intensity", sun.intensity);
+
+    int num_point_lights = std::min((int)point_lights.size(), 16);
+
+    for (int i = 0; i < num_point_lights; i++) {
+      std::stringstream pos_name;
+      pos_name << "u_point_lights[" << i << "].position";
+      std::stringstream col_name;
+      col_name << "u_point_lights[" << i << "].colour";
+      std::stringstream rad_name;
+      rad_name << "u_point_lights[" << i << "].radius";
+      std::stringstream int_name;
+      int_name << "u_point_lights[" << i << "].intensity";
+
+      forward_lighting_shader.set_vec3(pos_name.str(), point_lights[i].position);
+      forward_lighting_shader.set_vec3(col_name.str(), point_lights[i].colour);
+      forward_lighting_shader.set_float(rad_name.str(), point_lights[i].radius);
+      forward_lighting_shader.set_float(int_name.str(), point_lights[i].intensity);
+    }
+    // set dirlight shadow map
+    Texture::bind_sampler_handle(dir_light_shadow_buffer.m_depth_attachment,
+                                 GL_TEXTURE5);
+
+    for(auto n = 0; n < _NumSlices; n++)
+    {
+      m_slice_renders[n].bind();
+
+      forward_lighting_shader.set_mat4("u_vp", cam.m_proj * cam.m_view);
+      forward_lighting_shader.set_vec3("u_cam_pos", cam.m_pos);
+
+      for(auto* s : scenes)
+      {
+
+        auto scene_renderables = s->m_registry.view<Transform, MeshComponent, Material>();
+        for (auto [e, trans, emesh, ematerial] : scene_renderables.each()) {
+          // TODO:
+          // this wont work, we need the samplers and material values
+          // but this pass uses a different shader from the gbuffer pass.
+          // in this particular case, the forward shader mirrors the gbuffer pass
+          // so we can likely just fudge this slightly and push the same values to
+          // the forward pass shader.
+
+          if(ematerial.m_uniform_values.find("u_diffuse_map") != ematerial.m_uniform_values.end()) {
+            auto sampler = std::any_cast<SamplerInfo>(
+                ematerial.m_uniform_values["u_diffuse_map"]);
+
+            if(sampler.tex_entry.m_texture) {
+              Texture::bind_sampler_handle(
+                  sampler.tex_entry.m_texture->m_handle, GL_TEXTURE0);
+            }
+          }
+
+          if(ematerial.m_uniform_values.find("u_normal_map") != ematerial.m_uniform_values.end()) {
+            auto sampler = std::any_cast<SamplerInfo>(
+                ematerial.m_uniform_values["u_normal_map"]);
+
+            if(sampler.tex_entry.m_texture) {
+              Texture::bind_sampler_handle(
+                  sampler.tex_entry.m_texture->m_handle, GL_TEXTURE1);
+            }
+          }
+
+          if(ematerial.m_uniform_values.find("u_metallic_map") != ematerial.m_uniform_values.end()) {
+            auto sampler = std::any_cast<SamplerInfo>(
+                ematerial.m_uniform_values["u_metallic_map"]);
+
+            if(sampler.tex_entry.m_texture) {
+              Texture::bind_sampler_handle(
+                  sampler.tex_entry.m_texture->m_handle, GL_TEXTURE2);
+            }
+          }
+
+          if(ematerial.m_uniform_values.find("u_roughness_map") != ematerial.m_uniform_values.end()) {
+            auto sampler = std::any_cast<SamplerInfo>(
+                ematerial.m_uniform_values["u_roughness_map"]);
+
+            if(sampler.tex_entry.m_texture) {
+              Texture::bind_sampler_handle(
+                  sampler.tex_entry.m_texture->m_handle, GL_TEXTURE3);
+            }
+          }
+
+          if(ematerial.m_uniform_values.find("u_ao_map") != ematerial.m_uniform_values.end()) {
+            auto sampler = std::any_cast<SamplerInfo>(
+                ematerial.m_uniform_values["u_ao_map"]);
+
+            if(sampler.tex_entry.m_texture) {
+              Texture::bind_sampler_handle(
+                  sampler.tex_entry.m_texture->m_handle, GL_TEXTURE4);
+            }
+          }
+
+          forward_lighting_shader.set_mat4("u_model", trans.m_model);
+          forward_lighting_shader.set_mat4("u_normal", trans.m_normal_matrix);
+          emesh.m_mesh.draw();
+
+          Texture::bind_sampler_handle(0, GL_TEXTURE0);
+          Texture::bind_sampler_handle(0, GL_TEXTURE1);
+          Texture::bind_sampler_handle(0, GL_TEXTURE2);
+          Texture::bind_sampler_handle(0, GL_TEXTURE3);
+          Texture::bind_sampler_handle(0, GL_TEXTURE4);
+        }
+      }
+      m_slice_renders[n].unbind();
+    }
+  }
+
+  void on_imgui()
+  {
+    ImGui::Begin("VXGI V2 Debug");
+
+    ImGui::Text("Fuck ya life bing bong");
+
+    ImGui::Image((ImTextureID)&m_slice_renders[0].m_colour_attachments[0], {256, 256});
+    ImGui::SameLine();
+    ImGui::Image((ImTextureID)&m_slice_renders[1].m_colour_attachments[0], {256, 256});
+    ImGui::Image((ImTextureID)&m_slice_renders[2].m_colour_attachments[0], {256, 256});
+    ImGui::SameLine();
+    ImGui::Image((ImTextureID)&m_slice_renders[3].m_colour_attachments[0], {256, 256});
+    ImGui::End();
+
+  }
+
   explicit vxgi_data_n(glm::ivec3 res)
   {
     m_resolution = res;
     for(size_t n = 0; n < _NumSlices; n++) {
-      m_current_slice_indices[n] = static_cast<uint32_t>(n);
-
+      m_current_slice_indices[n] = n;
+      GLFramebuffer slice_fb = GLFramebuffer::create({m_resolution.x, m_resolution.z},
+      {
+          {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
+      }, true);
+      m_slice_renders[n] = slice_fb;
     }
     update_bounding_volume(glm::vec3(0.0));
   }
@@ -148,6 +312,8 @@ int main()
     GLRenderer renderer{};
     renderer.init(Engine::assets, resolution);
 
+    VXGIData vxgi({256,256,256});
+
     Camera cam{};
     DebugCameraController controller{};
     Scene * s = Engine::scenes.create_scene("test_scene");
@@ -182,9 +348,9 @@ int main()
     auto& cube_mat = cube_entity.add_component<Material>(
         renderer.m_gbuffer_textureless_shader->m_handle,
                 renderer.m_gbuffer_textureless_shader->m_data);
-    cube_mat.set_uniform_value("u_diffuse_map", glm::vec3(1.0, 0.0, 0.0));
-    cube_mat.set_uniform_value("u_metallic_map", 0.0f);
-    cube_mat.set_uniform_value("u_roughness_map", 0.0f);
+    cube_mat.set_uniform_value("u_diffuse", glm::vec3(1.0, 0.0, 0.0));
+    cube_mat.set_uniform_value("u_metallic", 0.0f);
+    cube_mat.set_uniform_value("u_roughness", 0.0f);
     cube_entity.add_component<MeshComponent>(
         MeshComponent{Shapes::s_torus_mesh, {}, 0});
 
@@ -217,6 +383,7 @@ int main()
         renderer.pre_frame(cam);
         controller.update(window_dim, cam);
         cam.update(window_dim);
+        vxgi.update_bounding_volume(cam.m_pos);
 
         for (auto* current_scene : scenes)
         {
@@ -232,6 +399,12 @@ int main()
 
         on_imgui(renderer, s, mouse_pos, dir2, cube_trans, lights);
 
+
+        vxgi.render(Engine::assets, scenes, cam,
+                    renderer.m_forward_lighting_shader->m_data,
+                    renderer.m_dir_light_shadow_buffer, lights, dir);
+
+        vxgi.on_imgui();
         renderer.render(Engine::assets, cam, scenes);
         GPUBackend::selected()->engine_post_frame();
     }
