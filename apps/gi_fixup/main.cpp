@@ -1,6 +1,6 @@
 #include "gem/gem.h"
 #include <sstream>
-
+#include "imgui_impl_opengl3.h"
 using namespace nlohmann;
 using namespace gem;
 
@@ -29,6 +29,7 @@ struct vxgi_data_n
   {
     ZoneScoped;
     m_voxel_unit = m_aabb_dim / glm::vec3(m_resolution);
+    m_center_pos = camera_pos;
     glm::vec3 half_dim = m_aabb_dim * 0.5f;
     m_bounding_volume.m_min = camera_pos - half_dim;
     m_bounding_volume.m_max = camera_pos + half_dim;
@@ -46,13 +47,16 @@ struct vxgi_data_n
       glm::mat4 projection = glm::ortho(
           -half_dim.x,
           half_dim.x,
-          btm,
-          top,
+          0.0f,
+          m_voxel_unit.y * 16.0f,
           -half_dim.z,
           half_dim.z
           );
 
-      glm::mat4 view = glm::translate(glm::mat4(1.0), camera_pos);
+      glm::vec3 center = glm::vec3 (m_center_pos.x, btm, m_center_pos.z);
+      glm::vec3 eye = glm::vec3 (m_center_pos.x, top, m_center_pos.z);
+      //glm::mat4 view = glm::lookAt(eye, center, glm::vec3(0.0, 1.0, 0.0));
+      glm::mat4 view = glm::translate(glm::mat4(1.0), eye);
       m_slice_vp_matrices[n] =  projection * view;
 
     }
@@ -117,7 +121,9 @@ struct vxgi_data_n
     {
       m_slice_renders[n].bind();
 
-      forward_lighting_shader.set_mat4("u_vp", cam.m_proj * cam.m_view);
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+      forward_lighting_shader.set_mat4("u_vp", m_slice_vp_matrices[n]);
       forward_lighting_shader.set_vec3("u_cam_pos", cam.m_pos);
 
       for(auto* s : scenes)
@@ -203,12 +209,12 @@ struct vxgi_data_n
 
     ImGui::Text("Fuck ya life bing bong");
 
-    ImGui::Image((ImTextureID)&m_slice_renders[0].m_colour_attachments[0], {256, 256});
+    ImGui::Image((ImTextureID)m_slice_renders[0].m_colour_attachments[0], {256, 256});
     ImGui::SameLine();
-    ImGui::Image((ImTextureID)&m_slice_renders[1].m_colour_attachments[0], {256, 256});
-    ImGui::Image((ImTextureID)&m_slice_renders[2].m_colour_attachments[0], {256, 256});
+    ImGui::Image((ImTextureID)m_slice_renders[1].m_colour_attachments[0], {256, 256});
+    ImGui::Image((ImTextureID)m_slice_renders[2].m_colour_attachments[0], {256, 256});
     ImGui::SameLine();
-    ImGui::Image((ImTextureID)&m_slice_renders[3].m_colour_attachments[0], {256, 256});
+    ImGui::Image((ImTextureID)m_slice_renders[3].m_colour_attachments[0], {256, 256});
     ImGui::End();
 
   }
