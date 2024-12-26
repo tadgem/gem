@@ -1,6 +1,8 @@
 #include "gem/gem.h"
 #include <sstream>
 #include "imgui_impl_opengl3.h"
+#include "gem/profile.h"
+
 using namespace nlohmann;
 using namespace gem;
 
@@ -15,6 +17,14 @@ static std::array<Im3d::Color, 4> s_colours
 template<size_t _NumSlices>
 struct vxgi_data_n
 {
+
+  enum AlongAxis : int
+  {
+    X = 0,
+    Y = 1,
+    Z = 2
+  };
+
   Texture                                 m_voxel_texture; // 3D Texture (Voxel Data)
   glm::ivec3                              m_resolution;
   glm::vec3                               m_voxel_unit; // scale of each texel
@@ -24,7 +34,10 @@ struct vxgi_data_n
   std::array<glm::mat4, _NumSlices>       m_slice_vp_matrices;
   std::array<uint32_t, _NumSlices>        m_current_slice_indices;
   std::array<GLFramebuffer, _NumSlices>   m_slice_renders;
-
+  AlongAxis                               m_axis = AlongAxis::Y;
+  glm::mat4                               m_debug_vp;
+  glm::vec3                               m_debug_eye;
+`
   void update_bounding_volume(const glm::vec3& camera_pos)
   {
     ZoneScoped;
@@ -36,27 +49,47 @@ struct vxgi_data_n
 
     for(size_t n = 0; n < _NumSlices; n++)
     {
+      glm::mat4 projection (1.0);
+      glm::mat4 view (1.0);
+      glm::vec3 center, eye;
       m_current_slice_indices[n] += _NumSlices;
-      float diff = m_current_slice_indices[n] - m_resolution.y;
-      m_current_slice_indices[n] = m_current_slice_indices[n] >= m_resolution.y
+      m_current_slice_indices[n] = m_current_slice_indices[n] >= m_resolution[m_axis]
                                        ? n : m_current_slice_indices[n];
-      float btm = m_bounding_volume.m_min.y
-                  + (m_voxel_unit.y * m_current_slice_indices[n]);
-      float top = m_bounding_volume.m_min.y
-                  + (m_voxel_unit.y * (m_current_slice_indices[n] + 1));
-      glm::mat4 projection = glm::ortho(
-          -half_dim.x,
-          half_dim.x,
-          0.0f,
-          m_voxel_unit.y * 16.0f,
-          -half_dim.z,
-          half_dim.z
-          );
+      float back = m_bounding_volume.m_min[m_axis]
+                  + (m_voxel_unit[m_axis] * m_current_slice_indices[n]);
 
-      glm::vec3 center = glm::vec3 (m_center_pos.x, btm, m_center_pos.z);
-      glm::vec3 eye = glm::vec3 (m_center_pos.x, top, m_center_pos.z);
-      //glm::mat4 view = glm::lookAt(eye, center, glm::vec3(0.0, 1.0, 0.0));
-      glm::mat4 view = glm::translate(glm::mat4(1.0), eye);
+      float front = m_bounding_volume.m_min[m_axis]
+                  + (m_voxel_unit[m_axis] * (m_current_slice_indices[n] + 4));
+      switch(m_axis)
+      {
+      case AlongAxis::X:
+        projection = glm::ortho(
+            -half_dim.z,
+            half_dim.z,
+            back,
+            front,
+            -half_dim.y,
+            half_dim.y
+            );
+
+        center = glm::vec3 (m_bounding_volume.m_min.x - half_dim.x, m_center_pos.y + FLT_EPSILON, m_center_pos.z + FLT_EPSILON);
+        eye = glm::vec3 (m_bounding_volume.m_max.x - half_dim.x,m_center_pos.y, m_center_pos.z);
+        break;
+      case AlongAxis::Y:
+        projection = glm::ortho(
+            -half_dim.x,
+            half_dim.x,
+            -half_dim.z,
+            half_dim.z, back, front);
+
+        center = glm::vec3 (m_center_pos.x + FLT_EPSILON, m_bounding_volume.m_min.y - half_dim.y, m_center_pos.z + FLT_EPSILON);
+        eye = glm::vec3 (m_center_pos.x, m_bounding_volume.m_max.y - half_dim.y, m_center_pos.z);
+        break;
+      case AlongAxis::Z:
+        break;
+      }
+      view = glm::lookAt(eye, center, glm::vec3(1.0, 0.0, 0.0));
+      //glm::mat4 view = glm::translate(glm::mat4(1.0), eye);
       m_slice_vp_matrices[n] =  projection * view;
 
     }
@@ -68,11 +101,24 @@ struct vxgi_data_n
               gem::Camera& cam,
               GLShader& forward_lighting_shader,
               GLFramebuffer &dir_light_shadow_buffer,
-              std::vector<PointLight> &point_lights,
-              DirectionalLight &sun)
+              glm::ivec2 window_res)
   {
     ZoneScoped;
-    GEM_GPU_MARKER("VXGI Forward Lighting Slices");
+    GEM_GPU_MARKER("VXGI Lighting Slices");
+    glLineWidth(10.0f);
+    DirectionalLight sun{};
+    std::vector<PointLight> point_lights{};
+    if (!scenes.empty()) {
+      auto dir_light_view = scenes.front()->m_registry.view<DirectionalLight>();
+      for (auto [e, dir_light_c] : dir_light_view.each()) {
+        sun = dir_light_c;
+        break;
+      }
+    }
+
+    glViewport(0,0, 256,256);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
     forward_lighting_shader.use();
 
     // set sampler indices
@@ -201,14 +247,26 @@ struct vxgi_data_n
       }
       m_slice_renders[n].unbind();
     }
-  }
+    glViewport(0,0,window_res.x, window_res.y);
+    glLineWidth(1.0f);  }
 
   void on_imgui()
   {
     ImGui::Begin("VXGI V2 Debug");
 
-    ImGui::Text("Fuck ya life bing bong");
+    if(ImGui::BeginMenu("Axis")) {
+      if (ImGui::MenuItem("X")) {
+        m_axis = AlongAxis::X;
+      }
+      if (ImGui::MenuItem("Y")) {
+        m_axis = AlongAxis::Y;
+      }
+      if (ImGui::MenuItem("Z")) {
+        m_axis = AlongAxis::Z;
+      }
 
+      ImGui::EndMenu();
+    }
     ImGui::Image((ImTextureID)m_slice_renders[0].m_colour_attachments[0], {256, 256});
     ImGui::SameLine();
     ImGui::Image((ImTextureID)m_slice_renders[1].m_colour_attachments[0], {256, 256});
@@ -238,27 +296,56 @@ struct vxgi_data_n
 using VXGIData = vxgi_data_n<4>;
 
 void on_im3d(GLRenderer & renderer, Scene & current_scene, VXGIData & vxgi,
-             Camera & cam)
+             Camera & cam, glm::mat4& dir_light_matrix)
 {
+
+    static float left = -50.0f;
+    static float right = 50.0f;
+    static float bottom = -50.0f;
+    static float top = 50.0f;
+    static float near0 = 0.0f;
+    static float far0 = 50.0f;
+    static glm::vec3 center = glm::vec3(FLT_EPSILON);
+    static glm::vec3 eye = glm::vec3(0.0, 50.0, 0.0);
+
     vxgi.update_bounding_volume(glm::vec3(0.0f));
 
     DebugDraw::DrawBoundingBox(vxgi.m_bounding_volume.m_min, vxgi.m_bounding_volume.m_max, 2.0f, Im3d::Color_Pink);
-
     for(auto n = 0; n < 4; n++)
     {
       DebugDraw::DrawFrustum(vxgi.m_slice_vp_matrices[n], 1.0, s_colours[n]);
     }
-    if (!current_scene.does_entity_exist((u32)renderer.m_last_selected_entity))
-    {
-        return;
-    }
 
-    if (!current_scene.m_registry.any_of<Mesh>(renderer.m_last_selected_entity))
-    {
-        return;
-    }
-    Mesh & meshc = current_scene.m_registry.get<Mesh>(renderer.m_last_selected_entity);
-    Im3d::DrawAlignedBox(ToIm3D(meshc.m_transformed_aabb.m_min), ToIm3D(meshc.m_transformed_aabb.m_max));
+    glm::mat4 projection = glm::ortho(
+        left,
+        right,
+        bottom,
+        top,
+        near0,
+        far0);
+
+    glm::mat4 view = glm::lookAt(eye, center, glm::vec3(0.0, 1.0, 0.0));
+    glm::mat4 vp = projection * view;
+    vxgi.m_debug_vp = vp;
+    vxgi.m_debug_eye = eye;
+
+    DebugDraw::DrawFrustum(dir_light_matrix, 2.0f, Im3d::Color_Cyan);
+    DebugDraw::DrawFrustum(vp, 2.0, Im3d::Color_Purple);
+    DebugDraw::DrawLine(eye, center, 2.0, Im3d::Color_Green);
+    Im3d::Text(ToIm3D(eye), Im3d::TextFlags_Default, "Eye Pos");
+    Im3d::Text(ToIm3D(center), Im3d::TextFlags_Default, "Center Pos");
+
+    ImGui::Begin("Debug Ortho Projections");
+    ImGui::DragFloat("Left", &left);
+    ImGui::DragFloat("Right", &right);
+    ImGui::DragFloat("Bottom", &bottom);
+    ImGui::DragFloat("Top", &top);
+    ImGui::DragFloat("Near", &near0);
+    ImGui::DragFloat("Far", &far0);
+    ImGui::DragFloat3("Eye", &eye[0]);
+    ImGui::DragFloat3("Center", &center[0]);
+    ImGui::End();
+
 }
 
 void on_imgui(GLRenderer & renderer, Scene * s, glm::vec2 mouse_pos,
@@ -318,8 +405,6 @@ int main()
     GLRenderer renderer{};
     renderer.init(Engine::assets, resolution);
 
-    VXGIData vxgi({256,256,256});
-
     Camera cam{};
     DebugCameraController controller{};
     Scene * s = Engine::scenes.create_scene("test_scene");
@@ -375,8 +460,8 @@ int main()
     lights.push_back({ {-10.0, 0.0, 10.0}, {0.0, 0.0, 255.0} , 40.0f});
 
     std::vector<Scene *> scenes{ s };
-    VXGIData vxgi_dat ({256,256,256});
-    vxgi_dat.update_bounding_volume(glm::vec3(0.0f));
+    VXGIData vxgi({256,256,256});
+    vxgi.update_bounding_volume(glm::vec3(0.0f));
 
     while (!GPUBackend::selected()->m_quit)
     {
@@ -394,7 +479,7 @@ int main()
         for (auto* current_scene : scenes)
         {
             current_scene->on_update();
-            on_im3d(renderer, *s, vxgi_dat, cam);
+            on_im3d(renderer, *s, vxgi, cam, dir2.light_space_matrix);
         }
 
         glm::vec2 mouse_pos = Input::get_mouse_position();
@@ -408,7 +493,7 @@ int main()
 
         vxgi.render(Engine::assets, scenes, cam,
                     renderer.m_forward_lighting_shader->m_data,
-                    renderer.m_dir_light_shadow_buffer, lights, dir);
+                    renderer.m_dir_light_shadow_buffer, window_dim);
 
         vxgi.on_imgui();
         renderer.render(Engine::assets, cam, scenes);

@@ -230,7 +230,7 @@ void GLRenderer::render(AssetManager &am, Camera &cam,
 
   if(m_debug_simulate_low_framerate)
   {
-    SDL_Delay(30);
+    SDL_Delay(50);
   }
 
   if (p_clear_voxel_grid) {

@@ -108,7 +108,7 @@ const vec2 halton_seq[16] = vec2[16]
 
 void main()
 {
-    vec4 inDiffuse = vec4(u_diffuse_map, 1.0);
+    vec4 inDiffuse = vec4(u_diffuse, 1.0);
     if(inDiffuse.w < 0.25)
     {
         discard;
@@ -132,9 +132,9 @@ void main()
     // velocity 
     oVelocity = currentPosNDC - previousPosNDC;
 
-    float metallic = u_metallic_map;
-    float roughness = u_roughness_map;
-    float ao = u_ao_map;
+    float metallic = u_metallic;
+    float roughness = u_roughness;
+    float ao = u_ao;
 
     oPBR = vec3(metallic, roughness, ao);
 }

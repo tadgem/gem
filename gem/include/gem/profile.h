@@ -1,6 +1,7 @@
 #pragma once
 #define ENABLE_PROFILING
 #ifdef ENABLE_PROFILING
+#define TRACY_ENABLE
 #else
 #undef TRACY_ENABLE
 #endif

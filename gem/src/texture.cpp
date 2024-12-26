@@ -8,7 +8,7 @@
 #include "gem/stb_image.h"
 #include "gem/texture.h"
 #include "gem/utils.h"
-
+#include "cpptrace/cpptrace.hpp"
 namespace gem {
 
 Texture::Texture() { ZoneScoped; }
@@ -41,7 +41,12 @@ void Texture::bind_sampler(GLenum texture_slot, GLenum texture_target) {
 void Texture::bind_sampler_handle(gl_handle handle, GLenum texture_slot,
                                   GLenum texture_target) {
   ZoneScoped;
-  glAssert(glActiveTexture(texture_slot));
+  glActiveTexture(texture_slot);
+  if(glGetError() != GL_NO_ERROR)
+  {
+    spdlog::error("Texture::bind_sampler_handle : ERROR");
+    cpptrace::generate_trace().print();
+  }
   glAssert(glBindTexture(texture_target, handle));
 }
 
