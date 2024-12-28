@@ -37,7 +37,7 @@ struct vxgi_data_n
   AlongAxis                               m_axis = AlongAxis::Y;
   glm::mat4                               m_debug_vp;
   glm::vec3                               m_debug_eye;
-`
+
   void update_bounding_volume(const glm::vec3& camera_pos)
   {
     ZoneScoped;
@@ -66,10 +66,10 @@ struct vxgi_data_n
         projection = glm::ortho(
             -half_dim.z,
             half_dim.z,
-            back,
-            front,
             -half_dim.y,
-            half_dim.y
+            half_dim.y,
+            back,
+            front
             );
 
         center = glm::vec3 (m_bounding_volume.m_min.x - half_dim.x, m_center_pos.y + FLT_EPSILON, m_center_pos.z + FLT_EPSILON);
@@ -421,11 +421,11 @@ int main()
         ma->m_data.update_aabb();
         s->create_entity_from_model(ma->m_handle, ma->m_data, renderer.m_gbuffer_shader->m_handle, renderer.m_gbuffer_shader->m_data, glm::vec3(0.1), glm::vec3(0.0, 0.0, 0.0),
             {
-                {"u_diffuse_map", TextureMapType::diffuse},
-                {"u_normal_map", TextureMapType::normal},
-                {"u_metallic_map", TextureMapType::metallicness},
+                {"u_diffuse_map",   TextureMapType::diffuse},
+                {"u_normal_map",    TextureMapType::normal},
+                {"u_metallic_map",  TextureMapType::metallicness},
                 {"u_roughness_map", TextureMapType::roughness},
-                {"u_ao_map", TextureMapType::ao}
+                {"u_ao_map",        TextureMapType::ao}
             });
 
         nlohmann::json scene_json = Engine::scenes.save_scene(s);
