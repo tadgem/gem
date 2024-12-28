@@ -18,7 +18,7 @@ template<size_t _NumSlices>
 struct vxgi_data_n
 {
 
-  enum AlongAxis : int
+  enum FillAxis : int
   {
     X = 0,
     Y = 1,
@@ -34,9 +34,10 @@ struct vxgi_data_n
   std::array<glm::mat4, _NumSlices>       m_slice_vp_matrices;
   std::array<uint32_t, _NumSlices>        m_current_slice_indices;
   std::array<GLFramebuffer, _NumSlices>   m_slice_renders;
-  AlongAxis                               m_axis = AlongAxis::Y;
+  FillAxis                                m_axis = FillAxis::Y;
   glm::mat4                               m_debug_vp;
   glm::vec3                               m_debug_eye;
+  bool                                    m_debug_freeze_slices = false;
 
   void update_bounding_volume(const glm::vec3& camera_pos)
   {
@@ -52,9 +53,13 @@ struct vxgi_data_n
       glm::mat4 projection (1.0);
       glm::mat4 view (1.0);
       glm::vec3 center, eye;
-      m_current_slice_indices[n] += _NumSlices;
-      m_current_slice_indices[n] = m_current_slice_indices[n] >= m_resolution[m_axis]
-                                       ? n : m_current_slice_indices[n];
+      if(!m_debug_freeze_slices) {
+        m_current_slice_indices[n] += _NumSlices;
+        m_current_slice_indices[n] =
+            m_current_slice_indices[n] >= m_resolution[m_axis]
+                ? n
+                : m_current_slice_indices[n];
+      }
       float back = m_bounding_volume.m_min[m_axis]
                   + (m_voxel_unit[m_axis] * m_current_slice_indices[n]);
 
@@ -62,20 +67,20 @@ struct vxgi_data_n
                   + (m_voxel_unit[m_axis] * (m_current_slice_indices[n] + 4));
       switch(m_axis)
       {
-      case AlongAxis::X:
+      case FillAxis::X:
         projection = glm::ortho(
-            -half_dim.z,
-            half_dim.z,
             -half_dim.y,
             half_dim.y,
+            -half_dim.z,
+            half_dim.z,
             back,
             front
             );
 
-        center = glm::vec3 (m_bounding_volume.m_min.x - half_dim.x, m_center_pos.y + FLT_EPSILON, m_center_pos.z + FLT_EPSILON);
-        eye = glm::vec3 (m_bounding_volume.m_max.x - half_dim.x,m_center_pos.y, m_center_pos.z);
+        center = glm::vec3 (m_bounding_volume.m_min.x - half_dim.x, m_center_pos.y, m_center_pos.z );
+        eye = glm::vec3 (m_bounding_volume.m_max.x - half_dim.x,m_center_pos.y, m_center_pos.z + FLT_EPSILON);
         break;
-      case AlongAxis::Y:
+      case FillAxis::Y:
         projection = glm::ortho(
             -half_dim.x,
             half_dim.x,
@@ -85,7 +90,7 @@ struct vxgi_data_n
         center = glm::vec3 (m_center_pos.x + FLT_EPSILON, m_bounding_volume.m_min.y - half_dim.y, m_center_pos.z + FLT_EPSILON);
         eye = glm::vec3 (m_center_pos.x, m_bounding_volume.m_max.y - half_dim.y, m_center_pos.z);
         break;
-      case AlongAxis::Z:
+      case FillAxis::Z:
         break;
       }
       view = glm::lookAt(eye, center, glm::vec3(1.0, 0.0, 0.0));
@@ -253,16 +258,16 @@ struct vxgi_data_n
   void on_imgui()
   {
     ImGui::Begin("VXGI V2 Debug");
-
+    ImGui::Checkbox("Freeze Slices", &m_debug_freeze_slices);
     if(ImGui::BeginMenu("Axis")) {
       if (ImGui::MenuItem("X")) {
-        m_axis = AlongAxis::X;
+        m_axis = FillAxis::X;
       }
       if (ImGui::MenuItem("Y")) {
-        m_axis = AlongAxis::Y;
+        m_axis = FillAxis::Y;
       }
       if (ImGui::MenuItem("Z")) {
-        m_axis = AlongAxis::Z;
+        m_axis = FillAxis::Z;
       }
 
       ImGui::EndMenu();
