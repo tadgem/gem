@@ -104,7 +104,7 @@ struct vxgi_data_n
               glm::ivec2 window_res)
   {
     ZoneScoped;
-    GEM_GPU_MARKER("VXGI Lighting Slices");
+    GEM_GPU_MARKER("VXGI Lighting Slice Pass");
     glLineWidth(10.0f);
     DirectionalLight sun{};
     std::vector<PointLight> point_lights{};
