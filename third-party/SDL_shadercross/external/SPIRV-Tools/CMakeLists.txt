@@ -121,6 +121,8 @@ endif()
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/)
 
+set(SPIRV_TOOLS_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include CACHE INTERNAL "")
+
 option(SPIRV_COLOR_TERMINAL "Enable color terminal output" ON)
 if(${SPIRV_COLOR_TERMINAL})
   add_definitions(-DSPIRV_COLOR_TERMINAL)

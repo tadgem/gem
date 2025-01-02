@@ -35,7 +35,7 @@ endif()
 
 if (IS_DIRECTORY ${SPIRV_HEADER_DIR})
   # TODO(dneto): We should not be modifying the parent scope.
-  set(SPIRV_HEADER_INCLUDE_DIR ${SPIRV_HEADER_DIR}/include PARENT_SCOPE)
+  set(SPIRV_HEADER_INCLUDE_DIR ${SPIRV_HEADER_DIR}/include CACHE INTERNAL "")
 
   # Add SPIRV-Headers as a sub-project if it isn't already defined.
   # Do this so enclosing projects can use SPIRV-Headers_SOURCE_DIR to find
