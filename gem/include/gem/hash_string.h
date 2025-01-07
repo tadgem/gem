@@ -57,7 +57,7 @@ struct HashString {
 
   HashString(u64 value) : m_value(value) {}
 
-  template <typename T> HashString() : m_value(get_type_hash<T>()) {}
+  template <typename T> HashString() : m_value(HashUtils::get_type_hash<T>()) {}
 
   u64 m_value;
 

@@ -1,7 +1,7 @@
 #pragma once
+#include <vector>
 #include "gem/gl/gl_shader.h"
 #include "gem/lights.h"
-
 namespace gem {
 
 class GLFramebuffer;

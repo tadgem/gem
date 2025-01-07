@@ -22,6 +22,9 @@ set(GEM_SRC
 
 set(CMAKE_CXX_STANDARD 17)
 
+# TODO: REMOVE: breaking some C++ rules for file dialog :(
+add_compile_options(-fpermissive)
+
 add_library(gem STATIC ${GEM_SRC})
 
 set(GEM_INCLUDES
@@ -46,4 +49,8 @@ set(GEM_INCLUDES
 
 target_link_libraries(gem PRIVATE efsw glew_s SDL3-static SDL3_shadercross-static glm assimp cpptrace::cpptrace spdlog TracyClient)
 target_include_directories(gem PUBLIC ${GEM_INCLUDES})
-target_link_options(gem PUBLIC /D_ITERATOR_DEBUG_LEVEL=0)
+target_compile_definitions(gem PUBLIC GLEW_NO_GLU)
+
+if(MSVC)
+    target_link_options(gem PUBLIC /D_ITERATOR_DEBUG_LEVEL=0)
+endif()

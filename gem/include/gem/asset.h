@@ -71,7 +71,7 @@ public:
   TAsset(_Ty data, const std::string &path)
       : Asset(path, _AssetType), m_data(data) {}
 
-  ~TAsset() { m_data.~_Ty(); }
+  ~TAsset() {}
 
   void *operator new(size_t size) {
     std::string type_name = HashUtils::get_type_name<TAsset<_Ty, _AssetType>>();
@@ -116,7 +116,6 @@ public:
                        const std::string &path)
       : AssetIntermediate(data), m_intermediate(inter), m_path(path) {}
 
-  ~TAssetIntermediate() { m_intermediate.~_IntermediateType(); }
 
   TAsset<_AssetType, _AssetTypeEnum> *get_concrete_asset() {
     return static_cast<TAsset<_AssetType, _AssetTypeEnum> *>(m_asset_data);

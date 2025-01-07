@@ -41,7 +41,7 @@ void GemFileWatchListener::handleFileAction(efsw::WatchID watchid,
 
       Engine::debug_callbacks.add([shader_asset, shader_source]() {
         shader_asset->m_data.release();
-        shader_asset->m_data = GLShader::GLShader(shader_source);
+        shader_asset->m_data = GLShader(shader_source);
       });
     }
     break;

@@ -25,7 +25,7 @@ AssetHandle AssetManager::load_asset(const std::string &path,
                                       AssetLoadedCallback on_asset_loaded) {
   ZoneScoped;
   if (!std::filesystem::exists(path)) {
-    return AssetHandle::AssetHandle();
+    return {};
   }
 
   std::string wd = std::filesystem::current_path().string();

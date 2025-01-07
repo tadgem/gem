@@ -12,7 +12,8 @@ namespace gem {
 void Engine::init() {
   ZoneScoped;
   glm::ivec2 resolution = {1920, 1080};
-  GPUBackend::init_backend<GLBackend>(BackendInit{resolution, true});
+  BackendInit init_props = {resolution, true};
+  GPUBackend::init_backend<GLBackend>(init_props);
 
   systems.add_system<TransformSystem>();
   systems.add_system<MeshSystem>();

@@ -63,11 +63,12 @@ std::vector<Entity> Scene::create_entity_from_model(
     }
     entities.push_back(e);
   }
+  static const glm::vec3 ZERO = glm::vec3(0.0);
+  glm::mat4 model_matrix = Utils::get_model_matrix(ZERO, euler, scale);
 
   // TODO: Update to work from scene overall aabb
   m_scene_bounding_volume = Utils::transform_aabb(
-      model_to_load.m_aabb,
-      Utils::get_model_matrix(glm::vec3(0.0), euler, scale));
+      model_to_load.m_aabb, model_matrix);
 
   return entities;
 }
