@@ -4,24 +4,27 @@
 struct Shader
 {
   SDL_GPUShader* m_shader;
-  SDL_ShaderCross_GraphicsShaderInfo m_info;
+  SDL_ShaderCross_GraphicsShaderMetadata m_info;
 };
 
 
 Shader LoadShader(
     SDL_GPUDevice* device,
     const char* shaderSource,
-    SDL_GPUShaderStage shaderStage)
+    SDL_ShaderCross_ShaderStage shaderStage)
 {
-  SDL_ShaderCross_GraphicsShaderInfo info;
-  SDL_GPUShader* shader = SDL_ShaderCross_CompileGraphicsShaderFromHLSL(
+    SDL_ShaderCross_GraphicsShaderMetadata info;
+    SDL_ShaderCross_HLSL_Info source_info{};
+    source_info.source = shaderSource;
+    source_info.entrypoint = "main";
+    source_info.defines = NULL;
+    source_info.include_dir = NULL;
+    source_info.name = NULL;
+    source_info.shader_stage = shaderStage;
+
+    SDL_GPUShader* shader = SDL_ShaderCross_CompileGraphicsShaderFromHLSL(
       device,
-      shaderSource,
-      "main",
-      NULL,
-      NULL,
-      0,
-      shaderStage,
+      &source_info,
       &info);
 
   return {shader, info};
@@ -115,8 +118,10 @@ int main()
   targetInfo.num_color_targets = 1;
   targetInfo.color_target_descriptions = targetDescriptions;
 
-  auto vert = LoadShader(device, &vert_source[0], SDL_GPU_SHADERSTAGE_VERTEX);
-  auto frag = LoadShader(device, &frag_source[0], SDL_GPU_SHADERSTAGE_FRAGMENT);
+  // TODO: Wont ship with shadercross as its huge, need to abstract the concept of shaderstage
+  // outwith shader cross
+  auto vert = LoadShader(device, &vert_source[0], SDL_SHADERCROSS_SHADERSTAGE_VERTEX);
+  auto frag = LoadShader(device, &frag_source[0], SDL_SHADERCROSS_SHADERSTAGE_FRAGMENT);
 
   SDL_GPUGraphicsPipelineCreateInfo pipelineCreateInfo = {};
   pipelineCreateInfo.target_info = targetInfo;

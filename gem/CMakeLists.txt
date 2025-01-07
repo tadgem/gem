@@ -38,7 +38,7 @@ set(GEM_INCLUDES
         ${THIRD_PARTY_DIR}/entt
         ${THIRD_PARTY_DIR}/im3d
         ${THIRD_PARTY_DIR}/tracy/public
-        ${THIRD_PARTY_DIR}/sdl-shadercross/include
+        ${THIRD_PARTY_DIR}/SDL_shadercross/include
         ${THIRD_PARTY_DIR}
         ${SUBMODULE_DIR}/spdlog/include
         ${SUBMODULE_DIR}/cpptrace/include
