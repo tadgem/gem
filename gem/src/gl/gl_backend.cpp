@@ -67,7 +67,7 @@ void GLBackend::init(BackendInit &init_props) {
   SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
   SDL_WindowFlags window_flags =
       (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE |
-                        SDL_WINDOW_HIGH_PIXEL_DENSITY | SDL_WINDOW_MAXIMIZED);
+                        SDL_WINDOW_HIGH_PIXEL_DENSITY);
   m_window =
       SDL_CreateWindow("GEM Engine", init_props.window_resolution.x,
                        init_props.window_resolution.y, window_flags);

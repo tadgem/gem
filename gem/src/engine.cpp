@@ -9,9 +9,8 @@
 
 namespace gem {
 
-void Engine::init() {
+void Engine::init(const glm::ivec2& resolution) {
   ZoneScoped;
-  glm::ivec2 resolution = {1920, 1080};
   BackendInit init_props = {resolution, true};
   GPUBackend::init_backend<GLBackend>(init_props);
 

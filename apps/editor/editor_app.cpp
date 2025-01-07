@@ -7,7 +7,7 @@ using namespace gem;
 editor_application::editor_application()
 {
     glm::ivec2 resolution = {1920, 1080};
-    Engine::init();
+    Engine::init(resolution);
     GLRenderer renderer{};
     renderer.init(Engine::assets, resolution);
 

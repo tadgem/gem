@@ -25,7 +25,7 @@ public:
   inline static Project active_project;
   inline static DebugCallbackCollection debug_callbacks;
 
-  static void init();
+  static void init(const glm::ivec2& resolution);
   static void update();
   static void save_project_to_disk(const std::string &filename,
                                    const std::string &directory);

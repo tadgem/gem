@@ -73,7 +73,7 @@ void on_imgui(GLRenderer & renderer, Scene * s, glm::vec2 mouse_pos,
 int main()
 {
     glm::ivec2 resolution = {1920, 1080};
-    Engine::init();
+    Engine::init(resolution);
     GLRenderer renderer{};
     renderer.init(Engine::assets, resolution);
 

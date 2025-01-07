@@ -304,15 +304,6 @@ void on_im3d(GLRenderer & renderer, Scene & current_scene, VXGIData & vxgi,
              Camera & cam, glm::mat4& dir_light_matrix)
 {
 
-    static float left = -50.0f;
-    static float right = 50.0f;
-    static float bottom = -50.0f;
-    static float top = 50.0f;
-    static float near0 = 0.0f;
-    static float far0 = 50.0f;
-    static glm::vec3 center = glm::vec3(FLT_EPSILON);
-    static glm::vec3 eye = glm::vec3(0.0, 50.0, 0.0);
-
     vxgi.update_bounding_volume(glm::vec3(0.0f));
 
     DebugDraw::DrawBoundingBox(vxgi.m_bounding_volume.m_min, vxgi.m_bounding_volume.m_max, 2.0f, Im3d::Color_Pink);
@@ -321,36 +312,7 @@ void on_im3d(GLRenderer & renderer, Scene & current_scene, VXGIData & vxgi,
       DebugDraw::DrawFrustum(vxgi.m_slice_vp_matrices[n], 1.0, s_colours[n]);
     }
 
-    glm::mat4 projection = glm::ortho(
-        left,
-        right,
-        bottom,
-        top,
-        near0,
-        far0);
-
-    glm::mat4 view = glm::lookAt(eye, center, glm::vec3(0.0, 1.0, 0.0));
-    glm::mat4 vp = projection * view;
-    vxgi.m_debug_vp = vp;
-    vxgi.m_debug_eye = eye;
-
     DebugDraw::DrawFrustum(dir_light_matrix, 2.0f, Im3d::Color_Cyan);
-    DebugDraw::DrawFrustum(vp, 2.0, Im3d::Color_Purple);
-    DebugDraw::DrawLine(eye, center, 2.0, Im3d::Color_Green);
-    Im3d::Text(ToIm3D(eye), Im3d::TextFlags_Default, "Eye Pos");
-    Im3d::Text(ToIm3D(center), Im3d::TextFlags_Default, "Center Pos");
-
-    ImGui::Begin("Debug Ortho Projections");
-    ImGui::DragFloat("Left", &left);
-    ImGui::DragFloat("Right", &right);
-    ImGui::DragFloat("Bottom", &bottom);
-    ImGui::DragFloat("Top", &top);
-    ImGui::DragFloat("Near", &near0);
-    ImGui::DragFloat("Far", &far0);
-    ImGui::DragFloat3("Eye", &eye[0]);
-    ImGui::DragFloat3("Center", &center[0]);
-    ImGui::End();
-
 }
 
 void on_imgui(GLRenderer & renderer, Scene * s, glm::vec2 mouse_pos,
@@ -405,8 +367,8 @@ void on_imgui(GLRenderer & renderer, Scene * s, glm::vec2 mouse_pos,
 
 int main()
 {
-    glm::ivec2 resolution = {1920, 1080};
-    Engine::init();
+    glm::ivec2 resolution = {1600, 900};
+    Engine::init(resolution);
     GLRenderer renderer{};
     renderer.init(Engine::assets, resolution);
 
