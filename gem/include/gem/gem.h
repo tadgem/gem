@@ -29,3 +29,4 @@
 #include "im3d_math.h"
 #include "imgui.h"
 #include "gem/gl/gl_dbg.h"
+#include "spdlog/spdlog.h"
