@@ -200,64 +200,9 @@ int GLShader::link_shader(gl_handle vert, gl_handle geom, gl_handle frag) {
   return prog_id;
 }
 
-std::unordered_map<GLShader::stage, std::string>
-GLShader::split_composite_shader(const std::string &input) {
-  ZoneScoped;
-  static std::unordered_map<std::string, GLShader::stage> s_known_stages = {
-      {"#frag", GLShader::stage::fragment},
-      {"#vert", GLShader::stage::vertex},
-      {"#geom", GLShader::stage::geometry},
-      {"#compute", GLShader::stage::compute}};
-  // static std::unordered_map<std::string, gl_shader::stage> s_known_stages = {
-  // };
-  auto stages = std::unordered_map<GLShader::stage, std::string>();
-  std::string version = "";
-
-  std::stringstream input_stream(input);
-  std::stringstream stage_stream{};
-  std::string line = "";
-  std::string stage = "";
-
-  while (std::getline(input_stream, line)) {
-    if (line.find("#version") != std::string::npos) {
-      version = line;
-      stage_stream << version << "\n";
-      continue;
-    }
-
-    for (auto &[known, stage_enum] : s_known_stages) {
-      if (line.find(known) != std::string::npos) {
-        if (!stage.empty()) {
-          stages.emplace(GLShader::stage(s_known_stages[stage]),
-                         std::string(stage_stream.str()));
-          stage_stream.str(std::string());
-          stage_stream.clear();
-          stage_stream << version << "\n";
-        }
-
-        stage = known;
-        break;
-      }
-    }
-
-    if (line == stage) {
-      continue;
-    }
-
-    stage_stream << line << "\n";
-  }
-
-  std::string last_stream = stage_stream.str();
-  if (!stage.empty() && !last_stream.empty()) {
-    stages.emplace(s_known_stages[stage], last_stream);
-  }
-
-  return stages;
-}
-
 GLShader GLShader::create_from_composite(const std::string &composite_shader) {
   std::unordered_map<GLShader::stage, std::string> stages =
-      GLShader::split_composite_shader(composite_shader);
+      split_composite_shader(composite_shader);
 
   if (stages.find(GLShader::stage::compute) != stages.end()) {
     return GLShader(stages[GLShader::stage::compute]);

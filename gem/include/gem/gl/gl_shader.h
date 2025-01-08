@@ -1,30 +1,14 @@
 #pragma once
 #include "GL/glew.h"
 #include "gem/alias.h"
+#include "gem/shader.h"
 #include "glm.hpp"
-#include <string>
-#include <unordered_map>
+
 
 namespace gem {
 
-class GLShader {
+class GLShader : public Shader {
 public:
-  enum class uniform_type {
-    UNKNOWN,
-    _int,
-    _float,
-    vec2,
-    vec3,
-    vec4,
-    mat3,
-    mat4,
-    sampler2D,
-    sampler3D,
-    image2D,
-    image3D
-  };
-
-  enum class stage { UNKNOWN, vertex, fragment, geometry, compute };
 
   unsigned int m_shader_id;
 
@@ -56,8 +40,6 @@ public:
   static int link_shader(gl_handle vert, gl_handle frag);
   static int link_shader(gl_handle vert, gl_handle geom, gl_handle frag);
 
-  static std::unordered_map<GLShader::stage, std::string>
-  split_composite_shader(const std::string &input);
 
   static GLShader create_from_composite(const std::string &composite_shader);
 

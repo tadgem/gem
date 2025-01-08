@@ -6140,7 +6140,13 @@ static VkRenderPass VULKAN_INTERNAL_CreateTransientRenderPass(
         NULL,
         &renderPass);
 
-    CHECK_VULKAN_ERROR_AND_RETURN(result, vkCreateRenderPass, VK_NULL_HANDLE)
+    if (result != VK_SUCCESS) {
+        if (renderer->debugMode) {
+            SDL_LogError_REAL(SDL_LOG_CATEGORY_GPU, "%s %s", "vkCreateRenderPass", VkErrorMessages(result));
+        }
+        SDL_SetError_REAL("%s %s", "vkCreateRenderPass", VkErrorMessages(result));
+        return ((void *)0);
+    }
 
     return renderPass;
 }
