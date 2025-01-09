@@ -1,34 +1,6 @@
 #include "gem/gem.h"
-#include "SDL3_shadercross/SDL_shadercross.h"
-
-struct SDLShader
-{
-  SDL_GPUShader* m_shader;
-  SDL_ShaderCross_GraphicsShaderMetadata m_info;
-};
-
-
-SDLShader LoadShader(
-    SDL_GPUDevice* device,
-    const char* shaderSource,
-    SDL_ShaderCross_ShaderStage shaderStage)
-{
-    SDL_ShaderCross_GraphicsShaderMetadata info;
-    SDL_ShaderCross_HLSL_Info source_info{};
-    source_info.source = shaderSource;
-    source_info.entrypoint = "main";
-    source_info.defines = NULL;
-    source_info.include_dir = NULL;
-    source_info.name = NULL;
-    source_info.shader_stage = shaderStage;
-
-    SDL_GPUShader* shader = SDL_ShaderCross_CompileGraphicsShaderFromHLSL(
-      device,
-      &source_info,
-      &info);
-
-  return {shader, info};
-}
+#include "gem/sdl/gpu_helpers.h"
+#include "gem/sdl/vertex.h"
 
 int main()
 {
@@ -64,39 +36,39 @@ int main()
     }
 
     std::vector<SDL_GPUColorTargetDescription> formats(6);
-
+    auto swapchain_format = SDL_GetGPUSwapchainTextureFormat(device, window);
     for(int i = 0; i < 6; i++)
     {
-      formats.push_back({SDL_GetGPUSwapchainTextureFormat(device, window)});
+      formats[i] = {swapchain_format};
     }
 
     SDL_GPUGraphicsPipelineTargetInfo targetInfo {};
     targetInfo.num_color_targets = 6;
     targetInfo.color_target_descriptions = formats.data();
-
+    targetInfo.has_depth_stencil_target = false;
 
     SDL_GPUVertexBufferDescription bufferDesc;
     bufferDesc.slot = 0;
     bufferDesc.input_rate  = SDL_GPU_VERTEXINPUTRATE_VERTEX;
     bufferDesc.instance_step_rate = 0;
-    bufferDesc.pitch = 32;
+    bufferDesc.pitch = gem::sdl::VertexDescriptions::PosNormalUV::Offset();
 
-    std::vector<SDL_GPUVertexAttribute> vertexAttributes;
-    vertexAttributes.push_back({0,0, SDL_GPU_VERTEXELEMENTFORMAT_FLOAT3, 0});
-    vertexAttributes.push_back({1,0, SDL_GPU_VERTEXELEMENTFORMAT_FLOAT3, sizeof(float) * 3});
-    vertexAttributes.push_back({2,0, SDL_GPU_VERTEXELEMENTFORMAT_FLOAT2, sizeof(float) * 6});
+    auto vertexAttributes = gem::sdl::VertexDescriptions::PosNormalUV::Get();
 
     std::vector<SDL_GPUVertexBufferDescription> bufferDescs {bufferDesc};
     SDL_GPUVertexInputState vertexState;
     vertexState.num_vertex_buffers = 1;
     vertexState.vertex_buffer_descriptions = bufferDescs.data();
-    vertexState.num_vertex_attributes = 3;
+    vertexState.num_vertex_attributes = vertexAttributes.size();
     vertexState.vertex_attributes = vertexAttributes.data();
 
     // TODO: Wont ship with shadercross as its huge, need to abstract the concept of shaderstage
     // outwith shader cross
-    auto vert = LoadShader(device, stages[gem::Shader::stage::vertex].c_str(), SDL_SHADERCROSS_SHADERSTAGE_VERTEX);
-    auto frag = LoadShader(device, stages[gem::Shader::stage::fragment].c_str(), SDL_SHADERCROSS_SHADERSTAGE_FRAGMENT);
+    auto vert = gem::sdl::GPUHelpers::LoadShader(device,
+    stages[gem::Shader::stage::vertex].c_str(), SDL_SHADERCROSS_SHADERSTAGE_VERTEX);
+
+    auto frag = gem::sdl::GPUHelpers::LoadShader(device,
+    stages[gem::Shader::stage::fragment].c_str(), SDL_SHADERCROSS_SHADERSTAGE_FRAGMENT);
 
     SDL_GPUGraphicsPipelineCreateInfo pipelineCreateInfo = {};
     pipelineCreateInfo.target_info = targetInfo;
@@ -112,9 +84,9 @@ int main()
       spdlog::error("SDL GPU : Failed to create graphics pipeline for triangle shader");
       return -1;
     }
-//
-//    SDL_ReleaseGPUShader(device, vert.m_shader);
-//    SDL_ReleaseGPUShader(device, frag.m_shader);
+
+    SDL_ReleaseGPUShader(device, vert.m_shader);
+    SDL_ReleaseGPUShader(device, frag.m_shader);
 
     static bool quit = false;
 

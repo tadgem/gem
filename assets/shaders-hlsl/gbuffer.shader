@@ -78,12 +78,12 @@ struct FragInput
 
 struct FragOutput
 {
-    float3 diffuse : SV_Target0;
+    float4 diffuse : SV_Target0;
     float4 clip_pos : SV_Target1;
-    float3 normal : SV_Target2;
-    float3 pbr : SV_Target3;
+    float4 normal : SV_Target2;
+    float4 pbr : SV_Target3;
     float2 velocity : SV_Target4;
-    float3 entity_id : SV_Target5;
+    float4 entity_id : SV_Target5;
 };
 
 cbuffer UniformBlock : register(b1, space1)
@@ -161,13 +161,13 @@ FragOutput main(FragInput input)
     FragOutput o;
     float4 diffuse = DiffuseTexture.Sample(DiffuseSampler, input.uv);
     o.clip_pos = input.pos;
-    o.normal = getNormalFromMap(input);
+    o.normal = float4(getNormalFromMap(input), 0.0);
 
     float r = ((u_entity_index & 0x000000FF) >>  0);
     float g = ((u_entity_index & 0x0000FF00) >>  8);
     float b = ((u_entity_index & 0x00FF0000) >> 16);
 
-    o.entity_id = float3(r,g,b);
+    o.entity_id = float4(r,g,b, 0.0);
 
     float2 currentPosNDC = input.clip_pos.xy / input.clip_pos.z;
     float2 previousPosNDC = input.last_clip_pos.xy / input.last_clip_pos.z;
@@ -177,6 +177,6 @@ FragOutput main(FragInput input)
     float metallic = MetallicTexture.Sample(MetallicSampler, input.uv).r;
     float roughness = RoughnessTexture.Sample(RoughnessSampler, input.uv).r;
     float ao = AOTexture.Sample(AOSampler, input.uv).r;
-    o.pbr = float3(metallic, roughness, ao);
+    o.pbr = float4(metallic, roughness, ao, 0.0);
     return o;
 }
