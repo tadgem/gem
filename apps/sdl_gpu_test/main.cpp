@@ -1,42 +1,18 @@
 #include "gem/gem.h"
 #include "gem/sdl/gpu_helpers.h"
-#include "gem/sdl/vertex.h"
+#include "gem/sdl/gpu_state.h"
+#include "gem/sdl/vertex_def.h"
 
 int main()
 {
+    gem::sdl::GPUState state = gem::sdl::GPUState::Init();
+
     std::string hlsl = gem::Utils::load_string_from_path("assets/shaders-hlsl/gbuffer.shader");
     auto stages = gem::Shader::split_composite_shader(hlsl);
-    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_AUDIO);
-    SDL_ShaderCross_Init();
 
-    SDL_GPUDevice* device = SDL_CreateGPUDevice(
-      SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_DXIL | SDL_GPU_SHADERFORMAT_MSL,
-      true,
-      NULL
-      );
-
-    if(!device)
-    {
-    spdlog::error("SDL GPU : Failed to create a gpu device : {}", SDL_GetError());
-    return -1;
-    }
-
-    SDL_Window* window = SDL_CreateWindow("SDL GPU", 1600, 900, 0);
-
-    if(!window)
-    {
-    spdlog::error("SDL GPU : Failed to create a window");
-    return -1;
-    }
-
-    if (!SDL_ClaimWindowForGPUDevice(device, window))
-    {
-    spdlog::error("SDL GPU : Failed to claim window for gpu device");
-    return -1;
-    }
 
     std::vector<SDL_GPUColorTargetDescription> formats(6);
-    auto swapchain_format = SDL_GetGPUSwapchainTextureFormat(device, window);
+    auto swapchain_format = SDL_GetGPUSwapchainTextureFormat(state.m_device, state.m_window);
     for(int i = 0; i < 6; i++)
     {
       formats[i] = {swapchain_format};
@@ -64,10 +40,10 @@ int main()
 
     // TODO: Wont ship with shadercross as its huge, need to abstract the concept of shaderstage
     // outwith shader cross
-    auto vert = gem::sdl::GPUHelpers::LoadShader(device,
+    auto vert = gem::sdl::GPUHelpers::LoadShader(state.m_device,
     stages[gem::Shader::stage::vertex].c_str(), SDL_SHADERCROSS_SHADERSTAGE_VERTEX);
 
-    auto frag = gem::sdl::GPUHelpers::LoadShader(device,
+    auto frag = gem::sdl::GPUHelpers::LoadShader(state.m_device,
     stages[gem::Shader::stage::fragment].c_str(), SDL_SHADERCROSS_SHADERSTAGE_FRAGMENT);
 
     SDL_GPUGraphicsPipelineCreateInfo pipelineCreateInfo = {};
@@ -78,21 +54,26 @@ int main()
     pipelineCreateInfo.primitive_type = SDL_GPU_PRIMITIVETYPE_TRIANGLELIST;
     pipelineCreateInfo.rasterizer_state.fill_mode = SDL_GPU_FILLMODE_FILL;
 
-    auto fillPipeline = SDL_CreateGPUGraphicsPipeline(device, &pipelineCreateInfo);
+    auto fillPipeline = SDL_CreateGPUGraphicsPipeline(state.m_device, &pipelineCreateInfo);
     if(!fillPipeline)
     {
       spdlog::error("SDL GPU : Failed to create graphics pipeline for triangle shader");
       return -1;
     }
 
-    SDL_ReleaseGPUShader(device, vert.m_shader);
-    SDL_ReleaseGPUShader(device, frag.m_shader);
+    SDL_ReleaseGPUShader(state.m_device, vert.m_shader);
+    SDL_ReleaseGPUShader(state.m_device, frag.m_shader);
 
     static bool quit = false;
 
     while(!quit)
     {
-        SDL_GPUCommandBuffer* cmdbuf = SDL_AcquireGPUCommandBuffer(device);
+        SDL_Event e;
+        while(SDL_PollEvent(&e))
+        {
+          continue;
+        }
+        SDL_GPUCommandBuffer* cmdbuf = SDL_AcquireGPUCommandBuffer(state.m_device);
         if (cmdbuf == NULL)
         {
             SDL_Log("AcquireGPUCommandBuffer failed: %s", SDL_GetError());
@@ -100,7 +81,7 @@ int main()
         }
 
         SDL_GPUTexture* swapchainTexture;
-        if (!SDL_AcquireGPUSwapchainTexture(cmdbuf, window, &swapchainTexture, NULL, NULL)) {
+        if (!SDL_AcquireGPUSwapchainTexture(cmdbuf, state.m_window, &swapchainTexture, NULL, NULL)) {
             SDL_Log("WaitAndAcquireGPUSwapchainTexture failed: %s", SDL_GetError());
             return -1;
         }
