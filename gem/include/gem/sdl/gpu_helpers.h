@@ -13,10 +13,6 @@ struct Shader {
 
 class GPUHelpers {
 public:
-  static SDL_GPUTexture *
-  CreateTexture2D(SDL_GPUDevice *device, SDL_GPUTextureFormat format,
-                  glm::ivec2 resolution, SDL_GPUTextureUsageFlags usage,
-                  uint32_t layer_count = 1, uint32_t num_levels = 1);
 
   static Shader LoadShader(SDL_GPUDevice *device, const char *shaderSource,
                            SDL_ShaderCross_ShaderStage shaderStage);

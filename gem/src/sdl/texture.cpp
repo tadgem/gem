@@ -1,5 +1,5 @@
 #include "gem/sdl/texture.h"
-
+#include <memory>
 
 gem::sdl::Texture gem::sdl::Texture::CreateTexture2D(
     SDL_GPUDevice *device, SDL_GPUTextureFormat format, glm::ivec2 resolution,
@@ -20,3 +20,25 @@ gem::sdl::Texture gem::sdl::Texture::CreateTexture2D(
 
 gem::sdl::Texture::Texture(const gem::sdl::Texture::Type &type,
                            SDL_GPUTexture *tex) : m_type(type), m_texture(tex){}
+gem::sdl::Texture::Texture(const gem::sdl::Texture &other)
+    : m_type(other.m_type), m_texture(other.m_texture)
+{
+
+}
+gem::sdl::Texture::~Texture() {
+
+}
+gem::sdl::Texture::Texture(gem::sdl::Texture &&other) noexcept
+    : m_type(other.m_type), m_texture(other.m_texture) {}
+
+gem::sdl::Texture &
+gem::sdl::Texture::operator=(const gem::sdl::Texture &other) {
+  m_type = other.m_type;
+  m_texture = other.m_texture;
+  return *this;
+}
+gem::sdl::Texture &
+gem::sdl::Texture::operator=(gem::sdl::Texture &&other) noexcept {
+  m_type = other.m_type;
+  m_texture = other.m_texture;
+}
