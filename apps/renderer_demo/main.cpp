@@ -12,11 +12,11 @@ void on_im3d(GLRenderer & renderer, Scene & current_scene)
         return;
     }
 
-    if (!current_scene.m_registry.any_of<Mesh>(renderer.m_last_selected_entity))
+    if (!current_scene.m_registry.any_of<GLMesh>(renderer.m_last_selected_entity))
     {
         return;
     }
-    Mesh & meshc = current_scene.m_registry.get<Mesh>(renderer.m_last_selected_entity);
+    GLMesh & meshc = current_scene.m_registry.get<GLMesh>(renderer.m_last_selected_entity);
     Im3d::DrawAlignedBox(ToIm3D(meshc.m_transformed_aabb.m_min), ToIm3D(meshc.m_transformed_aabb.m_max));
 }
 

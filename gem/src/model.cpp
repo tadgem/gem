@@ -120,11 +120,11 @@ void process_mesh(Model &model, aiMesh *m, aiNode *node, const aiScene *scene,
     AABB bb = {{m->mAABB.mMin.x, m->mAABB.mMin.y, m->mAABB.mMin.z},
                {m->mAABB.mMax.x, m->mAABB.mMax.y, m->mAABB.mMax.z}};
 
-    Mesh new_mesh{};
-    new_mesh.m_vao = mesh_builder.build();
-    new_mesh.m_index_count = indices.size();
-    new_mesh.m_original_aabb = bb;
-    new_mesh.m_material_index = m->mMaterialIndex;
+    AMesh* new_mesh = new AMesh();
+    new_mesh->m_vao = mesh_builder.build();
+    new_mesh->m_index_count = indices.size();
+    new_mesh->m_original_aabb = bb;
+    new_mesh->m_material_index = m->mMaterialIndex;
 
     model.m_meshes.push_back(new_mesh);
   }
@@ -211,24 +211,24 @@ Model Model::load_model_and_textures_from_path(const std::string &path) {
   process_node(m, scene->mRootNode, scene, false, mesh_entries);
 
   for (auto &mesh : m.m_meshes) {
-    if (mesh.m_original_aabb.m_min.x < model_aabb.m_min.x) {
-      model_aabb.m_min.x = mesh.m_original_aabb.m_min.x;
+    if (mesh->m_original_aabb.m_min.x < model_aabb.m_min.x) {
+      model_aabb.m_min.x = mesh->m_original_aabb.m_min.x;
     }
-    if (mesh.m_original_aabb.m_min.y < model_aabb.m_min.y) {
-      model_aabb.m_min.y = mesh.m_original_aabb.m_min.y;
+    if (mesh->m_original_aabb.m_min.y < model_aabb.m_min.y) {
+      model_aabb.m_min.y = mesh->m_original_aabb.m_min.y;
     }
-    if (mesh.m_original_aabb.m_min.z < model_aabb.m_min.z) {
-      model_aabb.m_min.z = mesh.m_original_aabb.m_min.z;
+    if (mesh->m_original_aabb.m_min.z < model_aabb.m_min.z) {
+      model_aabb.m_min.z = mesh->m_original_aabb.m_min.z;
     }
 
-    if (mesh.m_original_aabb.m_max.x > model_aabb.m_max.x) {
-      model_aabb.m_max.x = mesh.m_original_aabb.m_max.x;
+    if (mesh->m_original_aabb.m_max.x > model_aabb.m_max.x) {
+      model_aabb.m_max.x = mesh->m_original_aabb.m_max.x;
     }
-    if (mesh.m_original_aabb.m_max.y > model_aabb.m_max.y) {
-      model_aabb.m_max.y = mesh.m_original_aabb.m_max.y;
+    if (mesh->m_original_aabb.m_max.y > model_aabb.m_max.y) {
+      model_aabb.m_max.y = mesh->m_original_aabb.m_max.y;
     }
-    if (mesh.m_original_aabb.m_max.z > model_aabb.m_max.z) {
-      model_aabb.m_max.z = mesh.m_original_aabb.m_max.z;
+    if (mesh->m_original_aabb.m_max.z > model_aabb.m_max.z) {
+      model_aabb.m_max.z = mesh->m_original_aabb.m_max.z;
     }
   }
   m.m_aabb = model_aabb;
@@ -314,24 +314,24 @@ void Model::update_aabb() {
   ZoneScoped;
   AABB model_aabb{};
   for (auto &mesh : m_meshes) {
-    if (mesh.m_original_aabb.m_min.x < model_aabb.m_min.x) {
-      model_aabb.m_min.x = mesh.m_original_aabb.m_min.x;
+    if (mesh->m_original_aabb.m_min.x < model_aabb.m_min.x) {
+      model_aabb.m_min.x = mesh->m_original_aabb.m_min.x;
     }
-    if (mesh.m_original_aabb.m_min.y < model_aabb.m_min.y) {
-      model_aabb.m_min.y = mesh.m_original_aabb.m_min.y;
+    if (mesh->m_original_aabb.m_min.y < model_aabb.m_min.y) {
+      model_aabb.m_min.y = mesh->m_original_aabb.m_min.y;
     }
-    if (mesh.m_original_aabb.m_min.z < model_aabb.m_min.z) {
-      model_aabb.m_min.z = mesh.m_original_aabb.m_min.z;
+    if (mesh->m_original_aabb.m_min.z < model_aabb.m_min.z) {
+      model_aabb.m_min.z = mesh->m_original_aabb.m_min.z;
     }
 
-    if (mesh.m_original_aabb.m_max.x > model_aabb.m_max.x) {
-      model_aabb.m_max.x = mesh.m_original_aabb.m_max.x;
+    if (mesh->m_original_aabb.m_max.x > model_aabb.m_max.x) {
+      model_aabb.m_max.x = mesh->m_original_aabb.m_max.x;
     }
-    if (mesh.m_original_aabb.m_max.y > model_aabb.m_max.y) {
-      model_aabb.m_max.y = mesh.m_original_aabb.m_max.y;
+    if (mesh->m_original_aabb.m_max.y > model_aabb.m_max.y) {
+      model_aabb.m_max.y = mesh->m_original_aabb.m_max.y;
     }
-    if (mesh.m_original_aabb.m_max.z > model_aabb.m_max.z) {
-      model_aabb.m_max.z = mesh.m_original_aabb.m_max.z;
+    if (mesh->m_original_aabb.m_max.z > model_aabb.m_max.z) {
+      model_aabb.m_max.z = mesh->m_original_aabb.m_max.z;
     }
   }
   m_aabb = model_aabb;
@@ -339,8 +339,8 @@ void Model::update_aabb() {
 
 void Model::release() {
   ZoneScoped;
-  for (Mesh &m : m_meshes) {
-    m.m_vao.release();
+  for (AMesh* m : m_meshes) {
+    m->m_vao.release();
   }
 }
 } // namespace gem

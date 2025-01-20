@@ -67,11 +67,11 @@ void add_cube(AssetManager &am) {
 
   Shapes::s_cube_vao = cube_with_normals_builder.build();
   AABB cube_bb{{0, 0, 0}, {1, 1, 1}};
-  Shapes::s_cube_mesh = Mesh{Shapes::s_cube_vao, 36, cube_bb, cube_bb, 0};
+  Shapes::s_cube_mesh = new AMesh{36, cube_bb, cube_bb, 0, Shapes::s_cube_vao};
 
   Model cube_model{};
   cube_model.m_meshes.push_back(Shapes::s_cube_mesh);
-  cube_model.m_aabb = Shapes::s_cube_mesh.m_original_aabb;
+  cube_model.m_aabb = Shapes::s_cube_mesh->m_original_aabb;
 
   am.provide_asset<Model, AssetType::model>("cube", cube_model);
 }
@@ -589,11 +589,11 @@ void add_cylinder(AssetManager &am) {
   Shapes::s_cylinder_vao = cylinder_builder.build();
   AABB cube_bb{{0, 0, 0}, {1, 1, 1}};
   Shapes::s_cylinder_mesh =
-      Mesh{Shapes::s_cylinder_vao, 36, cube_bb, cube_bb, 0};
+      new AMesh{36, cube_bb, cube_bb, 0, Shapes::s_cylinder_vao};
 
   Model cylinder_model{};
   cylinder_model.m_meshes.push_back(Shapes::s_cylinder_mesh);
-  cylinder_model.m_aabb = Shapes::s_cylinder_mesh.m_original_aabb;
+  cylinder_model.m_aabb = Shapes::s_cylinder_mesh->m_original_aabb;
 
   am.provide_asset<Model, AssetType::model>("cylinder", cylinder_model);
 }
@@ -861,11 +861,11 @@ void add_cone(AssetManager &am) {
 
   Shapes::s_cone_vao = cone_builder.build();
   AABB cube_bb{{0, 0, 0}, {1, 1, 1}};
-  Shapes::s_cone_mesh = Mesh{Shapes::s_cone_vao, 36, cube_bb, cube_bb, 0};
+  Shapes::s_cone_mesh = new AMesh{ 36, cube_bb, cube_bb, 0, Shapes::s_cone_vao};
 
   Model cone_model{};
   cone_model.m_meshes.push_back(Shapes::s_cone_mesh);
-  cone_model.m_aabb = Shapes::s_cone_mesh.m_original_aabb;
+  cone_model.m_aabb = Shapes::s_cone_mesh->m_original_aabb;
 
   am.provide_asset<Model, AssetType::model>("cone", cone_model);
 }
@@ -5493,11 +5493,11 @@ void add_torus(AssetManager &am) {
 
   Shapes::s_torus_vao = torus_builder.build();
   AABB cube_bb{{0, 0, 0}, {1, 1, 1}};
-  Shapes::s_torus_mesh = Mesh{Shapes::s_torus_vao, 36, cube_bb, cube_bb, 0};
+  Shapes::s_torus_mesh = new AMesh{ 36, cube_bb, cube_bb, 0, Shapes::s_torus_vao};
 
   Model torus_model{};
   torus_model.m_meshes.push_back(Shapes::s_torus_mesh);
-  torus_model.m_aabb = Shapes::s_torus_mesh.m_original_aabb;
+  torus_model.m_aabb = Shapes::s_torus_mesh->m_original_aabb;
 
   am.provide_asset<Model, AssetType::model>("torus", torus_model);
 }
@@ -9357,11 +9357,11 @@ void add_sphere(AssetManager &am) {
   Shapes::s_sphere_vao = sphere_builder.build();
   AABB sphere_bb{{0, 0, 0}, {1, 1, 1}};
   Shapes::s_sphere_mesh =
-      Mesh{Shapes::s_sphere_vao, sphere_num_verts, sphere_bb, sphere_bb, 0};
+      new AMesh{ sphere_num_verts, sphere_bb, sphere_bb, 0, Shapes::s_sphere_vao};
 
   Model sphere_model{};
   sphere_model.m_meshes.push_back(Shapes::s_sphere_mesh);
-  sphere_model.m_aabb = Shapes::s_sphere_mesh.m_original_aabb;
+  sphere_model.m_aabb = Shapes::s_sphere_mesh->m_original_aabb;
 
   am.provide_asset<Model, AssetType::model>("sphere", sphere_model);
 }
@@ -9482,7 +9482,7 @@ VAO Shapes::gen_cube_instanced_vao(std::vector<glm::mat4> &matrices,
   return cube_builder.build();
 }
 
-void Shapes::init_built_in_assets(AssetManager &am) {
+void Shapes::init_built_in_assets(AssetManager &am, GPUBackend* backend) {
   ZoneScoped;
   add_screen_quad();
   add_cube_pos_only();

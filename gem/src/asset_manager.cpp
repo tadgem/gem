@@ -277,11 +277,11 @@ void submit_meshes_to_gpu(AssetIntermediate *model_asset) {
   }
 
   mesh_builder.add_index_buffer(indices);
-  Mesh m{};
-  m.m_index_count = static_cast<u32>(indices.size());
-  m.m_material_index = entry.m_material_index;
-  m.m_original_aabb = entry.m_mesh_aabb;
-  m.m_vao = mesh_builder.build();
+  AMesh* m = new AMesh();
+  m->m_index_count = static_cast<u32>(indices.size());
+  m->m_material_index = entry.m_material_index;
+  m->m_original_aabb = entry.m_mesh_aabb;
+  m->m_vao = mesh_builder.build();
   // create real mesh object on gpu
 
   ma->m_data.m_meshes.push_back(m);

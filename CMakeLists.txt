@@ -4,6 +4,9 @@ project(gem-engine)
 # built in options
 set(CMAKE_CXX_STANDARD 17)
 
+# development options
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # library options
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Disable ASSIMP dynamic linking")
 set(SDL_SHARED OFF CACHE INTERNAL "")
@@ -21,6 +24,7 @@ set(SDL_THREADS ON)
 set(SDLSHADERCROSS_VENDORED ON CACHE INTERNAL "")
 set(SDLSHADERCROSS_SPIRVCROSS_SHARED OFF CACHE INTERNAL "")
 set(USE_WAYLAND OFF CACHE INTERNAL "")
+set(SPIRV_REFLECT_STATIC_LIB ON CACHE INTERNAL "")
 
 if(NOT MSVC)
     message("-- Disabling DirectX shader compilation")
@@ -30,6 +34,7 @@ endif()
 add_subdirectory(submodules/cpptrace)
 add_subdirectory(submodules/spdlog)
 add_subdirectory(submodules/efsw)
+add_subdirectory(submodules/SPIRV-Reflect)
 add_subdirectory(third-party/sdl)
 add_subdirectory(third-party/SDL_shadercross)
 add_subdirectory(third-party/tracy)

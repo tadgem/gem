@@ -21,10 +21,10 @@ void Transform::update_transforms(Scene &current_scene) {
     trans.m_normal_matrix = Utils::get_normal_matrix(trans.m_model);
   }
 
-  auto transform_mesh_view = current_scene.m_registry.view<Transform, Mesh>();
+  auto transform_mesh_view = current_scene.m_registry.view<Transform, MeshComponent>();
   for (auto [e, trans, mesh] : transform_mesh_view.each()) {
-    mesh.m_transformed_aabb =
-        Utils::transform_aabb(mesh.m_original_aabb, trans.m_model);
+    mesh.m_mesh->m_transformed_aabb =
+        Utils::transform_aabb(mesh.m_mesh->m_original_aabb, trans.m_model);
   }
 }
 

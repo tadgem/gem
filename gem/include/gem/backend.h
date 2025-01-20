@@ -1,18 +1,20 @@
 #pragma once
 #include <SDL3/SDL.h>
+#include <iostream>
+#include <string>
 #undef main
 #include "gem/dbg_memory.h"
 #include "glm.hpp"
 #include "imgui.h"
-#include <iostream>
-#include <string>
+
 namespace gem {
 
-enum class BackendAPI { open_gl, vulkan };
+class AMesh;
+
+enum class BackendAPI { open_gl, sdl };
 
 void set_imgui_style();
 
-void init_built_in_assets();
 
 void init_imgui_file_dialog();
 
@@ -42,7 +44,7 @@ public:
   virtual glm::vec2 get_window_dim() = 0;
   virtual const BackendAPI get_backend_api_enum() = 0;
 
-  float get_frame_time() const { return p_frametime; }
+  [[nodiscard]] float get_frame_time() const { return p_frametime; }
 
   SDL_Window *m_window = nullptr;
   bool m_quit = false;
@@ -60,4 +62,7 @@ public:
     s_selected_backend_api = s_selected_backend->get_backend_api_enum();
   }
 };
+
+
 } // namespace gem
+void init_built_in_assets(gem::GPUBackend* backend);

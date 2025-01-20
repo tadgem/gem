@@ -17,6 +17,14 @@ struct VAO {
   void release();
 };
 
+class AVAOBuilder
+{
+public:
+  virtual void add_vertex_buffer(void* data, size_t data_size, size_t data_count) = 0;
+  virtual void add_index_buffer(uint32_t *data, uint32_t data_count) = 0;
+
+};
+
 class VAOBuilder {
 public:
   VAOBuilder() = default;

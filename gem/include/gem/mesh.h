@@ -1,5 +1,4 @@
 #pragma once
-
 #include "gem/AABB.h"
 #include "gem/asset.h"
 #include "gem/dbg_memory.h"
@@ -8,18 +7,18 @@
 
 namespace gem {
 
-struct Mesh {
-  VAO m_vao;
-  uint32_t m_index_count;
-  AABB m_original_aabb;
-  AABB m_transformed_aabb;
-  uint32_t m_material_index;
-
-  void draw() { m_vao.draw(); }
+class AMesh
+{
+public:
+  uint32_t  m_index_count;
+  AABB      m_original_aabb;
+  AABB      m_transformed_aabb;
+  uint32_t  m_material_index;
+  VAO       m_vao;
 };
 
 struct MeshComponent {
-  Mesh m_mesh;
+  AMesh* m_mesh;
   AssetHandle m_handle;
   u32 m_mesh_index = 0;
 };

@@ -59,7 +59,7 @@ void tech::GBuffer::dispatch_gbuffer_with_id(
       gbuffer_shader.set_mat4("u_normal", trans.m_normal_matrix);
       int entity_index = static_cast<int>(e);
       gbuffer_shader.set_int("u_entity_index", entity_index);
-      emesh.m_mesh.m_vao.draw();
+      emesh.m_mesh->m_vao.draw();
     }
   }
   gbuffer.unbind();
@@ -104,7 +104,7 @@ void tech::GBuffer::dispatch_gbuffer_textureless_with_id(
 
       int entity_index = static_cast<int>(e);
       gbuffer_textureless_shader.set_int("u_entity_index", entity_index);
-      emesh.m_mesh.m_vao.draw();
+      emesh.m_mesh->m_vao.draw();
     }
   }
   gbuffer.unbind();

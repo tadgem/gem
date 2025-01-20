@@ -14,7 +14,7 @@ struct Shader {
 class GPUHelpers {
 public:
 
-  static Shader LoadShader(SDL_GPUDevice *device, const char *shaderSource,
+  static Shader LoadShaderStage(SDL_GPUDevice *device, const char *shaderSource,
                            SDL_ShaderCross_ShaderStage shaderStage);
 };
 }

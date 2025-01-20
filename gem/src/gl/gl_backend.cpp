@@ -119,7 +119,7 @@ void GLBackend::init(BackendInit &init_props) {
   m_now_counter = SDL_GetPerformanceCounter();
   m_last_counter = 0;
 
-  init_built_in_assets();
+  init_built_in_assets(this);
   init_imgui_file_dialog();
 }
 

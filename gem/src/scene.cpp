@@ -51,7 +51,7 @@ std::vector<Entity> Scene::create_entity_from_model(
     for (auto &[uniform_name, map_type] : known_maps) {
       // check if material has desired map type
       Model::MaterialEntry &material_entry =
-          model_to_load.m_materials[entry.m_material_index];
+          model_to_load.m_materials[entry->m_material_index];
       if (material_entry.m_material_maps.find(map_type) !=
           material_entry.m_material_maps.end()) {
         current_mat.set_sampler(uniform_name, texture_slot,

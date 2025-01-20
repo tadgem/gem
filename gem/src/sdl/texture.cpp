@@ -41,4 +41,5 @@ gem::sdl::Texture &
 gem::sdl::Texture::operator=(gem::sdl::Texture &&other) noexcept {
   m_type = other.m_type;
   m_texture = other.m_texture;
+  return *this;
 }

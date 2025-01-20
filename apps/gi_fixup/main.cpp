@@ -241,7 +241,7 @@ struct vxgi_data_n
 
           forward_lighting_shader.set_mat4("u_model", trans.m_model);
           forward_lighting_shader.set_mat4("u_normal", trans.m_normal_matrix);
-          emesh.m_mesh.draw();
+          emesh.m_mesh->m_vao.draw();
 
           Texture::bind_sampler_handle(0, GL_TEXTURE0);
           Texture::bind_sampler_handle(0, GL_TEXTURE1);

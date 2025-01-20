@@ -26,7 +26,7 @@ public:
     GEM_IMPL_ALLOC(MaterialEntry);
   };
 
-  std::vector<Mesh> m_meshes;
+  std::vector<AMesh*> m_meshes;
   std::vector<MaterialEntry> m_materials;
   AABB m_aabb;
 

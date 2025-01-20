@@ -2,7 +2,8 @@
 #include "gem/sdl/texture.h"
 #include "gem/dbg_assert.h"
 
-static constexpr auto FB_FLAGS = SDL_GPU_TEXTUREUSAGE_SAMPLER | SDL_GPU_TEXTUREUSAGE_COLOR_TARGET;
+static constexpr auto COLOUR_ATTACHMENT_FLAGS = SDL_GPU_TEXTUREUSAGE_SAMPLER | SDL_GPU_TEXTUREUSAGE_COLOR_TARGET;
+static constexpr auto DEPTH_ATTACHMENT_FLAGS = SDL_GPU_TEXTUREUSAGE_SAMPLER | SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET;
 
 void gem::sdl::Framebuffer::add_colour_attachment(SDL_GPUDevice* device,
                                                   glm::ivec2 resolution,
@@ -14,7 +15,7 @@ void gem::sdl::Framebuffer::add_colour_attachment(SDL_GPUDevice* device,
 
 
   sdl::Texture attachment =
-      sdl::Texture::CreateTexture2D(device, format, resolution, FB_FLAGS);
+      sdl::Texture::CreateTexture2D(device, format, resolution, COLOUR_ATTACHMENT_FLAGS);
 
   SDL_GPUColorTargetDescription description {};
   description.format = format;
@@ -26,18 +27,16 @@ void gem::sdl::Framebuffer::add_colour_attachment(SDL_GPUDevice* device,
 void gem::sdl::Framebuffer::add_depth_attachment(SDL_GPUDevice* device,
                                                  glm::ivec2 resolution,
                                                  SDL_GPUTextureFormat format) {
-  if(m_depth_target_description.has_value() || m_depth_target_texture.has_value())
+  if(m_depth_target_format.has_value() || m_depth_target_texture.has_value())
   {
     spdlog::error("SDLGPU Framebuffer : A depth attachment has already been created for this framebuffer");
     return;
   }
 
   m_depth_target_texture =
-      sdl::Texture::CreateTexture2D(device, format, resolution, FB_FLAGS);
+      sdl::Texture::CreateTexture2D(device, format, resolution, DEPTH_ATTACHMENT_FLAGS);
 
-  SDL_GPUColorTargetDescription description {};
-  description.format = format;
-  m_depth_target_description.value().texture = m_depth_target_texture->m_texture;
+  m_depth_target_format = format;
 
 }
 void gem::sdl::Framebuffer::build() {
@@ -47,9 +46,10 @@ void gem::sdl::Framebuffer::build() {
     spdlog::error("SDLGPU Framebuffer : Framebuffer has already been built");
   }
 
-  if(m_depth_target_description.has_value())
+  if(m_depth_target_format.has_value())
   {
-    m_render_pass_data.m_depth_target = m_depth_target_description;
+    m_render_pass_data.m_depth_target = SDL_GPUDepthStencilTargetInfo {};
+    m_render_pass_data.m_depth_target.value().texture = m_depth_target_texture.value().m_texture;
   }
 
   m_render_pass_data.m_colour_targets.resize(m_colour_target_descriptions.size());
@@ -62,7 +62,21 @@ void gem::sdl::Framebuffer::build() {
     m_render_pass_data.m_colour_targets[i].load_op = SDL_GPU_LOADOP_CLEAR;
     m_render_pass_data.m_colour_targets[i].store_op = SDL_GPU_STOREOP_STORE;
   }
+
+  m_graphics_pipeline_target_info.num_color_targets = m_colour_target_descriptions.size();
+  m_graphics_pipeline_target_info.color_target_descriptions = m_colour_target_descriptions.data();
+  if(m_depth_target_format.has_value())
+  {
+    m_graphics_pipeline_target_info.has_depth_stencil_target = true;
+    m_graphics_pipeline_target_info.depth_stencil_format = m_depth_target_format.value();
+  }
+  else
+  {
+    m_graphics_pipeline_target_info.has_depth_stencil_target = false;
+
+  }
 }
+
 SDL_GPURenderPass *
 gem::sdl::Framebuffer::begin_render_pass(SDL_GPUCommandBuffer *cmd_buf) {
   const SDL_GPUDepthStencilTargetInfo * depth_info = nullptr;
@@ -75,4 +89,19 @@ gem::sdl::Framebuffer::begin_render_pass(SDL_GPUCommandBuffer *cmd_buf) {
       m_render_pass_data.m_colour_targets.data(),
       m_render_pass_data.m_colour_targets.size(),
       depth_info);
+}
+
+void gem::sdl::Swapchain::init(SDL_GPUDevice *device, SDL_Window *window) {
+  m_format = SDL_GetGPUSwapchainTextureFormat(device, window);
+}
+
+SDL_GPUTexture *
+gem::sdl::Swapchain::acquire_texture(SDL_GPUCommandBuffer *cmd_buf,
+                                     SDL_Window *window) {
+  SDL_GPUTexture* tex = nullptr;
+  uint32_t w, h;
+  if (!SDL_AcquireGPUSwapchainTexture(cmd_buf, window, &tex, &w, &h)) {
+    spdlog::error("WaitAndAcquireGPUSwapchainTexture failed: %s", SDL_GetError());
+  }
+  return tex;
 }

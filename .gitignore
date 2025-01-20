@@ -48,3 +48,4 @@ third-party/glew/glew.pc
 /cmake-build-releasedebug-visual-studio
 imgui.ini
 test.scene
+/cmake

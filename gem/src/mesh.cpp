@@ -27,7 +27,7 @@ void MeshSystem::update(Scene &current_scene) {
   auto mesh_view = current_scene.m_registry.view<MeshComponent>();
 
   for (auto [e, meshc] : mesh_view.each()) {
-    if (meshc.m_mesh.m_vao.m_vao_id == INVALID_GL_HANDLE) {
+    if (meshc.m_mesh->m_vao.m_vao_id == INVALID_GL_HANDLE) {
       try_update_mesh_component(meshc);
     }
   }

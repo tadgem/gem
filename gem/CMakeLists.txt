@@ -43,11 +43,23 @@ set(GEM_INCLUDES
         ${SUBMODULE_DIR}/spdlog/include
         ${SUBMODULE_DIR}/cpptrace/include
         ${SUBMODULE_DIR}/efsw/include
+        ${SUBMODULE_DIR}/SPIRV-Reflect
         ${CMAKE_CURRENT_SOURCE_DIR}/include
         CACHE INTERNAL "")
 
 
-target_link_libraries(gem PRIVATE efsw glew_s SDL3-static SDL3_shadercross-static glm assimp cpptrace::cpptrace spdlog TracyClient)
+target_link_libraries(gem PRIVATE
+        efsw
+        glew_s
+        SDL3-static
+        SDL3_shadercross-static
+        spirv-reflect-static
+        glm
+        assimp
+        cpptrace::cpptrace
+        spdlog
+        TracyClient)
+
 target_include_directories(gem PUBLIC ${GEM_INCLUDES})
 target_compile_definitions(gem PUBLIC GLEW_NO_GLU)
 

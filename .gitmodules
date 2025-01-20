@@ -13,3 +13,6 @@
 [submodule "submodules/efsw"]
 	path = submodules/efsw
 	url = https://github.com/SpartanJ/efsw.git
+[submodule "submodules/SPIRV-Reflect"]
+	path = submodules/SPIRV-Reflect
+	url = https://github.com/KhronosGroup/SPIRV-Reflect.git

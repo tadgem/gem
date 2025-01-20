@@ -38,6 +38,8 @@ gem::sdl::GPUState gem::sdl::GPUState::Init() {
     return state;
   }
 
+  state.m_swapchain.init(device, window);
+
 
   return state;
 }

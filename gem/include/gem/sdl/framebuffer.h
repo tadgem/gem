@@ -10,7 +10,11 @@ namespace sdl {
 class Swapchain
 {
 public:
+  SDL_GPUTextureFormat m_format;
 
+  void init(SDL_GPUDevice* device, SDL_Window* window);
+
+  SDL_GPUTexture* acquire_texture(SDL_GPUCommandBuffer* cmd_buf, SDL_Window* window);
 };
 
 class Framebuffer {
@@ -20,6 +24,7 @@ public:
   {
     std::vector<SDL_GPUColorTargetInfo>           m_colour_targets;
     std::optional<SDL_GPUDepthStencilTargetInfo>  m_depth_target;
+
 
     bool is_built() { return !m_colour_targets.empty() || m_depth_target.has_value();}
   };
@@ -36,9 +41,9 @@ public:
 
   std::vector<  SDL_GPUColorTargetDescription>    m_colour_target_descriptions;
   std::vector<  sdl::Texture>                     m_colour_target_textures;
-  std::optional<SDL_GPUDepthStencilTargetInfo>    m_depth_target_description;
+  std::optional<SDL_GPUTextureFormat>             m_depth_target_format;
   std::optional<sdl::Texture>                     m_depth_target_texture;
-
+  SDL_GPUGraphicsPipelineTargetInfo               m_graphics_pipeline_target_info;
   RenderPassData                                  m_render_pass_data;
 };
 }
