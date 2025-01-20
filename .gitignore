@@ -49,3 +49,5 @@ third-party/glew/glew.pc
 imgui.ini
 test.scene
 /cmake
+/.cache
+*.json
