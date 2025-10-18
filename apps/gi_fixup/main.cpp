@@ -394,7 +394,7 @@ int main()
                 {"u_roughness_map", TextureMapType::roughness},
                 {"u_ao_map",        TextureMapType::ao}
             });
-
+        renderer.m_voxel_data.current_bounding_box = ma->m_data.m_aabb;
         nlohmann::json scene_json = Engine::scenes.save_scene(s);
         std::string scene_json_str = scene_json.dump();
         spdlog::info("finished adding model to scene, dumping scene json");
