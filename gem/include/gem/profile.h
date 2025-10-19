@@ -1,5 +1,6 @@
 #pragma once
-#define ENABLE_PROFILING
+// TODO(LiamD) : This leaks memory when enabled and no profiler is connected.
+// #define ENABLE_PROFILING
 #ifdef ENABLE_PROFILING && !TRACY_ENABLE
 #define TRACY_ENABLE
 #else

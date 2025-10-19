@@ -11,8 +11,8 @@ public:
   struct Grid {
     Texture voxel_texture; // 3D Texture (Voxel Data)
     glm::ivec3 resolution;
-    glm::vec3 voxel_unit; // scale of each texel
-    glm::vec3 aabb_dim{200.0, 100.0, 200.0};
+    glm::vec3 voxel_unit; // dimensons of each texel
+    glm::vec3 aabb_dim{200.0, 200.0, 200.0};
     AABB current_bounding_box;
     AABB previous_bounding_box;
 
