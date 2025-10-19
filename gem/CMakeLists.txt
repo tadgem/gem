@@ -52,8 +52,6 @@ target_link_libraries(gem PRIVATE
         efsw
         glew_s
         SDL3-static
-        SDL3_shadercross-static
-        spirv-reflect-static
         glm
         assimp
         cpptrace::cpptrace

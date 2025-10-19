@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.16)
 project(gem-engine)
 
+add_compile_options(-fsanitize=address)
+add_link_options(-fsanitize=address)
+
 # built in options
 set(CMAKE_CXX_STANDARD 17)
 
@@ -21,10 +24,6 @@ set(SUBMODULE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/submodules/ CACHE INTERNAL "")
 set(ASSETS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/assets)
 set(SDL_THREADS_ENABLED_BY_DEFAULT ON)
 set(SDL_THREADS ON)
-set(SDLSHADERCROSS_VENDORED ON CACHE INTERNAL "")
-set(SDLSHADERCROSS_SPIRVCROSS_SHARED OFF CACHE INTERNAL "")
-set(USE_WAYLAND OFF CACHE INTERNAL "")
-set(SPIRV_REFLECT_STATIC_LIB ON CACHE INTERNAL "")
 
 if(NOT MSVC)
     message("-- Disabling DirectX shader compilation")
@@ -34,9 +33,7 @@ endif()
 add_subdirectory(submodules/cpptrace)
 add_subdirectory(submodules/spdlog)
 add_subdirectory(submodules/efsw)
-add_subdirectory(submodules/SPIRV-Reflect)
 add_subdirectory(third-party/sdl)
-add_subdirectory(third-party/SDL_shadercross)
 add_subdirectory(third-party/tracy)
 add_subdirectory(third-party/tracy/profiler)
 add_subdirectory(third-party/glew/build/cmake)

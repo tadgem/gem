@@ -7,7 +7,7 @@ using namespace gem;
 int main()
 {
     glm::ivec2 window_res{ 1280, 720};
-    Engine::init();
+    Engine::init(window_res);
     AssetManager am{};
     Camera cam{};
 

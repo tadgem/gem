@@ -9,7 +9,6 @@
 #include "gem/texture.h"
 #include "gem/utils.h"
 #include "cpptrace/cpptrace.hpp"
-#include "gem/sdl/texture.h"
 
 namespace gem {
 
