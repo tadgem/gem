@@ -1,3 +1,4 @@
+#undef SDL_THREAD_WINDOWS
 #include "gem/gem.h"
 #include <sstream>
 #include "imgui_impl_opengl3.h"
@@ -34,11 +35,6 @@ void on_imgui(GLRenderer & renderer, Scene * s, glm::vec2 mouse_pos,
 
         ImGui::Text("Mouse Pos : %.3f, %.3f", mouse_pos.x, mouse_pos.y);
         ImGui::Text("Selected Entity ID : %d", renderer.m_last_selected_entity);
-        ImGui::Separator();
-        ImGui::Text("Debug Cube");
-        ImGui::DragFloat3("Cube Position", &cube_trans.m_position[0], 1.0f);
-        ImGui::DragFloat3("Cube Euler", &cube_trans.m_euler[0], 1.0f, 0.0, 360.0f);
-        ImGui::DragFloat3("Cube Scale", &cube_trans.m_scale[0], 1.0f);
         ImGui::Separator();
         ImGui::Text("Lights");
         ImGui::ColorEdit3("Dir Light Colour", &dir2.colour[0]);
@@ -93,7 +89,6 @@ int main()
                 {"u_roughness_map", TextureMapType::roughness},
                 {"u_ao_map",        TextureMapType::ao}
             });
-        renderer.m_voxel_data.current_bounding_box = ma->m_data.m_aabb;
         nlohmann::json scene_json = Engine::scenes.save_scene(s);
         std::string scene_json_str = scene_json.dump();
         spdlog::info("finished adding model to scene, dumping scene json");
@@ -126,6 +121,7 @@ int main()
     lights.push_back({ {-10.0, 0.0, 10.0}, {0.0, 0.0, 255.0} , 40.0f});
 
     std::vector<Scene *> scenes{ s };
+
     
     while (!GPUBackend::selected()->m_quit)
     {
