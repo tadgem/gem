@@ -10,12 +10,6 @@ namespace open_gl {
 namespace tech {
 class VXGI {
 public:
-  static void dispatch_voxelisation_gbuffer_pass(GLShader &gbuffer_shader,
-                                                 Voxel::Grid &grid_data,
-                                                 GLFramebuffer gbuffer,
-                                                 GLFramebuffer lighting_buffer,
-                                                 glm::ivec2 window_res);
-
   static void dispatch_gbuffer_voxelization(GLShader &voxelization,
                                             Voxel::Grid &voxel_data,
                                             GLFramebuffer &gbuffer,

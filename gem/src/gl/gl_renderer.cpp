@@ -248,11 +248,11 @@ void GLRenderer::render(AssetManager &am, Camera &cam,
         m_lightpass_buffer, m_window_resolution);
   }
 
-  {
-    TracyGpuZone("GBuffer Voxelization MIPS");
-    open_gl::tech::VXGI::dispatch_gen_voxel_mips(
-        m_compute_voxel_mips_shader->m_data, m_voxel_data, s_voxel_resolution);
-  }
+  //{
+  //  TracyGpuZone("GBuffer Voxelization MIPS");
+  //  open_gl::tech::VXGI::dispatch_gen_voxel_mips(
+  //      m_compute_voxel_mips_shader->m_data, m_voxel_data, s_voxel_resolution);
+  //}
 
   {
     TracyGpuZone("GBuffer");

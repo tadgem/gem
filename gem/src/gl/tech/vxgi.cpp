@@ -128,8 +128,5 @@ void tech::VXGI::dispatch_clear_voxel(GLShader &clear_voxel,
                              _3d_tex_res_vec.z / 8));
   glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 }
-void tech::VXGI::dispatch_voxelisation_gbuffer_pass(
-    GLShader &gbuffer_shader, Voxel::Grid &grid_data, GLFramebuffer gbuffer,
-    GLFramebuffer lighting_buffer, glm::ivec2 window_res) {}
 } // namespace open_gl
 } // namespace gem
