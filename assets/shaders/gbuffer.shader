@@ -43,7 +43,7 @@ void main()
 {
     oUV = aUV;
     oNormal = (vec4(aNormal, 1.0) * u_normal).xyz;
-    oPosition = (vec4(aPos , 1.0) * u_model).xyz;
+    oPosition = vec4(aPos , 1.0) * u_model;
     vec4 pos =  u_vp * u_model * vec4(aPos, 1.0);
     oClipPos = pos;
 

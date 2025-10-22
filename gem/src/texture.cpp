@@ -42,12 +42,7 @@ void Texture::bind_sampler(GLenum texture_slot, GLenum texture_target) {
 void Texture::bind_sampler_handle(gl_handle handle, GLenum texture_slot,
                                   GLenum texture_target) {
   ZoneScoped;
-  glActiveTexture(texture_slot);
-  if(glGetError() != GL_NO_ERROR)
-  {
-    spdlog::error("Texture::bind_sampler_handle : ERROR");
-    cpptrace::generate_trace().print();
-  }
+  glAssert(glActiveTexture(texture_slot));
   glAssert(glBindTexture(texture_target, handle));
 }
 
