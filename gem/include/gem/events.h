@@ -76,7 +76,7 @@ protected:
 
 public:
   template <typename _EventData>
-  void add_subscription(void (*callback)(_EventData)) {
+  void AddSubscription(void (*callback)(_EventData)) {
     ZoneScoped;
     static_assert(std::is_base_of<AEventData, _EventData>(),
                   "_EventData does not inherit from a_event_data");
@@ -94,7 +94,7 @@ public:
   }
 
   template <typename _EventData>
-  void remove_subscription(void (*callback)(_EventData)) {
+  void RemoveSubscription(void (*callback)(_EventData)) {
     ZoneScoped;
     static_assert(std::is_base_of<AEventData, _EventData>(),
                   "_EventData does not inherit from a_event_data");
@@ -123,7 +123,7 @@ public:
     }
   }
 
-  template <typename _EventData> void invoke(_EventData data) {
+  template <typename _EventData> void Fire(_EventData data) {
     ZoneScoped;
     static_assert(std::is_base_of<AEventData, _EventData>(),
                   "_EventData does not inherit from a_event_data");

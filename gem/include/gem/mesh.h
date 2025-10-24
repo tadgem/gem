@@ -25,13 +25,13 @@ struct MeshComponent {
 
 class MeshSystem : public ECSSystem {
 public:
-  MeshSystem() : ECSSystem(HashUtils::get_type_hash<MeshSystem>()) {}
+  MeshSystem() : ECSSystem(HashUtils::GetTypeHash<MeshSystem>()) {}
 
-  void init() override;
-  void update(Scene &current_scene) override;
-  void cleanup() override;
-  nlohmann::json serialize(Scene &current_scene) override;
-  void deserialize(Scene &current_scene, nlohmann::json &sys_json) override;
+  void Init() override;
+  void Update(Scene &current_scene) override;
+  void Cleanup() override;
+  nlohmann::json Serialize(Scene &current_scene) override;
+  void Deserialize(Scene &current_scene, nlohmann::json &sys_json) override;
 
   ~MeshSystem() override {}
 };

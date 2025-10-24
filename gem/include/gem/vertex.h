@@ -12,27 +12,19 @@ struct VAO {
   gl_handle m_ibo = INVALID_GL_HANDLE;
   uint32_t m_index_count;
   std::vector<gl_handle> m_vbos;
-  void use();
-  void draw();
-  void release();
-};
-
-class AVAOBuilder
-{
-public:
-  virtual void add_vertex_buffer(void* data, size_t data_size, size_t data_count) = 0;
-  virtual void add_index_buffer(uint32_t *data, uint32_t data_count) = 0;
-
+  void Use();
+  void Draw();
+  void Release();
 };
 
 class VAOBuilder {
 public:
   VAOBuilder() = default;
 
-  void begin();
+  void Begin();
 
   template <typename _Ty>
-  void add_vertex_buffer(_Ty *data, uint32_t count,
+  void AddVertexBuffer(_Ty *data, uint32_t count,
                          GLenum usage_flags = GL_STATIC_DRAW) {
     if (GPUBackend::GetBackendAPI() == BackendAPI::open_gl) {
       gl_handle vbo;
@@ -46,19 +38,19 @@ public:
   }
 
   template <typename _Ty>
-  void add_vertex_buffer(std::vector<_Ty> data,
+  void AddVertexBuffer(std::vector<_Ty> data,
                          GLenum usage_flags = GL_STATIC_DRAW) {
-    add_vertex_buffer<_Ty>(&data[0], data.size(), usage_flags);
+    AddVertexBuffer<_Ty>(&data[0], data.size(), usage_flags);
   }
 
-  void add_index_buffer(uint32_t *data, uint32_t data_count);
-  void add_index_buffer(std::vector<uint32_t> data);
+  void AddIndexBuffer(uint32_t *data, uint32_t data_count);
+  void AddIndexBuffer(std::vector<uint32_t> data);
 
-  void add_vertex_attribute(uint32_t binding, uint32_t total_vertex_size,
+  void AddVertexAttribute(uint32_t binding, uint32_t total_vertex_size,
                             uint32_t num_elements, uint32_t element_size = 4,
                             GLenum primitive_type = GL_FLOAT);
 
-  VAO build();
+  VAO BuildVAO();
 
   gl_handle m_vao;
   gl_handle m_ibo = INVALID_GL_HANDLE;

@@ -25,15 +25,15 @@ struct Camera {
 
   projection_type m_projection_type = projection_type::perspective;
 
-  void update(glm::vec2 screen_dim);
+  void Update(glm::vec2 screen_dim);
 
-  glm::mat4 get_rotation_matrix();
+  glm::mat4 GetRotationMatrix();
 
   GEM_IMPL_ALLOC(Camera)
 };
 
 struct DebugCameraController {
-  void update(glm::vec2 screen_dim, Camera &cam);
+  void Update(glm::vec2 screen_dim, Camera &cam);
 
   float movement_speed = 10.0f;
   float deadzone = 0.002f;

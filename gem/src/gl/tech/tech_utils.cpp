@@ -23,7 +23,7 @@ void tech::Utils::DispatchDenoiseImage(GLShader &denoise_shader,
   denoise_shader.SetFloat("uThreshold", aThreshold);
   denoise_shader.SetFloat("uKSigma", aKSigma);
   denoise_shader.SetVec2f("wSize", {window_res.x, window_res.y});
-  Texture::bind_sampler_handle(input.m_colour_attachments.front(), GL_TEXTURE0);
+  Texture::BindSamplerHandle(input.m_colour_attachments.front(), GL_TEXTURE0);
   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
   denoised.Unbind();
 }
@@ -35,11 +35,11 @@ void tech::Utils::DispatchPresentImage(GLShader &present_shader,
   ZoneScoped;
   GEM_GPU_MARKER("Present Image Pass");
   present_shader.Use();
-  Shapes::s_screen_quad.use();
+  Shapes::s_screen_quad.Use();
   present_shader.SetInt(uniform_name.c_str(), texture_slot);
-  Texture::bind_sampler_handle(texture, GL_TEXTURE0 + texture_slot);
+  Texture::BindSamplerHandle(texture, GL_TEXTURE0 + texture_slot);
   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-  Texture::bind_sampler_handle(0, GL_TEXTURE0);
+  Texture::BindSamplerHandle(0, GL_TEXTURE0);
 }
 
 void tech::Utils::DispatchBlitToFB(GLFramebuffer &fb, GLShader &present_shader,

@@ -81,7 +81,7 @@ void process_mesh(Model &model, aiMesh *m, aiNode *node, const aiScene *scene,
   } else {
     std::vector<float> verts;
     VAOBuilder mesh_builder{};
-    mesh_builder.begin();
+    mesh_builder.Begin();
 
     if (hasPositions && hasUVs && hasNormals) {
       for (unsigned int i = 0; i < m->mNumVertices; i++) {
@@ -94,10 +94,10 @@ void process_mesh(Model &model, aiMesh *m, aiNode *node, const aiScene *scene,
         verts.push_back(m->mTextureCoords[0][i].x);
         verts.push_back(m->mTextureCoords[0][i].y);
       }
-      mesh_builder.add_vertex_buffer(verts);
-      mesh_builder.add_vertex_attribute(0, 8 * sizeof(float), 3);
-      mesh_builder.add_vertex_attribute(1, 8 * sizeof(float), 3);
-      mesh_builder.add_vertex_attribute(2, 8 * sizeof(float), 2);
+      mesh_builder.AddVertexBuffer(verts);
+      mesh_builder.AddVertexAttribute(0, 8 * sizeof(float), 3);
+      mesh_builder.AddVertexAttribute(1, 8 * sizeof(float), 3);
+      mesh_builder.AddVertexAttribute(2, 8 * sizeof(float), 2);
     }
 
     std::vector<uint32_t> indices;
@@ -115,13 +115,13 @@ void process_mesh(Model &model, aiMesh *m, aiNode *node, const aiScene *scene,
               static_cast<uint32_t>(m->mFaces[i].mIndices[index]));
         }
       }
-      mesh_builder.add_index_buffer(indices);
+      mesh_builder.AddIndexBuffer(indices);
     }
     AABB bb = {{m->mAABB.mMin.x, m->mAABB.mMin.y, m->mAABB.mMin.z},
                {m->mAABB.mMax.x, m->mAABB.mMax.y, m->mAABB.mMax.z}};
 
     AMesh* new_mesh = new AMesh();
-    new_mesh->m_vao = mesh_builder.build();
+    new_mesh->m_vao = mesh_builder.BuildVAO();
     new_mesh->m_index_count = indices.size();
     new_mesh->m_original_aabb = bb;
     new_mesh->m_material_index = m->mMaterialIndex;
@@ -191,7 +191,7 @@ void get_material_texture_entry(const std::string &directory,
   }
 }
 
-Model Model::load_model_and_textures_from_path(const std::string &path) {
+Model Model::LoadModelAndTextures(const std::string &path) {
   ZoneScoped;
   Assimp::Importer importer;
   const aiScene *scene = importer.ReadFile(
@@ -260,7 +260,7 @@ Model Model::load_model_and_textures_from_path(const std::string &path) {
   return m;
 }
 
-Model Model::load_model_from_path_entries(
+Model Model::LoadModelAndTextureEntries(
     const std::string &path, std::vector<TextureEntry> &texture_entries,
     std::vector<MeshEntry> &mesh_entries) {
   ZoneScoped;
@@ -278,7 +278,7 @@ Model Model::load_model_from_path_entries(
   Model m{};
   process_node(m, scene->mRootNode, scene, true, mesh_entries);
 
-  m.update_aabb();
+  m.UpdateAABB();
 
   std::string directory = path.substr(0, path.find_last_of('/') + 1);
   for (int i = 0; i < scene->mNumMaterials; i++) {
@@ -310,7 +310,7 @@ Model Model::load_model_from_path_entries(
   return m;
 }
 
-void Model::update_aabb() {
+void Model::UpdateAABB() {
   ZoneScoped;
   AABB model_aabb{};
   for (auto &mesh : m_meshes) {
@@ -337,10 +337,10 @@ void Model::update_aabb() {
   m_aabb = model_aabb;
 }
 
-void Model::release() {
+void Model::Release() {
   ZoneScoped;
   for (AMesh* m : m_meshes) {
-    m->m_vao.release();
+    m->m_vao.Release();
   }
 }
 } // namespace gem

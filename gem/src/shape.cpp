@@ -58,14 +58,14 @@ void add_cube(AssetManager &am) {
   const unsigned int cube_num_verts = 36;
 
   VAOBuilder cube_with_normals_builder;
-  cube_with_normals_builder.begin();
+  cube_with_normals_builder.Begin();
   cube_with_normals_builder.m_index_count = 36;
-  cube_with_normals_builder.add_vertex_buffer(&cube_vertex_data[0], 288);
-  cube_with_normals_builder.add_vertex_attribute(0, 8 * sizeof(float), 3);
-  cube_with_normals_builder.add_vertex_attribute(1, 8 * sizeof(float), 3);
-  cube_with_normals_builder.add_vertex_attribute(2, 8 * sizeof(float), 2);
+  cube_with_normals_builder.AddVertexBuffer(&cube_vertex_data[0], 288);
+  cube_with_normals_builder.AddVertexAttribute(0, 8 * sizeof(float), 3);
+  cube_with_normals_builder.AddVertexAttribute(1, 8 * sizeof(float), 3);
+  cube_with_normals_builder.AddVertexAttribute(2, 8 * sizeof(float), 2);
 
-  Shapes::s_cube_vao = cube_with_normals_builder.build();
+  Shapes::s_cube_vao = cube_with_normals_builder.BuildVAO();
   AABB cube_bb{{0, 0, 0}, {1, 1, 1}};
   Shapes::s_cube_mesh = new AMesh{36, cube_bb, cube_bb, 0, Shapes::s_cube_vao};
 
@@ -578,15 +578,15 @@ void add_cylinder(AssetManager &am) {
   const unsigned int cylinder_num_verts = 372;
 
   VAOBuilder cylinder_builder;
-  cylinder_builder.begin();
+  cylinder_builder.Begin();
   cylinder_builder.m_index_count = cylinder_num_verts;
-  cylinder_builder.add_vertex_buffer(&cylinder_vertex_data[0],
+  cylinder_builder.AddVertexBuffer(&cylinder_vertex_data[0],
                                      cylinder_num_verts * 8);
-  cylinder_builder.add_vertex_attribute(0, 8 * sizeof(float), 3);
-  cylinder_builder.add_vertex_attribute(1, 8 * sizeof(float), 3);
-  cylinder_builder.add_vertex_attribute(2, 8 * sizeof(float), 2);
+  cylinder_builder.AddVertexAttribute(0, 8 * sizeof(float), 3);
+  cylinder_builder.AddVertexAttribute(1, 8 * sizeof(float), 3);
+  cylinder_builder.AddVertexAttribute(2, 8 * sizeof(float), 2);
 
-  Shapes::s_cylinder_vao = cylinder_builder.build();
+  Shapes::s_cylinder_vao = cylinder_builder.BuildVAO();
   AABB cube_bb{{0, 0, 0}, {1, 1, 1}};
   Shapes::s_cylinder_mesh =
       new AMesh{36, cube_bb, cube_bb, 0, Shapes::s_cylinder_vao};
@@ -852,14 +852,14 @@ void add_cone(AssetManager &am) {
   const unsigned int cone_num_verts = 186;
 
   VAOBuilder cone_builder;
-  cone_builder.begin();
+  cone_builder.Begin();
   cone_builder.m_index_count = cone_num_verts;
-  cone_builder.add_vertex_buffer(&cone_vertex_data[0], cone_num_verts * 8);
-  cone_builder.add_vertex_attribute(0, 8 * sizeof(float), 3);
-  cone_builder.add_vertex_attribute(1, 8 * sizeof(float), 3);
-  cone_builder.add_vertex_attribute(2, 8 * sizeof(float), 2);
+  cone_builder.AddVertexBuffer(&cone_vertex_data[0], cone_num_verts * 8);
+  cone_builder.AddVertexAttribute(0, 8 * sizeof(float), 3);
+  cone_builder.AddVertexAttribute(1, 8 * sizeof(float), 3);
+  cone_builder.AddVertexAttribute(2, 8 * sizeof(float), 2);
 
-  Shapes::s_cone_vao = cone_builder.build();
+  Shapes::s_cone_vao = cone_builder.BuildVAO();
   AABB cube_bb{{0, 0, 0}, {1, 1, 1}};
   Shapes::s_cone_mesh = new AMesh{ 36, cube_bb, cube_bb, 0, Shapes::s_cone_vao};
 
@@ -5484,14 +5484,14 @@ void add_torus(AssetManager &am) {
   const unsigned int torus_num_verts = 3456;
 
   VAOBuilder torus_builder;
-  torus_builder.begin();
+  torus_builder.Begin();
   torus_builder.m_index_count = torus_num_verts;
-  torus_builder.add_vertex_buffer(&torus_vertex_data[0], torus_num_verts * 8);
-  torus_builder.add_vertex_attribute(0, 8 * sizeof(float), 3);
-  torus_builder.add_vertex_attribute(1, 8 * sizeof(float), 3);
-  torus_builder.add_vertex_attribute(2, 8 * sizeof(float), 2);
+  torus_builder.AddVertexBuffer(&torus_vertex_data[0], torus_num_verts * 8);
+  torus_builder.AddVertexAttribute(0, 8 * sizeof(float), 3);
+  torus_builder.AddVertexAttribute(1, 8 * sizeof(float), 3);
+  torus_builder.AddVertexAttribute(2, 8 * sizeof(float), 2);
 
-  Shapes::s_torus_vao = torus_builder.build();
+  Shapes::s_torus_vao = torus_builder.BuildVAO();
   AABB cube_bb{{0, 0, 0}, {1, 1, 1}};
   Shapes::s_torus_mesh = new AMesh{ 36, cube_bb, cube_bb, 0, Shapes::s_torus_vao};
 
@@ -9347,14 +9347,14 @@ void add_sphere(AssetManager &am) {
   };
   const unsigned int sphere_num_verts = 2880;
   VAOBuilder sphere_builder;
-  sphere_builder.begin();
+  sphere_builder.Begin();
   sphere_builder.m_index_count = sphere_num_verts;
-  sphere_builder.add_vertex_buffer(&sphere_vertex_data[0], 23040);
-  sphere_builder.add_vertex_attribute(0, 8 * sizeof(float), 3);
-  sphere_builder.add_vertex_attribute(1, 8 * sizeof(float), 3);
-  sphere_builder.add_vertex_attribute(2, 8 * sizeof(float), 2);
+  sphere_builder.AddVertexBuffer(&sphere_vertex_data[0], 23040);
+  sphere_builder.AddVertexAttribute(0, 8 * sizeof(float), 3);
+  sphere_builder.AddVertexAttribute(1, 8 * sizeof(float), 3);
+  sphere_builder.AddVertexAttribute(2, 8 * sizeof(float), 2);
 
-  Shapes::s_sphere_vao = sphere_builder.build();
+  Shapes::s_sphere_vao = sphere_builder.BuildVAO();
   AABB sphere_bb{{0, 0, 0}, {1, 1, 1}};
   Shapes::s_sphere_mesh =
       new AMesh{ sphere_num_verts, sphere_bb, sphere_bb, 0, Shapes::s_sphere_vao};
@@ -9388,12 +9388,12 @@ void add_cube_pos_only() {
       16, 17, 18, 18, 19, 16, 20, 21, 22, 22, 23, 20};
 
   VAOBuilder cube_builder;
-  cube_builder.begin();
-  cube_builder.add_vertex_buffer(cube_data);
-  cube_builder.add_index_buffer(cube_indices);
-  cube_builder.add_vertex_attribute(0, 3 * sizeof(float), 3);
+  cube_builder.Begin();
+  cube_builder.AddVertexBuffer(cube_data);
+  cube_builder.AddIndexBuffer(cube_indices);
+  cube_builder.AddVertexAttribute(0, 3 * sizeof(float), 3);
 
-  Shapes::s_cube_pos_only = cube_builder.build();
+  Shapes::s_cube_pos_only = cube_builder.BuildVAO();
 }
 
 void add_screen_quad() {
@@ -9411,15 +9411,15 @@ void add_screen_quad() {
   };
 
   VAOBuilder screen_quad_builder;
-  screen_quad_builder.begin();
-  screen_quad_builder.add_vertex_buffer(screen_quad_verts);
-  screen_quad_builder.add_vertex_attribute(0, 5 * sizeof(float), 3);
-  screen_quad_builder.add_vertex_attribute(1, 5 * sizeof(float), 2);
-  screen_quad_builder.add_index_buffer(screen_quad_indices);
-  Shapes::s_screen_quad = screen_quad_builder.build();
+  screen_quad_builder.Begin();
+  screen_quad_builder.AddVertexBuffer(screen_quad_verts);
+  screen_quad_builder.AddVertexAttribute(0, 5 * sizeof(float), 3);
+  screen_quad_builder.AddVertexAttribute(1, 5 * sizeof(float), 2);
+  screen_quad_builder.AddIndexBuffer(screen_quad_indices);
+  Shapes::s_screen_quad = screen_quad_builder.BuildVAO();
 }
 
-VAO Shapes::gen_cube_instanced_vao(std::vector<glm::mat4> &matrices,
+VAO Shapes::GenerateInstancedCube(std::vector<glm::mat4> &matrices,
                                    std::vector<glm::vec3> &uvs) {
   ZoneScoped;
 
@@ -9444,14 +9444,14 @@ VAO Shapes::gen_cube_instanced_vao(std::vector<glm::mat4> &matrices,
       16, 17, 18, 18, 19, 16, 20, 21, 22, 22, 23, 20};
 
   VAOBuilder cube_builder;
-  cube_builder.begin();
-  cube_builder.add_vertex_buffer(cube_data);
-  cube_builder.add_vertex_attribute(0, 3 * sizeof(float), 3);
-  cube_builder.add_vertex_buffer(matrices);
+  cube_builder.Begin();
+  cube_builder.AddVertexBuffer(cube_data);
+  cube_builder.AddVertexAttribute(0, 3 * sizeof(float), 3);
+  cube_builder.AddVertexBuffer(matrices);
   auto matrices_vbo = cube_builder.m_vbos.back();
-  cube_builder.add_vertex_buffer(uvs);
+  cube_builder.AddVertexBuffer(uvs);
   auto uvs_vbo = cube_builder.m_vbos.back();
-  cube_builder.add_index_buffer(cube_indices);
+  cube_builder.AddIndexBuffer(cube_indices);
 
   glEnableVertexAttribArray(1);
   glBindBuffer(GL_ARRAY_BUFFER, uvs_vbo);
@@ -9479,10 +9479,10 @@ VAO Shapes::gen_cube_instanced_vao(std::vector<glm::mat4> &matrices,
   glVertexAttribDivisor(3, 1);
   glVertexAttribDivisor(4, 1);
   glVertexAttribDivisor(5, 1);
-  return cube_builder.build();
+  return cube_builder.BuildVAO();
 }
 
-void Shapes::init_built_in_assets(AssetManager &am, GPUBackend* backend) {
+void Shapes::InitBuiltInAssets(AssetManager &am, GPUBackend* backend) {
   ZoneScoped;
   add_screen_quad();
   add_cube_pos_only();

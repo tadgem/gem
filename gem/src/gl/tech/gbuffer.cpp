@@ -34,13 +34,12 @@ void tech::GBuffer::DispatchGBufferWithID(
   gbuffer_shader.SetInt("u_ao_map", 4);
   gbuffer_shader.SetInt("u_prev_position_map", 5);
 
-  Texture::bind_sampler_handle(0, GL_TEXTURE0);
-  Texture::bind_sampler_handle(0, GL_TEXTURE1);
-  Texture::bind_sampler_handle(0, GL_TEXTURE2);
-  Texture::bind_sampler_handle(0, GL_TEXTURE3);
-  Texture::bind_sampler_handle(0, GL_TEXTURE4);
-
-  Texture::bind_sampler_handle(
+  Texture::BindSamplerHandle(0, GL_TEXTURE0);
+  Texture::BindSamplerHandle(0, GL_TEXTURE1);
+  Texture::BindSamplerHandle(0, GL_TEXTURE2);
+  Texture::BindSamplerHandle(0, GL_TEXTURE3);
+  Texture::BindSamplerHandle(0, GL_TEXTURE4);
+  Texture::BindSamplerHandle(
       previous_position_buffer.m_colour_attachments.front(), GL_TEXTURE5);
 
   for (Scene *current_scene : scenes) {
@@ -53,13 +52,13 @@ void tech::GBuffer::DispatchGBufferWithID(
         continue;
       }
 
-      ematerial.bind_material_uniforms(am);
+      ematerial.BindUniforms(am);
       gbuffer_shader.SetMat4f("u_model", trans.m_model);
       gbuffer_shader.SetMat4f("u_last_model", trans.m_last_model);
       gbuffer_shader.SetMat4f("u_normal", trans.m_normal_matrix);
       int entity_index = static_cast<int>(e);
       gbuffer_shader.SetInt("u_entity_index", entity_index);
-      emesh.m_mesh->m_vao.draw();
+      emesh.m_mesh->m_vao.Draw();
     }
   }
   gbuffer.Unbind();
@@ -85,7 +84,7 @@ void tech::GBuffer::DispatchGBufferTexturelessWithID(
   gbuffer_textureless_shader.SetInt("u_frame_index", frame_index);
   gbuffer_textureless_shader.SetInt("u_prev_position_map", 0);
 
-  Texture::bind_sampler_handle(
+  Texture::BindSamplerHandle(
       previous_position_buffer.m_colour_attachments.front(), GL_TEXTURE0);
 
   for (Scene *current_scene : scenes) {
@@ -98,17 +97,17 @@ void tech::GBuffer::DispatchGBufferTexturelessWithID(
         continue;
       }
 
-      ematerial.bind_material_uniforms(am);
+      ematerial.BindUniforms(am);
       gbuffer_textureless_shader.SetMat4f("u_model", trans.m_model);
       gbuffer_textureless_shader.SetMat4f("u_last_model", trans.m_last_model);
 
       int entity_index = static_cast<int>(e);
       gbuffer_textureless_shader.SetInt("u_entity_index", entity_index);
-      emesh.m_mesh->m_vao.draw();
+      emesh.m_mesh->m_vao.Draw();
     }
   }
   gbuffer.Unbind();
-  Texture::bind_sampler_handle(0, GL_TEXTURE0);
+  Texture::BindSamplerHandle(0, GL_TEXTURE0);
   glEnable(GL_DITHER);
 }
 } // namespace open_gl

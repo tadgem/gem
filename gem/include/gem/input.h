@@ -127,32 +127,32 @@ enum class KeyboardKey {
 
 class Input {
 public:
-  static bool get_gamepad_button(int index, GamepadButton button);
-  static glm::vec2 get_gamepad_stick(int index, GamepadStick stick);
-  static bool get_keyboard_key(KeyboardKey key);
-  static bool get_mouse_button(MouseButton button);
-  static glm::vec2 get_mouse_position();
-  static glm::vec2 get_mouse_velocity();
-  static float get_mouse_scroll();
+  static bool GetGamepadButton(int index, GamepadButton button);
+  static glm::vec2 GetGamepadStick(int index, GamepadStick stick);
+  static bool GetKey(KeyboardKey key);
+  static bool GetMouseButton(MouseButton button);
+  static glm::vec2 GetMousePosition();
+  static glm::vec2 GetMouseVelocity();
+  static float GetMouseScroll();
 
 protected:
   friend class GLBackend;
-  static GamepadStick get_stick_from_sdl(SDL_GamepadAxis &sdlAxis);
-  static GamepadTrigger get_trigger_from_sdl(SDL_GamepadAxis &sdlAxis);
-  static GamepadButton get_button_from_sdl(uint8_t sdlButton);
-  static KeyboardKey get_key_from_sdl(SDL_Keycode keyCode);
+  static GamepadStick GetStickSDL(SDL_GamepadAxis &sdlAxis);
+  static GamepadTrigger GetTriggerSDL(SDL_GamepadAxis &sdlAxis);
+  static GamepadButton GetButtonSDL(uint8_t sdlButton);
+  static KeyboardKey GetKeySDL(SDL_Keycode keyCode);
 
-  static void update_gamepad_button(int gamepad_index, GamepadButton b,
+  static void UpdateGamepadButton(int gamepad_index, GamepadButton b,
                                     bool value);
-  static void update_gamepad_trigger(int gamepad_index, GamepadTrigger b,
+  static void UpdateGamepadTrigger(int gamepad_index, GamepadTrigger b,
                                      float value);
-  static void update_gamepad_stick(int gamepad_index, GamepadStick b,
+  static void UpdateGamepadStick(int gamepad_index, GamepadStick b,
                                    glm::vec2 value);
-  static void update_mouse_button(MouseButton b, bool value);
-  static void update_mouse_scroll(float value);
-  static void update_mouse_position(glm::vec2 screen_dim, glm::vec2 value);
-  static void update_keyboard_key(KeyboardKey k, bool value);
-  static void update_last_frame();
+  static void UpdateMouseButton(MouseButton b, bool value);
+  static void UpdateMouseScroll(float value);
+  static void UpdateMousePosition(glm::vec2 screen_dim, glm::vec2 value);
+  static void UpdateKey(KeyboardKey k, bool value);
+  static void UpdateLastFrame();
 
   struct GamepadState {
     std::unordered_map<GamepadButton, bool> current_frame_gamepad_button_state;

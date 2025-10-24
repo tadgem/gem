@@ -30,14 +30,14 @@ public:
   std::vector<MaterialEntry> m_materials;
   AABB m_aabb;
 
-  static Model load_model_and_textures_from_path(const std::string &path);
+  static Model LoadModelAndTextures(const std::string &path);
   static Model
-  load_model_from_path_entries(const std::string &path,
+  LoadModelAndTextureEntries(const std::string &path,
                                std::vector<TextureEntry> &texture_entries,
                                std::vector<MeshEntry> &mesh_entries);
 
-  void update_aabb();
-  void release();
+  void UpdateAABB();
+  void Release();
 
   GEM_IMPL_ALLOC(Model);
 };

@@ -18,7 +18,7 @@ Scene::Scene(const std::string &scene_name)
   ZoneScoped;
 }
 
-Entity Scene::create_entity(const std::string &name) {
+Entity Scene::CreateEntity(const std::string &name) {
   ZoneScoped;
   entt::entity e = m_registry.create();
   m_registry.emplace<EntityData>(e, EntityData{name});
@@ -26,7 +26,7 @@ Entity Scene::create_entity(const std::string &name) {
   return Entity(this, e);
 }
 
-std::vector<Entity> Scene::create_entity_from_model(
+std::vector<Entity> Scene::CreateEntityFromModel(
     AssetHandle model_asset_handle, Model &model_to_load,
     AssetHandle shader_asset_handle, GLShader &material_shader,
     glm::vec3 scale, glm::vec3 euler,
@@ -37,14 +37,14 @@ std::vector<Entity> Scene::create_entity_from_model(
     auto &entry = model_to_load.m_meshes[i];
     std::stringstream entity_name;
     entity_name << "Entity " << p_created_entity_count;
-    Entity e = create_entity(entity_name.str());
+    Entity e = CreateEntity(entity_name.str());
 
-    Transform &trans = e.add_component<Transform>();
+    Transform &trans = e.AddComponent<Transform>();
     trans.m_scale = scale;
     trans.m_euler = euler;
-    e.add_component<MeshComponent>(MeshComponent{entry, model_asset_handle, i});
+    e.AddComponent<MeshComponent>(MeshComponent{entry, model_asset_handle, i});
     Material &current_mat =
-        e.add_component<Material>(shader_asset_handle, material_shader);
+        e.AddComponent<Material>(shader_asset_handle, material_shader);
 
     GLenum texture_slot = GL_TEXTURE0;
     // go through each known map type
@@ -54,7 +54,7 @@ std::vector<Entity> Scene::create_entity_from_model(
           model_to_load.m_materials[entry->m_material_index];
       if (material_entry.m_material_maps.find(map_type) !=
           material_entry.m_material_maps.end()) {
-        current_mat.set_sampler(uniform_name, texture_slot,
+        current_mat.SetSampler(uniform_name, texture_slot,
                                 material_entry.m_material_maps[map_type],
                                 GL_TEXTURE_2D);
 
@@ -64,28 +64,28 @@ std::vector<Entity> Scene::create_entity_from_model(
     entities.push_back(e);
   }
   static const glm::vec3 ZERO = glm::vec3(0.0);
-  glm::mat4 model_matrix = Utils::get_model_matrix(ZERO, euler, scale);
+  glm::mat4 model_matrix = Utils::GetModelMatrix(ZERO, euler, scale);
 
   // TODO: Update to work from scene overall aabb
-  m_scene_bounding_volume = Utils::transform_aabb(
+  m_scene_bounding_volume = Utils::TransformAABB(
       model_to_load.m_aabb, model_matrix);
 
   return entities;
 }
 
-bool Scene::does_entity_exist(u32 index) {
+bool Scene::DoesEntityExist(u32 index) {
   ZoneScoped;
   return m_registry.valid(entt::entity{index});
 }
 
-void Scene::on_update() {
+void Scene::Update() {
   ZoneScoped;
   for (auto &sys : Engine::systems.m_systems) {
-    sys->update(*this);
+    sys->Update(*this);
   }
 }
 
-void Scene::update_aabb(AABB &in) {
+void Scene::UpdateAABB(AABB &in) {
   ZoneScoped;
   if (in.m_min.x < m_scene_bounding_volume.m_min.x) {
     m_scene_bounding_volume.m_min.x = in.m_min.x;
@@ -114,9 +114,9 @@ Entity::Entity(Scene *escene, entt::entity e) : m_scene(escene), m_handle(e) {
 
 SceneManager::SceneManager() { ZoneScoped; }
 
-void SceneManager::close_scene(HashString scene_hash) { ZoneScoped; }
+void SceneManager::CloseScene(HashString scene_hash) { ZoneScoped; }
 
-Scene *SceneManager::get_scene(HashString scene_hash) {
+Scene *SceneManager::GetScene(HashString scene_hash) {
   ZoneScoped;
 
   for (auto &scene : p_active_scenes) {
@@ -127,10 +127,10 @@ Scene *SceneManager::get_scene(HashString scene_hash) {
   return nullptr;
 }
 
-Scene *SceneManager::create_scene(const std::string &scene_name) {
+Scene *SceneManager::CreateScene(const std::string &scene_name) {
   ZoneScoped;
   HashString scene_hash(scene_name);
-  Scene *existing_scene = get_scene(scene_hash);
+  Scene *existing_scene = GetScene(scene_hash);
   if (existing_scene != nullptr) {
     return existing_scene;
   }
@@ -139,21 +139,21 @@ Scene *SceneManager::create_scene(const std::string &scene_name) {
   return p_active_scenes.back().get();
 }
 
-Scene *SceneManager::load_scene(nlohmann::json &scene_json) {
+Scene *SceneManager::LoadScene(nlohmann::json &scene_json) {
   ZoneScoped;
   std::string scene_name = scene_json["name"];
   p_active_scenes.push_back(std::make_unique<Scene>(scene_name));
   Scene *s = p_active_scenes.back().get();
 
   for (auto &sys : Engine::systems.m_systems) {
-    sys->deserialize(
+    sys->Deserialize(
         *s, scene_json["systems"][std::to_string(sys->m_sys_hash.m_value)]);
   }
 
   return s;
 }
 
-nlohmann::json SceneManager::save_scene(Scene *ser_scene) {
+nlohmann::json SceneManager::SaveScene(Scene *ser_scene) {
   ZoneScoped;
   GEM_ASSERT(ser_scene, "Trying to save an invalid scene");
 
@@ -164,26 +164,26 @@ nlohmann::json SceneManager::save_scene(Scene *ser_scene) {
 
   for (auto &sys : Engine::systems.m_systems) {
     json["systems"][std::to_string(sys->m_sys_hash.m_value)] =
-        sys->serialize(*ser_scene);
+        sys->Serialize(*ser_scene);
   }
 
   return json;
 }
-void SceneManager::save_scene_to_disk(const std::string &path,
+void SceneManager::SaveSceneToPath(const std::string &path,
                                        Scene *ser_scene) {
 
-  nlohmann::json scene_json = save_scene(ser_scene);
-  Utils::save_string_to_path(path, scene_json.dump());
+  nlohmann::json scene_json = SaveScene(ser_scene);
+  Utils::SaveStringToPath(path, scene_json.dump());
 }
 
-Scene *SceneManager::load_scene_from_disk(const std::string &scene_path) {
-  std::string scene_json_str = Utils::load_string_from_path(scene_path);
+Scene *SceneManager::LoadSceneFromPath(const std::string &scene_path) {
+  std::string scene_json_str = Utils::LoadStringFromPath(scene_path);
   if (scene_json_str.empty()) {
     return nullptr;
   }
   nlohmann::json scene_json = nlohmann::json::parse(scene_json_str);
   GEM_ASSERT(!scene_json.empty(),
              "Failed to deserialize scene json at path : " + scene_path);
-  return load_scene(scene_json);
+  return LoadScene(scene_json);
 }
 } // namespace gem

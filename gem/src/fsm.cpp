@@ -4,7 +4,7 @@
 
 namespace gem {
 
-FSM::state::state(int state, std::function<int()> action,
+FSM::State::State(int state, std::function<int()> action,
                          std::function<void()> entry,
                          std::function<void()> exit)
     : m_state(state), m_action(action) {
@@ -24,12 +24,12 @@ FSM::FSM() : p_current_state(UINT16_MAX), p_run_entry(false) {
   ZoneScoped;
 }
 
-void FSM::set_starting_state(int state) {
+void FSM::SetStartingState(int state) {
   ZoneScoped;
   p_current_state = state;
 }
 
-void FSM::update() {
+void FSM::Update() {
   ZoneScoped;
   int index = -1;
   for (int i = 0; i < p_states.size(); i++) {
@@ -61,7 +61,7 @@ void FSM::update() {
     for (int i = 0; i < p_transitions.size(); i++) {
       if (p_transitions[i].m_trigger == trigger) {
         if (p_transitions[i].m_src_state == p_current_state) {
-          transition_state(p_transitions[i].m_dst_state);
+          TransitionState(p_transitions[i].m_dst_state);
           numTransitions++;
           break;
         }
@@ -73,18 +73,18 @@ void FSM::update() {
   }
   p_previous_state = p_current_state;
 }
-void FSM::trigger_int(int trigger) {
+void FSM::Trigger(int trigger) {
   ZoneScoped;
   for (int i = 0; i < p_transitions.size(); i++) {
     if (p_transitions[i].m_trigger == trigger) {
       if (p_transitions[i].m_src_state == p_current_state) {
-        transition_state(p_transitions[i].m_dst_state);
+        TransitionState(p_transitions[i].m_dst_state);
         break;
       }
     }
   }
 }
-void FSM::add_state(int s, std::function<int()> action) {
+void FSM::AddState(int s, std::function<int()> action) {
   ZoneScoped;
   for (int i = 0; i < p_states.size(); i++) {
     if (p_states[i].m_state == s) {
@@ -92,10 +92,10 @@ void FSM::add_state(int s, std::function<int()> action) {
       return;
     }
   }
-  state stateObj = state(s, action);
+  State stateObj = State(s, action);
   p_states.emplace_back(stateObj);
 }
-void FSM::add_state_entry(int state, std::function<void()> entry) {
+void FSM::AddEntry(int state, std::function<void()> entry) {
   ZoneScoped;
   for (int i = 0; i < p_states.size(); i++) {
     if (p_states[i].m_state == state) {
@@ -104,7 +104,7 @@ void FSM::add_state_entry(int state, std::function<void()> entry) {
     }
   }
 }
-void FSM::add_state_exit(int state, std::function<void()> exit) {
+void FSM::AddExit(int state, std::function<void()> exit) {
   ZoneScoped;
   for (int i = 0; i < p_states.size(); i++) {
     if (p_states[i].m_state == state) {
@@ -113,13 +113,13 @@ void FSM::add_state_exit(int state, std::function<void()> exit) {
     }
   }
 }
-void FSM::add_trigger(int trigger, int src_state, int dst_state) {
+void FSM::AddTrigger(int trigger, int src_state, int dst_state) {
   ZoneScoped;
-  state_transition transition{trigger, src_state, dst_state};
+  StateTransition transition{trigger, src_state, dst_state};
   p_transitions.emplace_back(transition);
 }
 
-void FSM::transition_state(int new_state) {
+void FSM::TransitionState(int new_state) {
   ZoneScoped;
   if (p_states[p_current_state].m_has_exit) {
     p_states[p_current_state].m_exit_procedure();

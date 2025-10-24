@@ -21,7 +21,7 @@ void tech::PBRLighting::DispatchLightPass(
   GEM_GPU_MARKER("Lighting Pass");
   lighting_buffer.Bind();
   lighting_shader.Use();
-  Shapes::s_screen_quad.use();
+  Shapes::s_screen_quad.Use();
 
   lighting_shader.SetInt("u_diffuse_map", 0);
   lighting_shader.SetInt("u_position_map", 1);
@@ -37,7 +37,7 @@ void tech::PBRLighting::DispatchLightPass(
   lighting_shader.SetVec3f("u_dir_light_pos", lightPos);
 
   lighting_shader.SetVec3f("u_dir_light.direction",
-                           Utils::get_forward(sun.direction));
+                           Utils::GetForwardFromEuler(sun.direction));
   lighting_shader.SetVec3f("u_dir_light.colour", sun.colour);
   lighting_shader.SetMat4f("u_dir_light.light_space_matrix",
                            sun.light_space_matrix);
@@ -61,11 +61,11 @@ void tech::PBRLighting::DispatchLightPass(
     lighting_shader.SetFloat(int_name.str(), point_lights[i].intensity);
   }
 
-  Texture::bind_sampler_handle(gbuffer.m_colour_attachments[0], GL_TEXTURE0);
-  Texture::bind_sampler_handle(gbuffer.m_colour_attachments[1], GL_TEXTURE1);
-  Texture::bind_sampler_handle(gbuffer.m_colour_attachments[2], GL_TEXTURE2);
-  Texture::bind_sampler_handle(gbuffer.m_colour_attachments[3], GL_TEXTURE3);
-  Texture::bind_sampler_handle(dir_light_shadow_buffer.m_depth_attachment,
+  Texture::BindSamplerHandle(gbuffer.m_colour_attachments[0], GL_TEXTURE0);
+  Texture::BindSamplerHandle(gbuffer.m_colour_attachments[1], GL_TEXTURE1);
+  Texture::BindSamplerHandle(gbuffer.m_colour_attachments[2], GL_TEXTURE2);
+  Texture::BindSamplerHandle(gbuffer.m_colour_attachments[3], GL_TEXTURE3);
+  Texture::BindSamplerHandle(dir_light_shadow_buffer.m_depth_attachment,
                                GL_TEXTURE4);
 
   // bind all maps

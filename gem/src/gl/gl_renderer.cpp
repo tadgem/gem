@@ -25,69 +25,69 @@ void GLRenderer::Init(AssetManager &am, glm::ivec2 resolution) {
   m_frame_index = 0;
   m_im3d_state = GLIm3d::LoadIm3D();
 
-  am.load_asset("assets/shaders/gbuffer.shader", AssetType::shader);
-  am.load_asset("assets/shaders/gbuffer_textureless.shader", AssetType::shader);
-  am.load_asset("assets/shaders/lighting.shader", AssetType::shader);
-  am.load_asset("assets/shaders/forward_lighting.shader", AssetType::shader);
-  am.load_asset("assets/shaders/visualize_3d_tex.shader", AssetType::shader);
-  am.load_asset("assets/shaders/visualize_3d_tex_instances.shader",
+  am.LoadAsset("assets/shaders/gbuffer.shader", AssetType::shader);
+  am.LoadAsset("assets/shaders/gbuffer_textureless.shader", AssetType::shader);
+  am.LoadAsset("assets/shaders/lighting.shader", AssetType::shader);
+  am.LoadAsset("assets/shaders/forward_lighting.shader", AssetType::shader);
+  am.LoadAsset("assets/shaders/visualize_3d_tex.shader", AssetType::shader);
+  am.LoadAsset("assets/shaders/visualize_3d_tex_instances.shader",
                 AssetType::shader);
-  am.load_asset("assets/shaders/present.shader", AssetType::shader);
-  am.load_asset("assets/shaders/dir_light_shadow.shader", AssetType::shader);
-  am.load_asset("assets/shaders/voxel_cone_tracing.shader", AssetType::shader);
-  am.load_asset("assets/shaders/ssr.shader", AssetType::shader);
-  am.load_asset("assets/shaders/taa.shader", AssetType::shader);
-  am.load_asset("assets/shaders/denoise.shader", AssetType::shader);
-  am.load_asset("assets/shaders/gi_combine.shader", AssetType::shader);
-  am.load_asset("assets/shaders/downsample.shader", AssetType::shader);
-  am.load_asset("assets/shaders/gbuffer_voxelization.shader",
+  am.LoadAsset("assets/shaders/present.shader", AssetType::shader);
+  am.LoadAsset("assets/shaders/dir_light_shadow.shader", AssetType::shader);
+  am.LoadAsset("assets/shaders/voxel_cone_tracing.shader", AssetType::shader);
+  am.LoadAsset("assets/shaders/ssr.shader", AssetType::shader);
+  am.LoadAsset("assets/shaders/taa.shader", AssetType::shader);
+  am.LoadAsset("assets/shaders/denoise.shader", AssetType::shader);
+  am.LoadAsset("assets/shaders/gi_combine.shader", AssetType::shader);
+  am.LoadAsset("assets/shaders/downsample.shader", AssetType::shader);
+  am.LoadAsset("assets/shaders/gbuffer_voxelization.shader",
                 AssetType::shader);
-  am.load_asset("assets/shaders/voxel_mips.shader", AssetType::shader);
-  am.load_asset("assets/shaders/voxel_reprojection.shader", AssetType::shader);
-  am.load_asset("assets/shaders/voxel_blit.shader", AssetType::shader);
-  am.load_asset("assets/shaders/voxel_clear.shader", AssetType::shader);
+  am.LoadAsset("assets/shaders/voxel_mips.shader", AssetType::shader);
+  am.LoadAsset("assets/shaders/voxel_reprojection.shader", AssetType::shader);
+  am.LoadAsset("assets/shaders/voxel_blit.shader", AssetType::shader);
+  am.LoadAsset("assets/shaders/voxel_clear.shader", AssetType::shader);
 
-  am.wait_all_assets();
-  m_gbuffer_shader = am.get_asset<GLShader, AssetType::shader>(
+  am.WaitAllLoads();
+  m_gbuffer_shader = am.GetAsset<GLShader, AssetType::shader>(
       "assets/shaders/gbuffer.shader");
-  m_gbuffer_textureless_shader = am.get_asset<GLShader, AssetType::shader>(
+  m_gbuffer_textureless_shader = am.GetAsset<GLShader, AssetType::shader>(
       "assets/shaders/gbuffer_textureless.shader");
-  m_forward_lighting_shader = am.get_asset<GLShader, AssetType::shader>(
+  m_forward_lighting_shader = am.GetAsset<GLShader, AssetType::shader>(
       "assets/shaders/forward_lighting.shader");
-  m_lighting_shader = am.get_asset<GLShader, AssetType::shader>(
+  m_lighting_shader = am.GetAsset<GLShader, AssetType::shader>(
       "assets/shaders/lighting.shader");
-  m_visualise_3d_tex_shader = am.get_asset<GLShader, AssetType::shader>(
+  m_visualise_3d_tex_shader = am.GetAsset<GLShader, AssetType::shader>(
       "assets/shaders/visualize_3d_tex.shader");
   m_visualise_3d_tex_instances_shader =
-      am.get_asset<GLShader, AssetType::shader>(
+      am.GetAsset<GLShader, AssetType::shader>(
           "assets/shaders/visualize_3d_tex_instances.shader");
-  m_present_shader = am.get_asset<GLShader, AssetType::shader>(
+  m_present_shader = am.GetAsset<GLShader, AssetType::shader>(
       "assets/shaders/present.shader");
-  m_dir_light_shadow_shader = am.get_asset<GLShader, AssetType::shader>(
+  m_dir_light_shadow_shader = am.GetAsset<GLShader, AssetType::shader>(
       "assets/shaders/dir_light_shadow.shader");
-  m_voxel_cone_tracing_shader = am.get_asset<GLShader, AssetType::shader>(
+  m_voxel_cone_tracing_shader = am.GetAsset<GLShader, AssetType::shader>(
       "assets/shaders/voxel_cone_tracing.shader");
   m_ssr_shader =
-      am.get_asset<GLShader, AssetType::shader>("assets/shaders/ssr.shader");
+      am.GetAsset<GLShader, AssetType::shader>("assets/shaders/ssr.shader");
   m_taa_shader =
-      am.get_asset<GLShader, AssetType::shader>("assets/shaders/taa.shader");
-  m_denoise_shader = am.get_asset<GLShader, AssetType::shader>(
+      am.GetAsset<GLShader, AssetType::shader>("assets/shaders/taa.shader");
+  m_denoise_shader = am.GetAsset<GLShader, AssetType::shader>(
       "assets/shaders/denoise.shader");
-  m_combine_shader = am.get_asset<GLShader, AssetType::shader>(
+  m_combine_shader = am.GetAsset<GLShader, AssetType::shader>(
       "assets/shaders/gi_combine.shader");
-  m_downsample_shader = am.get_asset<GLShader, AssetType::shader>(
+  m_downsample_shader = am.GetAsset<GLShader, AssetType::shader>(
       "assets/shaders/downsample.shader");
   m_compute_voxelize_gbuffer_shader =
-      am.get_asset<GLShader, AssetType::shader>(
+      am.GetAsset<GLShader, AssetType::shader>(
           "assets/shaders/gbuffer_voxelization.shader");
-  m_compute_voxel_mips_shader = am.get_asset<GLShader, AssetType::shader>(
+  m_compute_voxel_mips_shader = am.GetAsset<GLShader, AssetType::shader>(
       "assets/shaders/voxel_mips.shader");
   m_compute_voxel_reprojection_shader =
-      am.get_asset<GLShader, AssetType::shader>(
+      am.GetAsset<GLShader, AssetType::shader>(
           "assets/shaders/voxel_reprojection.shader");
-  m_compute_voxel_blit_shader = am.get_asset<GLShader, AssetType::shader>(
+  m_compute_voxel_blit_shader = am.GetAsset<GLShader, AssetType::shader>(
       "assets/shaders/voxel_blit.shader");
-  m_compute_voxel_clear_shader = am.get_asset<GLShader, AssetType::shader>(
+  m_compute_voxel_clear_shader = am.GetAsset<GLShader, AssetType::shader>(
       "assets/shaders/voxel_clear.shader");
 
   m_window_resolution = resolution;
@@ -209,10 +209,10 @@ void GLRenderer::Init(AssetManager &am, glm::ivec2 resolution) {
                              },
                              false);
 
-  m_voxel_data = Voxel::create_grid(s_voxel_resolution, AABB{});
+  m_voxel_data = Voxel::CreateGrid(s_voxel_resolution, AABB{});
   Camera cam{}; // TODO: clean this up, just need a position of 0,0,0 to init
-  m_voxel_data.update_voxel_unit();
-  m_voxel_visualiser = Voxel::create_grid_visualiser(
+  m_voxel_data.UpdateVoxelUnit();
+  m_voxel_visualiser = Voxel::CreateGridVisualizer(
       m_voxel_data, m_visualise_3d_tex_shader->m_data,
       m_visualise_3d_tex_instances_shader->m_data, 8);
 }
@@ -241,7 +241,7 @@ void GLRenderer::Render(AssetManager &am, Camera &cam,
     p_clear_voxel_grid = false;
   }
 
-  m_voxel_data.update_voxel_unit();
+  m_voxel_data.UpdateVoxelUnit();
 
   {
     TracyGpuZone("GBuffer Voxelization");
@@ -362,7 +362,7 @@ void GLRenderer::Render(AssetManager &am, Camera &cam,
           m_denoise_shader->m_data, m_conetracing_buffer_resolve,
           m_conetracing_buffer_denoise, m_denoise_sigma, m_denoise_threshold,
           m_denoise_k_sigma, m_window_resolution);
-      Texture::bind_sampler_handle(0, GL_TEXTURE0);
+      Texture::BindSamplerHandle(0, GL_TEXTURE0);
       glViewport(0, 0, m_window_resolution.x, m_window_resolution.y);
     }
   }
@@ -410,7 +410,7 @@ void GLRenderer::Render(AssetManager &am, Camera &cam,
 
   glClear(GL_DEPTH_BUFFER_BIT);
   if (m_debug_draw_3d_texture) {
-    m_voxel_visualiser.dispatch_draw(m_voxel_data, cam);
+    m_voxel_visualiser.Draw(m_voxel_data, cam);
   }
   m_voxel_data.previous_bounding_box = m_voxel_data.current_bounding_box;
   glClear(GL_DEPTH_BUFFER_BIT);
@@ -418,7 +418,7 @@ void GLRenderer::Render(AssetManager &am, Camera &cam,
     TracyGpuZone("Composite Final Pass");
     GEM_GPU_MARKER("Composite Final Pass");
     m_final_pass.Bind();
-    Shapes::s_screen_quad.use();
+    Shapes::s_screen_quad.Use();
     m_combine_shader->m_data.Use();
     m_combine_shader->m_data.SetFloat("u_brightness",
                                        m_tonemapping_brightness);
@@ -426,19 +426,19 @@ void GLRenderer::Render(AssetManager &am, Camera &cam,
     m_combine_shader->m_data.SetFloat("u_saturation",
                                        m_tonemapping_saturation);
     m_combine_shader->m_data.SetInt("lighting_pass", 0);
-    Texture::bind_sampler_handle(
+    Texture::BindSamplerHandle(
         m_lightpass_buffer_resolve.m_colour_attachments.front(), GL_TEXTURE0);
     m_combine_shader->m_data.SetInt("cone_tracing_pass", 1);
-    Texture::bind_sampler_handle(
+    Texture::BindSamplerHandle(
         m_conetracing_buffer_resolve.m_colour_attachments.front(), GL_TEXTURE1);
     m_combine_shader->m_data.SetInt("ssr_pass", 2);
     m_combine_shader->m_data.SetInt("ssr_pass", 2);
-    Texture::bind_sampler_handle(
+    Texture::BindSamplerHandle(
         m_ssr_buffer_resolve.m_colour_attachments.front(), GL_TEXTURE2);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-    Texture::bind_sampler_handle(0, GL_TEXTURE0);
-    Texture::bind_sampler_handle(0, GL_TEXTURE1);
+    Texture::BindSamplerHandle(0, GL_TEXTURE0);
+    Texture::BindSamplerHandle(0, GL_TEXTURE1);
     m_final_pass.Unbind();
     gl::tech::Utils::DispatchPresentImage(
         m_present_shader->m_data, "u_image_sampler", 0,
@@ -490,7 +490,7 @@ entt::entity GLRenderer::GetEntityAtScreenPosition(glm::vec2 mouse_position) {
 
 void GLRenderer::OnImGui(AssetManager &am) {
   ZoneScoped;
-  glm::vec2 mouse_pos = Input::get_mouse_position();
+  glm::vec2 mouse_pos = Input::GetMousePosition();
   ImGui::Begin("Renderer Settings");
   ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
               1000.0f / GPUBackend::Selected()->m_imgui_io->Framerate,

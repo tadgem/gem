@@ -126,13 +126,13 @@ void DrawIm3dTextListsImGui(const Im3d::TextDrawList _textDrawLists[],
 Im3dState GLIm3d::LoadIm3D() {
   ZoneScoped;
   std::string tris =
-      Utils::load_string_from_path("assets/shaders/im3d/im3d.tris.shader");
+      Utils::LoadStringFromPath("assets/shaders/im3d/im3d.tris.shader");
 
   std::string points =
-      Utils::load_string_from_path("assets/shaders/im3d/im3d.points.shader");
+      Utils::LoadStringFromPath("assets/shaders/im3d/im3d.points.shader");
 
   std::string lines =
-      Utils::load_string_from_path("assets/shaders/im3d/im3d.lines.shader");
+      Utils::LoadStringFromPath("assets/shaders/im3d/im3d.lines.shader");
 
   auto tris_stages = GLShader::SplitCompositeShader(tris);
   auto points_stages = GLShader::SplitCompositeShader(points);
@@ -182,16 +182,16 @@ void GLIm3d::NewFrameIm3D(Im3dState &state, glm::vec2 screen_dim,
   Im3d::AppData &ad = Im3d::GetAppData();
   ad.m_viewportSize = {screen_dim.x, screen_dim.y};
   ad.m_keyDown[Im3d::Key::Mouse_Left] =
-      Input::get_mouse_button(MouseButton::left);
-  ad.m_keyDown[Im3d::Key::Key_L] = Input::get_keyboard_key(KeyboardKey::l);
-  ad.m_keyDown[Im3d::Key::Key_R] = Input::get_keyboard_key(KeyboardKey::r);
-  ad.m_keyDown[Im3d::Key::Key_S] = Input::get_keyboard_key(KeyboardKey::s);
-  ad.m_keyDown[Im3d::Key::Key_T] = Input::get_keyboard_key(KeyboardKey::t);
+      Input::GetMouseButton(MouseButton::left);
+  ad.m_keyDown[Im3d::Key::Key_L] = Input::GetKey(KeyboardKey::l);
+  ad.m_keyDown[Im3d::Key::Key_R] = Input::GetKey(KeyboardKey::r);
+  ad.m_keyDown[Im3d::Key::Key_S] = Input::GetKey(KeyboardKey::s);
+  ad.m_keyDown[Im3d::Key::Key_T] = Input::GetKey(KeyboardKey::t);
   ad.m_deltaTime = GPUBackend::Selected()->GetFrameTime();
 
-  glm::vec2 cursor_pos = Input::get_mouse_position();
+  glm::vec2 cursor_pos = Input::GetMousePosition();
 
-  glm::vec3 rayOrigin = Utils::screen_to_world_pos(cursor_pos, screen_dim,
+  glm::vec3 rayOrigin = Utils::ScreenToWorldPos(cursor_pos, screen_dim,
                                                    glm::inverse(cam.m_view),
                                                    glm::inverse(cam.m_proj));
   ;

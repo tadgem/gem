@@ -10,10 +10,10 @@
 
 namespace gem {
 
-void Camera::update(glm::vec2 screen_dim) {
+void Camera::Update(glm::vec2 screen_dim) {
   ZoneScoped;
   m_last_vp = m_proj * m_view;
-  glm::mat4 rotate = get_rotation_matrix();
+  glm::mat4 rotate = GetRotationMatrix();
   glm::mat4 translate = glm::mat4(1.0f);
   translate = glm::translate(translate, -m_pos);
 
@@ -30,10 +30,10 @@ void Camera::update(glm::vec2 screen_dim) {
     break;
   }
 
-  m_frustum_planes.m_planes = Utils::get_planes_from_view_proj(m_proj * m_view);
+  m_frustum_planes.m_planes = Utils::GetPlanesFromViewProjectionMatrix(m_proj * m_view);
 }
 
-glm::mat4 Camera::get_rotation_matrix() {
+glm::mat4 Camera::GetRotationMatrix() {
   ZoneScoped;
   glm::quat qPitch =
       glm::angleAxis(glm::radians(-m_euler.x), glm::vec3(1, 0, 0));
@@ -44,15 +44,15 @@ glm::mat4 Camera::get_rotation_matrix() {
   return glm::mat4_cast(Rotation);
 }
 
-void DebugCameraController::update(glm::vec2 screen_dim, Camera &cam) {
+void DebugCameraController::Update(glm::vec2 screen_dim, Camera &cam) {
   ZoneScoped;
-  if (!Input::get_mouse_button(MouseButton::right) && !show_mouse) {
+  if (!Input::GetMouseButton(MouseButton::right) && !show_mouse) {
     SDL_ShowCursor();
     show_mouse = true;
     return;
   }
 
-  if (!Input::get_mouse_button(MouseButton::right)) {
+  if (!Input::GetMouseButton(MouseButton::right)) {
     return;
   }
 
@@ -63,7 +63,7 @@ void DebugCameraController::update(glm::vec2 screen_dim, Camera &cam) {
 
   float speed = movement_speed;
 
-  if (Input::get_keyboard_key(KeyboardKey::left_shift)) {
+  if (Input::GetKey(KeyboardKey::left_shift)) {
     speed *= 3.0f;
   }
 
@@ -73,40 +73,40 @@ void DebugCameraController::update(glm::vec2 screen_dim, Camera &cam) {
       glm::angleAxis(glm::radians(cam.m_euler.y), glm::vec3(0, 1, 0));
   glm::quat rotation = q_pitch * q_yaw;
 
-  glm::vec3 forward = Utils::get_forward_from_quat(rotation);
-  glm::vec3 right = Utils::get_right_from_quat(rotation);
-  glm::vec3 up = Utils::get_up_from_quat(rotation);
+  glm::vec3 forward = Utils::GetForwardFromQuat(rotation);
+  glm::vec3 right = Utils::GetRightFromQuat(rotation);
+  glm::vec3 up = Utils::GetUpFromQuat(rotation);
   float frame_time = GPUBackend::Selected()->GetFrameTime();
 
   cam.m_forward = forward;
   cam.m_right = right;
   cam.m_up = up;
 
-  if (Input::get_keyboard_key(KeyboardKey::w)) {
+  if (Input::GetKey(KeyboardKey::w)) {
     cam.m_pos += forward * speed * frame_time;
   }
 
-  if (Input::get_keyboard_key(KeyboardKey::s)) {
+  if (Input::GetKey(KeyboardKey::s)) {
     cam.m_pos -= forward * movement_speed * frame_time;
   }
 
-  if (Input::get_keyboard_key(KeyboardKey::a)) {
+  if (Input::GetKey(KeyboardKey::a)) {
     cam.m_pos -= right * movement_speed * frame_time;
   }
 
-  if (Input::get_keyboard_key(KeyboardKey::d)) {
+  if (Input::GetKey(KeyboardKey::d)) {
     cam.m_pos += right * movement_speed * frame_time;
   }
 
-  if (Input::get_keyboard_key(KeyboardKey::e)) {
+  if (Input::GetKey(KeyboardKey::e)) {
     cam.m_pos += up * movement_speed * frame_time;
   }
 
-  if (Input::get_keyboard_key(KeyboardKey::q)) {
+  if (Input::GetKey(KeyboardKey::q)) {
     cam.m_pos -= up * movement_speed * frame_time;
   }
 
-  glm::vec2 mouse_velocity = Input::get_mouse_velocity() / screen_dim;
+  glm::vec2 mouse_velocity = Input::GetMouseVelocity() / screen_dim;
   if (glm::abs(mouse_velocity.x) > deadzone) {
     cam.m_euler.y +=
         mouse_velocity.x * rotational_speed * rotational_factor * frame_time;

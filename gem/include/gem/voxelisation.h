@@ -16,7 +16,7 @@ public:
     AABB current_bounding_box;
     AABB previous_bounding_box;
 
-    void update_voxel_unit();
+    void UpdateVoxelUnit();
   };
 
   struct GridVisualizer {
@@ -30,12 +30,12 @@ public:
     float m_debug_scale = 1.0f;
     glm::vec3 m_debug_position_offset;
 
-    void dispatch_draw(Grid &vg, Camera &cam);
+    void Draw(Grid &vg, Camera &cam);
   };
 
-  static Grid create_grid(glm::ivec3 resolution, AABB bb);
+  static Grid CreateGrid(glm::ivec3 resolution, AABB bb);
   static GridVisualizer
-  create_grid_visualiser(Grid &vg, GLShader &visualisation_shader,
+  CreateGridVisualizer(Grid &vg, GLShader &visualisation_shader,
                          GLShader &compute_matrices_shader,
                          int texel_resolution = 8);
 };

@@ -163,7 +163,7 @@ void GLBackend::PreFrame() {
 
   float mouse_x, mouse_y;
   SDL_GetMouseState(&mouse_x, &mouse_y);
-  Input::update_mouse_position(GetWindowDimensions(), glm::vec2(mouse_x, mouse_y));
+  Input::UpdateMousePosition(GetWindowDimensions(), glm::vec2(mouse_x, mouse_y));
 
   // Start the Dear ImGui frame
   ImGui_ImplOpenGL3_NewFrame();
@@ -197,21 +197,21 @@ void GLBackend::ShutDown() {
 
 void GLBackend::HandleInputEvents(SDL_Event &input_event) {
   ZoneScoped;
-  Input::update_last_frame();
+  Input::UpdateLastFrame();
 
   if (input_event.type == SDL_EVENT_KEY_DOWN) {
     SDL_KeyboardEvent keyEvent = input_event.key;
     SDL_Keycode keySym = keyEvent.key;
-    KeyboardKey key = Input::get_key_from_sdl(keySym);
-    Input::update_keyboard_key(key, true);
+    KeyboardKey key = Input::GetKeySDL(keySym);
+    Input::UpdateKey(key, true);
     return;
   }
 
   if (input_event.type == SDL_EVENT_KEY_UP) {
     SDL_KeyboardEvent keyEvent = input_event.key;
     SDL_Keycode keySym = keyEvent.key;
-    KeyboardKey key = Input::get_key_from_sdl(keySym);
-    Input::update_keyboard_key(key, false);
+    KeyboardKey key = Input::GetKeySDL(keySym);
+    Input::UpdateKey(key, false);
     return;
   }
 
@@ -220,14 +220,14 @@ void GLBackend::HandleInputEvents(SDL_Event &input_event) {
     SDL_MouseButtonEvent buttonEvent = input_event.button;
     MouseButton button =
         buttonEvent.button == 3 ? MouseButton::right : MouseButton::left;
-    Input::update_mouse_button(button, false);
+    Input::UpdateMouseButton(button, false);
     return;
   }
   if (input_event.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
     SDL_MouseButtonEvent buttonEvent = input_event.button;
     MouseButton button =
         buttonEvent.button == 3 ? MouseButton::right : MouseButton::left;
-    Input::update_mouse_button(button, true);
+    Input::UpdateMouseButton(button, true);
     return;
   }
 
@@ -248,23 +248,23 @@ void GLBackend::HandleInputEvents(SDL_Event &input_event) {
 
     if (axis == SDL_GAMEPAD_AXIS_RIGHT_TRIGGER ||
         axis == SDL_GAMEPAD_AXIS_LEFT_TRIGGER) {
-      Input::update_gamepad_trigger(index, Input::get_trigger_from_sdl(axis),
+      Input::UpdateGamepadTrigger(index, Input::GetTriggerSDL(axis),
                                     value);
     }
     if (axis == SDL_GAMEPAD_AXIS_LEFTX ||
         axis == SDL_GAMEPAD_AXIS_RIGHTX) {
       glm::vec2 current =
-          Input::get_gamepad_stick(index, Input::get_stick_from_sdl(axis));
+          Input::GetGamepadStick(index, Input::GetStickSDL(axis));
       current.x = value;
-      Input::update_gamepad_stick(index, Input::get_stick_from_sdl(axis),
+      Input::UpdateGamepadStick(index, Input::GetStickSDL(axis),
                                   current);
     }
     if (axis == SDL_GAMEPAD_AXIS_LEFTY ||
         axis == SDL_GAMEPAD_AXIS_RIGHTY) {
       glm::vec2 current =
-          Input::get_gamepad_stick(index, Input::get_stick_from_sdl(axis));
+          Input::GetGamepadStick(index, Input::GetStickSDL(axis));
       current.y = value;
-      Input::update_gamepad_stick(index, Input::get_stick_from_sdl(axis),
+      Input::UpdateGamepadStick(index, Input::GetStickSDL(axis),
                                   current);
     }
   }
@@ -272,8 +272,8 @@ void GLBackend::HandleInputEvents(SDL_Event &input_event) {
   if (input_event.type == SDL_EVENT_GAMEPAD_BUTTON_DOWN) {
     SDL_GamepadButtonEvent buttonEvent = input_event.gbutton;
 
-    Input::update_gamepad_button(buttonEvent.which,
-                                 Input::get_button_from_sdl(buttonEvent.button),
+    Input::UpdateGamepadButton(buttonEvent.which,
+                                 Input::GetButtonSDL(buttonEvent.button),
                                  true);
     return;
   }
@@ -281,8 +281,8 @@ void GLBackend::HandleInputEvents(SDL_Event &input_event) {
   if (input_event.type == SDL_EVENT_GAMEPAD_BUTTON_UP) {
     SDL_GamepadButtonEvent buttonEvent = input_event.gbutton;
 
-    Input::update_gamepad_button(buttonEvent.which,
-                                 Input::get_button_from_sdl(buttonEvent.button),
+    Input::UpdateGamepadButton(buttonEvent.which,
+                                 Input::GetButtonSDL(buttonEvent.button),
                                  false);
     return;
   }

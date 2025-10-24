@@ -16,17 +16,17 @@ namespace gem {
 
 class HashUtils {
 public:
-  template <typename T> static std::string get_type_name() {
+  template <typename T> static std::string GetTypeName() {
     ZoneScoped;
     return ctti::type_id<T>().name().str();
   }
 
-  template <typename T> static u64 get_type_hash() {
+  template <typename T> static u64 GetTypeHash() {
     ZoneScoped;
     return ctti::type_id<T>().hash();
   }
 
-  static u64 get_string_hash(const std::string &str) {
+  static u64 GetStringHash(const std::string &str) {
 
     return ctti::id_from_name(str).hash();
   }
@@ -39,7 +39,7 @@ struct HashString {
   HashString() { m_value = 0; }
 
   HashString(const std::string &input)
-      : m_value(HashUtils::get_string_hash(input)) {
+      : m_value(HashUtils::GetStringHash(input)) {
     ZoneScoped;
 #ifdef TRACK_HASH_STRING_ORIGINALS
 #ifdef CHECK_FOR_HASH_STRING_COLLISIONS
@@ -57,7 +57,7 @@ struct HashString {
 
   HashString(u64 value) : m_value(value) {}
 
-  template <typename T> HashString() : m_value(HashUtils::get_type_hash<T>()) {}
+  template <typename T> HashString() : m_value(HashUtils::GetTypeHash<T>()) {}
 
   u64 m_value;
 

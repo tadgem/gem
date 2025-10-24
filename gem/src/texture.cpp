@@ -19,12 +19,12 @@ Texture::Texture(const std::string &path) {
   std::string compressed_format_type = "";
   int block_size = -1;
 
-  std::vector<unsigned char> data = Utils::load_binary_from_path(path);
+  std::vector<unsigned char> data = Utils::LoadBinaryFromPath(path);
 
   if (path.find("dds") != std::string::npos) {
-    load_texture_gli(data);
+    LoadTextureGLI(data);
   } else {
-    load_texture_stbi(data);
+    LoadTextureSTB(data);
   }
 }
 
@@ -34,32 +34,32 @@ Texture::Texture(const std::string &path, std::vector<unsigned char> data) {
 
 Texture::~Texture() { ZoneScoped; }
 
-void Texture::bind_sampler(GLenum texture_slot, GLenum texture_target) {
+void Texture::BindSampler(GLenum texture_slot, GLenum texture_target) {
   ZoneScoped;
-  bind_sampler_handle(m_handle, texture_slot, texture_target);
+  BindSamplerHandle(m_handle, texture_slot, texture_target);
 }
 
-void Texture::bind_sampler_handle(gl_handle handle, GLenum texture_slot,
+void Texture::BindSamplerHandle(gl_handle handle, GLenum texture_slot,
                                   GLenum texture_target) {
   ZoneScoped;
   glAssert(glActiveTexture(texture_slot));
   glAssert(glBindTexture(texture_target, handle));
 }
 
-void Texture::bind_image_handle(gl_handle handle, uint32_t binding,
+void Texture::BindImageHandle(gl_handle handle, uint32_t binding,
                                 uint32_t mip_level, GLenum format) {
   ZoneScoped;
   glAssert(glBindImageTexture(binding, handle, mip_level, GL_TRUE, 0,
                               GL_READ_WRITE, format));
 }
 
-void Texture::unbind_image(uint32_t binding) {
+void Texture::UnbindImage(uint32_t binding) {
   ZoneScoped;
   glAssert(
       glBindImageTexture(binding, 0, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA8));
 }
 
-Texture Texture::from_data(unsigned int *data, unsigned int count, int width,
+Texture Texture::FromData(unsigned int *data, unsigned int count, int width,
                            int height, int depth, int nr_channels) {
   ZoneScoped;
   Texture t{};
@@ -80,7 +80,7 @@ Texture Texture::from_data(unsigned int *data, unsigned int count, int width,
   return t;
 }
 
-Texture Texture::create_3d_texture(glm::ivec3 dim, GLenum format,
+Texture Texture::Create3DTexture(glm::ivec3 dim, GLenum format,
                                    GLenum pixel_format, GLenum data_type,
                                    void *data, GLenum filter,
                                    GLenum wrap_mode) {
@@ -105,7 +105,7 @@ Texture Texture::create_3d_texture(glm::ivec3 dim, GLenum format,
   return t;
 }
 
-Texture Texture::create_3d_texture_empty(glm::ivec3 dim, GLenum format,
+Texture Texture::Create3DTextureEmpty(glm::ivec3 dim, GLenum format,
                                          GLenum pixel_format, GLenum data_type,
                                          GLenum filter, GLenum wrap_mode) {
   ZoneScoped;
@@ -131,7 +131,7 @@ Texture Texture::create_3d_texture_empty(glm::ivec3 dim, GLenum format,
   return t;
 }
 
-void Texture::load_texture_stbi(std::vector<unsigned char> &data) {
+void Texture::LoadTextureSTB(std::vector<unsigned char> &data) {
   ZoneScoped;
   // TODO: Split up STBI and GLI CPU loading and GL submission
   //  STBI CPU processing taking 22ms in release, only 2ms to submit to GPU
@@ -147,7 +147,7 @@ void Texture::load_texture_stbi(std::vector<unsigned char> &data) {
   m_cpu_data.stb_data = stbi_data;
 }
 
-void Texture::load_texture_gli(std::vector<unsigned char> &data) {
+void Texture::LoadTextureGLI(std::vector<unsigned char> &data) {
   ZoneScoped;
   m_mode = Mode::gli;
   gli::texture dds_tex_raw =
@@ -159,12 +159,12 @@ void Texture::load_texture_gli(std::vector<unsigned char> &data) {
   m_num_channels = dds_tex->extent().z;
   m_cpu_data.gli_data = dds_tex;
 }
-void Texture::release() {
+void Texture::ReleaseGPU() {
   ZoneScoped;
   glDeleteTextures(1, &m_handle);
 }
 
-void Texture::submit_to_gpu() {
+void Texture::SubmitToGPU() {
   if (m_mode == Mode::stb) {
     ZoneScopedN("STBI Submit to GPU");
     glGenTextures(1, &m_handle);

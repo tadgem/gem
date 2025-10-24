@@ -17,7 +17,7 @@ void tech::ScreenSpaceReflections::DispatchSSRPass(GLShader &ssr, Camera &cam,
                                   glm::vec2 screen_dim) {
   ZoneScoped;
   GEM_GPU_MARKER("SSR Pass");
-  Shapes::s_screen_quad.use();
+  Shapes::s_screen_quad.Use();
   ssr_buffer.Bind();
   glClearColor(0, 0, 0, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
@@ -28,20 +28,20 @@ void tech::ScreenSpaceReflections::DispatchSSRPass(GLShader &ssr, Camera &cam,
   ssr.SetFloat("u_screen_height", screen_dim.y);
   ssr.SetMat4f("u_inv_projection", glm::inverse(cam.m_proj));
   ssr.SetMat4f("u_projection", cam.m_proj);
-  ssr.SetMat4f("u_rotation", cam.get_rotation_matrix());
+  ssr.SetMat4f("u_rotation", cam.GetRotationMatrix());
 
   ssr.SetInt("u_gnormal_buffer", 0);
-  Texture::bind_sampler_handle(gbuffer.m_colour_attachments[2], GL_TEXTURE0);
+  Texture::BindSamplerHandle(gbuffer.m_colour_attachments[2], GL_TEXTURE0);
 
   ssr.SetInt("u_gcolour_buffer", 1);
-  Texture::bind_sampler_handle(lighting_buffer.m_colour_attachments.front(),
+  Texture::BindSamplerHandle(lighting_buffer.m_colour_attachments.front(),
                                GL_TEXTURE1);
 
   ssr.SetInt("u_gpbr_buffer", 2);
-  Texture::bind_sampler_handle(gbuffer.m_colour_attachments[3], GL_TEXTURE2);
+  Texture::BindSamplerHandle(gbuffer.m_colour_attachments[3], GL_TEXTURE2);
 
   ssr.SetInt("u_depth_buffer", 3);
-  Texture::bind_sampler_handle(gbuffer.m_depth_attachment, GL_TEXTURE3);
+  Texture::BindSamplerHandle(gbuffer.m_depth_attachment, GL_TEXTURE3);
 
   glStencilFunc(GL_EQUAL, 1, 0xFF);
   glStencilMask(0x00);

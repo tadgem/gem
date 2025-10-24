@@ -6,40 +6,7 @@
 
 #include <vector>
 namespace gem {
-template <typename _StateEnum> class TFsm {
-public:
-  using callback = void (*)();
-  using callback_t = void (*)(_StateEnum);
 
-  const unsigned char MAX_TRANSITIONS_PER_TICK = 8;
-
-  GEM_IMPL_ALLOC(TFsm<_StateEnum>)
-
-  class state {
-  public:
-    state(_StateEnum state, callback_t action, callback entry = nullptr,
-          callback exit = nullptr) {}
-    bool m_has_entry;
-    bool m_has_exit;
-
-    GEM_IMPL_ALLOC(TFsm<_StateEnum>::state)
-
-  protected:
-    callback m_entry_procedure;
-    callback m_exit_procedure;
-    callback_t m_action;
-    const _StateEnum m_state;
-    friend class TFsm;
-  };
-
-  struct state_transition {
-    _StateEnum trigger;
-    _StateEnum src_state;
-    _StateEnum dst_state;
-
-    GEM_IMPL_ALLOC(TFsm<_StateEnum>::state_transition)
-  };
-};
 
 class FSM {
 public:
@@ -47,14 +14,14 @@ public:
 
   GEM_IMPL_ALLOC(FSM)
 
-  class state {
+  class State {
   public:
-    state(int state, std::function<int()> action,
+    State(int state, std::function<int()> action,
           std::function<void()> entry = NULL,
           std::function<void()> exit = NULL);
     bool m_has_entry;
     bool m_has_exit;
-    GEM_IMPL_ALLOC(FSM::state)
+    GEM_IMPL_ALLOC(FSM::State)
 
   protected:
     std::function<void()> m_entry_procedure;
@@ -63,58 +30,58 @@ public:
     const int m_state;
     friend class FSM;
   };
-  struct state_transition {
+  struct StateTransition {
     int m_trigger;
     int m_src_state;
     int m_dst_state;
 
-    GEM_IMPL_ALLOC(FSM::state_transition)
+    GEM_IMPL_ALLOC(FSM::StateTransition)
   };
 
 public:
   FSM();
 
-  void set_starting_state(int state);
-  template <typename _Enum> void set_starting_state(_Enum state) {
+  void SetStartingState(int state);
+  template <typename _Enum> void SetStartingState(_Enum state) {
     ZoneScoped;
-    set_starting_state(static_cast<int>(state));
+    SetStartingState(static_cast<int>(state));
   }
 
-  void update();
-  void add_state(int state, std::function<int()> action);
+  void Update();
+  void AddState(int state, std::function<int()> action);
   template <typename _Enum>
-  void add_state(_Enum state, std::function<int()> action) {
+  void AddState(_Enum state, std::function<int()> action) {
     ZoneScoped;
-    add_state(static_cast<int>(state), action);
+    AddState(static_cast<int>(state), action);
   }
 
-  void add_state_entry(int state, std::function<void()> entry);
+  void AddEntry(int state, std::function<void()> entry);
   template <typename _Enum>
-  void add_state_entry(_Enum state, std::function<void()> action) {
+  void AddEntry(_Enum state, std::function<void()> action) {
     ZoneScoped;
-    add_state_entry(static_cast<int>(state), action);
+    AddEntry(static_cast<int>(state), action);
   }
 
-  void add_state_exit(int state, std::function<void()> exit);
+  void AddExit(int state, std::function<void()> exit);
   template <typename _Enum>
-  void add_state_exit(_Enum state, std::function<void()> action) {
+  void AddExit(_Enum state, std::function<void()> action) {
     ZoneScoped;
-    add_state_exit(static_cast<int>(state), action);
+    AddExit(static_cast<int>(state), action);
   }
 
-  void add_trigger(int trigger, int src_state, int dst_state);
+  void AddTrigger(int trigger, int src_state, int dst_state);
   template <typename _TriggerEnum, typename _StateEnum>
-  void add_trigger(_TriggerEnum trigger, _StateEnum src_state,
+  void AddTrigger(_TriggerEnum trigger, _StateEnum src_state,
                    _StateEnum dst_state) {
     ZoneScoped;
-    add_trigger(static_cast<int>(trigger), static_cast<int>(src_state),
+    AddTrigger(static_cast<int>(trigger), static_cast<int>(src_state),
                 static_cast<int>(dst_state));
   }
 
-  void trigger_int(int trigger);
-  template <typename _Enum> void trigger(_Enum trigger) {
+  void Trigger(int trigger);
+  template <typename _Enum> void Trigger(_Enum trigger) {
     ZoneScoped;
-    trigger_int(static_cast<int>(trigger));
+    Trigger(static_cast<int>(trigger));
   }
 
   // arbitrary, can probably be done in a better way but we are in trouble if we
@@ -126,10 +93,10 @@ protected:
   int p_current_state;
   bool p_run_entry;
 
-  void transition_state(int new_state);
+  void TransitionState(int new_state);
 
-  std::vector<state> p_states;
-  std::vector<state_transition> p_transitions;
+  std::vector<State> p_states;
+  std::vector<StateTransition> p_transitions;
 };
 
 using fsm = FSM;

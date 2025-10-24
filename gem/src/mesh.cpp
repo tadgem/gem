@@ -6,22 +6,22 @@
 
 namespace gem {
 
-void MeshSystem::init() { ZoneScoped; }
+void MeshSystem::Init() { ZoneScoped; }
 
-void MeshSystem::cleanup() { ZoneScoped; }
+void MeshSystem::Cleanup() { ZoneScoped; }
 
 void try_update_mesh_component(MeshComponent &mc) {
   ZoneScoped;
 
-  if (Engine::assets.get_asset_load_progress(mc.m_handle) ==
+  if (Engine::assets.GetLoadProgress(mc.m_handle) ==
       AssetLoadProgress::loaded) {
     auto model_asset =
-        Engine::assets.get_asset<Model, AssetType::model>(mc.m_handle);
+        Engine::assets.GetAsset<Model, AssetType::model>(mc.m_handle);
     mc.m_mesh = model_asset->m_data.m_meshes[mc.m_mesh_index];
   }
 }
 
-void MeshSystem::update(Scene &current_scene) {
+void MeshSystem::Update(Scene &current_scene) {
   ZoneScoped;
 
   auto mesh_view = current_scene.m_registry.view<MeshComponent>();
@@ -33,7 +33,7 @@ void MeshSystem::update(Scene &current_scene) {
   }
 }
 
-nlohmann::json MeshSystem::serialize(Scene &current_scene) {
+nlohmann::json MeshSystem::Serialize(Scene &current_scene) {
   ZoneScoped;
 
   nlohmann::json sys_json{};
@@ -42,16 +42,16 @@ nlohmann::json MeshSystem::serialize(Scene &current_scene) {
     nlohmann::json comp_json{};
     comp_json["asset_handle"] = mesh.m_handle;
     comp_json["mesh_index"] = mesh.m_mesh_index;
-    sys_json[get_entity_string(e)] = comp_json;
+    sys_json[GetEntityIDString(e)] = comp_json;
   }
   return sys_json;
 }
 
-void MeshSystem::deserialize(Scene &current_scene, nlohmann::json &sys_json) {
+void MeshSystem::Deserialize(Scene &current_scene, nlohmann::json &sys_json) {
   ZoneScoped;
 
   for (auto [entity, entry] : sys_json.items()) {
-    entt::entity e = get_entity_from_string(entity);
+    entt::entity e = GetEntityIDFromString(entity);
     MeshComponent mc{};
 
     mc.m_handle = entry["asset_handle"];

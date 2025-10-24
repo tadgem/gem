@@ -13,7 +13,7 @@ TEST("Test Test 2",
   glm::vec3 position (-75,-75,-75);
   glm::vec3 scale (0.19531f);
 
-  glm::mat4 model = gem::Utils::get_model_matrix(position, glm::vec3(0.0), scale);
+  glm::mat4 model = gem::Utils::GetModelMatrix(position, glm::vec3(0.0), scale);
 
   spdlog::info("Model Matrix : {}", model);
   return TEST_RESULT::PASS;

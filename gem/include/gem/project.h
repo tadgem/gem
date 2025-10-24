@@ -12,8 +12,8 @@ public:
   std::vector<SerializableAssetHandle> m_project_assets;
   std::string m_name;
 
-  nlohmann::json serialize(AssetManager &am);
-  void deserialize(AssetManager &am, nlohmann::json &proj_json);
+  nlohmann::json Serialize(AssetManager &am);
+  void Deserialize(AssetManager &am, nlohmann::json &proj_json);
 
   GEM_IMPL_ALLOC(Project)
 };

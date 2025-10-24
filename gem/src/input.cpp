@@ -3,44 +3,44 @@
 
 namespace gem {
 
-bool Input::get_gamepad_button(int index, GamepadButton button) {
+bool Input::GetGamepadButton(int index, GamepadButton button) {
   ZoneScoped;
   // AASSERT(index < MAX_SUPPORTED_GAMEPADS, "Invalid Gamepad Index Provided");
   return s_gamepad_state[index].current_frame_gamepad_button_state[button];
 }
 
-glm::vec2 Input::get_gamepad_stick(int index, GamepadStick stick) {
+glm::vec2 Input::GetGamepadStick(int index, GamepadStick stick) {
   ZoneScoped;
   // AASSERT(index < MAX_SUPPORTED_GAMEPADS, "Invalid Gamepad Index Provided");
   return s_gamepad_state[index].current_frame_stick_state[stick];
 }
 
-bool Input::get_keyboard_key(KeyboardKey key) {
+bool Input::GetKey(KeyboardKey key) {
   ZoneScoped;
   return s_keyboard_state.current_frame_key_state[key];
 }
 
-bool Input::get_mouse_button(MouseButton button) {
+bool Input::GetMouseButton(MouseButton button) {
   ZoneScoped;
   return s_mouse_state.current_frame_mouse_button_state[button];
 }
 
-glm::vec2 Input::get_mouse_position() {
+glm::vec2 Input::GetMousePosition() {
   ZoneScoped;
   return s_mouse_state.current_frame_mouse_location;
 }
 
-glm::vec2 Input::get_mouse_velocity() {
+glm::vec2 Input::GetMouseVelocity() {
   ZoneScoped;
   return s_mouse_state.current_frame_mouse_velocity;
 }
 
-float Input::get_mouse_scroll() {
+float Input::GetMouseScroll() {
   ZoneScoped;
   return s_mouse_state.current_frame_scroll;
 }
 
-GamepadStick Input::get_stick_from_sdl(SDL_GamepadAxis &sdlAxis) {
+GamepadStick Input::GetStickSDL(SDL_GamepadAxis &sdlAxis) {
   ZoneScoped;
   switch (sdlAxis) {
   case SDL_GamepadAxis::SDL_GAMEPAD_AXIS_LEFTX:
@@ -55,7 +55,7 @@ GamepadStick Input::get_stick_from_sdl(SDL_GamepadAxis &sdlAxis) {
   return GamepadStick::invalid;
 }
 
-GamepadTrigger Input::get_trigger_from_sdl(SDL_GamepadAxis &sdlAxis) {
+GamepadTrigger Input::GetTriggerSDL(SDL_GamepadAxis &sdlAxis) {
   ZoneScoped;
   switch (sdlAxis) {
   case SDL_GAMEPAD_AXIS_LEFT_TRIGGER:
@@ -66,7 +66,7 @@ GamepadTrigger Input::get_trigger_from_sdl(SDL_GamepadAxis &sdlAxis) {
   return GamepadTrigger::invalid;
 }
 
-GamepadButton Input::get_button_from_sdl(uint8_t sdlButton) {
+GamepadButton Input::GetButtonSDL(uint8_t sdlButton) {
   ZoneScoped;
   switch (sdlButton) {
   case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_SOUTH:
@@ -102,7 +102,7 @@ GamepadButton Input::get_button_from_sdl(uint8_t sdlButton) {
   }
 }
 
-KeyboardKey Input::get_key_from_sdl(SDL_Keycode keyCode) {
+KeyboardKey Input::GetKeySDL(SDL_Keycode keyCode) {
   ZoneScoped;
   {
     if (keyCode >= SDLK_0 && keyCode <= SDLK_9) {
@@ -181,7 +181,7 @@ KeyboardKey Input::get_key_from_sdl(SDL_Keycode keyCode) {
   }
 }
 
-void Input::update_gamepad_button(int gamepad_index, GamepadButton b,
+void Input::UpdateGamepadButton(int gamepad_index, GamepadButton b,
                                   bool value) {
   ZoneScoped;
   // AASSERT(gamepad_index < MAX_SUPPORTED_GAMEPADS, "Invalid Gamepad Index
@@ -189,7 +189,7 @@ void Input::update_gamepad_button(int gamepad_index, GamepadButton b,
   s_gamepad_state->current_frame_gamepad_button_state[b] = value;
 }
 
-void Input::update_gamepad_trigger(int gamepad_index, GamepadTrigger b,
+void Input::UpdateGamepadTrigger(int gamepad_index, GamepadTrigger b,
                                    float value) {
   ZoneScoped;
   // AASSERT(gamepad_index < MAX_SUPPORTED_GAMEPADS, "Invalid Gamepad Index
@@ -197,7 +197,7 @@ void Input::update_gamepad_trigger(int gamepad_index, GamepadTrigger b,
   s_gamepad_state->current_frame_trigger_state[b] = value;
 }
 
-void Input::update_gamepad_stick(int gamepad_index, GamepadStick b,
+void Input::UpdateGamepadStick(int gamepad_index, GamepadStick b,
                                  glm::vec2 value) {
   ZoneScoped;
   // AASSERT(gamepad_index < MAX_SUPPORTED_GAMEPADS, "Invalid Gamepad Index
@@ -205,17 +205,17 @@ void Input::update_gamepad_stick(int gamepad_index, GamepadStick b,
   s_gamepad_state->current_frame_stick_state[b] = value;
 }
 
-void Input::update_mouse_button(MouseButton b, bool value) {
+void Input::UpdateMouseButton(MouseButton b, bool value) {
   ZoneScoped;
   s_mouse_state.current_frame_mouse_button_state[b] = value;
 }
 
-void Input::update_mouse_scroll(float value) {
+void Input::UpdateMouseScroll(float value) {
   ZoneScoped;
   s_mouse_state.current_frame_scroll = value;
 }
 
-void Input::update_mouse_position(glm::vec2 screen_dim, glm::vec2 value) {
+void Input::UpdateMousePosition(glm::vec2 screen_dim, glm::vec2 value) {
   ZoneScoped;
   glm::vec2 val = value;
   val.x = glm::min(value.x, screen_dim.x);
@@ -227,12 +227,12 @@ void Input::update_mouse_position(glm::vec2 screen_dim, glm::vec2 value) {
       value - s_mouse_state.last_frame_mouse_location;
 }
 
-void Input::update_keyboard_key(KeyboardKey k, bool value) {
+void Input::UpdateKey(KeyboardKey k, bool value) {
   ZoneScoped;
   s_keyboard_state.current_frame_key_state[k] = value;
 }
 
-void Input::update_last_frame() {
+void Input::UpdateLastFrame() {
   ZoneScoped;
   s_keyboard_state.last_frame_key_state =
       s_keyboard_state.current_frame_key_state;

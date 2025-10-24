@@ -26,7 +26,7 @@ std::string get_asset_type_name(const AssetType &t) {
 AssetHandle::AssetHandle(const std::string &path, AssetType type) {
   ZoneScoped;
   m_type = type;
-  m_path_hash = HashUtils::get_string_hash(path);
+  m_path_hash = HashUtils::GetStringHash(path);
 }
 
 AssetHandle::AssetHandle(const HashString &path_hash, AssetType type) {

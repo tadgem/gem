@@ -7,7 +7,7 @@ struct AABB {
   glm::vec3 m_min;
   glm::vec3 m_max;
 
-  void scale(const glm::vec3& scale) {
+  void Scale(const glm::vec3& scale) {
     m_min *= scale;
     m_max *= scale;
   }

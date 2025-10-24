@@ -30,7 +30,7 @@ Material::Material(AssetHandle shader_handle, GLShader &program)
   }
 }
 
-bool Material::set_sampler(const std::string &sampler_name, GLenum texture_slot,
+bool Material::SetSampler(const std::string &sampler_name, GLenum texture_slot,
                            TextureEntry &tex_entry, GLenum texture_target) {
   ZoneScoped;
 #ifdef ENABLE_MATERIAL_UNIFORM_CHECKS
@@ -45,7 +45,7 @@ bool Material::set_sampler(const std::string &sampler_name, GLenum texture_slot,
   return true;
 }
 
-void Material::bind_material_uniforms(AssetManager &am) {
+void Material::BindUniforms(AssetManager &am) {
   ZoneScoped;
   m_prog.Use();
   for (auto &[name, val] : m_uniform_values) {
@@ -61,7 +61,7 @@ void Material::bind_material_uniforms(AssetManager &am) {
       SamplerInfo info = std::any_cast<SamplerInfo>(m_uniform_values[name]);
       if (info.tex_entry.m_texture == nullptr) {
         TextureAsset *ta =
-            am.get_asset<Texture, AssetType::texture>(info.tex_entry.m_handle);
+            am.GetAsset<Texture, AssetType::texture>(info.tex_entry.m_handle);
         if (!ta) {
           continue;
         }
@@ -72,7 +72,7 @@ void Material::bind_material_uniforms(AssetManager &am) {
       }
       int loc = info.sampler_slot - GL_TEXTURE0;
       m_prog.SetInt(name, loc);
-      Texture::bind_sampler_handle(info.tex_entry.m_texture->m_handle,
+      Texture::BindSamplerHandle(info.tex_entry.m_texture->m_handle,
                                    info.sampler_slot);
       break;
     }
@@ -117,13 +117,13 @@ void Material::bind_material_uniforms(AssetManager &am) {
   }
 }
 
-void MaterialSystem::init() { ZoneScoped; }
+void MaterialSystem::Init() { ZoneScoped; }
 
-void MaterialSystem::cleanup() { ZoneScoped; }
+void MaterialSystem::Cleanup() { ZoneScoped; }
 
-void MaterialSystem::update(Scene &current_scene) { ZoneScoped; }
+void MaterialSystem::Update(Scene &current_scene) { ZoneScoped; }
 
-nlohmann::json MaterialSystem::serialize(Scene &current_scene) {
+nlohmann::json MaterialSystem::Serialize(Scene &current_scene) {
   ZoneScoped;
 
   nlohmann::json sys_json;
@@ -154,21 +154,21 @@ nlohmann::json MaterialSystem::serialize(Scene &current_scene) {
         comp_json["uniforms"][name] = uniform_json;
       }
     }
-    sys_json[get_entity_string(e)] = comp_json;
+    sys_json[GetEntityIDString(e)] = comp_json;
   }
 
   return sys_json;
 }
 
-void MaterialSystem::deserialize(Scene &current_scene, nlohmann::json &sys_json) {
+void MaterialSystem::Deserialize(Scene &current_scene, nlohmann::json &sys_json) {
   ZoneScoped;
 
   for (auto [entity, entry] : sys_json.items()) {
-    entt::entity e = get_entity_from_string(entity);
+    entt::entity e = GetEntityIDFromString(entity);
     e = current_scene.m_registry.create(e);
     AssetHandle shader_handle = entry["shader"];
     auto *shader_asset =
-        Engine::assets.get_asset<GLShader, AssetType::shader>(shader_handle);
+        Engine::assets.GetAsset<GLShader, AssetType::shader>(shader_handle);
     Material mat(shader_handle, shader_asset->m_data);
 
     nlohmann::json uniforms = entry["uniforms"];
@@ -185,7 +185,7 @@ void MaterialSystem::deserialize(Scene &current_scene, nlohmann::json &sys_json)
       case GLShader::UniformType::sampler2D:
       case GLShader::UniformType::sampler3D: {
         TextureEntry tex_entry = uniform_json["entry"];
-        mat.set_sampler(uniform_name, uniform_json["slot"], tex_entry,
+        mat.SetSampler(uniform_name, uniform_json["slot"], tex_entry,
                         uniform_json["target"]);
         break;
       }

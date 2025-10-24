@@ -17,18 +17,18 @@ struct Transform {
 
   glm::mat3 m_normal_matrix;
 
-  static void update_transforms(Scene &current_scene);
+  static void UpdateTransforms(Scene &current_scene);
 };
 
 class TransformSystem : public ECSSystem {
 public:
-  TransformSystem() : ECSSystem(HashUtils::get_type_hash<TransformSystem>()) {}
+  TransformSystem() : ECSSystem(HashUtils::GetTypeHash<TransformSystem>()) {}
 
-  void init() override;
-  void update(Scene &current_scene) override;
-  void cleanup() override;
-  nlohmann::json serialize(Scene &current_scene) override;
-  void deserialize(Scene &current_scene, nlohmann::json &sys_json) override;
+  void Init() override;
+  void Update(Scene &current_scene) override;
+  void Cleanup() override;
+  nlohmann::json Serialize(Scene &current_scene) override;
+  void Deserialize(Scene &current_scene, nlohmann::json &sys_json) override;
 
   ~TransformSystem() {}
 };

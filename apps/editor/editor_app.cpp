@@ -11,40 +11,40 @@ editor_application::editor_application()
     GLRenderer renderer{};
     renderer.Init(Engine::assets, resolution);
 
-    m_editor_fsm.set_starting_state(editor_mode::no_open_project);
-    m_editor_fsm.add_state(editor_mode::no_open_project, [this]() {
+    m_editor_fsm.SetStartingState(editor_mode::no_open_project);
+    m_editor_fsm.AddState(editor_mode::no_open_project, [this]() {
         this->on_open_project();
         return fsm::NO_TRIGGER; 
     });
-    m_editor_fsm.add_state(editor_mode::edit, [this]() {
+    m_editor_fsm.AddState(editor_mode::edit, [this]() {
         this->on_edit();
         return fsm::NO_TRIGGER; 
     });
-    m_editor_fsm.add_state(editor_mode::play, [this]() {
+    m_editor_fsm.AddState(editor_mode::play, [this]() {
         this->on_play();
         return fsm::NO_TRIGGER; 
     });
 
-    m_editor_fsm.add_state_entry(editor_mode::play, []() {});
-    m_editor_fsm.add_state_exit(editor_mode::play, []() {});
+    m_editor_fsm.AddEntry(editor_mode::play, []() {});
+    m_editor_fsm.AddExit(editor_mode::play, []() {});
 
-    m_editor_fsm.add_trigger(editor_trigger::project_loaded, editor_mode::no_open_project, editor_mode::edit);
-    m_editor_fsm.add_trigger(editor_trigger::begin_play_mode, editor_mode::edit, editor_mode::play);
-    m_editor_fsm.add_trigger(editor_trigger::exit_play_mode, editor_mode::play, editor_mode::edit);
+    m_editor_fsm.AddTrigger(editor_trigger::project_loaded, editor_mode::no_open_project, editor_mode::edit);
+    m_editor_fsm.AddTrigger(editor_trigger::begin_play_mode, editor_mode::edit, editor_mode::play);
+    m_editor_fsm.AddTrigger(editor_trigger::exit_play_mode, editor_mode::play, editor_mode::edit);
 }
 
 void editor_application::run()
 {
     while (!GPUBackend::Selected()->m_quit)
     {
-      Engine::assets.update();
+      Engine::assets.Update();
 
         GPUBackend::Selected()->ProcessEvents();
         GPUBackend::Selected()->PreFrame();
 
         main_menu_bar();
 
-        m_editor_fsm.update();
+        m_editor_fsm.Update();
 
         GPUBackend::Selected()->PostFrame();
     }
@@ -97,7 +97,7 @@ void editor_application::on_open_project()
             std::filesystem::path directory = p.parent_path();
             Engine::active_project = create_project(std::string(s_create_project_name_buffer), directory.string());
             Engine::SaveProjectToDisk(p.filename().string(), directory.string());
-            m_editor_fsm.trigger(editor_trigger::project_loaded);
+            m_editor_fsm.Trigger(editor_trigger::project_loaded);
         }
         ifd::FileDialog::Instance().Close();
     }
@@ -107,7 +107,7 @@ void editor_application::on_open_project()
             std::filesystem::path p = ifd::FileDialog::Instance().GetResult();
             std::string res = p.u8string();
             Engine::LoadProjectFromDisk(res);
-            m_editor_fsm.trigger(editor_trigger::project_loaded);
+            m_editor_fsm.Trigger(editor_trigger::project_loaded);
         }
         ifd::FileDialog::Instance().Close();
     }
@@ -118,7 +118,7 @@ void editor_application::on_edit()
     ImGui::Begin("Edit");
     if (ImGui::Button("Play"))
     {
-        m_editor_fsm.trigger(editor_trigger::begin_play_mode);
+        m_editor_fsm.Trigger(editor_trigger::begin_play_mode);
     }
     ImGui::End();
 }
@@ -128,7 +128,7 @@ void editor_application::on_play()
     ImGui::Begin("Play");
     if (ImGui::Button("Edit"))
     {
-        m_editor_fsm.trigger(editor_trigger::exit_play_mode);
+        m_editor_fsm.Trigger(editor_trigger::exit_play_mode);
     }
     ImGui::End();
 }

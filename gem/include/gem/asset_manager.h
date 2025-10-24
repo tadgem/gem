@@ -45,12 +45,12 @@ class AssetManager {
 public:
   AssetManager();
 
-  AssetHandle load_asset(const std::string &path, const AssetType &assetType,
+  AssetHandle LoadAsset(const std::string &path, const AssetType &assetType,
                          AssetLoadedCallback on_asset_loaded = nullptr);
 
-  void unload_asset(const AssetHandle &handle);
+  void UnloadAsset(const AssetHandle &handle);
 
-  Asset *get_asset(AssetHandle &handle);
+  Asset *GetAsset(AssetHandle &handle);
 
   template <typename _Ty, AssetType _AssetType>
   AssetHandle provide_asset(const std::string &name, _Ty data) {
@@ -62,31 +62,31 @@ public:
   }
 
   template <typename _Ty, AssetType _AssetType>
-  TAsset<_Ty, _AssetType> *get_asset(AssetHandle &handle) {
-    Asset *ass = get_asset(handle);
+  TAsset<_Ty, _AssetType> *GetAsset(AssetHandle &handle) {
+    Asset *ass = GetAsset(handle);
     return static_cast<TAsset<_Ty, _AssetType> *>(ass);
   }
 
   template <typename _Ty, AssetType _AssetType>
-  TAsset<_Ty, _AssetType> *get_asset(const std::string &path) {
+  TAsset<_Ty, _AssetType> *GetAsset(const std::string &path) {
     AssetHandle handle(path, _AssetType);
-    Asset *ass = get_asset(handle);
+    Asset *ass = GetAsset(handle);
     return static_cast<TAsset<_Ty, _AssetType> *>(ass);
   }
 
-  AssetLoadProgress get_asset_load_progress(const AssetHandle &handle);
+  AssetLoadProgress GetLoadProgress(const AssetHandle &handle);
 
-  bool any_assets_loading();
-  bool any_assets_unloading();
+  bool AnyAssetsLoading();
+  bool AnyAssetsUnloading();
 
-  void wait_all_assets();
-  void wait_all_unloads();
-  void unload_all_assets();
+  void WaitAllLoads();
+  void WaitAllUnloads();
+  void UnloadAll();
 
-  void update();
-  void shutdown();
+  void Update();
+  void Shutdown();
 
-  void on_imgui();
+  void OnImGui();
 
   GEM_IMPL_ALLOC(AssetManager)
 
@@ -107,16 +107,16 @@ protected:
   const uint16_t p_callback_tasks_per_tick = 1;
   const uint16_t p_max_async_tasks_in_flight = 8;
 
-  void handle_load_and_unload_callbacks();
+  void DispatchAssetTasksInternal();
 
-  void handle_pending_loads();
+  void HandlePendingLoadTasksInternal();
 
-  void handle_async_tasks();
+  void HandlePendingAsyncTasksInternal();
 
-  void dispatch_asset_load_task(const AssetHandle &handle, AssetLoadInfo &info);
+  void DispatchLoadTask(const AssetHandle &handle, AssetLoadInfo &info);
 
 private:
-  void transition_asset_to_loaded(const AssetHandle &handle,
+  void FinalizeAssetLoad(const AssetHandle &handle,
                                   Asset *asset_to_transition);
 };
 } // namespace gem

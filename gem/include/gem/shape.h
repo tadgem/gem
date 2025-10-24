@@ -25,9 +25,9 @@ public:
   inline static VAO s_torus_vao;
   inline static AMesh* s_torus_mesh;
 
-  static void init_built_in_assets(AssetManager &am, GPUBackend* backend);
+  static void InitBuiltInAssets(AssetManager &am, GPUBackend* backend);
 
-  static VAO gen_cube_instanced_vao(std::vector<glm::mat4> &matrices,
+  static VAO GenerateInstancedCube(std::vector<glm::mat4> &matrices,
                                     std::vector<glm::vec3> &uvs);
 };
 } // namespace gem

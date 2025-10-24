@@ -23,7 +23,7 @@ struct AssetHandle {
   AssetType m_type;
   HashString m_path_hash;
 
-  AssetHandle(){};
+  AssetHandle() : m_type(AssetType::COUNT), m_path_hash(0) {};
   AssetHandle(const std::string &path, AssetType type);
   AssetHandle(const HashString &path_hash, AssetType type);
 
@@ -74,7 +74,7 @@ public:
   ~TAsset() {}
 
   void *operator new(size_t size) {
-    std::string type_name = HashUtils::get_type_name<TAsset<_Ty, _AssetType>>();
+    std::string type_name = HashUtils::GetTypeName<TAsset<_Ty, _AssetType>>();
     if (DebugMemoryTracker::s_instance->s_allocation_info.find(type_name) ==
         DebugMemoryTracker::s_instance->s_allocation_info.end()) {
       DebugMemoryTracker::s_instance->s_allocation_info.emplace(
@@ -86,7 +86,7 @@ public:
   };
 
   void operator delete(void *p) {
-    std::string type_name = HashUtils::get_type_name<TAsset<_Ty, _AssetType>>();
+    std::string type_name = HashUtils::GetTypeName<TAsset<_Ty, _AssetType>>();
     free(p);
     if (!DebugMemoryTracker::s_instance)
       return;
@@ -122,7 +122,7 @@ public:
   }
 
   void *operator new(size_t size) {
-    std::string type_name = HashUtils::get_type_name<
+    std::string type_name = HashUtils::GetTypeName<
         TAssetIntermediate<_AssetType, _IntermediateType, _AssetTypeEnum>>();
     if (DebugMemoryTracker::s_instance->s_allocation_info.find(type_name) ==
         DebugMemoryTracker::s_instance->s_allocation_info.end()) {
@@ -135,7 +135,7 @@ public:
   };
 
   void operator delete(void *p) {
-    std::string type_name = HashUtils::get_type_name<
+    std::string type_name = HashUtils::GetTypeName<
         TAssetIntermediate<_AssetType, _IntermediateType, _AssetTypeEnum>>();
     free(p);
     if (!DebugMemoryTracker::s_instance)

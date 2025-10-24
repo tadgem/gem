@@ -21,7 +21,7 @@ public:
   std::map<std::string, std::any> m_uniform_values;
 
   template <typename _Ty>
-  bool set_uniform_value(const std::string &name, const _Ty &val) {
+  bool SetUniformValue(const std::string &name, const _Ty &val) {
 #ifdef ENABLE_MATERIAL_UNIFORM_CHECKS
     if (m_uniforms.find(name) == m_uniforms.end()) {
       return false;
@@ -31,11 +31,11 @@ public:
     return true;
   }
 
-  bool set_sampler(const std::string &sampler_name, GLenum texture_slot,
+  bool SetSampler(const std::string &sampler_name, GLenum texture_slot,
                    TextureEntry &tex_entry,
                    GLenum texture_target = GL_TEXTURE_2D);
 
-  void bind_material_uniforms(AssetManager &am);
+  void BindUniforms(AssetManager &am);
 
   GLShader &m_prog;
   const AssetHandle m_shader_handle;
@@ -43,12 +43,12 @@ public:
 
 class MaterialSystem : public ECSSystem {
 public:
-  MaterialSystem() : ECSSystem(HashUtils::get_type_hash<MaterialSystem>()) {}
-  void init() override;
-  void update(Scene &current_scene) override;
-  void cleanup() override;
-  nlohmann::json serialize(Scene &current_scene) override;
-  void deserialize(Scene &current_scene, nlohmann::json &sys_json) override;
+  MaterialSystem() : ECSSystem(HashUtils::GetTypeHash<MaterialSystem>()) {}
+  void Init() override;
+  void Update(Scene &current_scene) override;
+  void Cleanup() override;
+  nlohmann::json Serialize(Scene &current_scene) override;
+  void Deserialize(Scene &current_scene, nlohmann::json &sys_json) override;
 
   ~MaterialSystem() {}
 };

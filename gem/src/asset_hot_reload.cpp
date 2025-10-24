@@ -5,7 +5,7 @@
 
 namespace gem {
 
-void reload_shader(TAsset<GLShader, AssetType::shader> *shader_asset,
+void ReloadShader(TAsset<GLShader, AssetType::shader> *shader_asset,
                    std::string shader_source) {}
 
 void clean_delimiters(std::string &input) {
@@ -32,12 +32,12 @@ void GemFileWatchListener::handleFileAction(efsw::WatchID watchid,
     std::string full_path = dir + filename;
     clean_delimiters(full_path);
     AssetHandle ah = AssetHandle(full_path, AssetType::shader);
-    if (Engine::assets.get_asset_load_progress(ah) ==
+    if (Engine::assets.GetLoadProgress(ah) ==
         AssetLoadProgress::loaded) {
       spdlog::info("GemFileListener : Reloading : {}{}", dir, filename);
-      std::string shader_source = Utils::load_string_from_path(full_path);
+      std::string shader_source = Utils::LoadStringFromPath(full_path);
       auto *shader_asset =
-          Engine::assets.get_asset<GLShader, AssetType::shader>(ah);
+          Engine::assets.GetAsset<GLShader, AssetType::shader>(ah);
 
       Engine::debug_callbacks.Add([shader_asset, shader_source]() {
         shader_asset->m_data.Release();

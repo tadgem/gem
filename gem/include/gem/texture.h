@@ -27,15 +27,15 @@ public:
   Texture(const std::string &path, std::vector<unsigned char> data);
   ~Texture();
 
-  void bind_sampler(GLenum texture_slot, GLenum texture_target = GL_TEXTURE_2D);
+  void BindSampler(GLenum texture_slot, GLenum texture_target = GL_TEXTURE_2D);
 
-  static void bind_sampler_handle(gl_handle handle, GLenum texture_slot,
+  static void BindSamplerHandle(gl_handle handle, GLenum texture_slot,
                                   GLenum texture_target = GL_TEXTURE_2D);
 
-  static void bind_image_handle(gl_handle handle, uint32_t binding,
+  static void BindImageHandle(gl_handle handle, uint32_t binding,
                                 uint32_t mip_level, GLenum format);
 
-  static void unbind_image(uint32_t binding);
+  static void UnbindImage(uint32_t binding);
 
   int m_width, m_height, m_depth, m_num_channels;
 
@@ -48,25 +48,25 @@ public:
     gli::texture *gli_data;
   } m_cpu_data;
 
-  static Texture from_data(unsigned int *data, unsigned int count, int width,
+  static Texture FromData(unsigned int *data, unsigned int count, int width,
                            int height, int depth, int nr_channels);
 
-  static Texture create_3d_texture(glm::ivec3 dim, GLenum format,
+  static Texture Create3DTexture(glm::ivec3 dim, GLenum format,
                                    GLenum pixel_format, GLenum data_type,
                                    void *data, GLenum filter = GL_LINEAR,
                                    GLenum wrap_mode = GL_REPEAT);
 
-  static Texture create_3d_texture_empty(glm::ivec3 dim, GLenum format,
+  static Texture Create3DTextureEmpty(glm::ivec3 dim, GLenum format,
                                          GLenum pixel_format, GLenum data_type,
                                          GLenum filter = GL_LINEAR,
                                          GLenum wrap_mode = GL_REPEAT);
 
-  void load_texture_stbi(std::vector<unsigned char> &data);
-  void load_texture_gli(std::vector<unsigned char> &data);
+  void LoadTextureSTB(std::vector<unsigned char> &data);
+  void LoadTextureGLI(std::vector<unsigned char> &data);
 
-  void submit_to_gpu();
+  void SubmitToGPU();
 
-  void release();
+  void ReleaseGPU();
 
   inline static Texture *white;
   inline static Texture *black;

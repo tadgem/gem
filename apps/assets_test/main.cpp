@@ -19,14 +19,14 @@ int main()
         glm::vec2 window_dim = GPUBackend::Selected()->GetWindowDimensions();
         GLIm3d::NewFrameIm3D(im3d_s, window_dim, cam);
 
-        am.update();
-        am.on_imgui();
+        am.Update();
+        am.OnImGui();
 
         GLIm3d::EndFrameIm3D(im3d_s, { window_res.x, window_res.y }, cam);
         GPUBackend::Selected()->PostFrame();
     }
 
-    am.shutdown();
+    am.Shutdown();
     GLIm3d::ShutdownIm3D(im3d_s);
     GPUBackend::Selected()->ShutDown();
 

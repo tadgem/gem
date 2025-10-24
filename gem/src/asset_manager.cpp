@@ -20,7 +20,7 @@ using model_intermediate_asset =
 using shader_intermediate_asset =
     TAssetIntermediate<GLShader, std::string, AssetType::shader>;
 
-AssetHandle AssetManager::load_asset(const std::string &path,
+AssetHandle AssetManager::LoadAsset(const std::string &path,
                                        const AssetType &assetType,
                                       AssetLoadedCallback on_asset_loaded) {
   ZoneScoped;
@@ -61,7 +61,7 @@ AssetHandle AssetManager::load_asset(const std::string &path,
   return handle;
 }
 
-Asset *AssetManager::get_asset(AssetHandle &handle) {
+Asset *AssetManager::GetAsset(AssetHandle &handle) {
   ZoneScoped;
   if (p_loaded_assets.find(handle) == p_loaded_assets.end()) {
     return nullptr;
@@ -71,7 +71,7 @@ Asset *AssetManager::get_asset(AssetHandle &handle) {
 }
 
 AssetLoadProgress
-AssetManager::get_asset_load_progress(const AssetHandle &handle) {
+AssetManager::GetLoadProgress(const AssetHandle &handle) {
   ZoneScoped;
   for (auto &queued : p_queued_loads) {
     if (queued.to_handle() == handle) {
@@ -96,32 +96,32 @@ AssetManager::get_asset_load_progress(const AssetHandle &handle) {
   return AssetLoadProgress::not_loaded;
 }
 
-bool AssetManager::any_assets_loading() {
+bool AssetManager::AnyAssetsLoading() {
   ZoneScoped;
   return !p_pending_load_tasks.empty() || !p_pending_load_callbacks.empty() ||
          !p_pending_unload_callbacks.empty() || !p_queued_loads.empty();
 }
 
-bool AssetManager::any_assets_unloading() {
+bool AssetManager::AnyAssetsUnloading() {
   ZoneScoped;
   return !p_pending_unload_callbacks.empty();
 }
 
-void AssetManager::wait_all_assets() {
+void AssetManager::WaitAllLoads() {
   ZoneScoped;
-  while (any_assets_loading()) {
-    update();
+  while (AnyAssetsLoading()) {
+    Update();
   }
 }
 
-void AssetManager::wait_all_unloads() {
+void AssetManager::WaitAllUnloads() {
   ZoneScoped;
-  while (any_assets_unloading()) {
-    update();
+  while (AnyAssetsUnloading()) {
+    Update();
   }
 }
 
-void AssetManager::unload_all_assets() {
+void AssetManager::UnloadAll() {
   ZoneScoped;
   std::vector<AssetHandle> assetsRemaining{};
 
@@ -130,31 +130,31 @@ void AssetManager::unload_all_assets() {
   }
 
   for (auto &handle : assetsRemaining) {
-    unload_asset(handle);
+    UnloadAsset(handle);
   }
 
-  wait_all_unloads();
+  WaitAllUnloads();
 }
 
-void AssetManager::update() {
+void AssetManager::Update() {
   ZoneScoped;
-  if (!any_assets_loading()) {
+  if (!AnyAssetsLoading()) {
     return;
   }
 
-  handle_load_and_unload_callbacks();
-  handle_pending_loads();
-  handle_async_tasks();
+  DispatchAssetTasksInternal();
+  HandlePendingLoadTasksInternal();
+  HandlePendingAsyncTasksInternal();
 }
 
-void AssetManager::shutdown() {
+void AssetManager::Shutdown() {
   ZoneScoped;
-  wait_all_assets();
-  wait_all_unloads();
-  unload_all_assets();
+  WaitAllLoads();
+  WaitAllUnloads();
+  UnloadAll();
 }
 
-void AssetManager::handle_load_and_unload_callbacks() {
+void AssetManager::DispatchAssetTasksInternal() {
   ZoneScoped;
   u16 processedCallbacks = 0;
   std::vector<AssetHandle> clears;
@@ -179,7 +179,7 @@ void AssetManager::handle_load_and_unload_callbacks() {
   for (auto &handle : clears) {
     // p_loaded_assets.emplace(handle,
     // std::move(std::unique_ptr<asset>(p_pending_load_callbacks[handle].m_loaded_asset_intermediate->m_asset_data)));
-    transition_asset_to_loaded(handle,
+    FinalizeAssetLoad(handle,
                                p_pending_load_callbacks[handle]
                                    .m_loaded_asset_intermediate->m_asset_data);
     delete p_pending_load_callbacks[handle].m_loaded_asset_intermediate;
@@ -202,21 +202,21 @@ void AssetManager::handle_load_and_unload_callbacks() {
   }
 }
 
-void AssetManager::handle_pending_loads() {
+void AssetManager::HandlePendingLoadTasksInternal() {
   ZoneScoped;
   while (p_pending_load_tasks.size() <= p_max_async_tasks_in_flight &&
          !p_queued_loads.empty()) {
     auto &info = p_queued_loads.front();
-    dispatch_asset_load_task(info.to_handle(), info);
+    DispatchLoadTask(info.to_handle(), info);
     p_queued_loads.erase(p_queued_loads.begin());
   }
 }
 
-void AssetManager::handle_async_tasks() {
+void AssetManager::HandlePendingAsyncTasksInternal() {
   ZoneScoped;
   std::vector<AssetHandle> finished;
   for (auto &[handle, future] : p_pending_load_tasks) {
-    if (Utils::is_future_ready(future)) {
+    if (Utils::IsFutureReady(future)) {
       finished.push_back(handle);
     }
   }
@@ -225,14 +225,14 @@ void AssetManager::handle_async_tasks() {
     AssetLoadResult asyncReturn = p_pending_load_tasks[handle].get();
     // enqueue new loads
     for (auto &newLoad : asyncReturn.m_new_assets_to_load) {
-      load_asset(newLoad.m_path, newLoad.m_type);
+      LoadAsset(newLoad.m_path, newLoad.m_type);
     }
 
     if (asyncReturn.m_asset_load_sync_callbacks.empty() &&
         asyncReturn.m_loaded_asset_intermediate == nullptr) {
       // p_loaded_assets.emplace(handle,
       // std::move(std::unique_ptr<asset>(asyncReturn.m_loaded_asset_intermediate->m_asset_data)));
-      transition_asset_to_loaded(
+      FinalizeAssetLoad(
           handle, asyncReturn.m_loaded_asset_intermediate->m_asset_data);
       delete asyncReturn.m_loaded_asset_intermediate;
       asyncReturn.m_loaded_asset_intermediate = nullptr;
@@ -253,7 +253,7 @@ void submit_meshes_to_gpu(AssetIntermediate *model_asset) {
   // go through each entry
   Model::MeshEntry &entry = inter->m_intermediate.front();
   VAOBuilder mesh_builder{};
-  mesh_builder.begin();
+  mesh_builder.Begin();
   std::vector<float> buffer;
   for (int i = 0; i < entry.m_positions.size(); i++) {
     buffer.push_back(entry.m_positions[i].x);
@@ -266,22 +266,22 @@ void submit_meshes_to_gpu(AssetIntermediate *model_asset) {
     buffer.push_back(entry.m_uvs[i].y);
   }
 
-  mesh_builder.add_vertex_buffer(buffer);
-  mesh_builder.add_vertex_attribute(0, 8 * sizeof(float), 3);
-  mesh_builder.add_vertex_attribute(1, 8 * sizeof(float), 3);
-  mesh_builder.add_vertex_attribute(2, 8 * sizeof(float), 2);
+  mesh_builder.AddVertexBuffer(buffer);
+  mesh_builder.AddVertexAttribute(0, 8 * sizeof(float), 3);
+  mesh_builder.AddVertexAttribute(1, 8 * sizeof(float), 3);
+  mesh_builder.AddVertexAttribute(2, 8 * sizeof(float), 2);
 
   std::vector<u32> indices;
   for (int i = 0; i < entry.m_indices.size(); i++) {
     indices.push_back(entry.m_indices[i]);
   }
 
-  mesh_builder.add_index_buffer(indices);
+  mesh_builder.AddIndexBuffer(indices);
   AMesh* m = new AMesh();
   m->m_index_count = static_cast<u32>(indices.size());
   m->m_material_index = entry.m_material_index;
   m->m_original_aabb = entry.m_mesh_aabb;
-  m->m_vao = mesh_builder.build();
+  m->m_vao = mesh_builder.BuildVAO();
   // create real mesh object on gpu
 
   ma->m_data.m_meshes.push_back(m);
@@ -295,7 +295,7 @@ void submit_texture_to_gpu(AssetIntermediate *texture_asset) {
       static_cast<texture_intermediate_asset *>(texture_asset);
   TAsset<Texture, AssetType::texture> *ta = ta_inter->get_concrete_asset();
 
-  ta->m_data.submit_to_gpu();
+  ta->m_data.SubmitToGPU();
   ta_inter->m_intermediate.clear();
 }
 
@@ -313,13 +313,13 @@ AssetLoadResult load_model_asset_manager(const std::string &path) {
   std::vector<TextureEntry> associated_textures;
   std::vector<Model::MeshEntry> mesh_entries;
   // move this into a heap allocated object
-  Model m = Model::load_model_from_path_entries(path, associated_textures,
+  Model m = Model::LoadModelAndTextureEntries(path, associated_textures,
                                                 mesh_entries);
   TAsset<Model, AssetType::model> *model_asset =
       new TAsset<Model, AssetType::model>(m, path);
   model_intermediate_asset *model_intermediate =
       new model_intermediate_asset(model_asset, mesh_entries, path);
-  std::string directory = Utils::get_directory_from_path(path);
+  std::string directory = Utils::GetDirFromPath(path);
 
   AssetLoadResult ret{};
   for (auto &tex : associated_textures) {
@@ -338,7 +338,7 @@ void unload_model_asset_manager(Asset *_asset) {
   ZoneScoped;
   TAsset<Model, AssetType::model> *ma =
       static_cast<TAsset<Model, AssetType::model> *>(_asset);
-  ma->m_data.release();
+  ma->m_data.Release();
 }
 
 AssetLoadResult load_texture_asset_manager(const std::string &path) {
@@ -348,12 +348,12 @@ AssetLoadResult load_texture_asset_manager(const std::string &path) {
   ret.m_asset_load_sync_callbacks.push_back(submit_texture_to_gpu);
 
   Texture t{};
-  std::vector<unsigned char> binary = Utils::load_binary_from_path(path);
+  std::vector<unsigned char> binary = Utils::LoadBinaryFromPath(path);
 
   if (path.find("dds") != std::string::npos) {
-    t.load_texture_gli(binary);
+    t.LoadTextureGLI(binary);
   } else {
-    t.load_texture_stbi(binary);
+    t.LoadTextureSTB(binary);
   }
 
   TAsset<Texture, AssetType::texture> *ta =
@@ -369,12 +369,12 @@ void unload_texture_asset_manager(Asset *_asset) {
   ZoneScoped;
   TAsset<Texture, AssetType::texture> *ta =
       static_cast<TAsset<Texture, AssetType::texture> *>(_asset);
-  ta->m_data.release();
+  ta->m_data.ReleaseGPU();
 }
 
 AssetLoadResult load_shader_asset_manager(const std::string &path) {
   ZoneScoped;
-  std::string source = Utils::load_string_from_path(path);
+  std::string source = Utils::LoadStringFromPath(path);
   AssetLoadResult ret{};
   ret.m_loaded_asset_intermediate = new shader_intermediate_asset(
       new TAsset<GLShader, AssetType::shader>(GLShader{}, path), source,
@@ -392,7 +392,7 @@ void unload_shader_asset_manager(Asset *_asset) {
   sa->m_data.Release();
 }
 
-void AssetManager::dispatch_asset_load_task(const AssetHandle &handle,
+void AssetManager::DispatchLoadTask(const AssetHandle &handle,
                                              AssetLoadInfo &info) {
   ZoneScoped;
   switch (info.m_type) {
@@ -414,7 +414,7 @@ void AssetManager::dispatch_asset_load_task(const AssetHandle &handle,
   }
 }
 
-void AssetManager::transition_asset_to_loaded(const AssetHandle &handle,
+void AssetManager::FinalizeAssetLoad(const AssetHandle &handle,
                                                Asset *asset_to_transition) {
   ZoneScoped;
   p_loaded_assets.emplace(
@@ -438,7 +438,7 @@ AssetHandle AssetLoadInfo::to_handle() {
   return AssetHandle(m_path, m_type);
 }
 
-void AssetManager::unload_asset(const AssetHandle &handle) {
+void AssetManager::UnloadAsset(const AssetHandle &handle) {
   ZoneScoped;
   if (p_loaded_assets.find(handle) == p_loaded_assets.end()) {
     return;
@@ -465,7 +465,7 @@ AssetManager::AssetManager() {
       p_file_watcher->addWatch("assets", p_gem_listener.get(), true);
   p_file_watcher->watch();
 }
-void AssetManager::on_imgui() {
+void AssetManager::OnImGui() {
   if (ImGui::Begin("Assets Debug"))
   {
     if (ImGui::CollapsingHeader("CPU Memory")) {
@@ -476,7 +476,7 @@ void AssetManager::on_imgui() {
       }
     }
     ImGui::Separator();
-    ImGui::Text("Any Assets Loading? : %s", any_assets_loading() ? "true" : "false");
+    ImGui::Text("Any Assets Loading? : %s", AnyAssetsLoading() ? "true" : "false");
     ImGui::Text("Any Pending Async Tasks : %d", static_cast<uint32_t>(p_pending_load_tasks.size()));
     ImGui::Text("Any Pending Synchronous Callbacks : %d", static_cast<uint32_t>(p_pending_load_callbacks.size()));
     ImGui::Text("Any Pending Unload Tasks: %d", static_cast<uint32_t>(p_pending_unload_callbacks.size()));
@@ -491,7 +491,7 @@ void AssetManager::on_imgui() {
         ImGui::SameLine();
         if (ImGui::Button("Unload"))
         {
-          unload_asset(handle);
+          UnloadAsset(handle);
         }
         ImGui::PopID();
       }
@@ -515,7 +515,7 @@ void AssetManager::on_imgui() {
     ImGui::Separator();
     if (ImGui::Button("Unload All Assets"))
     {
-      unload_all_assets();
+      UnloadAll();
     }
 
     if (ImGui::Button("Load Model"))
@@ -535,7 +535,7 @@ void AssetManager::on_imgui() {
       std::filesystem::path p = ifd::FileDialog::Instance().GetResult();
       std::string res = p.u8string();
       printf("OPEN[%s]\n", res.c_str());
-      load_asset(res, AssetType::model);
+      LoadAsset(res, AssetType::model);
     }
     ifd::FileDialog::Instance().Close();
   }
@@ -545,7 +545,7 @@ void AssetManager::on_imgui() {
       std::filesystem::path p = ifd::FileDialog::Instance().GetResult();
       std::string res = p.u8string();
       printf("OPEN[%s]\n", res.c_str());
-      load_asset(res, AssetType::shader);
+      LoadAsset(res, AssetType::shader);
     }
     ifd::FileDialog::Instance().Close();
   }

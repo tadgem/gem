@@ -14,25 +14,25 @@ void Engine::Init(const glm::ivec2& resolution) {
   BackendInit init_props = {resolution, true};
   GPUBackend::InitBackend<GLBackend>(init_props);
 
-  systems.add_system<TransformSystem>();
-  systems.add_system<MeshSystem>();
-  systems.add_system<MaterialSystem>();
+  systems.AddSystem<TransformSystem>();
+  systems.AddSystem<MeshSystem>();
+  systems.AddSystem<MaterialSystem>();
 }
 
 void Engine::SaveProjectToDisk(const std::string &filename,
                                   const std::string &directory) {
   ZoneScoped;
   std::string final_path = directory + "/" + filename;
-  Utils::save_string_to_path(final_path,
-                             active_project.serialize(Engine::assets).dump());
+  Utils::SaveStringToPath(final_path,
+                             active_project.Serialize(Engine::assets).dump());
 }
 
 void Engine::LoadProjectFromDisk(const std::string &filepath) {
   ZoneScoped;
   nlohmann::json proj_json =
-      nlohmann::json::parse(Utils::load_string_from_path(filepath));
+      nlohmann::json::parse(Utils::LoadStringFromPath(filepath));
   Project new_proj{};
-  new_proj.deserialize(assets, proj_json);
+  new_proj.Deserialize(assets, proj_json);
   Engine::active_project = new_proj;
 }
 
@@ -42,7 +42,7 @@ void Engine::Shutdown() {
   systems.m_system_type_aliases.clear();
 }
 void Engine::Update() {
-  assets.update();
+  assets.Update();
 
   for (auto &cb : debug_callbacks.m_callbacks) {
     cb();

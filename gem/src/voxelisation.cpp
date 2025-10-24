@@ -7,7 +7,7 @@
 #include "glm/vec3.hpp"
 namespace gem {
 
-void Voxel::Grid::update_voxel_unit() {
+void Voxel::Grid::UpdateVoxelUnit() {
   ZoneScoped;
   glm::vec3 dim = current_bounding_box.m_max - current_bounding_box.m_min;
   voxel_unit =
@@ -15,13 +15,13 @@ void Voxel::Grid::update_voxel_unit() {
                 (dim.z / resolution.z));
 }
 
-Voxel::Grid Voxel::create_grid(glm::ivec3 resolution, AABB bb) {
+Voxel::Grid Voxel::CreateGrid(glm::ivec3 resolution, AABB bb) {
   ZoneScoped;
   Grid grid{};
   grid.resolution = resolution;
   grid.current_bounding_box = bb;
-  grid.update_voxel_unit();
-  grid.voxel_texture = Texture::create_3d_texture_empty(resolution, GL_RGBA,
+  grid.UpdateVoxelUnit();
+  grid.voxel_texture = Texture::Create3DTextureEmpty(resolution, GL_RGBA,
                                                         GL_RGBA16F, GL_FLOAT);
   glAssert(glBindImageTexture(0, grid.voxel_texture.m_handle, 0, GL_TRUE, 0,
                               GL_READ_WRITE, GL_RGBA16F));
@@ -39,7 +39,7 @@ Voxel::Grid Voxel::create_grid(glm::ivec3 resolution, AABB bb) {
   return grid;
 }
 Voxel::GridVisualizer
-Voxel::create_grid_visualiser(Voxel::Grid &vg, GLShader &visualisation_shader,
+Voxel::CreateGridVisualizer(Voxel::Grid &vg, GLShader &visualisation_shader,
                               GLShader &compute_matrices_shader,
                               int texel_resolution) {
   ZoneScoped;
@@ -128,17 +128,17 @@ Voxel::create_grid_visualiser(Voxel::Grid &vg, GLShader &visualisation_shader,
   for (int z = 0; z < vg.resolution.z; z += texel_resolution) {
     for (int y = 0; y < vg.resolution.y; y += texel_resolution) {
       for (int x = 0; x < vg.resolution.x; x += texel_resolution) {
-        instance_matrices.push_back(Utils::get_model_matrix(
+        instance_matrices.push_back(Utils::GetModelMatrix(
             glm::vec3{x, y, z}, glm::vec3(0.0), scaled_unit));
       }
     }
   }
 
   VAOBuilder builder;
-  builder.begin();
-  builder.add_vertex_buffer(vertex_data);
-  builder.add_vertex_attribute(0, 3 * sizeof(float), 3);
-  builder.add_index_buffer(index_data);
+  builder.Begin();
+  builder.AddVertexBuffer(vertex_data);
+  builder.AddVertexAttribute(0, 3 * sizeof(float), 3);
+  builder.AddIndexBuffer(index_data);
   // builder.add_vertex_buffer(instance_matrices, GL_STATIC_DRAW);
   // TODO: create an ssbo helper class
   GLuint matrices_ssbo;
@@ -173,13 +173,13 @@ Voxel::create_grid_visualiser(Voxel::Grid &vg, GLShader &visualisation_shader,
   //  glVertexAttribDivisor(3, 1);
   //  glVertexAttribDivisor(4, 1);
 
-  vgv.m_texel_shape = builder.build();
+  vgv.m_texel_shape = builder.BuildVAO();
   vgv.m_total_invocations = instance_matrices.size();
   vgv.m_index_count = index_data.size();
   return vgv;
 }
 
-void Voxel::GridVisualizer::dispatch_draw(Voxel::Grid &vg, Camera &cam) {
+void Voxel::GridVisualizer::Draw(Voxel::Grid &vg, Camera &cam) {
   // compute instance matrices
   glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, m_instance_matrices_ssbo);
   m_compute_instances_shader.Use();
@@ -198,24 +198,24 @@ void Voxel::GridVisualizer::dispatch_draw(Voxel::Grid &vg, Camera &cam) {
   glAssert(glDispatchCompute(m_total_invocations, 1, 1));
 
   // draw
-  m_texel_shape.use();
+  m_texel_shape.Use();
   auto &vs = m_visual_shader;
   vs.Use();
   vs.SetVec3i("u_texture_resolution", vg.resolution);
   vs.SetVec3i("u_voxel_group_resolution", glm::ivec3(m_texel_resolution));
   vs.SetMat4f("u_view_projection", cam.m_proj * cam.m_view);
   vs.SetMat4f("u_model",
-              Utils::get_model_matrix(
+              Utils::GetModelMatrix(
                   vg.current_bounding_box.m_min + m_debug_position_offset,
                   glm::vec3(0.0f), vg.voxel_unit * m_debug_scale));
   vs.SetVec3f("u_aabb.min", vg.current_bounding_box.m_min);
   vs.SetVec3f("u_aabb.max", vg.current_bounding_box.m_max);
   vs.SetInt("u_volume", 0);
-  Texture::bind_sampler_handle(vg.voxel_texture.m_handle, GL_TEXTURE0,
+  Texture::BindSamplerHandle(vg.voxel_texture.m_handle, GL_TEXTURE0,
                                GL_TEXTURE_3D);
   glDrawElementsInstanced(GL_TRIANGLES, static_cast<GLsizei>(m_index_count),
                           GL_UNSIGNED_INT, GL_ZERO, m_total_invocations);
-  Texture::bind_sampler_handle(0, GL_TEXTURE0);
+  Texture::BindSamplerHandle(0, GL_TEXTURE0);
   glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, 0);
 }
 } // namespace gem

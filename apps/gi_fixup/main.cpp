@@ -18,7 +18,7 @@ struct DebugVoxelGrid
 void on_imgui(GLRenderer & renderer, Scene * s, glm::vec2 mouse_pos,
               DirectionalLight & dir2, Transform & cube_trans, std::vector<PointLight>& lights)
 {
-    if (s->does_entity_exist((u32) renderer.m_last_selected_entity))
+    if (s->DoesEntityExist((u32) renderer.m_last_selected_entity))
     {
         EntityData & data = s->m_registry.get<EntityData>(renderer.m_last_selected_entity);
         ImGui::Begin(data.m_name.c_str());
@@ -62,8 +62,8 @@ void on_imgui(GLRenderer & renderer, Scene * s, glm::vec2 mouse_pos,
 
 DebugVoxelGrid create_debug_voxel_renderer(GLShader& viz_shader, const AABB& initial_aabb, int square_resolution)
 {
-    glm::mat4 model = Utils::get_model_matrix(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(0.2f));
-    AABB transformed_aabb = Utils::transform_aabb(initial_aabb, model);
+    glm::mat4 model = Utils::GetModelMatrix (glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(0.2f));
+    AABB transformed_aabb = Utils::TransformAABB(initial_aabb, model);
     int cubed_res = pow(square_resolution, 3);
 
     glm::vec3 aabb_dim = transformed_aabb.m_max - transformed_aabb.m_min;
@@ -96,10 +96,10 @@ DebugVoxelGrid create_debug_voxel_renderer(GLShader& viz_shader, const AABB& ini
         x += x_offset2;
 
         instance_uvs.push_back({ (x_offset + 1) / cubed_res ,(y_offset + 1) / cubed_res,(z_offset + 1) / cubed_res });
-        instance_matrices.push_back(Utils::get_model_matrix({ x,y,z }, { 0,90,0 }, unit));
+        instance_matrices.push_back(Utils::GetModelMatrix({ x,y,z }, { 0,90,0 }, unit));
     }
 
-    VAO instanced_cubes = Shapes::gen_cube_instanced_vao(instance_matrices, instance_uvs);
+    VAO instanced_cubes = Shapes::GenerateInstancedCube(instance_matrices, instance_uvs);
 
     return DebugVoxelGrid {
         instanced_cubes, transformed_aabb, square_resolution
@@ -116,19 +116,19 @@ int main()
 
     Camera cam{};
     DebugCameraController controller{};
-    Scene * s = Engine::scenes.create_scene("test_scene");
-    Entity e = s->create_entity("Daddalus");
+    Scene * s = Engine::scenes.CreateScene("test_scene");
+    Entity e = s->CreateEntity("Daddalus");
 
-    e.has_component<EntityData>();
-    auto& data = e.get_component<EntityData>();
+    e.HasComponent<EntityData>();
+    auto& data = e.GetComponent<EntityData>();
     Material mat(renderer.m_gbuffer_shader->m_handle, renderer.m_gbuffer_shader->m_data);
-    e.add_component<Material>(renderer.m_gbuffer_shader->m_handle, renderer.m_gbuffer_shader->m_data);
+    e.AddComponent<Material>(renderer.m_gbuffer_shader->m_handle, renderer.m_gbuffer_shader->m_data);
 
-    Engine::assets.load_asset("assets/models/sponza/Sponza.gltf", AssetType::model, [s, &renderer](Asset * a) {
+    Engine::assets.LoadAsset("assets/models/sponza/Sponza.gltf", AssetType::model, [s, &renderer](Asset * a) {
         spdlog::info("adding model to scene");
         auto* ma = dynamic_cast<ModelAsset *>(a);
-        ma->m_data.update_aabb();
-        s->create_entity_from_model(ma->m_handle, ma->m_data, renderer.m_gbuffer_shader->m_handle, renderer.m_gbuffer_shader->m_data, glm::vec3(0.1), glm::vec3(0.0, 0.0, 0.0),
+        ma->m_data.UpdateAABB();
+        s->CreateEntityFromModel(ma->m_handle, ma->m_data, renderer.m_gbuffer_shader->m_handle, renderer.m_gbuffer_shader->m_data, glm::vec3(0.1), glm::vec3(0.0, 0.0, 0.0),
             {
                 {"u_diffuse_map",   TextureMapType::diffuse},
                 {"u_normal_map",    TextureMapType::normal},
@@ -136,19 +136,19 @@ int main()
                 {"u_roughness_map", TextureMapType::roughness},
                 {"u_ao_map",        TextureMapType::ao}
             });
-        glm::mat4 model = Utils::get_model_matrix(glm::vec3(0.0), glm::vec3(0.0), glm::vec3(0.1));
-        renderer.m_voxel_data.current_bounding_box = Utils::transform_aabb(ma->m_data.m_aabb, model);
+        glm::mat4 model = Utils::GetModelMatrix(glm::vec3(0.0), glm::vec3(0.0), glm::vec3(0.1));
+        renderer.m_voxel_data.current_bounding_box = Utils::TransformAABB(ma->m_data.m_aabb, model);
     });
 
-    auto cube_entity = s->create_entity("Test Cube");
-    auto& cube_trans = cube_entity.add_component<Transform>();
-    auto& cube_mat = cube_entity.add_component<Material>(
+    auto cube_entity = s->CreateEntity("Test Cube");
+    auto& cube_trans = cube_entity.AddComponent<Transform>();
+    auto& cube_mat = cube_entity.AddComponent<Material>(
         renderer.m_gbuffer_textureless_shader->m_handle,
                 renderer.m_gbuffer_textureless_shader->m_data);
-    cube_mat.set_uniform_value("u_diffuse", glm::vec3(1.0, 0.0, 0.0));
-    cube_mat.set_uniform_value("u_metallic", 0.0f);
-    cube_mat.set_uniform_value("u_roughness", 0.0f);
-    cube_entity.add_component<MeshComponent>(
+    cube_mat.SetUniformValue("u_diffuse", glm::vec3(1.0, 0.0, 0.0));
+    cube_mat.SetUniformValue("u_metallic", 0.0f);
+    cube_mat.SetUniformValue("u_roughness", 0.0f);
+    cube_entity.AddComponent<MeshComponent>(
         MeshComponent{Shapes::s_torus_mesh, {}, 0});
 
 
@@ -159,7 +159,7 @@ int main()
         {1.0f,1.0f,1.0f},
         2.75f
     };
-    auto& dir2 = e.add_component<DirectionalLight>(dir);
+    auto& dir2 = e.AddComponent<DirectionalLight>(dir);
     lights.push_back({ {0.0, 0.0, 0.0}, {255.0, 0.0, 0.0}, 10.0f});
     lights.push_back({ {10.0, 0.0, 10.0}, {255.0, 255.0, 0.0}, 20.0f });
     lights.push_back({ {-10.0, 0.0, -10.0}, {0.0, 255.0, 0.0}, 30.0f });
@@ -176,16 +176,16 @@ int main()
         GPUBackend::Selected()->PreFrame();
         glm::vec2 window_dim = GPUBackend::Selected()->GetWindowDimensions();
         renderer.PreFrame(cam);
-        controller.update(window_dim, cam);
-        cam.update(window_dim);
+        controller.Update(window_dim, cam);
+        cam.Update(window_dim);
 
         for (auto* current_scene : scenes)
         {
-            current_scene->on_update();
+            current_scene->Update();
         }
 
-        glm::vec2 mouse_pos = Input::get_mouse_position();
-        if (Input::get_mouse_button(MouseButton::left) && !ImGui::GetIO().WantCaptureMouse)
+        glm::vec2 mouse_pos = Input::GetMousePosition();
+        if (Input::GetMouseButton(MouseButton::left) && !ImGui::GetIO().WantCaptureMouse)
         {
             renderer.GetEntityAtScreenPosition(mouse_pos);
         }

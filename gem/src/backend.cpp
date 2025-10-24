@@ -28,11 +28,11 @@ void InitBuiltInAssets(gem::GPUBackend* backend) {
   std::vector<unsigned int> black_data = {0};
   std::vector<unsigned int> white_data = {UINT32_MAX};
   gem::Texture::white = new gem::Texture(
-      gem::Texture::from_data(white_data.data(), white_data.size(), 1, 1, 1, 4));
+      gem::Texture::FromData(white_data.data(), white_data.size(), 1, 1, 1, 4));
   gem:: Texture::black = new gem::Texture(
-      gem::Texture::from_data(black_data.data(), white_data.size(), 1, 1, 1, 4));
+      gem::Texture::FromData(black_data.data(), white_data.size(), 1, 1, 1, 4));
 
-  gem::Shapes::init_built_in_assets(gem::Engine::assets, backend);
+  gem::Shapes::InitBuiltInAssets(gem::Engine::assets, backend);
 
   // mesh::m_cube = mesh {shapes::m_cube, 36, gem::aabb{{0,0,0}, {1,1,1}}};
 }
