@@ -12,7 +12,7 @@ public:
                         const std::string &filename, efsw::Action action,
                         std::string oldFilename) override;
 
-  efsw::WatchID m_watch_id;
+  efsw::WatchID watch_id;
 };
 
 void reload_shader(TAsset<shader, AssetType::shader> *shader_asset,

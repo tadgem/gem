@@ -461,7 +461,7 @@ void AssetManager::UnloadAsset(const AssetHandle &handle) {
 AssetManager::AssetManager() {
   p_file_watcher = std::make_unique<efsw::FileWatcher>();
   p_gem_listener = std::make_unique<GemFileWatchListener>();
-  p_gem_listener->m_watch_id =
+  p_gem_listener->watch_id =
       p_file_watcher->addWatch("assets", p_gem_listener.get(), true);
   p_file_watcher->watch();
 }
