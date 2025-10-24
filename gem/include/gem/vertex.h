@@ -34,7 +34,7 @@ public:
   template <typename _Ty>
   void add_vertex_buffer(_Ty *data, uint32_t count,
                          GLenum usage_flags = GL_STATIC_DRAW) {
-    if (GPUBackend::get_backend_api() == BackendAPI::open_gl) {
+    if (GPUBackend::GetBackendAPI() == BackendAPI::open_gl) {
       gl_handle vbo;
       glGenBuffers(1, &vbo);
 

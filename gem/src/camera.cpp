@@ -76,7 +76,7 @@ void DebugCameraController::update(glm::vec2 screen_dim, Camera &cam) {
   glm::vec3 forward = Utils::get_forward_from_quat(rotation);
   glm::vec3 right = Utils::get_right_from_quat(rotation);
   glm::vec3 up = Utils::get_up_from_quat(rotation);
-  float frame_time = GPUBackend::selected()->get_frame_time();
+  float frame_time = GPUBackend::Selected()->GetFrameTime();
 
   cam.m_forward = forward;
   cam.m_right = right;

@@ -4,11 +4,11 @@ namespace gem {
 
 class Camera;
 class GLFramebuffer;
-namespace open_gl {
+namespace gl {
 namespace tech {
 class ScreenSpaceReflections {
 public:
-  static void dispatch_ssr_pass(GLShader &ssr, Camera &cam,
+  static void DispatchSSRPass(GLShader &ssr, Camera &cam,
                                 GLFramebuffer &ssr_buffer,
                                 GLFramebuffer &gbuffer,
                                 GLFramebuffer &lighting_buffer,

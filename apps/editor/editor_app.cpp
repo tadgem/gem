@@ -7,9 +7,9 @@ using namespace gem;
 editor_application::editor_application()
 {
     glm::ivec2 resolution = {1920, 1080};
-    Engine::init(resolution);
+    Engine::Init(resolution);
     GLRenderer renderer{};
-    renderer.init(Engine::assets, resolution);
+    renderer.Init(Engine::assets, resolution);
 
     m_editor_fsm.set_starting_state(editor_mode::no_open_project);
     m_editor_fsm.add_state(editor_mode::no_open_project, [this]() {
@@ -35,21 +35,21 @@ editor_application::editor_application()
 
 void editor_application::run()
 {
-    while (!GPUBackend::selected()->m_quit)
+    while (!GPUBackend::Selected()->m_quit)
     {
       Engine::assets.update();
 
-        GPUBackend::selected()->process_sdl_event();
-        GPUBackend::selected()->engine_pre_frame();
+        GPUBackend::Selected()->ProcessEvents();
+        GPUBackend::Selected()->PreFrame();
 
         main_menu_bar();
 
         m_editor_fsm.update();
 
-        GPUBackend::selected()->engine_post_frame();
+        GPUBackend::Selected()->PostFrame();
     }
-    GPUBackend::selected()->engine_shut_down();
-    Engine::shutdown();
+    GPUBackend::Selected()->ShutDown();
+    Engine::Shutdown();
 }
 
 static char s_create_project_name_buffer[256]{ 0 };
@@ -96,7 +96,7 @@ void editor_application::on_open_project()
             std::string res = p.u8string();
             std::filesystem::path directory = p.parent_path();
             Engine::active_project = create_project(std::string(s_create_project_name_buffer), directory.string());
-            Engine::save_project_to_disk(p.filename().string(), directory.string());
+            Engine::SaveProjectToDisk(p.filename().string(), directory.string());
             m_editor_fsm.trigger(editor_trigger::project_loaded);
         }
         ifd::FileDialog::Instance().Close();
@@ -106,7 +106,7 @@ void editor_application::on_open_project()
         if (ifd::FileDialog::Instance().HasResult()) {
             std::filesystem::path p = ifd::FileDialog::Instance().GetResult();
             std::string res = p.u8string();
-            Engine::load_project_from_disk(res);
+            Engine::LoadProjectFromDisk(res);
             m_editor_fsm.trigger(editor_trigger::project_loaded);
         }
         ifd::FileDialog::Instance().Close();

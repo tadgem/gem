@@ -11,9 +11,9 @@
 #include "gtc/quaternion.hpp"
 
 namespace gem {
-namespace open_gl {
+namespace gl {
 
-void tech::Shadow::dispatch_shadow_pass(GLFramebuffer &shadow_fb,
+void tech::Shadow::DispatchShadowPass(GLFramebuffer &shadow_fb,
                                         GLShader &shadow_shader,
                                         DirectionalLight &sun,
                                         std::vector<Scene *> &scenes,
@@ -34,25 +34,25 @@ void tech::Shadow::dispatch_shadow_pass(GLFramebuffer &shadow_fb,
 
   sun.light_space_matrix = lightSpaceMatrix;
 
-  shadow_fb.bind();
+  shadow_fb.Bind();
   glClear(GL_DEPTH_BUFFER_BIT);
   glViewport(0, 0, shadow_fb.m_width, shadow_fb.m_height);
   glEnable(GL_CULL_FACE);
   glCullFace(GL_FRONT);
-  shadow_shader.use();
-  shadow_shader.set_mat4("lightSpaceMatrix", lightSpaceMatrix);
+  shadow_shader.Use();
+  shadow_shader.SetMat4f("lightSpaceMatrix", lightSpaceMatrix);
 
   for (Scene *current_scene : scenes) {
     auto renderables =
         current_scene->m_registry.view<Transform, MeshComponent, Material>();
 
     for (auto [e, trans, emesh, ematerial] : renderables.each()) {
-      shadow_shader.set_mat4("model", trans.m_model);
+      shadow_shader.SetMat4f("model", trans.m_model);
       emesh.m_mesh->m_vao.draw();
     }
   }
 
-  shadow_fb.unbind();
+  shadow_fb.Unbind();
   glDisable(GL_CULL_FACE);
   glViewport(0, 0, window_res.x, window_res.y);
 }

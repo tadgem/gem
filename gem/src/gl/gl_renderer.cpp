@@ -19,11 +19,11 @@
 
 namespace gem {
 
-void GLRenderer::init(AssetManager &am, glm::ivec2 resolution) {
+void GLRenderer::Init(AssetManager &am, glm::ivec2 resolution) {
   ZoneScoped;
   TracyGpuContext;
   m_frame_index = 0;
-  m_im3d_state = GLIm3d::load_im3d();
+  m_im3d_state = GLIm3d::LoadIm3D();
 
   am.load_asset("assets/shaders/gbuffer.shader", AssetType::shader);
   am.load_asset("assets/shaders/gbuffer_textureless.shader", AssetType::shader);
@@ -93,7 +93,7 @@ void GLRenderer::init(AssetManager &am, glm::ivec2 resolution) {
   m_window_resolution = resolution;
   const int shadow_resolution = 4096;
   m_gbuffer =
-      GLFramebuffer::create(m_window_resolution,
+      GLFramebuffer::Create(m_window_resolution,
                              {
                                  {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
                                  {GL_RGBA, GL_RGBA32F, GL_LINEAR, GL_FLOAT},
@@ -105,38 +105,38 @@ void GLRenderer::init(AssetManager &am, glm::ivec2 resolution) {
                              true);
 
   m_gbuffer_downsample =
-      GLFramebuffer::create(m_window_resolution,
+      GLFramebuffer::Create(m_window_resolution,
                              {
                                  {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
                              },
                              false);
 
   m_dir_light_shadow_buffer =
-      GLFramebuffer::create({shadow_resolution, shadow_resolution}, {}, true);
+      GLFramebuffer::Create({shadow_resolution, shadow_resolution}, {}, true);
 
   m_lightpass_buffer =
-      GLFramebuffer::create(m_window_resolution,
+      GLFramebuffer::Create(m_window_resolution,
                              {
                                  {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
                              },
                              false);
 
   m_lightpass_buffer_resolve =
-      GLFramebuffer::create(m_window_resolution,
+      GLFramebuffer::Create(m_window_resolution,
                              {
                                  {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
                              },
                              false);
 
   m_lightpass_buffer_history =
-      GLFramebuffer::create(m_window_resolution,
+      GLFramebuffer::Create(m_window_resolution,
                              {
                                  {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
                              },
                              false);
 
   m_position_buffer_history =
-      GLFramebuffer::create(m_window_resolution,
+      GLFramebuffer::Create(m_window_resolution,
                              {
                                  {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
                              },
@@ -145,28 +145,28 @@ void GLRenderer::init(AssetManager &am, glm::ivec2 resolution) {
   glm::vec2 gi_res = {m_window_resolution.x * m_vxgi_resolution_scale,
                       m_window_resolution.y * m_vxgi_resolution_scale};
   m_conetracing_buffer =
-      GLFramebuffer::create(gi_res,
+      GLFramebuffer::Create(gi_res,
                              {
                                  {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
                              },
                              false);
 
   m_conetracing_buffer_denoise =
-      GLFramebuffer::create(gi_res,
+      GLFramebuffer::Create(gi_res,
                              {
                                  {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
                              },
                              false);
 
   m_conetracing_buffer_resolve =
-      GLFramebuffer::create(m_window_resolution,
+      GLFramebuffer::Create(m_window_resolution,
                              {
                                  {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
                              },
                              false);
 
   m_conetracing_buffer_history =
-      GLFramebuffer::create(m_window_resolution,
+      GLFramebuffer::Create(m_window_resolution,
                              {
                                  {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
                              },
@@ -175,35 +175,35 @@ void GLRenderer::init(AssetManager &am, glm::ivec2 resolution) {
   glm::vec2 ssr_res = {m_window_resolution.x * m_ssr_resolution_scale,
                        m_window_resolution.y * m_ssr_resolution_scale};
   m_ssr_buffer =
-      GLFramebuffer::create(ssr_res,
+      GLFramebuffer::Create(ssr_res,
                              {
                                  {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
                              },
                              false);
 
   m_ssr_buffer_denoise =
-      GLFramebuffer::create(ssr_res,
+      GLFramebuffer::Create(ssr_res,
                              {
                                  {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
                              },
                              false);
 
   m_ssr_buffer_resolve =
-      GLFramebuffer::create(m_window_resolution,
+      GLFramebuffer::Create(m_window_resolution,
                              {
                                  {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
                              },
                              false);
 
   m_ssr_buffer_history =
-      GLFramebuffer::create(m_window_resolution,
+      GLFramebuffer::Create(m_window_resolution,
                              {
                                  {GL_RGBA, GL_RGBA16F, GL_LINEAR, GL_FLOAT},
                              },
                              false);
 
   m_final_pass =
-      GLFramebuffer::create(m_window_resolution,
+      GLFramebuffer::Create(m_window_resolution,
                              {
                                  {GL_RGBA, GL_RGBA8, GL_LINEAR, GL_FLOAT},
                              },
@@ -217,16 +217,18 @@ void GLRenderer::init(AssetManager &am, glm::ivec2 resolution) {
       m_visualise_3d_tex_instances_shader->m_data, 8);
 }
 
-void GLRenderer::pre_frame(Camera &cam) {
+void GLRenderer::PreFrame(Camera &cam) {
   ZoneScoped;
 
-  GLIm3d::new_frame_im3d(m_im3d_state, m_window_resolution, cam);
+  GLIm3d::NewFrameIm3D(m_im3d_state, m_window_resolution, cam);
 }
 
-void GLRenderer::render(AssetManager &am, Camera &cam,
+void GLRenderer::Render(AssetManager &am, Camera &cam,
                          std::vector<Scene *> &scenes) {
   ZoneScoped;
   FrameMark;
+
+  glEnable(GL_DEPTH_TEST);
 
   if(m_debug_simulate_low_framerate)
   {
@@ -234,7 +236,7 @@ void GLRenderer::render(AssetManager &am, Camera &cam,
   }
 
   if (p_clear_voxel_grid) {
-    open_gl::tech::VXGI::dispatch_clear_voxel(
+    gl::tech::VXGI::DispatchClear3DTexture(
         m_compute_voxel_clear_shader->m_data, m_voxel_data, s_voxel_resolution);
     p_clear_voxel_grid = false;
   }
@@ -243,7 +245,7 @@ void GLRenderer::render(AssetManager &am, Camera &cam,
 
   {
     TracyGpuZone("GBuffer Voxelization");
-    open_gl::tech::VXGI::dispatch_gbuffer_voxelization(
+    gl::tech::VXGI::DispatchGBufferVoxelization(
         m_compute_voxelize_gbuffer_shader->m_data, m_voxel_data, m_gbuffer,
         m_lightpass_buffer, m_window_resolution);
   }
@@ -256,13 +258,13 @@ void GLRenderer::render(AssetManager &am, Camera &cam,
 
   {
     TracyGpuZone("GBuffer");
-    m_gbuffer.bind();
+    m_gbuffer.Bind();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    open_gl::tech::GBuffer::dispatch_gbuffer_with_id(
+    gl::tech::GBuffer::DispatchGBufferWithID(
         m_frame_index, m_gbuffer, m_position_buffer_history,
         m_gbuffer_shader->m_data, am, cam, scenes, m_window_resolution);
 
-    open_gl::tech::GBuffer::dispatch_gbuffer_textureless_with_id(
+    gl::tech::GBuffer::DispatchGBufferTexturelessWithID(
         m_frame_index, m_gbuffer, m_position_buffer_history,
         m_gbuffer_textureless_shader->m_data, am, cam, scenes,
         m_window_resolution);
@@ -281,30 +283,30 @@ void GLRenderer::render(AssetManager &am, Camera &cam,
   }
   {
     TracyGpuZone("Dir Light Shadow Pass");
-    open_gl::tech::Shadow::dispatch_shadow_pass(
+    gl::tech::Shadow::DispatchShadowPass(
         m_dir_light_shadow_buffer, m_dir_light_shadow_shader->m_data, dir,
         scenes, m_window_resolution);
   }
   {
     TracyGpuZone("Direct Lighting Pass");
-    open_gl::tech::PBRLighting::dispatch_light_pass(
+    gl::tech::PBRLighting::DispatchLightPass(
         m_lighting_shader->m_data, m_lightpass_buffer, m_gbuffer,
         m_dir_light_shadow_buffer, cam, point_lights, dir);
   }
 
   {
     TracyGpuZone("GBuffer Downsample");
-    m_gbuffer_downsample.bind();
-    open_gl::tech::Utils::dispatch_present_image(
+    m_gbuffer_downsample.Bind();
+    gl::tech::Utils::DispatchPresentImage(
         m_downsample_shader->m_data, "u_prev_mip", 0,
         m_gbuffer.m_colour_attachments[2]);
-    m_gbuffer_downsample.unbind();
+    m_gbuffer_downsample.Unbind();
   }
 
   {
     TracyGpuZone("Light Pass TAA");
 
-    open_gl::tech::TemporalAntiAliasing::dispatch_taa_pass(
+    gl::tech::TemporalAntiAliasing::DispatchTAAPass(
         m_taa_shader->m_data, m_lightpass_buffer, m_lightpass_buffer_resolve,
         m_lightpass_buffer_history, m_gbuffer.m_colour_attachments[4],
         m_window_resolution);
@@ -312,7 +314,7 @@ void GLRenderer::render(AssetManager &am, Camera &cam,
 
   if (m_debug_draw_cone_tracing_pass || m_debug_draw_cone_tracing_pass_no_taa) {
     TracyGpuZone("Voxel Cone Tracing Pass");
-    open_gl::tech::VXGI::dispatch_cone_tracing_pass(
+    gl::tech::VXGI::DispatchConeTracingPass(
         m_voxel_cone_tracing_shader->m_data, m_voxel_data, m_conetracing_buffer,
         m_gbuffer, m_window_resolution, m_voxel_data.current_bounding_box,
         s_voxel_resolution, cam, m_vxgi_cone_trace_distance,
@@ -320,24 +322,24 @@ void GLRenderer::render(AssetManager &am, Camera &cam,
   }
 
   if (m_debug_draw_lighting_pass) {
-    open_gl::tech::Utils::dispatch_present_image(
+    gl::tech::Utils::DispatchPresentImage(
         m_present_shader->m_data, "u_image_sampler", 0,
         m_lightpass_buffer_resolve.m_colour_attachments.front());
   }
 
-  m_ssr_buffer_resolve.bind();
+  m_ssr_buffer_resolve.Bind();
   glClear(GL_COLOR_BUFFER_BIT);
-  m_ssr_buffer_resolve.unbind();
+  m_ssr_buffer_resolve.Unbind();
 
   if (m_debug_draw_ssr_pass) {
     TracyGpuZone("SSR Pass");
     glViewport(0, 0, m_window_resolution.x * m_ssr_resolution_scale,
                m_window_resolution.y * m_ssr_resolution_scale);
-    open_gl::tech::ScreenSpaceReflections::dispatch_ssr_pass(
+    gl::tech::ScreenSpaceReflections::DispatchSSRPass(
         m_ssr_shader->m_data, cam, m_ssr_buffer, m_gbuffer, m_lightpass_buffer,
         m_window_resolution * m_ssr_resolution_scale);
     glViewport(0, 0, m_window_resolution.x, m_window_resolution.y);
-    open_gl::tech::TemporalAntiAliasing::dispatch_taa_pass(
+    gl::tech::TemporalAntiAliasing::DispatchTAAPass(
         m_taa_shader->m_data, m_ssr_buffer, m_ssr_buffer_resolve,
         m_ssr_buffer_history, m_gbuffer.m_colour_attachments[4],
         m_window_resolution);
@@ -346,7 +348,7 @@ void GLRenderer::render(AssetManager &am, Camera &cam,
   if (m_debug_draw_cone_tracing_pass) {
     {
       TracyGpuZone("Voxel Cone Tracing TAA");
-      open_gl::tech::TemporalAntiAliasing::dispatch_taa_pass(
+      gl::tech::TemporalAntiAliasing::DispatchTAAPass(
           m_taa_shader->m_data, m_conetracing_buffer,
           m_conetracing_buffer_resolve, m_conetracing_buffer_history,
           m_gbuffer.m_colour_attachments[4], m_window_resolution);
@@ -356,7 +358,7 @@ void GLRenderer::render(AssetManager &am, Camera &cam,
     }
     {
       TracyGpuZone("Voxel Cone Tracing Denoise");
-      open_gl::tech::Utils::dispatch_denoise_image(
+      gl::tech::Utils::DispatchDenoiseImage(
           m_denoise_shader->m_data, m_conetracing_buffer_resolve,
           m_conetracing_buffer_denoise, m_denoise_sigma, m_denoise_threshold,
           m_denoise_k_sigma, m_window_resolution);
@@ -365,43 +367,43 @@ void GLRenderer::render(AssetManager &am, Camera &cam,
     }
   }
   if (m_debug_draw_cone_tracing_pass_no_taa) {
-    open_gl::tech::Utils::dispatch_present_image(
+    gl::tech::Utils::DispatchPresentImage(
         m_present_shader->m_data, "u_image_sampler", 0,
         m_conetracing_buffer.m_colour_attachments.front());
   }
   if (m_debug_draw_lighting_pass_no_taa) {
-    open_gl::tech::Utils::dispatch_present_image(
+    gl::tech::Utils::DispatchPresentImage(
         m_present_shader->m_data, "u_image_sampler", 0,
         m_lightpass_buffer.m_colour_attachments.front());
   }
 
   if (m_debug_draw_ssr_pass) {
-    open_gl::tech::Utils::dispatch_present_image(
+    gl::tech::Utils::DispatchPresentImage(
         m_present_shader->m_data, "u_image_sampler", 0,
         m_ssr_buffer_resolve.m_colour_attachments.front());
   }
   {
     TracyGpuZone("Blit lightpass to history");
-    open_gl::tech::Utils::blit_to_fb(
+    gl::tech::Utils::DispatchBlitToFB(
         m_lightpass_buffer_history, m_present_shader->m_data, "u_image_sampler",
         0, m_lightpass_buffer_resolve.m_colour_attachments[0]);
   }
   {
     TracyGpuZone("Blit Gbuffer position to history");
-    open_gl::tech::Utils::blit_to_fb(
+    gl::tech::Utils::DispatchBlitToFB(
         m_position_buffer_history, m_present_shader->m_data, "u_image_sampler",
         0, m_gbuffer.m_colour_attachments[1]);
   }
   {
     TracyGpuZone("Blit voxel cone tracing to history");
-    open_gl::tech::Utils::blit_to_fb(
+    gl::tech::Utils::DispatchBlitToFB(
         m_conetracing_buffer_history, m_present_shader->m_data,
         "u_image_sampler", 0,
         m_conetracing_buffer_denoise.m_colour_attachments.front());
   }
   {
     TracyGpuZone("Blit ssr pass to history");
-    open_gl::tech::Utils::blit_to_fb(
+    gl::tech::Utils::DispatchBlitToFB(
         m_ssr_buffer_history, m_present_shader->m_data, "u_image_sampler", 0,
         m_ssr_buffer_resolve.m_colour_attachments.front());
   }
@@ -415,69 +417,69 @@ void GLRenderer::render(AssetManager &am, Camera &cam,
   if (m_debug_draw_final_pass) {
     TracyGpuZone("Composite Final Pass");
     GEM_GPU_MARKER("Composite Final Pass");
-    m_final_pass.bind();
+    m_final_pass.Bind();
     Shapes::s_screen_quad.use();
-    m_combine_shader->m_data.use();
-    m_combine_shader->m_data.set_float("u_brightness",
+    m_combine_shader->m_data.Use();
+    m_combine_shader->m_data.SetFloat("u_brightness",
                                        m_tonemapping_brightness);
-    m_combine_shader->m_data.set_float("u_contrast", m_tonemapping_contrast);
-    m_combine_shader->m_data.set_float("u_saturation",
+    m_combine_shader->m_data.SetFloat("u_contrast", m_tonemapping_contrast);
+    m_combine_shader->m_data.SetFloat("u_saturation",
                                        m_tonemapping_saturation);
-    m_combine_shader->m_data.set_int("lighting_pass", 0);
+    m_combine_shader->m_data.SetInt("lighting_pass", 0);
     Texture::bind_sampler_handle(
         m_lightpass_buffer_resolve.m_colour_attachments.front(), GL_TEXTURE0);
-    m_combine_shader->m_data.set_int("cone_tracing_pass", 1);
+    m_combine_shader->m_data.SetInt("cone_tracing_pass", 1);
     Texture::bind_sampler_handle(
         m_conetracing_buffer_resolve.m_colour_attachments.front(), GL_TEXTURE1);
-    m_combine_shader->m_data.set_int("ssr_pass", 2);
-    m_combine_shader->m_data.set_int("ssr_pass", 2);
+    m_combine_shader->m_data.SetInt("ssr_pass", 2);
+    m_combine_shader->m_data.SetInt("ssr_pass", 2);
     Texture::bind_sampler_handle(
         m_ssr_buffer_resolve.m_colour_attachments.front(), GL_TEXTURE2);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
     Texture::bind_sampler_handle(0, GL_TEXTURE0);
     Texture::bind_sampler_handle(0, GL_TEXTURE1);
-    m_final_pass.unbind();
-    open_gl::tech::Utils::dispatch_present_image(
+    m_final_pass.Unbind();
+    gl::tech::Utils::DispatchPresentImage(
         m_present_shader->m_data, "u_image_sampler", 0,
         m_final_pass.m_colour_attachments.front());
 
-    m_conetracing_buffer_resolve.bind();
+    m_conetracing_buffer_resolve.Bind();
     glClear(GL_COLOR_BUFFER_BIT);
-    m_conetracing_buffer.unbind();
+    m_conetracing_buffer.Unbind();
   }
 
   {
     TracyGpuZone("Im3D Pass");
-    GLIm3d::end_frame_im3d(m_im3d_state, m_window_resolution, cam);
+    GLIm3d::EndFrameIm3D(m_im3d_state, m_window_resolution, cam);
   }
   TracyGpuCollect;
 }
 
-void GLRenderer::cleanup(AssetManager &am) {
+void GLRenderer::Cleanup(AssetManager &am) {
   ZoneScoped;
-  m_gbuffer.cleanup();
-  m_gbuffer_downsample.cleanup();
-  m_dir_light_shadow_buffer.cleanup();
-  m_lightpass_buffer.cleanup();
-  m_lightpass_buffer_resolve.cleanup();
-  m_lightpass_buffer_history.cleanup();
-  m_position_buffer_history.cleanup();
-  m_conetracing_buffer.cleanup();
-  m_conetracing_buffer_denoise.cleanup();
-  m_conetracing_buffer_resolve.cleanup();
-  m_conetracing_buffer_history.cleanup();
-  m_ssr_buffer.cleanup();
-  m_ssr_buffer_denoise.cleanup();
-  m_ssr_buffer_resolve.cleanup();
-  m_ssr_buffer_history.cleanup();
-  m_final_pass.cleanup();
-  GLIm3d::shutdown_im3d(m_im3d_state);
+  m_gbuffer.Cleanup();
+  m_gbuffer_downsample.Cleanup();
+  m_dir_light_shadow_buffer.Cleanup();
+  m_lightpass_buffer.Cleanup();
+  m_lightpass_buffer_resolve.Cleanup();
+  m_lightpass_buffer_history.Cleanup();
+  m_position_buffer_history.Cleanup();
+  m_conetracing_buffer.Cleanup();
+  m_conetracing_buffer_denoise.Cleanup();
+  m_conetracing_buffer_resolve.Cleanup();
+  m_conetracing_buffer_history.Cleanup();
+  m_ssr_buffer.Cleanup();
+  m_ssr_buffer_denoise.Cleanup();
+  m_ssr_buffer_resolve.Cleanup();
+  m_ssr_buffer_history.Cleanup();
+  m_final_pass.Cleanup();
+  GLIm3d::ShutdownIm3D(m_im3d_state);
 }
 
-entt::entity GLRenderer::get_mouse_entity(glm::vec2 mouse_position) {
+entt::entity GLRenderer::GetEntityAtScreenPosition(glm::vec2 mouse_position) {
   ZoneScoped;
-  auto pixels = m_gbuffer.read_pixels<glm::vec4, 1, 1>(
+  auto pixels = m_gbuffer.ReadPixels<glm::vec4, 1, 1>(
       mouse_position.x, m_window_resolution.y - mouse_position.y, 5, GL_RGBA,
       GL_FLOAT);
   m_last_selected_entity = entt::entity(pixels[0][0] + pixels[0][1] * 256 +
@@ -486,13 +488,13 @@ entt::entity GLRenderer::get_mouse_entity(glm::vec2 mouse_position) {
   return m_last_selected_entity;
 }
 
-void GLRenderer::on_imgui(AssetManager &am) {
+void GLRenderer::OnImGui(AssetManager &am) {
   ZoneScoped;
   glm::vec2 mouse_pos = Input::get_mouse_position();
   ImGui::Begin("Renderer Settings");
   ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
-              1000.0f / GPUBackend::selected()->m_imgui_io->Framerate,
-              GPUBackend::selected()->m_imgui_io->Framerate);
+              1000.0f / GPUBackend::Selected()->m_imgui_io->Framerate,
+              GPUBackend::Selected()->m_imgui_io->Framerate);
   ImGui::Text("Mouse Pos : %.3f, %.3f", mouse_pos.x, mouse_pos.y);
   ImGui::Text("Selected Entity ID : %d", m_last_selected_entity);
 

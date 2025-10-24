@@ -32,12 +32,12 @@ void on_imgui(GLRenderer & renderer, Scene * s, glm::vec2 mouse_pos,
         ImGui::End();
     }
     {
-        renderer.on_imgui(Engine::assets);
+        renderer.OnImGui(Engine::assets);
 
         ImGui::Begin("Demo Settings");
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
-                    1000.0f / GPUBackend::selected()->m_imgui_io->Framerate,
-                    GPUBackend::selected()->m_imgui_io->Framerate);
+                    1000.0f / GPUBackend::Selected()->m_imgui_io->Framerate,
+                    GPUBackend::Selected()->m_imgui_io->Framerate);
 
         ImGui::Text("Mouse Pos : %.3f, %.3f", mouse_pos.x, mouse_pos.y);
         ImGui::Text("Selected Entity ID : %d", renderer.m_last_selected_entity);
@@ -74,9 +74,9 @@ void on_imgui(GLRenderer & renderer, Scene * s, glm::vec2 mouse_pos,
 int main()
 {
     glm::ivec2 resolution = {1920, 1080};
-    Engine::init(resolution);
+    Engine::Init(resolution);
     GLRenderer renderer{};
-    renderer.init(Engine::assets, resolution);
+    renderer.Init(Engine::assets, resolution);
 
     Camera cam{};
     DebugCameraController controller{};
@@ -134,15 +134,15 @@ int main()
 
     std::vector<Scene *> scenes{ s };
 
-    while (!GPUBackend::selected()->m_quit)
+    while (!GPUBackend::Selected()->m_quit)
     {
         glEnable(GL_DEPTH_TEST);
-        Engine::update();
+        Engine::Update();
 
-        GPUBackend::selected()->process_sdl_event();
-        GPUBackend::selected()->engine_pre_frame();
-        glm::vec2 window_dim = GPUBackend::selected()->get_window_dim();
-        renderer.pre_frame(cam);
+        GPUBackend::Selected()->ProcessEvents();
+        GPUBackend::Selected()->PreFrame();
+        glm::vec2 window_dim = GPUBackend::Selected()->GetWindowDimensions();
+        renderer.PreFrame(cam);
         controller.update(window_dim, cam);
         cam.update(window_dim);
 
@@ -155,16 +155,16 @@ int main()
         glm::vec2 mouse_pos = Input::get_mouse_position();
         if (Input::get_mouse_button(MouseButton::left) && !ImGui::GetIO().WantCaptureMouse)
         {
-            renderer.get_mouse_entity(mouse_pos);
+            renderer.GetEntityAtScreenPosition(mouse_pos);
         }
 
         on_imgui(renderer, s, mouse_pos, dir2, cube_trans, lights);
 
-        renderer.render(Engine::assets, cam, scenes);
-        GPUBackend::selected()->engine_post_frame();
+        renderer.Render(Engine::assets, cam, scenes);
+        GPUBackend::Selected()->PostFrame();
     }
-    GPUBackend::selected()->engine_shut_down();
-    Engine::shutdown();
+    GPUBackend::Selected()->ShutDown();
+    Engine::Shutdown();
 
     return 0;
 }

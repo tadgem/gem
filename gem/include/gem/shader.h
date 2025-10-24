@@ -5,8 +5,8 @@
 namespace gem {
   class Shader {
   public:
-    enum class stage { UNKNOWN, vertex, fragment, geometry, compute };
-    enum class uniform_type {
+    enum class Stage { UNKNOWN, vertex, fragment, geometry, compute };
+    enum class UniformType {
       UNKNOWN,
       _int,
       _float,
@@ -21,8 +21,8 @@ namespace gem {
       image3D
     };
 
-    static std::unordered_map<Shader::stage, std::string>
-    split_composite_shader(const std::string &input);
+    static std::unordered_map<Shader::Stage, std::string>
+    SplitCompositeShader(const std::string &input);
 
   };
 }

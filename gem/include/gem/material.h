@@ -17,7 +17,7 @@ class Material {
 public:
   Material(AssetHandle shader_handle, GLShader &shader_program);
 
-  std::map<std::string, GLShader::uniform_type> m_uniforms;
+  std::map<std::string, GLShader::UniformType> m_uniforms;
   std::map<std::string, std::any> m_uniform_values;
 
   template <typename _Ty>

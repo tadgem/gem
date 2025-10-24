@@ -7,18 +7,18 @@ namespace gem {
 class Camera;
 class Scene;
 class AssetManager;
-namespace open_gl {
+namespace gl {
 namespace tech {
 class GBuffer {
 public:
-  static void dispatch_gbuffer_with_id(u32 frame_index, GLFramebuffer &gbuffer,
+  static void DispatchGBufferWithID(u32 frame_index, GLFramebuffer &gbuffer,
                                        GLFramebuffer &previous_position_buffer,
                                        GLShader &gbuffer_shader,
                                        AssetManager &am, Camera &cam,
                                        std::vector<Scene *> &scenes,
                                        glm::ivec2 win_res);
 
-  static void dispatch_gbuffer_textureless_with_id(
+  static void DispatchGBufferTexturelessWithID(
       u32 frame_index, GLFramebuffer &gbuffer,
       GLFramebuffer &previous_position_buffer,
       GLShader &gbuffer_textureless_shader, AssetManager &am, Camera &cam,

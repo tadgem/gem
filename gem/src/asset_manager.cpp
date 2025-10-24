@@ -305,7 +305,7 @@ void link_shader_program(AssetIntermediate *shader_asset) {
       static_cast<shader_intermediate_asset *>(shader_asset);
 
   shader_inter->get_concrete_asset()->m_data =
-      GLShader::create_from_composite(shader_inter->m_intermediate);
+      GLShader::CreateFromComposite(shader_inter->m_intermediate);
 }
 
 AssetLoadResult load_model_asset_manager(const std::string &path) {
@@ -389,7 +389,7 @@ void unload_shader_asset_manager(Asset *_asset) {
   ZoneScoped;
   TAsset<GLShader, AssetType::shader> *sa =
       static_cast<TAsset<GLShader, AssetType::shader> *>(_asset);
-  sa->m_data.release();
+  sa->m_data.Release();
 }
 
 void AssetManager::dispatch_asset_load_task(const AssetHandle &handle,

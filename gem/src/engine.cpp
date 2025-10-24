@@ -9,17 +9,17 @@
 
 namespace gem {
 
-void Engine::init(const glm::ivec2& resolution) {
+void Engine::Init(const glm::ivec2& resolution) {
   ZoneScoped;
   BackendInit init_props = {resolution, true};
-  GPUBackend::init_backend<GLBackend>(init_props);
+  GPUBackend::InitBackend<GLBackend>(init_props);
 
   systems.add_system<TransformSystem>();
   systems.add_system<MeshSystem>();
   systems.add_system<MaterialSystem>();
 }
 
-void Engine::save_project_to_disk(const std::string &filename,
+void Engine::SaveProjectToDisk(const std::string &filename,
                                   const std::string &directory) {
   ZoneScoped;
   std::string final_path = directory + "/" + filename;
@@ -27,7 +27,7 @@ void Engine::save_project_to_disk(const std::string &filename,
                              active_project.serialize(Engine::assets).dump());
 }
 
-void Engine::load_project_from_disk(const std::string &filepath) {
+void Engine::LoadProjectFromDisk(const std::string &filepath) {
   ZoneScoped;
   nlohmann::json proj_json =
       nlohmann::json::parse(Utils::load_string_from_path(filepath));
@@ -36,12 +36,12 @@ void Engine::load_project_from_disk(const std::string &filepath) {
   Engine::active_project = new_proj;
 }
 
-void Engine::shutdown() {
+void Engine::Shutdown() {
   ZoneScoped;
   systems.m_systems.clear();
   systems.m_system_type_aliases.clear();
 }
-void Engine::update() {
+void Engine::Update() {
   assets.update();
 
   for (auto &cb : debug_callbacks.m_callbacks) {
@@ -50,6 +50,6 @@ void Engine::update() {
   debug_callbacks.m_callbacks.clear();
 }
 } // namespace gem
-void DebugCallbackCollection::add(std::function<void()> debug_callback) {
+void DebugCallbackCollection::Add(std::function<void()> debug_callback) {
   m_callbacks.emplace_back(debug_callback);
 }

@@ -15,7 +15,7 @@
 namespace gem {
 
 // todo: rework this to allow rendering backend to init
-void GLBackend::init(BackendInit &init_props) {
+void GLBackend::Init(BackendInit &init_props) {
   ZoneScoped;
 #ifdef GEM_ENABLE_MEMORY_TRACKING
   DebugMemoryTracker::s_instance = new DebugMemoryTracker();
@@ -110,7 +110,7 @@ void GLBackend::init(BackendInit &init_props) {
       ImGuiConfigFlags_DockingEnable; // Enable imgui window docking
 
   // Setup Dear ImGui style
-  set_imgui_style();
+  SetGemImGuiStyle();
 
   // Setup Platform/Renderer backends
   ImGui_ImplSDL3_InitForOpenGL(m_window, *m_sdl_gl_context);
@@ -119,11 +119,11 @@ void GLBackend::init(BackendInit &init_props) {
   m_now_counter = SDL_GetPerformanceCounter();
   m_last_counter = 0;
 
-  init_built_in_assets(this);
-  init_imgui_file_dialog();
+  InitBuiltInAssets(this);
+  InitImGuiFileDialogImpl();
 }
 
-void GLBackend::process_sdl_event() {
+void GLBackend::ProcessEvents() {
   ZoneScoped;
   SDL_Event event;
   while (SDL_PollEvent(&event)) {
@@ -137,14 +137,14 @@ void GLBackend::process_sdl_event() {
 //      m_quit = true;
 //    }
 
-    engine_handle_input_events(event);
+    HandleInputEvents(event);
   }
   if (SDL_GetWindowFlags(m_window) & SDL_WINDOW_MINIMIZED) {
     SDL_Delay(10);
   }
 }
 
-void GLBackend::engine_pre_frame() {
+void GLBackend::PreFrame() {
   ZoneScoped;
   static ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 1.00f);
   m_last_counter = m_now_counter;
@@ -163,7 +163,7 @@ void GLBackend::engine_pre_frame() {
 
   float mouse_x, mouse_y;
   SDL_GetMouseState(&mouse_x, &mouse_y);
-  Input::update_mouse_position(get_window_dim(), glm::vec2(mouse_x, mouse_y));
+  Input::update_mouse_position(GetWindowDimensions(), glm::vec2(mouse_x, mouse_y));
 
   // Start the Dear ImGui frame
   ImGui_ImplOpenGL3_NewFrame();
@@ -171,7 +171,7 @@ void GLBackend::engine_pre_frame() {
   ImGui::NewFrame();
 }
 
-void GLBackend::engine_post_frame() {
+void GLBackend::PostFrame() {
   ZoneScoped;
   {
     GEM_GPU_MARKER("ImGui");
@@ -181,7 +181,7 @@ void GLBackend::engine_post_frame() {
   }
 }
 
-void GLBackend::engine_shut_down() {
+void GLBackend::ShutDown() {
   ZoneScoped;
   ImGui_ImplOpenGL3_Shutdown();
   ImGui_ImplSDL3_Shutdown();
@@ -195,7 +195,7 @@ void GLBackend::engine_shut_down() {
   SDL_Quit();
 }
 
-void GLBackend::engine_handle_input_events(SDL_Event &input_event) {
+void GLBackend::HandleInputEvents(SDL_Event &input_event) {
   ZoneScoped;
   Input::update_last_frame();
 
@@ -288,7 +288,7 @@ void GLBackend::engine_handle_input_events(SDL_Event &input_event) {
   }
 }
 
-glm::vec2 GLBackend::get_window_dim() {
+glm::vec2 GLBackend::GetWindowDimensions() {
   ZoneScoped;
   int w, h;
   SDL_GetWindowSize(m_window, &w, &h);

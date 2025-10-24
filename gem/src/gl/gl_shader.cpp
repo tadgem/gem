@@ -10,18 +10,18 @@ namespace gem {
 
 GLShader::GLShader(const std::string &comp) {
   ZoneScoped;
-  auto c = compile_shader(comp, GL_COMPUTE_SHADER);
-  m_shader_id = link_shader(c);
+  auto c = CompileShader(comp, GL_COMPUTE_SHADER);
+  m_shader_id = LinkShader(c);
 
   glDeleteShader(c);
 }
 
 GLShader::GLShader(const std::string &vert, const std::string &frag) {
   ZoneScoped;
-  auto v = compile_shader(vert, GL_VERTEX_SHADER);
-  auto f = compile_shader(frag, GL_FRAGMENT_SHADER);
+  auto v = CompileShader(vert, GL_VERTEX_SHADER);
+  auto f = CompileShader(frag, GL_FRAGMENT_SHADER);
 
-  m_shader_id = link_shader(v, f);
+  m_shader_id = LinkShader(v, f);
 
   glDeleteShader(v);
   glDeleteShader(f);
@@ -30,96 +30,96 @@ GLShader::GLShader(const std::string &vert, const std::string &frag) {
 GLShader::GLShader(const std::string &vert, const std::string &geom,
                      const std::string &frag) {
   ZoneScoped;
-  auto v = compile_shader(vert, GL_VERTEX_SHADER);
-  auto g = compile_shader(geom, GL_GEOMETRY_SHADER);
-  auto f = compile_shader(frag, GL_FRAGMENT_SHADER);
+  auto v = CompileShader(vert, GL_VERTEX_SHADER);
+  auto g = CompileShader(geom, GL_GEOMETRY_SHADER);
+  auto f = CompileShader(frag, GL_FRAGMENT_SHADER);
 
-  m_shader_id = link_shader(v, g, f);
+  m_shader_id = LinkShader(v, g, f);
 
   glDeleteShader(v);
   glDeleteShader(g);
   glDeleteShader(f);
 }
 
-void GLShader::use() {
+void GLShader::Use() {
   ZoneScoped;
   glUseProgram(m_shader_id);
 }
 
-void GLShader::release() {
+void GLShader::Release() {
   ZoneScoped;
   glDeleteProgram(m_shader_id);
 }
 
-void GLShader::set_bool(const std::string &name, bool value) const {
+void GLShader::SetBool(const std::string &name, bool value) const {
   ZoneScoped;
   glUniform1i(glGetUniformLocation(m_shader_id, name.c_str()), (int)value);
 }
 
-void GLShader::set_int(const std::string &name, int value) const {
+void GLShader::SetInt(const std::string &name, int value) const {
   ZoneScoped;
   glUniform1i(glGetUniformLocation(m_shader_id, name.c_str()), value);
 }
 
-void GLShader::set_uint(const std::string &name, unsigned int value) const {
+void GLShader::SetUint(const std::string &name, unsigned int value) const {
   ZoneScoped;
   glUniform1ui(glGetUniformLocation(m_shader_id, name.c_str()), value);
 }
 
-void GLShader::set_float(const std::string &name, float value) const {
+void GLShader::SetFloat(const std::string &name, float value) const {
   ZoneScoped;
   glUniform1f(glGetUniformLocation(m_shader_id, name.c_str()), value);
 }
 
-void GLShader::set_vec2(const std::string &name, glm::vec2 value) const {
+void GLShader::SetVec2f(const std::string &name, glm::vec2 value) const {
   ZoneScoped;
   glUniform2f(glGetUniformLocation(m_shader_id, name.c_str()), value.x,
               value.y);
 }
 
-void GLShader::set_vec3(const std::string &name, glm::vec3 value) const {
+void GLShader::SetVec3f(const std::string &name, glm::vec3 value) const {
   ZoneScoped;
   glUniform3f(glGetUniformLocation(m_shader_id, name.c_str()), value.x, value.y,
               value.z);
 }
 
-void GLShader::set_vec4(const std::string &name, glm::vec4 value) const {
+void GLShader::SetVec4f(const std::string &name, glm::vec4 value) const {
   ZoneScoped;
   glUniform4f(glGetUniformLocation(m_shader_id, name.c_str()), value.x, value.y,
               value.z, value.w);
 }
 
-void GLShader::set_ivec2(const std::string &name, glm::ivec2 value) const {
+void GLShader::SetVec2i(const std::string &name, glm::ivec2 value) const {
   ZoneScoped;
   glUniform2i(glGetUniformLocation(m_shader_id, name.c_str()), value.x,
               value.y);
 }
 
-void GLShader::set_ivec3(const std::string &name, glm::ivec3 value) const {
+void GLShader::SetVec3i(const std::string &name, glm::ivec3 value) const {
   ZoneScoped;
   glUniform3i(glGetUniformLocation(m_shader_id, name.c_str()), value.x, value.y,
               value.z);
 }
 
-void GLShader::set_ivec4(const std::string &name, glm::ivec4 value) const {
+void GLShader::SetVec4i(const std::string &name, glm::ivec4 value) const {
   ZoneScoped;
   glUniform4i(glGetUniformLocation(m_shader_id, name.c_str()), value.x, value.y,
               value.z, value.w);
 }
 
-void GLShader::set_mat3(const std::string &name, glm::mat3 value) const {
+void GLShader::SetMat3f(const std::string &name, glm::mat3 value) const {
   ZoneScoped;
   glUniformMatrix3fv(glGetUniformLocation(m_shader_id, name.c_str()), 1,
                      GL_FALSE, glm::value_ptr(value));
 }
 
-void GLShader::set_mat4(const std::string &name, glm::mat4 value) const {
+void GLShader::SetMat4f(const std::string &name, glm::mat4 value) const {
   ZoneScoped;
   glUniformMatrix4fv(glGetUniformLocation(m_shader_id, name.c_str()), 1,
                      GL_FALSE, glm::value_ptr(value));
 }
 
-gl_handle GLShader::compile_shader(const std::string &source,
+gl_handle GLShader::CompileShader(const std::string &source,
                                     GLenum shader_stage) {
   ZoneScoped;
   const char *src = source.c_str();
@@ -140,7 +140,7 @@ gl_handle GLShader::compile_shader(const std::string &source,
   return s;
 }
 
-int GLShader::link_shader(gl_handle comp) {
+int GLShader::LinkShader(gl_handle comp) {
   ZoneScoped;
   auto prog_id = glCreateProgram();
   glAttachShader(prog_id, comp);
@@ -159,7 +159,7 @@ int GLShader::link_shader(gl_handle comp) {
   return prog_id;
 }
 
-int GLShader::link_shader(gl_handle vert, gl_handle frag) {
+int GLShader::LinkShader(gl_handle vert, gl_handle frag) {
   ZoneScoped;
   auto prog_id = glCreateProgram();
   glAttachShader(prog_id, vert);
@@ -179,7 +179,7 @@ int GLShader::link_shader(gl_handle vert, gl_handle frag) {
   return prog_id;
 }
 
-int GLShader::link_shader(gl_handle vert, gl_handle geom, gl_handle frag) {
+int GLShader::LinkShader(gl_handle vert, gl_handle geom, gl_handle frag) {
   ZoneScoped;
   auto prog_id = glCreateProgram();
   glAttachShader(prog_id, vert);
@@ -200,60 +200,60 @@ int GLShader::link_shader(gl_handle vert, gl_handle geom, gl_handle frag) {
   return prog_id;
 }
 
-GLShader GLShader::create_from_composite(const std::string &composite_shader) {
-  std::unordered_map<GLShader::stage, std::string> stages =
-      split_composite_shader(composite_shader);
+GLShader GLShader::CreateFromComposite(const std::string &composite_shader) {
+  std::unordered_map<GLShader::Stage, std::string> stages =
+      SplitCompositeShader(composite_shader);
 
-  if (stages.find(GLShader::stage::compute) != stages.end()) {
-    return GLShader(stages[GLShader::stage::compute]);
+  if (stages.find(GLShader::Stage::compute) != stages.end()) {
+    return GLShader(stages[GLShader::Stage::compute]);
   }
 
-  if (stages.find(GLShader::stage::vertex) != stages.end() &&
-      stages.find(GLShader::stage::fragment) != stages.end() &&
-      stages.find(GLShader::stage::geometry) == stages.end()) {
-    return GLShader(stages[GLShader::stage::vertex],
-                     stages[GLShader::stage::fragment]);
+  if (stages.find(GLShader::Stage::vertex) != stages.end() &&
+      stages.find(GLShader::Stage::fragment) != stages.end() &&
+      stages.find(GLShader::Stage::geometry) == stages.end()) {
+    return GLShader(stages[GLShader::Stage::vertex],
+                     stages[GLShader::Stage::fragment]);
   }
 
-  if (stages.find(GLShader::stage::vertex) != stages.end() &&
-      stages.find(GLShader::stage::fragment) != stages.end() &&
-      stages.find(GLShader::stage::geometry) != stages.end()) {
-    return GLShader(stages[GLShader::stage::vertex],
-                     stages[GLShader::stage::geometry],
-                     stages[GLShader::stage::fragment]);
+  if (stages.find(GLShader::Stage::vertex) != stages.end() &&
+      stages.find(GLShader::Stage::fragment) != stages.end() &&
+      stages.find(GLShader::Stage::geometry) != stages.end()) {
+    return GLShader(stages[GLShader::Stage::vertex],
+                     stages[GLShader::Stage::geometry],
+                     stages[GLShader::Stage::fragment]);
   }
   return {};
 }
 
-GLShader::uniform_type GLShader::get_type_from_gl(GLenum type) {
+GLShader::UniformType GLShader::GetUniformTypeFromGL(GLenum type) {
   ZoneScoped;
   switch (type) {
   case GL_SAMPLER_2D:
-    return uniform_type::sampler2D;
+    return UniformType::sampler2D;
   case GL_SAMPLER_3D:
-    return uniform_type::sampler3D;
+    return UniformType::sampler3D;
   case GL_IMAGE_2D:
-    return uniform_type::image2D;
+    return UniformType::image2D;
   case GL_IMAGE_3D:
-    return uniform_type::image3D;
+    return UniformType::image3D;
   case GL_INT:
-    return uniform_type::_int;
+    return UniformType::_int;
   case GL_FLOAT:
-    return uniform_type::_float;
+    return UniformType::_float;
   case GL_FLOAT_VEC2:
-    return uniform_type::vec2;
+    return UniformType::vec2;
   case GL_FLOAT_VEC3:
-    return uniform_type::vec3;
+    return UniformType::vec3;
   case GL_FLOAT_VEC4:
-    return uniform_type::vec4;
+    return UniformType::vec4;
   case GL_FLOAT_MAT3:
-    return uniform_type::mat3;
+    return UniformType::mat3;
   case GL_FLOAT_MAT4:
-    return uniform_type::mat4;
+    return UniformType::mat4;
   default:
-    return uniform_type::UNKNOWN;
+    return UniformType::UNKNOWN;
   }
 
-  return uniform_type::UNKNOWN;
+  return UniformType::UNKNOWN;
 }
 } // namespace gem

@@ -35,7 +35,7 @@ public:
                                        glm::vec2 resolution, glm::mat4 &proj,
                                        glm::mat4 &view);
   static float round_up(float value, int decimal_places);
-  static AABB transform_aabb(AABB &in, glm::mat4 &model);
+  static AABB transform_aabb(const AABB &in, glm::mat4 &model);
   static void validate_euler_angles(glm::vec3 &input);
   static glm::vec3 screen_to_world_ray(glm::vec3 eye_pos, glm::vec2 mouse_pos,
                                        glm::vec2 screen_dim,

@@ -123,7 +123,7 @@ void DrawIm3dTextListsImGui(const Im3d::TextDrawList _textDrawLists[],
   ImGui::PopStyleColor(1);
 }
 
-Im3dState GLIm3d::load_im3d() {
+Im3dState GLIm3d::LoadIm3D() {
   ZoneScoped;
   std::string tris =
       Utils::load_string_from_path("assets/shaders/im3d/im3d.tris.shader");
@@ -134,17 +134,17 @@ Im3dState GLIm3d::load_im3d() {
   std::string lines =
       Utils::load_string_from_path("assets/shaders/im3d/im3d.lines.shader");
 
-  auto tris_stages = GLShader::split_composite_shader(tris);
-  auto points_stages = GLShader::split_composite_shader(points);
-  auto lines_stages = GLShader::split_composite_shader(lines);
+  auto tris_stages = GLShader::SplitCompositeShader(tris);
+  auto points_stages = GLShader::SplitCompositeShader(points);
+  auto lines_stages = GLShader::SplitCompositeShader(lines);
 
-  GLShader points_shader(points_stages[GLShader::stage::vertex],
-                          points_stages[GLShader::stage::fragment]);
-  GLShader tris_shader(tris_stages[GLShader::stage::vertex],
-                        tris_stages[GLShader::stage::fragment]);
-  GLShader lines_shader(lines_stages[GLShader::stage::vertex],
-                         lines_stages[GLShader::stage::geometry],
-                         lines_stages[GLShader::stage::fragment]);
+  GLShader points_shader(points_stages[GLShader::Stage::vertex],
+                          points_stages[GLShader::Stage::fragment]);
+  GLShader tris_shader(tris_stages[GLShader::Stage::vertex],
+                        tris_stages[GLShader::Stage::fragment]);
+  GLShader lines_shader(lines_stages[GLShader::Stage::vertex],
+                         lines_stages[GLShader::Stage::geometry],
+                         lines_stages[GLShader::Stage::fragment]);
 
   gl_handle im3d_vertex_buffer;
   gl_handle im3d_vao;
@@ -166,7 +166,7 @@ Im3dState GLIm3d::load_im3d() {
           im3d_vao};
 }
 
-void GLIm3d::shutdown_im3d(Im3dState &state) {
+void GLIm3d::ShutdownIm3D(Im3dState &state) {
   ZoneScoped;
   glDeleteVertexArrays(1, &state.im3d_vao);
   glDeleteBuffers(1, &state.im3d_vertex_buffer);
@@ -175,7 +175,7 @@ void GLIm3d::shutdown_im3d(Im3dState &state) {
   glDeleteProgram(state.tris_shader.m_shader_id);
 }
 
-void GLIm3d::new_frame_im3d(Im3dState &state, glm::vec2 screen_dim,
+void GLIm3d::NewFrameIm3D(Im3dState &state, glm::vec2 screen_dim,
                              Camera &cam) {
   ZoneScoped;
   // update app data e.g. mouse pos, viewport size keys etc.
@@ -187,7 +187,7 @@ void GLIm3d::new_frame_im3d(Im3dState &state, glm::vec2 screen_dim,
   ad.m_keyDown[Im3d::Key::Key_R] = Input::get_keyboard_key(KeyboardKey::r);
   ad.m_keyDown[Im3d::Key::Key_S] = Input::get_keyboard_key(KeyboardKey::s);
   ad.m_keyDown[Im3d::Key::Key_T] = Input::get_keyboard_key(KeyboardKey::t);
-  ad.m_deltaTime = GPUBackend::selected()->get_frame_time();
+  ad.m_deltaTime = GPUBackend::Selected()->GetFrameTime();
 
   glm::vec2 cursor_pos = Input::get_mouse_position();
 
@@ -204,7 +204,7 @@ void GLIm3d::new_frame_im3d(Im3dState &state, glm::vec2 screen_dim,
   Im3d::NewFrame();
 }
 
-void GLIm3d::end_frame_im3d(Im3dState &state, glm::ivec2 screen_dim,
+void GLIm3d::EndFrameIm3D(Im3dState &state, glm::ivec2 screen_dim,
                              Camera &cam) {
   ZoneScoped;
   Im3d::EndFrame();

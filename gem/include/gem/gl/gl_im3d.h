@@ -18,11 +18,9 @@ struct Im3dState {
 
 class GLIm3d {
 public:
-  static Im3dState load_im3d();
-  static void shutdown_im3d(Im3dState &state);
-  static void new_frame_im3d(Im3dState &state, glm::vec2 screen_dim,
-                             Camera &cam);
-  static void end_frame_im3d(Im3dState &state, glm::ivec2 screen_dim,
-                             Camera &cam);
+  static Im3dState LoadIm3D();
+  static void ShutdownIm3D(Im3dState &state);
+  static void NewFrameIm3D(Im3dState &state, glm::vec2 screen_dim, Camera &cam);
+  static void EndFrameIm3D(Im3dState &state, glm::ivec2 screen_dim,Camera &cam);
 };
 } // namespace gem

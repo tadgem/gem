@@ -7,12 +7,12 @@ namespace gem {
 class GLFramebuffer;
 class Camera;
 
-namespace open_gl {
+namespace gl {
 namespace tech {
 class PBRLighting {
 public:
   static void
-  dispatch_light_pass(GLShader &lighting_shader,
+  DispatchLightPass(GLShader &lighting_shader,
                                   GLFramebuffer &lighting_buffer,
                                   GLFramebuffer &gbuffer,
                                   GLFramebuffer &dir_light_shadow_buffer, Camera &cam,

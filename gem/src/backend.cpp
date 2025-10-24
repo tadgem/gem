@@ -23,7 +23,7 @@
 #include <SDL3/SDL_opengl.h>
 #endif
 
-void init_built_in_assets(gem::GPUBackend* backend) {
+void InitBuiltInAssets(gem::GPUBackend* backend) {
   ZoneScoped;
   std::vector<unsigned int> black_data = {0};
   std::vector<unsigned int> white_data = {UINT32_MAX};
@@ -38,7 +38,7 @@ void init_built_in_assets(gem::GPUBackend* backend) {
 }
 
 namespace gem {
-void set_imgui_style() {
+void SetGemImGuiStyle() {
   ZoneScoped;
   ImFontConfig font_config = ImFontConfig();
   font_config.FontDataOwnedByAtlas = false;
@@ -128,7 +128,7 @@ void set_imgui_style() {
 
 
 
-void init_imgui_file_dialog() {
+void InitImGuiFileDialogImpl() {
   ZoneScoped;
   ifd::FileDialog::Instance().CreateTexture = [](uint8_t *data, int w, int h,
                                                  char fmt) -> void * {

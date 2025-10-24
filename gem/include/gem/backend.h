@@ -13,10 +13,10 @@ class AMesh;
 
 enum class BackendAPI { open_gl, sdl };
 
-void set_imgui_style();
+void SetGemImGuiStyle();
 
 
-void init_imgui_file_dialog();
+void InitImGuiFileDialogImpl();
 
 struct BackendInit {
   glm::vec2 window_resolution;
@@ -35,34 +35,34 @@ private:
   inline static GPUBackend *s_selected_backend = nullptr;
 
 public:
-  virtual void init(BackendInit &init_props) = 0;
-  virtual void process_sdl_event() = 0;
-  virtual void engine_pre_frame() = 0;
-  virtual void engine_post_frame() = 0;
-  virtual void engine_shut_down() = 0;
-  virtual void engine_handle_input_events(SDL_Event &input_event) = 0;
-  virtual glm::vec2 get_window_dim() = 0;
-  virtual const BackendAPI get_backend_api_enum() = 0;
+  virtual void Init(BackendInit &init_props) = 0;
+  virtual void ProcessEvents() = 0;
+  virtual void PreFrame() = 0;
+  virtual void PostFrame() = 0;
+  virtual void ShutDown() = 0;
+  virtual void HandleInputEvents(SDL_Event &input_event) = 0;
+  virtual glm::vec2 GetWindowDimensions() = 0;
+  virtual const BackendAPI GetAPI() = 0;
 
-  [[nodiscard]] float get_frame_time() const { return p_frametime; }
+  [[nodiscard]] float GetFrameTime() const { return p_frametime; }
 
   SDL_Window *m_window = nullptr;
   bool m_quit = false;
   ImGuiIO *m_imgui_io = nullptr;
 
-  static GPUBackend *selected() { return s_selected_backend; }
-  static BackendAPI get_backend_api() { return s_selected_backend_api; }
+  static GPUBackend *Selected() { return s_selected_backend; }
+  static BackendAPI GetBackendAPI() { return s_selected_backend_api; }
 
   template <typename _Backend, typename... Args>
-  static void init_backend(BackendInit &props, Args &&...args) {
+  static void InitBackend(BackendInit &props, Args &&...args) {
     static_assert(std::is_base_of<GPUBackend, _Backend>());
     auto *backend = new _Backend(std::forward<Args>(args)...);
-    backend->init(props);
+    backend->Init(props);
     s_selected_backend = static_cast<GPUBackend *>(backend);
-    s_selected_backend_api = s_selected_backend->get_backend_api_enum();
+    s_selected_backend_api = s_selected_backend->GetAPI();
   }
 };
 
 
 } // namespace gem
-void init_built_in_assets(gem::GPUBackend* backend);
+void InitBuiltInAssets(gem::GPUBackend* backend);

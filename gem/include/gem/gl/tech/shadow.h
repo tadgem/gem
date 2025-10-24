@@ -6,11 +6,11 @@ namespace gem {
 
 class GLFramebuffer;
 class Scene;
-namespace open_gl {
+namespace gl {
 namespace tech {
 class Shadow {
 public:
-  static void dispatch_shadow_pass(GLFramebuffer &shadow_fb,
+  static void DispatchShadowPass(GLFramebuffer &shadow_fb,
                                    GLShader &shadow_shader,
                                    DirectionalLight &sun,
                                    std::vector<Scene *> &scenes,

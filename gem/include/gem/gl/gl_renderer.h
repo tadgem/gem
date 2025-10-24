@@ -15,12 +15,12 @@ class GLRenderer {
 public:
   GLRenderer() = default;
 
-  void init(AssetManager &am, glm::ivec2 resolution);
-  void pre_frame(Camera &cam);
-  void render(AssetManager &am, Camera &cam, std::vector<Scene *> &scenes);
-  void cleanup(AssetManager &am);
+  void Init(AssetManager &am, glm::ivec2 resolution);
+  void PreFrame(Camera &cam);
+  void Render(AssetManager &am, Camera &cam, std::vector<Scene *> &scenes);
+  void Cleanup(AssetManager &am);
 
-  entt::entity get_mouse_entity(glm::vec2 mouse_position);
+  entt::entity GetEntityAtScreenPosition(glm::vec2 mouse_position);
 
   GLShaderAsset *m_gbuffer_shader;
   GLShaderAsset *m_gbuffer_textureless_shader;
@@ -95,7 +95,7 @@ public:
   inline static constexpr glm::ivec3 s_voxel_resolution =
       glm::ivec3(s_voxel_square_resolution);
 
-  void on_imgui(AssetManager &am);
+  void OnImGui(AssetManager &am);
 
 protected:
   bool p_clear_voxel_grid = false;

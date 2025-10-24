@@ -182,15 +182,15 @@ Voxel::create_grid_visualiser(Voxel::Grid &vg, GLShader &visualisation_shader,
 void Voxel::GridVisualizer::dispatch_draw(Voxel::Grid &vg, Camera &cam) {
   // compute instance matrices
   glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, m_instance_matrices_ssbo);
-  m_compute_instances_shader.use();
+  m_compute_instances_shader.Use();
   // set uniforms
-  m_compute_instances_shader.set_vec3("u_resolution", vg.resolution);
-  m_compute_instances_shader.set_vec3("u_voxel_unit", vg.voxel_unit);
-  m_compute_instances_shader.set_vec3("u_instance_resolution",
+  m_compute_instances_shader.SetVec3f("u_resolution", vg.resolution);
+  m_compute_instances_shader.SetVec3f("u_voxel_unit", vg.voxel_unit);
+  m_compute_instances_shader.SetVec3f("u_instance_resolution",
                                       glm::vec3(m_texel_resolution));
-  m_compute_instances_shader.set_vec3("u_current_aabb.min",
+  m_compute_instances_shader.SetVec3f("u_current_aabb.min",
                                       vg.current_bounding_box.m_min);
-  m_compute_instances_shader.set_vec3("u_current_aabb.max",
+  m_compute_instances_shader.SetVec3f("u_current_aabb.max",
                                       vg.current_bounding_box.m_max);
 
   // dispatch
@@ -200,17 +200,17 @@ void Voxel::GridVisualizer::dispatch_draw(Voxel::Grid &vg, Camera &cam) {
   // draw
   m_texel_shape.use();
   auto &vs = m_visual_shader;
-  vs.use();
-  vs.set_ivec3("u_texture_resolution", vg.resolution);
-  vs.set_ivec3("u_voxel_group_resolution", glm::ivec3(m_texel_resolution));
-  vs.set_mat4("u_view_projection", cam.m_proj * cam.m_view);
-  vs.set_mat4("u_model",
+  vs.Use();
+  vs.SetVec3i("u_texture_resolution", vg.resolution);
+  vs.SetVec3i("u_voxel_group_resolution", glm::ivec3(m_texel_resolution));
+  vs.SetMat4f("u_view_projection", cam.m_proj * cam.m_view);
+  vs.SetMat4f("u_model",
               Utils::get_model_matrix(
                   vg.current_bounding_box.m_min + m_debug_position_offset,
                   glm::vec3(0.0f), vg.voxel_unit * m_debug_scale));
-  vs.set_vec3("u_aabb.min", vg.current_bounding_box.m_min);
-  vs.set_vec3("u_aabb.max", vg.current_bounding_box.m_max);
-  vs.set_int("u_volume", 0);
+  vs.SetVec3f("u_aabb.min", vg.current_bounding_box.m_min);
+  vs.SetVec3f("u_aabb.max", vg.current_bounding_box.m_max);
+  vs.SetInt("u_volume", 0);
   Texture::bind_sampler_handle(vg.voxel_texture.m_handle, GL_TEXTURE0,
                                GL_TEXTURE_3D);
   glDrawElementsInstanced(GL_TRIANGLES, static_cast<GLsizei>(m_index_count),

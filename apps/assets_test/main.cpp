@@ -7,28 +7,28 @@ using namespace gem;
 int main()
 {
     glm::ivec2 window_res{ 1280, 720};
-    Engine::init(window_res);
+    Engine::Init(window_res);
     AssetManager am{};
     Camera cam{};
 
-    auto im3d_s = GLIm3d::load_im3d();
-    while (!GPUBackend::selected()->m_quit)
+    auto im3d_s = GLIm3d::LoadIm3D();
+    while (!GPUBackend::Selected()->m_quit)
     {       
-        GPUBackend::selected()->process_sdl_event();
-        GPUBackend::selected()->engine_pre_frame();
-        glm::vec2 window_dim = GPUBackend::selected()->get_window_dim();
-        GLIm3d::new_frame_im3d(im3d_s, window_dim, cam);
+        GPUBackend::Selected()->ProcessEvents();
+        GPUBackend::Selected()->PreFrame();
+        glm::vec2 window_dim = GPUBackend::Selected()->GetWindowDimensions();
+        GLIm3d::NewFrameIm3D(im3d_s, window_dim, cam);
 
         am.update();
         am.on_imgui();
 
-        GLIm3d::end_frame_im3d(im3d_s, { window_res.x, window_res.y }, cam);
-        GPUBackend::selected()->engine_post_frame();
+        GLIm3d::EndFrameIm3D(im3d_s, { window_res.x, window_res.y }, cam);
+        GPUBackend::Selected()->PostFrame();
     }
 
     am.shutdown();
-    GLIm3d::shutdown_im3d(im3d_s);
-    GPUBackend::selected()->engine_shut_down();
+    GLIm3d::ShutdownIm3D(im3d_s);
+    GPUBackend::Selected()->ShutDown();
 
     return 0;
 }

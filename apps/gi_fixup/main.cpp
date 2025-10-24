@@ -3,16 +3,16 @@
 #include <sstream>
 #include "imgui_impl_opengl3.h"
 #include "gem/profile.h"
+#include "gem/utils.h"
 
 using namespace nlohmann;
 using namespace gem;
 
-static std::array<Im3d::Color, 4> s_colours
+struct DebugVoxelGrid
 {
-        Im3d::Color_Red,
-        Im3d::Color_Magenta,
-        Im3d::Color_Yellow,
-        Im3d::Color_Green
+    VAO     m_vao;
+    AABB    m_transformed_aabb;
+    int     m_square_resolution;
 };
 
 void on_imgui(GLRenderer & renderer, Scene * s, glm::vec2 mouse_pos,
@@ -26,12 +26,12 @@ void on_imgui(GLRenderer & renderer, Scene * s, glm::vec2 mouse_pos,
         ImGui::End();
     }
     {
-        renderer.on_imgui(Engine::assets);
+        renderer.OnImGui(Engine::assets);
 
         ImGui::Begin("Demo Settings");
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
-                    1000.0f / GPUBackend::selected()->m_imgui_io->Framerate,
-                    GPUBackend::selected()->m_imgui_io->Framerate);
+                    1000.0f / GPUBackend::Selected()->m_imgui_io->Framerate,
+                    GPUBackend::Selected()->m_imgui_io->Framerate);
 
         ImGui::Text("Mouse Pos : %.3f, %.3f", mouse_pos.x, mouse_pos.y);
         ImGui::Text("Selected Entity ID : %d", renderer.m_last_selected_entity);
@@ -60,12 +60,59 @@ void on_imgui(GLRenderer & renderer, Scene * s, glm::vec2 mouse_pos,
     }
 }
 
+DebugVoxelGrid create_debug_voxel_renderer(GLShader& viz_shader, const AABB& initial_aabb, int square_resolution)
+{
+    glm::mat4 model = Utils::get_model_matrix(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(0.2f));
+    AABB transformed_aabb = Utils::transform_aabb(initial_aabb, model);
+    int cubed_res = pow(square_resolution, 3);
+
+    glm::vec3 aabb_dim = transformed_aabb.m_max - transformed_aabb.m_min;
+    glm::vec3 unit = glm::vec3((aabb_dim.x / cubed_res), (aabb_dim.y / cubed_res), (aabb_dim.z / cubed_res));
+
+    std::vector<glm::mat4> instance_matrices;
+    std::vector<glm::vec3> instance_uvs;
+
+
+    for (auto i = 0; i < cubed_res; i++)
+    {
+        //create a new VAO for debug cubes
+        // first vbo is same as cube
+        // instance vbo is per-instance transform
+
+        float z = transformed_aabb.m_min.z;
+        float y = transformed_aabb.m_min.y;
+        float x = transformed_aabb.m_min.x;
+
+        float z_offset = i / (cubed_res * cubed_res);
+        float y_offset = (i / cubed_res) % cubed_res;
+        float x_offset = i % cubed_res;
+
+        float z_offset2 = z_offset * unit.z;
+        float y_offset2 = y_offset * unit.y;
+        float x_offset2 = x_offset * unit.x;
+
+        z += z_offset2;
+        y += y_offset2;
+        x += x_offset2;
+
+        instance_uvs.push_back({ (x_offset + 1) / cubed_res ,(y_offset + 1) / cubed_res,(z_offset + 1) / cubed_res });
+        instance_matrices.push_back(Utils::get_model_matrix({ x,y,z }, { 0,90,0 }, unit));
+    }
+
+    VAO instanced_cubes = Shapes::gen_cube_instanced_vao(instance_matrices, instance_uvs);
+
+    return DebugVoxelGrid {
+        instanced_cubes, transformed_aabb, square_resolution
+    };
+
+}
+
 int main()
 {
     glm::ivec2 resolution = {1600, 900};
-    Engine::init(resolution);
+    Engine::Init(resolution);
     GLRenderer renderer{};
-    renderer.init(Engine::assets, resolution);
+    renderer.Init(Engine::assets, resolution);
 
     Camera cam{};
     DebugCameraController controller{};
@@ -89,10 +136,8 @@ int main()
                 {"u_roughness_map", TextureMapType::roughness},
                 {"u_ao_map",        TextureMapType::ao}
             });
-        nlohmann::json scene_json = Engine::scenes.save_scene(s);
-        std::string scene_json_str = scene_json.dump();
-        spdlog::info("finished adding model to scene, dumping scene json");
-        spdlog::info(scene_json_str);
+        glm::mat4 model = Utils::get_model_matrix(glm::vec3(0.0), glm::vec3(0.0), glm::vec3(0.1));
+        renderer.m_voxel_data.current_bounding_box = Utils::transform_aabb(ma->m_data.m_aabb, model);
     });
 
     auto cube_entity = s->create_entity("Test Cube");
@@ -123,15 +168,14 @@ int main()
     std::vector<Scene *> scenes{ s };
 
     
-    while (!GPUBackend::selected()->m_quit)
+    while (!GPUBackend::Selected()->m_quit)
     {
-        glEnable(GL_DEPTH_TEST);
-        Engine::update();
+        Engine::Update();
 
-        GPUBackend::selected()->process_sdl_event();
-        GPUBackend::selected()->engine_pre_frame();
-        glm::vec2 window_dim = GPUBackend::selected()->get_window_dim();
-        renderer.pre_frame(cam);
+        GPUBackend::Selected()->ProcessEvents();
+        GPUBackend::Selected()->PreFrame();
+        glm::vec2 window_dim = GPUBackend::Selected()->GetWindowDimensions();
+        renderer.PreFrame(cam);
         controller.update(window_dim, cam);
         cam.update(window_dim);
 
@@ -143,16 +187,18 @@ int main()
         glm::vec2 mouse_pos = Input::get_mouse_position();
         if (Input::get_mouse_button(MouseButton::left) && !ImGui::GetIO().WantCaptureMouse)
         {
-            renderer.get_mouse_entity(mouse_pos);
+            renderer.GetEntityAtScreenPosition(mouse_pos);
         }
 
         on_imgui(renderer, s, mouse_pos, dir2, cube_trans, lights);
 
-        renderer.render(Engine::assets, cam, scenes);
-        GPUBackend::selected()->engine_post_frame();
+        renderer.Render(Engine::assets, cam, scenes);
+
+
+        GPUBackend::Selected()->PostFrame();
     }
-    GPUBackend::selected()->engine_shut_down();
-    Engine::shutdown();
+    GPUBackend::Selected()->ShutDown();
+    Engine::Shutdown();
 
     return 0;
 }

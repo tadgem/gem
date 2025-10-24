@@ -25,7 +25,7 @@ Material::Material(AssetHandle shader_handle, GLShader &program)
     glGetActiveUniform(m_prog.m_shader_id, (GLuint)i, bufSize, &length, &size,
                        &type, name);
     std::string uname = std::string(name);
-    GLShader::uniform_type utype = GLShader::get_type_from_gl(type);
+    GLShader::UniformType utype = GLShader::GetUniformTypeFromGL(type);
     m_uniforms.emplace(uname, utype);
   }
 }
@@ -47,7 +47,7 @@ bool Material::set_sampler(const std::string &sampler_name, GLenum texture_slot,
 
 void Material::bind_material_uniforms(AssetManager &am) {
   ZoneScoped;
-  m_prog.use();
+  m_prog.Use();
   for (auto &[name, val] : m_uniform_values) {
 #ifdef ENABLE_MATERIAL_UNIFORM_CHECKS
     if (m_uniforms.find(name) == m_uniforms.end()) {
@@ -56,8 +56,8 @@ void Material::bind_material_uniforms(AssetManager &am) {
 #endif
     switch (m_uniforms[name]) {
       // TODO: Image attachments for compute shaders....
-    case GLShader::uniform_type::sampler2D:
-    case GLShader::uniform_type::sampler3D: {
+    case GLShader::UniformType::sampler2D:
+    case GLShader::UniformType::sampler3D: {
       SamplerInfo info = std::any_cast<SamplerInfo>(m_uniform_values[name]);
       if (info.tex_entry.m_texture == nullptr) {
         TextureAsset *ta =
@@ -71,44 +71,44 @@ void Material::bind_material_uniforms(AssetManager &am) {
         m_uniform_values[name] = info;
       }
       int loc = info.sampler_slot - GL_TEXTURE0;
-      m_prog.set_int(name, loc);
+      m_prog.SetInt(name, loc);
       Texture::bind_sampler_handle(info.tex_entry.m_texture->m_handle,
                                    info.sampler_slot);
       break;
     }
-    case GLShader::uniform_type::_int: {
+    case GLShader::UniformType::_int: {
       int iv = std::any_cast<int>(m_uniform_values[name]);
-      m_prog.set_int(name, iv);
+      m_prog.SetInt(name, iv);
       break;
     }
-    case GLShader::uniform_type::_float: {
+    case GLShader::UniformType::_float: {
       float fv = std::any_cast<float>(m_uniform_values[name]);
-      m_prog.set_float(name, fv);
+      m_prog.SetFloat(name, fv);
       break;
     }
-    case GLShader::uniform_type::vec2: {
+    case GLShader::UniformType::vec2: {
       glm::vec2 v2 = std::any_cast<glm::vec2>(m_uniform_values[name]);
-      m_prog.set_vec2(name, v2);
+      m_prog.SetVec2f(name, v2);
       break;
     }
-    case GLShader::uniform_type::vec3: {
+    case GLShader::UniformType::vec3: {
       glm::vec3 v3 = std::any_cast<glm::vec3>(m_uniform_values[name]);
-      m_prog.set_vec3(name, v3);
+      m_prog.SetVec3f(name, v3);
       break;
     }
-    case GLShader::uniform_type::vec4: {
+    case GLShader::UniformType::vec4: {
       glm::vec4 v4 = std::any_cast<glm::vec4>(m_uniform_values[name]);
-      m_prog.set_vec4(name, v4);
+      m_prog.SetVec4f(name, v4);
       break;
     }
-    case GLShader::uniform_type::mat3: {
+    case GLShader::UniformType::mat3: {
       glm::mat3 m3 = std::any_cast<glm::mat3>(m_uniform_values[name]);
-      m_prog.set_mat3(name, m3);
+      m_prog.SetMat3f(name, m3);
       break;
     }
-    case GLShader::uniform_type::mat4: {
+    case GLShader::UniformType::mat4: {
       glm::mat4 m4 = std::any_cast<glm::mat4>(m_uniform_values[name]);
-      m_prog.set_mat4(name, m4);
+      m_prog.SetMat4f(name, m4);
       break;
     }
     default:
@@ -139,8 +139,8 @@ nlohmann::json MaterialSystem::serialize(Scene &current_scene) {
         nlohmann::json uniform_json{};
         uniform_json["uniform_type"] = uniform_type;
         switch (uniform_type) {
-        case GLShader::uniform_type::sampler2D:
-        case GLShader::uniform_type::sampler3D: {
+        case GLShader::UniformType::sampler2D:
+        case GLShader::UniformType::sampler3D: {
           SamplerInfo info =
               std::any_cast<SamplerInfo>(mat.m_uniform_values[name]);
           uniform_json["slot"] = info.sampler_slot;
@@ -179,11 +179,11 @@ void MaterialSystem::deserialize(Scene &current_scene, nlohmann::json &sys_json)
       std::string uniform_json_str = uniform_json.dump();
 
       spdlog::info("entity : {} : uniform json {}", entity, uniform_json_str);
-      GLShader::uniform_type uniform_type = uniform_json["uniform_type"];
+      GLShader::UniformType uniform_type = uniform_json["uniform_type"];
 
       switch (uniform_type) {
-      case GLShader::uniform_type::sampler2D:
-      case GLShader::uniform_type::sampler3D: {
+      case GLShader::UniformType::sampler2D:
+      case GLShader::UniformType::sampler3D: {
         TextureEntry tex_entry = uniform_json["entry"];
         mat.set_sampler(uniform_name, uniform_json["slot"], tex_entry,
                         uniform_json["target"]);

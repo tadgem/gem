@@ -9,17 +9,17 @@ GLFramebuffer::GLFramebuffer() {
   m_handle = INVALID_GL_HANDLE;
 }
 
-void GLFramebuffer::unbind() {
+void GLFramebuffer::Unbind() {
   ZoneScoped;
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void GLFramebuffer::cleanup() {
+void GLFramebuffer::Cleanup() {
   ZoneScoped;
   glDeleteFramebuffers(1, &m_handle);
 }
 
-void GLFramebuffer::add_colour_attachment(GLenum attachment_index,
+void GLFramebuffer::AddColourAttachment(GLenum attachment_index,
                                            uint32_t width, uint32_t height,
                                            GLenum internal_format,
                                            GLenum format, GLenum filter,
@@ -41,7 +41,7 @@ void GLFramebuffer::add_colour_attachment(GLenum attachment_index,
   m_height = height;
 }
 
-void GLFramebuffer::add_depth_attachment(uint32_t width, uint32_t height,
+void GLFramebuffer::AddDepthAttachment(uint32_t width, uint32_t height,
                                           GLenum format) {
   ZoneScoped;
   gl_handle rbo;
@@ -58,7 +58,7 @@ void GLFramebuffer::add_depth_attachment(uint32_t width, uint32_t height,
   m_height = height;
 }
 
-void GLFramebuffer::add_depth_attachment_sampler_friendly(uint32_t width,
+void GLFramebuffer::AddDepthAttachmentSamplerFriendly(uint32_t width,
                                                            uint32_t height,
                                                            GLenum format) {
   ZoneScoped;
@@ -81,7 +81,7 @@ void GLFramebuffer::add_depth_attachment_sampler_friendly(uint32_t width,
   m_height = height;
 }
 
-void GLFramebuffer::check() {
+void GLFramebuffer::Check() {
   ZoneScoped;
   auto zero = GL_COLOR_ATTACHMENT0;
   std::vector<unsigned int> attachments;
@@ -104,29 +104,29 @@ void GLFramebuffer::check() {
   }
 }
 
-GLFramebuffer GLFramebuffer::create(glm::vec2 resolution,
-                                      std::vector<attachment_info> attachments,
+GLFramebuffer GLFramebuffer::Create(glm::vec2 resolution,
+                                      std::vector<GLAttachmentInfo> attachments,
                                       bool add_depth) {
   ZoneScoped;
   GLenum attachment = GL_COLOR_ATTACHMENT0;
   GLFramebuffer fb{};
-  fb.bind();
+  fb.Bind();
   for (auto &info : attachments) {
-    fb.add_colour_attachment(attachment, resolution.x, resolution.y,
+    fb.AddColourAttachment(attachment, resolution.x, resolution.y,
                              info.m_internal_format, info.m_format,
                              info.m_filter, info.m_pixel_format);
     attachment++;
   }
   if (add_depth) {
-    fb.add_depth_attachment_sampler_friendly(resolution.x, resolution.y,
+    fb.AddDepthAttachmentSamplerFriendly(resolution.x, resolution.y,
                                              GL_DEPTH24_STENCIL8);
   }
-  fb.check();
-  fb.unbind();
+  fb.Check();
+  fb.Unbind();
   return fb;
 }
 
-void GLFramebuffer::bind() {
+void GLFramebuffer::Bind() {
   ZoneScoped;
   if (m_handle == INVALID_GL_HANDLE) {
     glGenFramebuffers(1, &m_handle);

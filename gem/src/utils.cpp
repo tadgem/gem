@@ -183,7 +183,7 @@ float Utils::round_up(float value, int decimal_places) {
   return std::ceil(value * multiplier) / multiplier;
 }
 
-AABB Utils::transform_aabb(AABB &box, glm::mat4 &M) {
+AABB Utils::transform_aabb(const AABB &box, glm::mat4 &M) {
   ZoneScoped;
   glm::vec3 corners[8];
   corners[0] = box.m_min;

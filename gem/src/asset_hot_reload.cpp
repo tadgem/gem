@@ -39,8 +39,8 @@ void GemFileWatchListener::handleFileAction(efsw::WatchID watchid,
       auto *shader_asset =
           Engine::assets.get_asset<GLShader, AssetType::shader>(ah);
 
-      Engine::debug_callbacks.add([shader_asset, shader_source]() {
-        shader_asset->m_data.release();
+      Engine::debug_callbacks.Add([shader_asset, shader_source]() {
+        shader_asset->m_data.Release();
         shader_asset->m_data = GLShader(shader_source);
       });
     }

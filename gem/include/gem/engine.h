@@ -10,7 +10,7 @@
 struct DebugCallbackCollection {
   std::vector<std::function<void()>> m_callbacks;
 
-  void add(std::function<void()> debug_callback);
+  void Add(std::function<void()> debug_callback);
 };
 
 namespace gem {
@@ -25,12 +25,12 @@ public:
   inline static Project active_project;
   inline static DebugCallbackCollection debug_callbacks;
 
-  static void init(const glm::ivec2& resolution);
-  static void update();
-  static void save_project_to_disk(const std::string &filename,
+  static void Init(const glm::ivec2& resolution);
+  static void Update();
+  static void SaveProjectToDisk(const std::string &filename,
                                    const std::string &directory);
-  static void load_project_from_disk(const std::string &filepath);
-  static void shutdown();
+  static void LoadProjectFromDisk(const std::string &filepath);
+  static void Shutdown();
 };
 
 } // namespace gem
