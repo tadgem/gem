@@ -65,8 +65,8 @@ void Material::BindUniforms(AssetManager &am) {
         if (!ta) {
           continue;
         }
-        if (ta->m_data.m_handle != INVALID_GL_HANDLE) {
-          info.tex_entry.m_texture = &ta->m_data;
+        if (ta->data.m_handle != INVALID_GL_HANDLE) {
+          info.tex_entry.m_texture = &ta->data;
         }
         m_uniform_values[name] = info;
       }
@@ -169,7 +169,7 @@ void MaterialSystem::Deserialize(Scene &current_scene, nlohmann::json &sys_json)
     AssetHandle shader_handle = entry["shader"];
     auto *shader_asset =
         Engine::assets.GetAsset<GLShader, AssetType::shader>(shader_handle);
-    Material mat(shader_handle, shader_asset->m_data);
+    Material mat(shader_handle, shader_asset->data);
 
     nlohmann::json uniforms = entry["uniforms"];
 

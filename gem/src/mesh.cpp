@@ -17,7 +17,7 @@ void try_update_mesh_component(MeshComponent &mc) {
       AssetLoadProgress::loaded) {
     auto model_asset =
         Engine::assets.GetAsset<Model, AssetType::model>(mc.m_handle);
-    mc.m_mesh = model_asset->m_data.m_meshes[mc.m_mesh_index];
+    mc.m_mesh = model_asset->data.m_meshes[mc.m_mesh_index];
   }
 }
 

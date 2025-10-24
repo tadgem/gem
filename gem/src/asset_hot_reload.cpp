@@ -40,8 +40,8 @@ void GemFileWatchListener::handleFileAction(efsw::WatchID watchid,
           Engine::assets.GetAsset<GLShader, AssetType::shader>(ah);
 
       Engine::debug_callbacks.Add([shader_asset, shader_source]() {
-        shader_asset->m_data.Release();
-        shader_asset->m_data = GLShader(shader_source);
+        shader_asset->data.Release();
+        shader_asset->data = GLShader(shader_source);
       });
     }
     break;

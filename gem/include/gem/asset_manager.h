@@ -56,9 +56,9 @@ public:
   AssetHandle provide_asset(const std::string &name, _Ty data) {
     TAsset<_Ty, _AssetType> *to_asset =
         new TAsset<_Ty, _AssetType>(data, name);
-    p_loaded_assets.emplace(to_asset->m_handle,
+    p_loaded_assets.emplace(to_asset->handle,
                             std::move(std::unique_ptr<Asset>(to_asset)));
-    return to_asset->m_handle;
+    return to_asset->handle;
   }
 
   template <typename _Ty, AssetType _AssetType>

@@ -2,8 +2,8 @@
 #include "gem/hash_string.h"
 #include "gem/profile.h"
 namespace gem {
-Asset::Asset(const std::string &path, AssetType type)
-    : m_path(path), m_handle(path, type) {
+Asset::Asset(const std::string &p, AssetType type)
+    : path(p), handle(p, type) {
   ZoneScoped;
 }
 
@@ -25,14 +25,14 @@ std::string get_asset_type_name(const AssetType &t) {
 
 AssetHandle::AssetHandle(const std::string &path, AssetType type) {
   ZoneScoped;
-  m_type = type;
-  m_path_hash = HashUtils::GetStringHash(path);
+  asset_type = type;
+  path_hash = HashUtils::GetStringHash(path);
 }
 
-AssetHandle::AssetHandle(const HashString &path_hash, AssetType type) {
+AssetHandle::AssetHandle(const HashString &ph, AssetType type) {
   ZoneScoped;
-  m_type = type;
-  m_path_hash = path_hash;
+  asset_type = type;
+  path_hash = ph;
 }
 
 } // namespace gem

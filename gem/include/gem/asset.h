@@ -20,35 +20,35 @@ enum class AssetType : u32 {
 std::string get_asset_type_name(const AssetType &t);
 
 struct AssetHandle {
-  AssetType m_type;
-  HashString m_path_hash;
+  AssetType asset_type;
+  HashString path_hash;
 
-  AssetHandle() : m_type(AssetType::COUNT), m_path_hash(0) {};
+  AssetHandle() : asset_type(AssetType::COUNT), path_hash(0) {};
   AssetHandle(const std::string &path, AssetType type);
   AssetHandle(const HashString &path_hash, AssetType type);
 
   bool operator==(const AssetHandle &o) const {
-    return m_type == o.m_type && m_path_hash == o.m_path_hash;
+    return asset_type == o.asset_type && path_hash == o.path_hash;
   }
 
   bool operator<(const AssetHandle &o) const {
-    return m_type < o.m_type && m_path_hash < o.m_path_hash;
+    return asset_type < o.asset_type && path_hash < o.path_hash;
   }
 
   static AssetHandle INVALID() {
     return AssetHandle(HashString(UINT64_MAX), AssetType::COUNT);
   }
 
-  NLOHMANN_DEFINE_TYPE_INTRUSIVE(AssetHandle, m_type, m_path_hash);
+  NLOHMANN_DEFINE_TYPE_INTRUSIVE(AssetHandle, asset_type, path_hash);
 
   GEM_IMPL_ALLOC(AssetHandle)
 };
 
 struct SerializableAssetHandle {
-  AssetHandle m_handle;
-  std::string m_path;
+  AssetHandle handle;
+  std::string path;
 
-  NLOHMANN_DEFINE_TYPE_INTRUSIVE(SerializableAssetHandle, m_handle, m_path)
+  NLOHMANN_DEFINE_TYPE_INTRUSIVE(SerializableAssetHandle, handle, path)
 
   GEM_IMPL_ALLOC(SerializableAssetHandle)
 };
@@ -61,15 +61,15 @@ public:
 
   GEM_IMPL_ALLOC(Asset)
 
-  const std::string m_path;
-  const AssetHandle m_handle;
+  const std::string path;
+  const AssetHandle handle;
 };
 
 template <typename _Ty, AssetType _AssetType> class TAsset : public Asset {
 public:
-  _Ty m_data;
+  _Ty data;
   TAsset(_Ty data, const std::string &path)
-      : Asset(path, _AssetType), m_data(data) {}
+      : Asset(path, _AssetType), data(data) {}
 
   ~TAsset() {}
 
@@ -98,9 +98,9 @@ public:
 
 class AssetIntermediate {
 public:
-  Asset *m_asset_data;
+  Asset *asset_data;
 
-  AssetIntermediate(Asset *asset) : m_asset_data(asset){};
+  AssetIntermediate(Asset *asset) : asset_data(asset){};
 
   virtual ~AssetIntermediate(){};
 };
@@ -109,16 +109,16 @@ template <typename _AssetType, typename _IntermediateType,
           AssetType _AssetTypeEnum>
 class TAssetIntermediate : public AssetIntermediate {
 public:
-  _IntermediateType m_intermediate;
-  std::string m_path;
+  _IntermediateType intermediate;
+  std::string path;
 
   TAssetIntermediate(Asset *data, const _IntermediateType &inter,
                        const std::string &path)
-      : AssetIntermediate(data), m_intermediate(inter), m_path(path) {}
+      : AssetIntermediate(data), intermediate(inter), path(path) {}
 
 
   TAsset<_AssetType, _AssetTypeEnum> *get_concrete_asset() {
-    return static_cast<TAsset<_AssetType, _AssetTypeEnum> *>(m_asset_data);
+    return static_cast<TAsset<_AssetType, _AssetTypeEnum> *>(asset_data);
   }
 
   void *operator new(size_t size) {
@@ -150,7 +150,7 @@ public:
 
 template <> struct std::hash<gem::AssetHandle> {
   std::size_t operator()(const gem::AssetHandle &ah) const {
-    return std::hash<u64>()(ah.m_path_hash) ^
-           std::hash<u32>()(static_cast<u32>(ah.m_type));
+    return std::hash<u64>()(ah.path_hash) ^
+           std::hash<u32>()(static_cast<u32>(ah.asset_type));
   }
 };

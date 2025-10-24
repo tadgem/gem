@@ -121,14 +121,14 @@ int main()
 
     e.HasComponent<EntityData>();
     auto& data = e.GetComponent<EntityData>();
-    Material mat(renderer.m_gbuffer_shader->m_handle, renderer.m_gbuffer_shader->m_data);
-    e.AddComponent<Material>(renderer.m_gbuffer_shader->m_handle, renderer.m_gbuffer_shader->m_data);
+    Material mat(renderer.m_gbuffer_shader->handle, renderer.m_gbuffer_shader->data);
+    e.AddComponent<Material>(renderer.m_gbuffer_shader->handle, renderer.m_gbuffer_shader->data);
 
     Engine::assets.LoadAsset("assets/models/sponza/Sponza.gltf", AssetType::model, [s, &renderer](Asset * a) {
         spdlog::info("adding model to scene");
         auto* ma = dynamic_cast<ModelAsset *>(a);
-        ma->m_data.UpdateAABB();
-        s->CreateEntityFromModel(ma->m_handle, ma->m_data, renderer.m_gbuffer_shader->m_handle, renderer.m_gbuffer_shader->m_data, glm::vec3(0.1), glm::vec3(0.0, 0.0, 0.0),
+        ma->data.UpdateAABB();
+        s->CreateEntityFromModel(ma->handle, ma->data, renderer.m_gbuffer_shader->handle, renderer.m_gbuffer_shader->data, glm::vec3(0.1), glm::vec3(0.0, 0.0, 0.0),
             {
                 {"u_diffuse_map",   TextureMapType::diffuse},
                 {"u_normal_map",    TextureMapType::normal},
@@ -137,14 +137,14 @@ int main()
                 {"u_ao_map",        TextureMapType::ao}
             });
         glm::mat4 model = Utils::GetModelMatrix(glm::vec3(0.0), glm::vec3(0.0), glm::vec3(0.1));
-        renderer.m_voxel_data.current_bounding_box = Utils::TransformAABB(ma->m_data.m_aabb, model);
+        renderer.m_voxel_data.current_bounding_box = Utils::TransformAABB(ma->data.m_aabb, model);
     });
 
     auto cube_entity = s->CreateEntity("Test Cube");
     auto& cube_trans = cube_entity.AddComponent<Transform>();
     auto& cube_mat = cube_entity.AddComponent<Material>(
-        renderer.m_gbuffer_textureless_shader->m_handle,
-                renderer.m_gbuffer_textureless_shader->m_data);
+        renderer.m_gbuffer_textureless_shader->handle,
+                renderer.m_gbuffer_textureless_shader->data);
     cube_mat.SetUniformValue("u_diffuse", glm::vec3(1.0, 0.0, 0.0));
     cube_mat.SetUniformValue("u_metallic", 0.0f);
     cube_mat.SetUniformValue("u_roughness", 0.0f);
