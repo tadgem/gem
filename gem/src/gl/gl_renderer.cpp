@@ -541,9 +541,9 @@ void GLRenderer::OnImGui(AssetManager &am) {
     ImGui::DragFloat3("AABB Position Offset",
                       &m_voxel_visualiser.m_debug_position_offset[0]);
     ImGui::DragFloat3("Current VXGI BB Min",
-                      &m_voxel_data.current_bounding_box.m_min[0]);
+                      &m_voxel_data.current_bounding_box.min[0]);
     ImGui::DragFloat3("Current VXGI BB Max",
-                      &m_voxel_data.current_bounding_box.m_max[0]);
+                      &m_voxel_data.current_bounding_box.max[0]);
     ImGui::TreePop();
   }
   if (ImGui::TreeNode("Denoise Settings")) {
@@ -555,7 +555,7 @@ void GLRenderer::OnImGui(AssetManager &am) {
   ImGui::End();
 
   // TODO: Find a better place for this jesus
-  Im3d::DrawAlignedBox(ToIm3D(m_voxel_data.current_bounding_box.m_min),
-                       ToIm3D(m_voxel_data.current_bounding_box.m_max));
+  Im3d::DrawAlignedBox(ToIm3D(m_voxel_data.current_bounding_box.min),
+                       ToIm3D(m_voxel_data.current_bounding_box.max));
 }
 } // namespace gem

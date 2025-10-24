@@ -186,14 +186,14 @@ float Utils::RoundUp(float value, int decimal_places) {
 AABB Utils::TransformAABB(const AABB &box, glm::mat4 &M) {
   ZoneScoped;
   glm::vec3 corners[8];
-  corners[0] = box.m_min;
-  corners[1] = glm::vec3(box.m_min.x, box.m_max.y, box.m_min.z);
-  corners[2] = glm::vec3(box.m_min.x, box.m_max.y, box.m_max.z);
-  corners[3] = glm::vec3(box.m_min.x, box.m_min.y, box.m_max.z);
-  corners[4] = glm::vec3(box.m_max.x, box.m_min.y, box.m_min.z);
-  corners[5] = glm::vec3(box.m_max.x, box.m_max.y, box.m_min.z);
-  corners[6] = box.m_max;
-  corners[7] = glm::vec3(box.m_max.x, box.m_min.y, box.m_max.z);
+  corners[0] = box.min;
+  corners[1] = glm::vec3(box.min.x, box.max.y, box.min.z);
+  corners[2] = glm::vec3(box.min.x, box.max.y, box.max.z);
+  corners[3] = glm::vec3(box.min.x, box.min.y, box.max.z);
+  corners[4] = glm::vec3(box.max.x, box.min.y, box.min.z);
+  corners[5] = glm::vec3(box.max.x, box.max.y, box.min.z);
+  corners[6] = box.max;
+  corners[7] = glm::vec3(box.max.x, box.min.y, box.max.z);
 
   // transform the first corner
   glm::vec3 tmin = glm::vec3(M * glm::vec4(corners[0], 1.0));
@@ -209,8 +209,8 @@ AABB Utils::TransformAABB(const AABB &box, glm::mat4 &M) {
 
   AABB rbox;
 
-  rbox.m_min = tmin;
-  rbox.m_max = tmax;
+  rbox.min = tmin;
+  rbox.max = tmax;
 
   return rbox;
 }

@@ -20,8 +20,8 @@ void tech::VXGI::DispatchGBufferVoxelization(GLShader &voxelization,
   voxelization.SetInt("u_gbuffer_lighting", 1);
   voxelization.SetVec3f("u_voxel_resolution", voxel_data.resolution);
   voxelization.SetVec2f("u_input_resolution", {window_res.x, window_res.y});
-  voxelization.SetVec3f("u_aabb.min", voxel_data.current_bounding_box.m_min);
-  voxelization.SetVec3f("u_aabb.max", voxel_data.current_bounding_box.m_max);
+  voxelization.SetVec3f("u_aabb.min", voxel_data.current_bounding_box.min);
+  voxelization.SetVec3f("u_aabb.max", voxel_data.current_bounding_box.max);
   voxelization.SetVec3f("u_voxel_unit", voxel_data.voxel_unit);
   Texture::BindImageHandle(voxel_data.voxel_texture.m_handle, 0, 0,
                              GL_RGBA16F);
@@ -77,8 +77,8 @@ void tech::VXGI::DispatchConeTracingPass(
   Shapes::s_screen_quad.Use();
   buffer_conetracing.Bind();
   voxel_cone_tracing.Use();
-  voxel_cone_tracing.SetVec3f("u_aabb.min", bounding_volume.m_min);
-  voxel_cone_tracing.SetVec3f("u_aabb.max", bounding_volume.m_max);
+  voxel_cone_tracing.SetVec3f("u_aabb.min", bounding_volume.min);
+  voxel_cone_tracing.SetVec3f("u_aabb.max", bounding_volume.max);
   voxel_cone_tracing.SetVec3f("u_voxel_resolution", _3d_tex_res);
   voxel_cone_tracing.SetInt("u_position_map", 0);
   voxel_cone_tracing.SetVec3f("u_cam_position", cam.m_pos);

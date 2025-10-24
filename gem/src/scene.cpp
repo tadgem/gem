@@ -87,24 +87,24 @@ void Scene::Update() {
 
 void Scene::UpdateAABB(AABB &in) {
   ZoneScoped;
-  if (in.m_min.x < m_scene_bounding_volume.m_min.x) {
-    m_scene_bounding_volume.m_min.x = in.m_min.x;
+  if (in.min.x < m_scene_bounding_volume.min.x) {
+    m_scene_bounding_volume.min.x = in.min.x;
   }
-  if (in.m_min.y < m_scene_bounding_volume.m_min.y) {
-    m_scene_bounding_volume.m_min.y = in.m_min.y;
+  if (in.min.y < m_scene_bounding_volume.min.y) {
+    m_scene_bounding_volume.min.y = in.min.y;
   }
-  if (in.m_min.z < m_scene_bounding_volume.m_min.z) {
-    m_scene_bounding_volume.m_min.z = in.m_min.z;
+  if (in.min.z < m_scene_bounding_volume.min.z) {
+    m_scene_bounding_volume.min.z = in.min.z;
   }
 
-  if (in.m_max.x > m_scene_bounding_volume.m_max.x) {
-    m_scene_bounding_volume.m_max.x = in.m_max.x;
+  if (in.max.x > m_scene_bounding_volume.max.x) {
+    m_scene_bounding_volume.max.x = in.max.x;
   }
-  if (in.m_max.y > m_scene_bounding_volume.m_max.y) {
-    m_scene_bounding_volume.m_max.y = in.m_max.y;
+  if (in.max.y > m_scene_bounding_volume.max.y) {
+    m_scene_bounding_volume.max.y = in.max.y;
   }
-  if (in.m_max.z > m_scene_bounding_volume.m_max.z) {
-    m_scene_bounding_volume.m_max.z = in.m_max.z;
+  if (in.max.z > m_scene_bounding_volume.max.z) {
+    m_scene_bounding_volume.max.z = in.max.z;
   }
 }
 

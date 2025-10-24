@@ -211,24 +211,24 @@ Model Model::LoadModelAndTextures(const std::string &path) {
   process_node(m, scene->mRootNode, scene, false, mesh_entries);
 
   for (auto &mesh : m.m_meshes) {
-    if (mesh->m_original_aabb.m_min.x < model_aabb.m_min.x) {
-      model_aabb.m_min.x = mesh->m_original_aabb.m_min.x;
+    if (mesh->m_original_aabb.min.x < model_aabb.min.x) {
+      model_aabb.min.x = mesh->m_original_aabb.min.x;
     }
-    if (mesh->m_original_aabb.m_min.y < model_aabb.m_min.y) {
-      model_aabb.m_min.y = mesh->m_original_aabb.m_min.y;
+    if (mesh->m_original_aabb.min.y < model_aabb.min.y) {
+      model_aabb.min.y = mesh->m_original_aabb.min.y;
     }
-    if (mesh->m_original_aabb.m_min.z < model_aabb.m_min.z) {
-      model_aabb.m_min.z = mesh->m_original_aabb.m_min.z;
+    if (mesh->m_original_aabb.min.z < model_aabb.min.z) {
+      model_aabb.min.z = mesh->m_original_aabb.min.z;
     }
 
-    if (mesh->m_original_aabb.m_max.x > model_aabb.m_max.x) {
-      model_aabb.m_max.x = mesh->m_original_aabb.m_max.x;
+    if (mesh->m_original_aabb.max.x > model_aabb.max.x) {
+      model_aabb.max.x = mesh->m_original_aabb.max.x;
     }
-    if (mesh->m_original_aabb.m_max.y > model_aabb.m_max.y) {
-      model_aabb.m_max.y = mesh->m_original_aabb.m_max.y;
+    if (mesh->m_original_aabb.max.y > model_aabb.max.y) {
+      model_aabb.max.y = mesh->m_original_aabb.max.y;
     }
-    if (mesh->m_original_aabb.m_max.z > model_aabb.m_max.z) {
-      model_aabb.m_max.z = mesh->m_original_aabb.m_max.z;
+    if (mesh->m_original_aabb.max.z > model_aabb.max.z) {
+      model_aabb.max.z = mesh->m_original_aabb.max.z;
     }
   }
   m.m_aabb = model_aabb;
@@ -314,24 +314,24 @@ void Model::UpdateAABB() {
   ZoneScoped;
   AABB model_aabb{};
   for (auto &mesh : m_meshes) {
-    if (mesh->m_original_aabb.m_min.x < model_aabb.m_min.x) {
-      model_aabb.m_min.x = mesh->m_original_aabb.m_min.x;
+    if (mesh->m_original_aabb.min.x < model_aabb.min.x) {
+      model_aabb.min.x = mesh->m_original_aabb.min.x;
     }
-    if (mesh->m_original_aabb.m_min.y < model_aabb.m_min.y) {
-      model_aabb.m_min.y = mesh->m_original_aabb.m_min.y;
+    if (mesh->m_original_aabb.min.y < model_aabb.min.y) {
+      model_aabb.min.y = mesh->m_original_aabb.min.y;
     }
-    if (mesh->m_original_aabb.m_min.z < model_aabb.m_min.z) {
-      model_aabb.m_min.z = mesh->m_original_aabb.m_min.z;
+    if (mesh->m_original_aabb.min.z < model_aabb.min.z) {
+      model_aabb.min.z = mesh->m_original_aabb.min.z;
     }
 
-    if (mesh->m_original_aabb.m_max.x > model_aabb.m_max.x) {
-      model_aabb.m_max.x = mesh->m_original_aabb.m_max.x;
+    if (mesh->m_original_aabb.max.x > model_aabb.max.x) {
+      model_aabb.max.x = mesh->m_original_aabb.max.x;
     }
-    if (mesh->m_original_aabb.m_max.y > model_aabb.m_max.y) {
-      model_aabb.m_max.y = mesh->m_original_aabb.m_max.y;
+    if (mesh->m_original_aabb.max.y > model_aabb.max.y) {
+      model_aabb.max.y = mesh->m_original_aabb.max.y;
     }
-    if (mesh->m_original_aabb.m_max.z > model_aabb.m_max.z) {
-      model_aabb.m_max.z = mesh->m_original_aabb.m_max.z;
+    if (mesh->m_original_aabb.max.z > model_aabb.max.z) {
+      model_aabb.max.z = mesh->m_original_aabb.max.z;
     }
   }
   m_aabb = model_aabb;

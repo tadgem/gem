@@ -9,7 +9,7 @@ namespace gem {
 
 void Voxel::Grid::UpdateVoxelUnit() {
   ZoneScoped;
-  glm::vec3 dim = current_bounding_box.m_max - current_bounding_box.m_min;
+  glm::vec3 dim = current_bounding_box.max - current_bounding_box.min;
   voxel_unit =
       glm::vec3((dim.x / resolution.x), (dim.y / resolution.y),
                 (dim.z / resolution.z));
@@ -189,9 +189,9 @@ void Voxel::GridVisualizer::Draw(Voxel::Grid &vg, Camera &cam) {
   m_compute_instances_shader.SetVec3f("u_instance_resolution",
                                       glm::vec3(m_texel_resolution));
   m_compute_instances_shader.SetVec3f("u_current_aabb.min",
-                                      vg.current_bounding_box.m_min);
+                                      vg.current_bounding_box.min);
   m_compute_instances_shader.SetVec3f("u_current_aabb.max",
-                                      vg.current_bounding_box.m_max);
+                                      vg.current_bounding_box.max);
 
   // dispatch
   glm::ivec3 dispatch_dims = vg.resolution / m_texel_resolution;
@@ -206,10 +206,10 @@ void Voxel::GridVisualizer::Draw(Voxel::Grid &vg, Camera &cam) {
   vs.SetMat4f("u_view_projection", cam.m_proj * cam.m_view);
   vs.SetMat4f("u_model",
               Utils::GetModelMatrix(
-                  vg.current_bounding_box.m_min + m_debug_position_offset,
+                  vg.current_bounding_box.min + m_debug_position_offset,
                   glm::vec3(0.0f), vg.voxel_unit * m_debug_scale));
-  vs.SetVec3f("u_aabb.min", vg.current_bounding_box.m_min);
-  vs.SetVec3f("u_aabb.max", vg.current_bounding_box.m_max);
+  vs.SetVec3f("u_aabb.min", vg.current_bounding_box.min);
+  vs.SetVec3f("u_aabb.max", vg.current_bounding_box.max);
   vs.SetInt("u_volume", 0);
   Texture::BindSamplerHandle(vg.voxel_texture.m_handle, GL_TEXTURE0,
                                GL_TEXTURE_3D);

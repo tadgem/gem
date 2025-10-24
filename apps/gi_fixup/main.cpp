@@ -66,7 +66,7 @@ DebugVoxelGrid create_debug_voxel_renderer(GLShader& viz_shader, const AABB& ini
     AABB transformed_aabb = Utils::TransformAABB(initial_aabb, model);
     int cubed_res = pow(square_resolution, 3);
 
-    glm::vec3 aabb_dim = transformed_aabb.m_max - transformed_aabb.m_min;
+    glm::vec3 aabb_dim = transformed_aabb.max - transformed_aabb.min;
     glm::vec3 unit = glm::vec3((aabb_dim.x / cubed_res), (aabb_dim.y / cubed_res), (aabb_dim.z / cubed_res));
 
     std::vector<glm::mat4> instance_matrices;
@@ -79,9 +79,9 @@ DebugVoxelGrid create_debug_voxel_renderer(GLShader& viz_shader, const AABB& ini
         // first vbo is same as cube
         // instance vbo is per-instance transform
 
-        float z = transformed_aabb.m_min.z;
-        float y = transformed_aabb.m_min.y;
-        float x = transformed_aabb.m_min.x;
+        float z = transformed_aabb.min.z;
+        float y = transformed_aabb.min.y;
+        float x = transformed_aabb.min.x;
 
         float z_offset = i / (cubed_res * cubed_res);
         float y_offset = (i / cubed_res) % cubed_res;
