@@ -59,7 +59,7 @@ void add_cube(AssetManager &am) {
 
   VAOBuilder cube_with_normals_builder;
   cube_with_normals_builder.Begin();
-  cube_with_normals_builder.m_index_count = 36;
+  cube_with_normals_builder.index_count = 36;
   cube_with_normals_builder.AddVertexBuffer(&cube_vertex_data[0], 288);
   cube_with_normals_builder.AddVertexAttribute(0, 8 * sizeof(float), 3);
   cube_with_normals_builder.AddVertexAttribute(1, 8 * sizeof(float), 3);
@@ -579,7 +579,7 @@ void add_cylinder(AssetManager &am) {
 
   VAOBuilder cylinder_builder;
   cylinder_builder.Begin();
-  cylinder_builder.m_index_count = cylinder_num_verts;
+  cylinder_builder.index_count = cylinder_num_verts;
   cylinder_builder.AddVertexBuffer(&cylinder_vertex_data[0],
                                      cylinder_num_verts * 8);
   cylinder_builder.AddVertexAttribute(0, 8 * sizeof(float), 3);
@@ -853,7 +853,7 @@ void add_cone(AssetManager &am) {
 
   VAOBuilder cone_builder;
   cone_builder.Begin();
-  cone_builder.m_index_count = cone_num_verts;
+  cone_builder.index_count = cone_num_verts;
   cone_builder.AddVertexBuffer(&cone_vertex_data[0], cone_num_verts * 8);
   cone_builder.AddVertexAttribute(0, 8 * sizeof(float), 3);
   cone_builder.AddVertexAttribute(1, 8 * sizeof(float), 3);
@@ -5485,7 +5485,7 @@ void add_torus(AssetManager &am) {
 
   VAOBuilder torus_builder;
   torus_builder.Begin();
-  torus_builder.m_index_count = torus_num_verts;
+  torus_builder.index_count = torus_num_verts;
   torus_builder.AddVertexBuffer(&torus_vertex_data[0], torus_num_verts * 8);
   torus_builder.AddVertexAttribute(0, 8 * sizeof(float), 3);
   torus_builder.AddVertexAttribute(1, 8 * sizeof(float), 3);
@@ -9348,7 +9348,7 @@ void add_sphere(AssetManager &am) {
   const unsigned int sphere_num_verts = 2880;
   VAOBuilder sphere_builder;
   sphere_builder.Begin();
-  sphere_builder.m_index_count = sphere_num_verts;
+  sphere_builder.index_count = sphere_num_verts;
   sphere_builder.AddVertexBuffer(&sphere_vertex_data[0], 23040);
   sphere_builder.AddVertexAttribute(0, 8 * sizeof(float), 3);
   sphere_builder.AddVertexAttribute(1, 8 * sizeof(float), 3);
@@ -9448,9 +9448,9 @@ VAO Shapes::GenerateInstancedCube(std::vector<glm::mat4> &matrices,
   cube_builder.AddVertexBuffer(cube_data);
   cube_builder.AddVertexAttribute(0, 3 * sizeof(float), 3);
   cube_builder.AddVertexBuffer(matrices);
-  auto matrices_vbo = cube_builder.m_vbos.back();
+  auto matrices_vbo = cube_builder.vbos.back();
   cube_builder.AddVertexBuffer(uvs);
-  auto uvs_vbo = cube_builder.m_vbos.back();
+  auto uvs_vbo = cube_builder.vbos.back();
   cube_builder.AddIndexBuffer(cube_indices);
 
   glEnableVertexAttribArray(1);

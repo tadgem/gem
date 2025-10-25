@@ -53,9 +53,9 @@ void tech::GBuffer::DispatchGBufferWithID(
       }
 
       ematerial.BindUniforms(am);
-      gbuffer_shader.SetMat4f("u_model", trans.m_model);
-      gbuffer_shader.SetMat4f("u_last_model", trans.m_last_model);
-      gbuffer_shader.SetMat4f("u_normal", trans.m_normal_matrix);
+      gbuffer_shader.SetMat4f("u_model", trans.model_matrix);
+      gbuffer_shader.SetMat4f("u_last_model", trans.prev_frame_model_matrix);
+      gbuffer_shader.SetMat4f("u_normal", trans.normal_matrix);
       int entity_index = static_cast<int>(e);
       gbuffer_shader.SetInt("u_entity_index", entity_index);
       emesh.mesh->vao.Draw();
@@ -98,8 +98,8 @@ void tech::GBuffer::DispatchGBufferTexturelessWithID(
       }
 
       ematerial.BindUniforms(am);
-      gbuffer_textureless_shader.SetMat4f("u_model", trans.m_model);
-      gbuffer_textureless_shader.SetMat4f("u_last_model", trans.m_last_model);
+      gbuffer_textureless_shader.SetMat4f("u_model", trans.model_matrix);
+      gbuffer_textureless_shader.SetMat4f("u_last_model", trans.prev_frame_model_matrix);
 
       int entity_index = static_cast<int>(e);
       gbuffer_textureless_shader.SetInt("u_entity_index", entity_index);

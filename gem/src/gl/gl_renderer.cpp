@@ -537,9 +537,9 @@ void GLRenderer::OnImGui(AssetManager &am) {
   if (ImGui::TreeNode("VXGI Voxel Grid Debug")) {
     ImGui::DragFloat3("AABB Dimensions", &m_voxel_data.aabb_dim[0]);
     ImGui::DragFloat("AABB Debug Visual Model Matrix Scale",
-                     &m_voxel_visualiser.m_debug_scale, 0.01f, 3000.0f);
+                     &m_voxel_visualiser.debug_scale, 0.01f, 3000.0f);
     ImGui::DragFloat3("AABB Position Offset",
-                      &m_voxel_visualiser.m_debug_position_offset[0]);
+                      &m_voxel_visualiser.debug_position_offset[0]);
     ImGui::DragFloat3("Current VXGI BB Min",
                       &m_voxel_data.current_bounding_box.min[0]);
     ImGui::DragFloat3("Current VXGI BB Max",

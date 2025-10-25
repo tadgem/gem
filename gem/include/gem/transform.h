@@ -7,15 +7,15 @@ namespace gem {
 class Scene;
 
 struct Transform {
-  glm::vec3 m_position{0.0, 0.0, 0.0};
-  glm::vec3 m_euler{0.0, 0.0, 0.0};
-  glm::vec3 m_scale{1.0, 1.0, 1.0};
-  glm::quat m_rotation = glm::quat();
+  glm::vec3 position{0.0, 0.0, 0.0};
+  glm::vec3 euler{0.0, 0.0, 0.0};
+  glm::vec3 scale{1.0, 1.0, 1.0};
+  glm::quat quat_rotation = glm::quat();
 
-  glm::mat4 m_model = glm::mat4(1.0);
-  glm::mat4 m_last_model = glm::mat4(1.0);
+  glm::mat4 model_matrix = glm::mat4(1.0);
+  glm::mat4 prev_frame_model_matrix = glm::mat4(1.0);
 
-  glm::mat3 m_normal_matrix;
+  glm::mat3 normal_matrix;
 
   static void UpdateTransforms(Scene &current_scene);
 };

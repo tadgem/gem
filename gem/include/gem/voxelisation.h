@@ -20,15 +20,15 @@ public:
   };
 
   struct GridVisualizer {
-    GLShader m_visual_shader;
-    GLShader m_compute_instances_shader;
-    VAO m_texel_shape;
-    GLuint m_instance_matrices_ssbo;
-    int m_texel_resolution;
-    int m_total_invocations;
-    unsigned int m_index_count;
-    float m_debug_scale = 1.0f;
-    glm::vec3 m_debug_position_offset;
+    GLShader visualization_shader;
+    GLShader compute_instance_matrices_shader;
+    VAO voxel_unit_shape;
+    GLuint instance_matrices_ssbo;
+    int texel_resolution_cubed;
+    int required_draw_calls;
+    unsigned int index_count;
+    float debug_scale = 1.0f;
+    glm::vec3 debug_position_offset;
 
     void Draw(Grid &vg, Camera &cam);
   };

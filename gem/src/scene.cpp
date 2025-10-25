@@ -40,8 +40,8 @@ std::vector<Entity> Scene::CreateEntityFromModel(
     Entity e = CreateEntity(entity_name.str());
 
     Transform &trans = e.AddComponent<Transform>();
-    trans.m_scale = scale;
-    trans.m_euler = euler;
+    trans.scale = scale;
+    trans.euler = euler;
     e.AddComponent<MeshComponent>(MeshComponent{entry, model_asset_handle, i});
     Material &current_mat =
         e.AddComponent<Material>(shader_asset_handle, material_shader);

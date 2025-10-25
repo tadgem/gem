@@ -43,9 +43,9 @@ void on_imgui(GLRenderer & renderer, Scene * s, glm::vec2 mouse_pos,
         ImGui::Text("Selected Entity ID : %d", renderer.m_last_selected_entity);
         ImGui::Separator();
         ImGui::Text("Debug Cube");
-        ImGui::DragFloat3("Cube Position", &cube_trans.m_position[0], 1.0f);
-        ImGui::DragFloat3("Cube Euler", &cube_trans.m_euler[0], 1.0f, 0.0, 360.0f);
-        ImGui::DragFloat3("Cube Scale", &cube_trans.m_scale[0], 1.0f);
+        ImGui::DragFloat3("Cube Position", &cube_trans.position[0], 1.0f);
+        ImGui::DragFloat3("Cube Euler", &cube_trans.euler[0], 1.0f, 0.0, 360.0f);
+        ImGui::DragFloat3("Cube Scale", &cube_trans.scale[0], 1.0f);
         ImGui::Separator();
         ImGui::Text("Lights");
         ImGui::ColorEdit3("Dir Light Colour", &dir2.colour[0]);

@@ -150,7 +150,7 @@ Voxel::CreateGridVisualizer(Voxel::Grid &vg, GLShader &visualisation_shader,
   glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, matrices_ssbo);
   glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
-  vgv.m_instance_matrices_ssbo = matrices_ssbo;
+  vgv.instance_matrices_ssbo = matrices_ssbo;
   //  constexpr std::size_t vec4Size = sizeof(glm::vec4);
   //  glEnableVertexAttribArray(1);
   //  glBindBuffer(GL_ARRAY_BUFFER, matrices_vbo);
@@ -173,48 +173,48 @@ Voxel::CreateGridVisualizer(Voxel::Grid &vg, GLShader &visualisation_shader,
   //  glVertexAttribDivisor(3, 1);
   //  glVertexAttribDivisor(4, 1);
 
-  vgv.m_texel_shape = builder.BuildVAO();
-  vgv.m_total_invocations = instance_matrices.size();
-  vgv.m_index_count = index_data.size();
+  vgv.voxel_unit_shape = builder.BuildVAO();
+  vgv.required_draw_calls = instance_matrices.size();
+  vgv.index_count = index_data.size();
   return vgv;
 }
 
 void Voxel::GridVisualizer::Draw(Voxel::Grid &vg, Camera &cam) {
   // compute instance matrices
-  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, m_instance_matrices_ssbo);
-  m_compute_instances_shader.Use();
+  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, instance_matrices_ssbo);
+  compute_instance_matrices_shader.Use();
   // set uniforms
-  m_compute_instances_shader.SetVec3f("u_resolution", vg.resolution);
-  m_compute_instances_shader.SetVec3f("u_voxel_unit", vg.voxel_unit);
-  m_compute_instances_shader.SetVec3f("u_instance_resolution",
-                                      glm::vec3(m_texel_resolution));
-  m_compute_instances_shader.SetVec3f("u_current_aabb.min",
+  compute_instance_matrices_shader.SetVec3f("u_resolution", vg.resolution);
+  compute_instance_matrices_shader.SetVec3f("u_voxel_unit", vg.voxel_unit);
+  compute_instance_matrices_shader.SetVec3f("u_instance_resolution",
+                                      glm::vec3(texel_resolution_cubed));
+  compute_instance_matrices_shader.SetVec3f("u_current_aabb.min",
                                       vg.current_bounding_box.min);
-  m_compute_instances_shader.SetVec3f("u_current_aabb.max",
+  compute_instance_matrices_shader.SetVec3f("u_current_aabb.max",
                                       vg.current_bounding_box.max);
 
   // dispatch
-  glm::ivec3 dispatch_dims = vg.resolution / m_texel_resolution;
-  glAssert(glDispatchCompute(m_total_invocations, 1, 1));
+  glm::ivec3 dispatch_dims = vg.resolution / texel_resolution_cubed;
+  glAssert(glDispatchCompute(required_draw_calls, 1, 1));
 
   // draw
-  m_texel_shape.Use();
-  auto &vs = m_visual_shader;
+  voxel_unit_shape.Use();
+  auto &vs = visualization_shader;
   vs.Use();
   vs.SetVec3i("u_texture_resolution", vg.resolution);
-  vs.SetVec3i("u_voxel_group_resolution", glm::ivec3(m_texel_resolution));
+  vs.SetVec3i("u_voxel_group_resolution", glm::ivec3(texel_resolution_cubed));
   vs.SetMat4f("u_view_projection", cam.proj_matrix * cam.view_matrix);
   vs.SetMat4f("u_model",
               Utils::GetModelMatrix(
-                  vg.current_bounding_box.min + m_debug_position_offset,
-                  glm::vec3(0.0f), vg.voxel_unit * m_debug_scale));
+                  vg.current_bounding_box.min + debug_position_offset,
+                  glm::vec3(0.0f), vg.voxel_unit * debug_scale));
   vs.SetVec3f("u_aabb.min", vg.current_bounding_box.min);
   vs.SetVec3f("u_aabb.max", vg.current_bounding_box.max);
   vs.SetInt("u_volume", 0);
   Texture::BindSamplerHandle(vg.voxel_texture.handle, GL_TEXTURE0,
                                GL_TEXTURE_3D);
-  glDrawElementsInstanced(GL_TRIANGLES, static_cast<GLsizei>(m_index_count),
-                          GL_UNSIGNED_INT, GL_ZERO, m_total_invocations);
+  glDrawElementsInstanced(GL_TRIANGLES, static_cast<GLsizei>(index_count),
+                          GL_UNSIGNED_INT, GL_ZERO, required_draw_calls);
   Texture::BindSamplerHandle(0, GL_TEXTURE0);
   glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, 0);
 }

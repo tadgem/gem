@@ -8,10 +8,10 @@ namespace gem {
 // TODO: turn this into a union based on the backend
 // vulkan version will have buffer & alloc for vertex buffer and index buffer
 struct VAO {
-  gl_handle m_vao_id;
-  gl_handle m_ibo = INVALID_GL_HANDLE;
-  uint32_t m_index_count;
-  std::vector<gl_handle> m_vbos;
+  gl_handle vao_handle = INVALID_GL_HANDLE;
+  gl_handle ibo_handle = INVALID_GL_HANDLE;
+  uint32_t index_count;
+  std::vector<gl_handle> vbos;
   void Use();
   void Draw();
   void Release();
@@ -33,7 +33,7 @@ public:
       glBindBuffer(GL_ARRAY_BUFFER, vbo);
       auto data_size = sizeof(_Ty) * count;
       glBufferData(GL_ARRAY_BUFFER, data_size, data, usage_flags);
-      m_vbos.push_back(vbo);
+      vbos.push_back(vbo);
     }
   }
 
@@ -52,10 +52,11 @@ public:
 
   VAO BuildVAO();
 
-  gl_handle m_vao;
-  gl_handle m_ibo = INVALID_GL_HANDLE;
-  uint32_t m_index_count = 0;
-  std::vector<gl_handle> m_vbos;
-  uint32_t m_offset_counter;
+  gl_handle vao_handle = INVALID_GL_HANDLE;
+  gl_handle ibo_handle = INVALID_GL_HANDLE;
+  uint32_t index_count = 0;
+  std::vector<gl_handle> vbos;
+private:
+  uint32_t offset_counter_;
 };
 } // namespace gem

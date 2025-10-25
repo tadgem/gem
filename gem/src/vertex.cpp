@@ -5,35 +5,35 @@ namespace gem {
 
 void VAO::Use() {
   ZoneScoped;
-  glBindVertexArray(m_vao_id);
+  glBindVertexArray(vao_handle);
 }
 void VAO::Release() {
   ZoneScoped;
-  if (m_ibo > 0) {
-    glDeleteBuffers(1, &m_ibo);
+  if (ibo_handle > 0) {
+    glDeleteBuffers(1, &ibo_handle);
   }
-  if (!m_vbos.empty()) {
-    glDeleteBuffers(m_vbos.size(), m_vbos.data());
+  if (!vbos.empty()) {
+    glDeleteBuffers(vbos.size(), vbos.data());
   }
-  glDeleteVertexArrays(1, &m_vao_id);
+  glDeleteVertexArrays(1, &vao_handle);
 }
 void VAO::Draw() {
   Use();
-  if (m_ibo != INVALID_GL_HANDLE) {
-    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(m_index_count),
+  if (ibo_handle != INVALID_GL_HANDLE) {
+    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(index_count),
                    GL_UNSIGNED_INT, 0);
   } else {
-    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(m_index_count));
+    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(index_count));
   }
 }
 
 void VAOBuilder::Begin() {
   ZoneScoped;
-  m_offset_counter = 0;
-  m_ibo = INVALID_GL_HANDLE;
-  m_vbos.clear();
-  glGenVertexArrays(1, &m_vao);
-  glBindVertexArray(m_vao);
+  offset_counter_ = 0;
+  ibo_handle = INVALID_GL_HANDLE;
+  vbos.clear();
+  glGenVertexArrays(1, &vao_handle);
+  glBindVertexArray(vao_handle);
 }
 
 void VAOBuilder::AddIndexBuffer(uint32_t *data, uint32_t data_count) {
@@ -44,8 +44,8 @@ void VAOBuilder::AddIndexBuffer(uint32_t *data, uint32_t data_count) {
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * data_count, data,
                GL_STATIC_DRAW);
-  m_ibo = ibo;
-  m_index_count = data_count;
+  ibo_handle = ibo;
+  index_count = data_count;
 }
 
 void VAOBuilder::AddIndexBuffer(std::vector<uint32_t> data) {
@@ -60,14 +60,14 @@ void VAOBuilder::AddVertexAttribute(uint32_t binding,
                                        GLenum primitive_type) {
   ZoneScoped;
   glVertexAttribPointer(binding, num_elements, primitive_type, GL_FALSE,
-                        total_vertex_size, (void *)m_offset_counter);
+                        total_vertex_size, (void *)offset_counter_);
   glEnableVertexAttribArray(binding);
   // glBindBuffer(GL_ARRAY_BUFFER, m_vbos.back());
-  m_offset_counter += num_elements * element_size;
+  offset_counter_ += num_elements * element_size;
 }
 
 VAO VAOBuilder::BuildVAO() {
   ZoneScoped;
-  return VAO{m_vao, m_ibo, m_index_count, m_vbos};
+  return VAO{vao_handle, ibo_handle, index_count, vbos};
 }
 } // namespace gem
