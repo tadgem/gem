@@ -44,18 +44,18 @@ AssetHandle AssetManager::LoadAsset(const std::string &path,
   AssetHandle handle(tmp_path, assetType);
   AssetLoadInfo load_info{tmp_path, assetType};
 
-  auto it = std::find(p_queued_loads.begin(), p_queued_loads.end(), load_info);
+  auto it = std::find(enqueued_loads_.begin(), enqueued_loads_.end(), load_info);
 
-  for (auto &queued_load : p_queued_loads) {
+  for (auto &queued_load : enqueued_loads_) {
     if (load_info == queued_load) {
       return queued_load.to_handle();
     }
   }
 
-  p_queued_loads.push_back(load_info);
+  enqueued_loads_.push_back(load_info);
 
   if (on_asset_loaded != nullptr) {
-    p_asset_loaded_callbacks.emplace(handle, on_asset_loaded);
+    asset_loaded_callbacks_.emplace(handle, on_asset_loaded);
   }
 
   return handle;
@@ -63,33 +63,33 @@ AssetHandle AssetManager::LoadAsset(const std::string &path,
 
 Asset *AssetManager::GetAsset(AssetHandle &handle) {
   ZoneScoped;
-  if (p_loaded_assets.find(handle) == p_loaded_assets.end()) {
+  if (loaded_assets_.find(handle) == loaded_assets_.end()) {
     return nullptr;
   }
 
-  return p_loaded_assets[handle].get();
+  return loaded_assets_[handle].get();
 }
 
 AssetLoadProgress
 AssetManager::GetLoadProgress(const AssetHandle &handle) {
   ZoneScoped;
-  for (auto &queued : p_queued_loads) {
+  for (auto &queued : enqueued_loads_) {
     if (queued.to_handle() == handle) {
       return AssetLoadProgress::loading;
     }
   }
 
-  if (p_pending_load_tasks.find(handle) != p_pending_load_tasks.end() ||
-      p_pending_load_callbacks.find(handle) != p_pending_load_callbacks.end()) {
+  if (pending_async_load_tasks_.find(handle) != pending_async_load_tasks_.end() ||
+      pending_sync_load_tasks_.find(handle) != pending_sync_load_tasks_.end()) {
     return AssetLoadProgress::loading;
   }
 
-  if (p_pending_unload_callbacks.find(handle) !=
-      p_pending_unload_callbacks.end()) {
+  if (pending_unload_tasks_.find(handle) !=
+      pending_unload_tasks_.end()) {
     return AssetLoadProgress::unloading;
   }
 
-  if (p_loaded_assets.find(handle) != p_loaded_assets.end()) {
+  if (loaded_assets_.find(handle) != loaded_assets_.end()) {
     return AssetLoadProgress::loaded;
   }
 
@@ -98,13 +98,13 @@ AssetManager::GetLoadProgress(const AssetHandle &handle) {
 
 bool AssetManager::AnyAssetsLoading() {
   ZoneScoped;
-  return !p_pending_load_tasks.empty() || !p_pending_load_callbacks.empty() ||
-         !p_pending_unload_callbacks.empty() || !p_queued_loads.empty();
+  return !pending_async_load_tasks_.empty() || !pending_sync_load_tasks_.empty() ||
+         !pending_unload_tasks_.empty() || !enqueued_loads_.empty();
 }
 
 bool AssetManager::AnyAssetsUnloading() {
   ZoneScoped;
-  return !p_pending_unload_callbacks.empty();
+  return !pending_unload_tasks_.empty();
 }
 
 void AssetManager::WaitAllLoads() {
@@ -125,7 +125,7 @@ void AssetManager::UnloadAll() {
   ZoneScoped;
   std::vector<AssetHandle> assetsRemaining{};
 
-  for (auto &[handle, asset] : p_loaded_assets) {
+  for (auto &[handle, asset] : loaded_assets_) {
     assetsRemaining.push_back(handle);
   }
 
@@ -159,20 +159,20 @@ void AssetManager::DispatchAssetTasksInternal() {
   u16 processedCallbacks = 0;
   std::vector<AssetHandle> clears;
 
-  for (auto &[handle, asset] : p_pending_load_callbacks) {
-    if (processedCallbacks == p_callback_tasks_per_tick)
+  for (auto &[handle, asset] : pending_sync_load_tasks_) {
+    if (processedCallbacks == kSyncTasksPerFrame)
       break;
 
-    for (u16 i = 0; i < p_callback_tasks_per_tick - processedCallbacks; i++) {
-      if (i >= asset.m_asset_load_sync_callbacks.size())
+    for (u16 i = 0; i < kSyncTasksPerFrame - processedCallbacks; i++) {
+      if (i >= asset.sync_load_tasks.size())
         break;
-      asset.m_asset_load_sync_callbacks.back()(
-          asset.m_loaded_asset_intermediate);
-      asset.m_asset_load_sync_callbacks.pop_back();
+      asset.sync_load_tasks.back()(
+          asset.loaded_asset_intermediate);
+      asset.sync_load_tasks.pop_back();
       processedCallbacks++;
     }
 
-    if (asset.m_asset_load_sync_callbacks.empty()) {
+    if (asset.sync_load_tasks.empty()) {
       clears.push_back(handle);
     }
   }
@@ -180,67 +180,67 @@ void AssetManager::DispatchAssetTasksInternal() {
     // p_loaded_assets.emplace(handle,
     // std::move(std::unique_ptr<asset>(p_pending_load_callbacks[handle].m_loaded_asset_intermediate->m_asset_data)));
     FinalizeAssetLoad(handle,
-                               p_pending_load_callbacks[handle]
-                                   .m_loaded_asset_intermediate->asset_data);
-    delete p_pending_load_callbacks[handle].m_loaded_asset_intermediate;
-    p_pending_load_callbacks.erase(handle);
+                               pending_sync_load_tasks_[handle]
+                                   .loaded_asset_intermediate->asset_data);
+    delete pending_sync_load_tasks_[handle].loaded_asset_intermediate;
+    pending_sync_load_tasks_.erase(handle);
   }
   clears.clear();
 
-  for (auto &[handle, callback] : p_pending_unload_callbacks) {
-    if (processedCallbacks == p_callback_tasks_per_tick)
+  for (auto &[handle, callback] : pending_unload_tasks_) {
+    if (processedCallbacks == kSyncTasksPerFrame)
       break;
-    callback(p_loaded_assets[handle].get());
+    callback(loaded_assets_[handle].get());
     clears.push_back(handle);
     processedCallbacks++;
   }
 
   for (auto &handle : clears) {
-    p_pending_unload_callbacks.erase(handle);
-    p_loaded_assets[handle].reset();
-    p_loaded_assets.erase(handle);
+    pending_unload_tasks_.erase(handle);
+    loaded_assets_[handle].reset();
+    loaded_assets_.erase(handle);
   }
 }
 
 void AssetManager::HandlePendingLoadTasksInternal() {
   ZoneScoped;
-  while (p_pending_load_tasks.size() <= p_max_async_tasks_in_flight &&
-         !p_queued_loads.empty()) {
-    auto &info = p_queued_loads.front();
+  while (pending_async_load_tasks_.size() <= kMaxAsyncTasksInFlight &&
+         !enqueued_loads_.empty()) {
+    auto &info = enqueued_loads_.front();
     DispatchLoadTask(info.to_handle(), info);
-    p_queued_loads.erase(p_queued_loads.begin());
+    enqueued_loads_.erase(enqueued_loads_.begin());
   }
 }
 
 void AssetManager::HandlePendingAsyncTasksInternal() {
   ZoneScoped;
   std::vector<AssetHandle> finished;
-  for (auto &[handle, future] : p_pending_load_tasks) {
+  for (auto &[handle, future] : pending_async_load_tasks_) {
     if (Utils::IsFutureReady(future)) {
       finished.push_back(handle);
     }
   }
 
   for (auto &handle : finished) {
-    AssetLoadResult asyncReturn = p_pending_load_tasks[handle].get();
+    AssetLoadResult asyncReturn = pending_async_load_tasks_[handle].get();
     // enqueue new loads
-    for (auto &newLoad : asyncReturn.m_new_assets_to_load) {
-      LoadAsset(newLoad.m_path, newLoad.m_type);
+    for (auto &newLoad : asyncReturn.new_assets_to_load) {
+      LoadAsset(newLoad.path, newLoad.asset_type);
     }
 
-    if (asyncReturn.m_asset_load_sync_callbacks.empty() &&
-        asyncReturn.m_loaded_asset_intermediate == nullptr) {
+    if (asyncReturn.sync_load_tasks.empty() &&
+        asyncReturn.loaded_asset_intermediate == nullptr) {
       // p_loaded_assets.emplace(handle,
       // std::move(std::unique_ptr<asset>(asyncReturn.m_loaded_asset_intermediate->m_asset_data)));
       FinalizeAssetLoad(
-          handle, asyncReturn.m_loaded_asset_intermediate->asset_data);
-      delete asyncReturn.m_loaded_asset_intermediate;
-      asyncReturn.m_loaded_asset_intermediate = nullptr;
+          handle, asyncReturn.loaded_asset_intermediate->asset_data);
+      delete asyncReturn.loaded_asset_intermediate;
+      asyncReturn.loaded_asset_intermediate = nullptr;
     } else {
-      p_pending_load_callbacks.emplace(handle, asyncReturn);
+      pending_sync_load_tasks_.emplace(handle, asyncReturn);
     }
 
-    p_pending_load_tasks.erase(handle);
+    pending_async_load_tasks_.erase(handle);
   }
 }
 
@@ -323,14 +323,14 @@ AssetLoadResult load_model_asset_manager(const std::string &path) {
 
   AssetLoadResult ret{};
   for (auto &tex : associated_textures) {
-    ret.m_new_assets_to_load.push_back(
+    ret.new_assets_to_load.push_back(
         AssetLoadInfo{tex.m_path, AssetType::texture});
   }
   for (int i = 0; i < mesh_entries.size(); i++) {
-    ret.m_asset_load_sync_callbacks.push_back(submit_meshes_to_gpu);
+    ret.sync_load_tasks.push_back(submit_meshes_to_gpu);
   }
   model_intermediate->asset_data = model_asset;
-  ret.m_loaded_asset_intermediate = model_intermediate;
+  ret.loaded_asset_intermediate = model_intermediate;
   return ret;
 }
 
@@ -344,8 +344,8 @@ void unload_model_asset_manager(Asset *_asset) {
 AssetLoadResult load_texture_asset_manager(const std::string &path) {
   ZoneScoped;
   AssetLoadResult ret{};
-  ret.m_new_assets_to_load = {};
-  ret.m_asset_load_sync_callbacks.push_back(submit_texture_to_gpu);
+  ret.new_assets_to_load = {};
+  ret.sync_load_tasks.push_back(submit_texture_to_gpu);
 
   Texture t{};
   std::vector<unsigned char> binary = Utils::LoadBinaryFromPath(path);
@@ -361,7 +361,7 @@ AssetLoadResult load_texture_asset_manager(const std::string &path) {
   texture_intermediate_asset *ta_inter =
       new texture_intermediate_asset(ta, binary, path);
 
-  ret.m_loaded_asset_intermediate = ta_inter;
+  ret.loaded_asset_intermediate = ta_inter;
   return ret;
 }
 
@@ -376,11 +376,11 @@ AssetLoadResult load_shader_asset_manager(const std::string &path) {
   ZoneScoped;
   std::string source = Utils::LoadStringFromPath(path);
   AssetLoadResult ret{};
-  ret.m_loaded_asset_intermediate = new shader_intermediate_asset(
+  ret.loaded_asset_intermediate = new shader_intermediate_asset(
       new TAsset<GLShader, AssetType::shader>(GLShader{}, path), source,
       path);
-  ret.m_asset_load_sync_callbacks.push_back(link_shader_program);
-  ret.m_new_assets_to_load = {};
+  ret.sync_load_tasks.push_back(link_shader_program);
+  ret.new_assets_to_load = {};
 
   return ret;
 }
@@ -395,21 +395,21 @@ void unload_shader_asset_manager(Asset *_asset) {
 void AssetManager::DispatchLoadTask(const AssetHandle &handle,
                                              AssetLoadInfo &info) {
   ZoneScoped;
-  switch (info.m_type) {
+  switch (info.asset_type) {
   case AssetType::model:
-    p_pending_load_tasks.emplace(
+    pending_async_load_tasks_.emplace(
         handle, std::move(std::async(std::launch::async,
-                                     load_model_asset_manager, info.m_path)));
+                                     load_model_asset_manager, info.path)));
     break;
   case AssetType::texture:
-    p_pending_load_tasks.emplace(
+    pending_async_load_tasks_.emplace(
         handle, std::move(std::async(std::launch::async,
-                                     load_texture_asset_manager, info.m_path)));
+                                     load_texture_asset_manager, info.path)));
     break;
   case AssetType::shader:
-    p_pending_load_tasks.emplace(
+    pending_async_load_tasks_.emplace(
         handle, std::move(std::async(std::launch::async,
-                                     load_shader_asset_manager, info.m_path)));
+                                     load_shader_asset_manager, info.path)));
     break;
   }
 }
@@ -417,53 +417,53 @@ void AssetManager::DispatchLoadTask(const AssetHandle &handle,
 void AssetManager::FinalizeAssetLoad(const AssetHandle &handle,
                                                Asset *asset_to_transition) {
   ZoneScoped;
-  p_loaded_assets.emplace(
+  loaded_assets_.emplace(
       handle, std::move(std::unique_ptr<Asset>(asset_to_transition)));
   spdlog::info("asset_manager : loaded {} : {} ",
                get_asset_type_name(handle.asset_type), asset_to_transition->path);
 
-  if (p_asset_loaded_callbacks.find(handle) == p_asset_loaded_callbacks.end()) {
+  if (asset_loaded_callbacks_.find(handle) == asset_loaded_callbacks_.end()) {
     return;
   }
 
-  for (auto &[ah, loaded_callback] : p_asset_loaded_callbacks) {
-    loaded_callback(p_loaded_assets[ah].get());
+  for (auto &[ah, loaded_callback] : asset_loaded_callbacks_) {
+    loaded_callback(loaded_assets_[ah].get());
   }
 
-  p_asset_loaded_callbacks.erase(handle);
+  asset_loaded_callbacks_.erase(handle);
 }
 
 AssetHandle AssetLoadInfo::to_handle() {
   ZoneScoped;
-  return AssetHandle(m_path, m_type);
+  return AssetHandle(path, asset_type);
 }
 
 void AssetManager::UnloadAsset(const AssetHandle &handle) {
   ZoneScoped;
-  if (p_loaded_assets.find(handle) == p_loaded_assets.end()) {
+  if (loaded_assets_.find(handle) == loaded_assets_.end()) {
     return;
   }
 
   switch (handle.asset_type) {
   case AssetType::model:
-    p_pending_unload_callbacks.emplace(handle, unload_model_asset_manager);
+    pending_unload_tasks_.emplace(handle, unload_model_asset_manager);
     break;
   case AssetType::texture:
-    p_pending_unload_callbacks.emplace(handle, unload_texture_asset_manager);
+    pending_unload_tasks_.emplace(handle, unload_texture_asset_manager);
     break;
   case AssetType::shader:
-    p_pending_unload_callbacks.emplace(handle, unload_shader_asset_manager);
+    pending_unload_tasks_.emplace(handle, unload_shader_asset_manager);
     break;
   default:
     break;
   }
 }
 AssetManager::AssetManager() {
-  p_file_watcher = std::make_unique<efsw::FileWatcher>();
-  p_gem_listener = std::make_unique<GemFileWatchListener>();
-  p_gem_listener->watch_id =
-      p_file_watcher->addWatch("assets", p_gem_listener.get(), true);
-  p_file_watcher->watch();
+  file_watcher_ = std::make_unique<efsw::FileWatcher>();
+  gem_listener_ = std::make_unique<GemFileWatchListener>();
+  gem_listener_->watch_id =
+      file_watcher_->addWatch("assets", gem_listener_.get(), true);
+  file_watcher_->watch();
 }
 void AssetManager::OnImGui() {
   if (ImGui::Begin("Assets Debug"))
@@ -477,13 +477,13 @@ void AssetManager::OnImGui() {
     }
     ImGui::Separator();
     ImGui::Text("Any Assets Loading? : %s", AnyAssetsLoading() ? "true" : "false");
-    ImGui::Text("Any Pending Async Tasks : %d", static_cast<uint32_t>(p_pending_load_tasks.size()));
-    ImGui::Text("Any Pending Synchronous Callbacks : %d", static_cast<uint32_t>(p_pending_load_callbacks.size()));
-    ImGui::Text("Any Pending Unload Tasks: %d", static_cast<uint32_t>(p_pending_unload_callbacks.size()));
+    ImGui::Text("Any Pending Async Tasks : %d", static_cast<uint32_t>(pending_async_load_tasks_.size()));
+    ImGui::Text("Any Pending Synchronous Callbacks : %d", static_cast<uint32_t>(pending_sync_load_tasks_.size()));
+    ImGui::Text("Any Pending Unload Tasks: %d", static_cast<uint32_t>(pending_unload_tasks_.size()));
 
     if (ImGui::CollapsingHeader("Loaded Assets"))
     {
-      for (const auto& [handle, u_asset] : p_loaded_assets)
+      for (const auto& [handle, u_asset] : loaded_assets_)
       {
         if (!u_asset) { continue; }
         ImGui::PushID(handle.path_hash);
@@ -499,17 +499,17 @@ void AssetManager::OnImGui() {
 
     if (ImGui::CollapsingHeader("Enqueued Loads"))
     {
-      for (const auto& info : p_queued_loads)
+      for (const auto& info : enqueued_loads_)
       {
-        ImGui::Text("%s : %s", info.m_path.c_str(), get_asset_type_name(info.m_type).c_str());
+        ImGui::Text("%s : %s", info.path.c_str(), get_asset_type_name(info.asset_type).c_str());
       }
     }
 
     if (ImGui::CollapsingHeader("In Progress Loads"))
     {
-      for (const auto& [handle , info ]: p_pending_load_callbacks)
+      for (const auto& [handle , info ]: pending_sync_load_tasks_)
       {
-        ImGui::Text("%s : %s", info.m_loaded_asset_intermediate->asset_data->path.c_str(), get_asset_type_name(handle.asset_type).c_str());
+        ImGui::Text("%s : %s", info.loaded_asset_intermediate->asset_data->path.c_str(), get_asset_type_name(handle.asset_type).c_str());
       }
     }
     ImGui::Separator();
