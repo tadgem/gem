@@ -11,7 +11,7 @@ namespace gem {
 
 void Transform::UpdateTransforms(Scene &current_scene) {
   ZoneScoped;
-  auto transform_view = current_scene.m_registry.view<Transform>();
+  auto transform_view = current_scene.registry.view<Transform>();
 
   for (auto [e, trans] : transform_view.each()) {
     trans.m_last_model = trans.m_model;
@@ -21,7 +21,7 @@ void Transform::UpdateTransforms(Scene &current_scene) {
     trans.m_normal_matrix = Utils::GetNormalMatrix(trans.m_model);
   }
 
-  auto transform_mesh_view = current_scene.m_registry.view<Transform, MeshComponent>();
+  auto transform_mesh_view = current_scene.registry.view<Transform, MeshComponent>();
   for (auto [e, trans, mesh] : transform_mesh_view.each()) {
     mesh.mesh->transformed_aabb =
         Utils::TransformAABB(mesh.mesh->original_aabb, trans.m_model);
@@ -41,7 +41,7 @@ nlohmann::json TransformSystem::Serialize(Scene &current_scene) {
   ZoneScoped;
   nlohmann::json sys_json;
 
-  auto sys_view = current_scene.m_registry.view<Transform>();
+  auto sys_view = current_scene.registry.view<Transform>();
 
   for (auto [e, transform] : sys_view.each()) {
     nlohmann::json comp_json;
@@ -64,8 +64,8 @@ void TransformSystem::Deserialize(Scene &current_scene,
     t.m_euler = entry["euler"];
     t.m_scale = entry["scale"];
 
-    e = current_scene.m_registry.create(e);
-    current_scene.m_registry.emplace<Transform>(e, t);
+    e = current_scene.registry.create(e);
+    current_scene.registry.emplace<Transform>(e, t);
   }
 }
 } // namespace gem

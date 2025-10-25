@@ -24,7 +24,7 @@ void try_update_mesh_component(MeshComponent &mc) {
 void MeshSystem::Update(Scene &current_scene) {
   ZoneScoped;
 
-  auto mesh_view = current_scene.m_registry.view<MeshComponent>();
+  auto mesh_view = current_scene.registry.view<MeshComponent>();
 
   for (auto [e, meshc] : mesh_view.each()) {
     if (meshc.mesh->vao.m_vao_id == INVALID_GL_HANDLE) {
@@ -37,7 +37,7 @@ nlohmann::json MeshSystem::Serialize(Scene &current_scene) {
   ZoneScoped;
 
   nlohmann::json sys_json{};
-  auto view = current_scene.m_registry.view<MeshComponent>();
+  auto view = current_scene.registry.view<MeshComponent>();
   for (auto [e, mesh] : view.each()) {
     nlohmann::json comp_json{};
     comp_json["asset_handle"] = mesh.handle;
@@ -61,8 +61,8 @@ void MeshSystem::Deserialize(Scene &current_scene, nlohmann::json &sys_json) {
     // might be ok but could hit race
     try_update_mesh_component(mc);
 
-    e = current_scene.m_registry.create(e);
-    current_scene.m_registry.emplace<MeshComponent>(e, mc);
+    e = current_scene.registry.create(e);
+    current_scene.registry.emplace<MeshComponent>(e, mc);
   }
 }
 

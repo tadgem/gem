@@ -44,7 +44,7 @@ void tech::Shadow::DispatchShadowPass(GLFramebuffer &shadow_fb,
 
   for (Scene *current_scene : scenes) {
     auto renderables =
-        current_scene->m_registry.view<Transform, MeshComponent, Material>();
+        current_scene->registry.view<Transform, MeshComponent, Material>();
 
     for (auto [e, trans, emesh, ematerial] : renderables.each()) {
       shadow_shader.SetMat4f("model", trans.m_model);

@@ -8,9 +8,9 @@ namespace gem {
 class AssetManager;
 class Project {
 public:
-  std::vector<std::string> m_scene_paths;
-  std::vector<SerializableAssetHandle> m_project_assets;
-  std::string m_name;
+  std::vector<std::string> scene_paths;
+  std::vector<SerializableAssetHandle> project_assets;
+  std::string project_name;
 
   nlohmann::json Serialize(AssetManager &am);
   void Deserialize(AssetManager &am, nlohmann::json &proj_json);

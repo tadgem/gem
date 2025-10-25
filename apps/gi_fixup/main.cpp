@@ -20,8 +20,8 @@ void on_imgui(GLRenderer & renderer, Scene * s, glm::vec2 mouse_pos,
 {
     if (s->DoesEntityExist((u32) renderer.m_last_selected_entity))
     {
-        EntityData & data = s->m_registry.get<EntityData>(renderer.m_last_selected_entity);
-        ImGui::Begin(data.m_name.c_str());
+        EntityData & data = s->registry.get<EntityData>(renderer.m_last_selected_entity);
+        ImGui::Begin(data.entity_name.c_str());
         // do each component ImGui
         ImGui::End();
     }

@@ -13,11 +13,11 @@ void on_im3d(GLRenderer & renderer, Scene & current_scene)
         return;
     }
 
-    if (!current_scene.m_registry.any_of<GLMesh>(renderer.m_last_selected_entity))
+    if (!current_scene.registry.any_of<GLMesh>(renderer.m_last_selected_entity))
     {
         return;
     }
-    GLMesh & meshc = current_scene.m_registry.get<GLMesh>(renderer.m_last_selected_entity);
+    GLMesh & meshc = current_scene.registry.get<GLMesh>(renderer.m_last_selected_entity);
     Im3d::DrawAlignedBox(ToIm3D(meshc.transformed_aabb.min), ToIm3D(meshc.transformed_aabb.max));
 }
 
@@ -26,7 +26,7 @@ void on_imgui(GLRenderer & renderer, Scene * s, glm::vec2 mouse_pos,
 {
     if (s->DoesEntityExist((u32) renderer.m_last_selected_entity))
     {
-        EntityData & data = s->m_registry.get<EntityData>(renderer.m_last_selected_entity);
+        EntityData & data = s->registry.get<EntityData>(renderer.m_last_selected_entity);
         ImGui::Begin(data.m_name.c_str());
         // do each component ImGui
         ImGui::End();

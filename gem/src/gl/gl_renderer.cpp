@@ -275,7 +275,7 @@ void GLRenderer::Render(AssetManager &am, Camera &cam,
   DirectionalLight dir{};
   std::vector<PointLight> point_lights{};
   if (!scenes.empty()) {
-    auto dir_light_view = scenes.front()->m_registry.view<DirectionalLight>();
+    auto dir_light_view = scenes.front()->registry.view<DirectionalLight>();
     for (auto [e, dir_light_c] : dir_light_view.each()) {
       dir = dir_light_c;
       break;

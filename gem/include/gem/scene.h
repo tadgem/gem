@@ -33,21 +33,21 @@ public:
   void Update();
   void UpdateAABB(AABB &in);
 
-  const std::string m_name;
-  const HashString m_name_hash;
-  entt::registry m_registry;
-  AABB m_scene_bounding_volume;
+  const std::string scene_name;
+  const HashString scene_name_hash;
+  entt::registry registry;
+  AABB aabb;
 
   GEM_IMPL_ALLOC(Scene)
 
 protected:
-  u32 p_created_entity_count;
+  u32 created_entity_count_;
 };
 
 class Entity {
 public:
-  entt::entity m_handle;
-  Scene *m_scene;
+  entt::entity handle;
+  Scene *scene;
 
   Entity(Scene *escene, entt::entity e);
 
@@ -56,23 +56,23 @@ public:
   }
 
   template <typename _Ty, typename... Args> _Ty &AddComponent(Args &&...args) {
-    return m_scene->m_registry.emplace<_Ty>(m_handle,
+    return scene->registry.emplace<_Ty>(handle,
                                             std::forward<Args>(args)...);
   }
 
   template <typename _Ty> _Ty &GetComponent() {
-    return m_scene->m_registry.get<_Ty>(m_handle);
+    return scene->registry.get<_Ty>(handle);
   }
 
   template <typename _Ty> std::optional<_Ty> TryGetComponent() {
-    if (!m_scene->m_registry.any_of<_Ty>(m_handle)) {
+    if (!scene->registry.any_of<_Ty>(handle)) {
       return {};
     }
     return GetComponent<_Ty>();
   }
 
   template <typename _Ty> bool HasComponent() {
-    if (!m_scene->m_registry.any_of<_Ty>(m_handle)) {
+    if (!scene->registry.any_of<_Ty>(handle)) {
       return false;
     }
     return true;
@@ -83,8 +83,8 @@ public:
 
 // component which all entities must have
 struct EntityData {
-  std::string m_name;
-  Entity m_parent = Entity::INVALID();
+  std::string entity_name;
+  Entity parent = Entity::INVALID();
 };
 
 class SceneManager {
@@ -101,6 +101,6 @@ public:
 
   GEM_IMPL_ALLOC(SceneManager)
 protected:
-  std::vector<std::unique_ptr<Scene>> p_active_scenes;
+  std::vector<std::unique_ptr<Scene>> active_scenes_;
 };
 } // namespace gem

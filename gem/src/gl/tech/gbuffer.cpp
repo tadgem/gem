@@ -44,7 +44,7 @@ void tech::GBuffer::DispatchGBufferWithID(
 
   for (Scene *current_scene : scenes) {
     auto renderables =
-        current_scene->m_registry.view<Transform, MeshComponent, Material>();
+        current_scene->registry.view<Transform, MeshComponent, Material>();
 
     for (auto [e, trans, emesh, ematerial] : renderables.each()) {
 
@@ -89,7 +89,7 @@ void tech::GBuffer::DispatchGBufferTexturelessWithID(
 
   for (Scene *current_scene : scenes) {
     auto renderables =
-        current_scene->m_registry.view<Transform, MeshComponent, Material>();
+        current_scene->registry.view<Transform, MeshComponent, Material>();
 
     for (auto [e, trans, emesh, ematerial] : renderables.each()) {
       if (ematerial.program.m_shader_id !=

@@ -14,15 +14,15 @@
 namespace gem {
 
 Scene::Scene(const std::string &scene_name)
-    : m_name(scene_name), m_name_hash(scene_name) {
+    : scene_name(scene_name), scene_name_hash(scene_name) {
   ZoneScoped;
 }
 
 Entity Scene::CreateEntity(const std::string &name) {
   ZoneScoped;
-  entt::entity e = m_registry.create();
-  m_registry.emplace<EntityData>(e, EntityData{name});
-  p_created_entity_count++;
+  entt::entity e = registry.create();
+  registry.emplace<EntityData>(e, EntityData{name});
+  created_entity_count_++;
   return Entity(this, e);
 }
 
@@ -36,7 +36,7 @@ std::vector<Entity> Scene::CreateEntityFromModel(
   for (u32 i = 0; i < model_to_load.meshes.size(); i++) {
     auto &entry = model_to_load.meshes[i];
     std::stringstream entity_name;
-    entity_name << "Entity " << p_created_entity_count;
+    entity_name << "Entity " << created_entity_count_;
     Entity e = CreateEntity(entity_name.str());
 
     Transform &trans = e.AddComponent<Transform>();
@@ -67,7 +67,7 @@ std::vector<Entity> Scene::CreateEntityFromModel(
   glm::mat4 model_matrix = Utils::GetModelMatrix(ZERO, euler, scale);
 
   // TODO: Update to work from scene overall aabb
-  m_scene_bounding_volume = Utils::TransformAABB(
+  aabb = Utils::TransformAABB(
       model_to_load.aabb, model_matrix);
 
   return entities;
@@ -75,7 +75,7 @@ std::vector<Entity> Scene::CreateEntityFromModel(
 
 bool Scene::DoesEntityExist(u32 index) {
   ZoneScoped;
-  return m_registry.valid(entt::entity{index});
+  return registry.valid(entt::entity{index});
 }
 
 void Scene::Update() {
@@ -87,28 +87,28 @@ void Scene::Update() {
 
 void Scene::UpdateAABB(AABB &in) {
   ZoneScoped;
-  if (in.min.x < m_scene_bounding_volume.min.x) {
-    m_scene_bounding_volume.min.x = in.min.x;
+  if (in.min.x < aabb.min.x) {
+    aabb.min.x = in.min.x;
   }
-  if (in.min.y < m_scene_bounding_volume.min.y) {
-    m_scene_bounding_volume.min.y = in.min.y;
+  if (in.min.y < aabb.min.y) {
+    aabb.min.y = in.min.y;
   }
-  if (in.min.z < m_scene_bounding_volume.min.z) {
-    m_scene_bounding_volume.min.z = in.min.z;
+  if (in.min.z < aabb.min.z) {
+    aabb.min.z = in.min.z;
   }
 
-  if (in.max.x > m_scene_bounding_volume.max.x) {
-    m_scene_bounding_volume.max.x = in.max.x;
+  if (in.max.x > aabb.max.x) {
+    aabb.max.x = in.max.x;
   }
-  if (in.max.y > m_scene_bounding_volume.max.y) {
-    m_scene_bounding_volume.max.y = in.max.y;
+  if (in.max.y > aabb.max.y) {
+    aabb.max.y = in.max.y;
   }
-  if (in.max.z > m_scene_bounding_volume.max.z) {
-    m_scene_bounding_volume.max.z = in.max.z;
+  if (in.max.z > aabb.max.z) {
+    aabb.max.z = in.max.z;
   }
 }
 
-Entity::Entity(Scene *escene, entt::entity e) : m_scene(escene), m_handle(e) {
+Entity::Entity(Scene *escene, entt::entity e) : scene(escene), handle(e) {
   ZoneScoped;
 }
 
@@ -119,9 +119,9 @@ void SceneManager::CloseScene(HashString scene_hash) { ZoneScoped; }
 Scene *SceneManager::GetScene(HashString scene_hash) {
   ZoneScoped;
 
-  for (auto &scene : p_active_scenes) {
-    if (scene->m_name_hash == scene_hash) {
-      return p_active_scenes[scene_hash].get();
+  for (auto &scene : active_scenes_) {
+    if (scene->scene_name_hash == scene_hash) {
+      return active_scenes_[scene_hash].get();
     }
   }
   return nullptr;
@@ -135,15 +135,15 @@ Scene *SceneManager::CreateScene(const std::string &scene_name) {
     return existing_scene;
   }
 
-  p_active_scenes.emplace_back(std::make_unique<Scene>(scene_name));
-  return p_active_scenes.back().get();
+  active_scenes_.emplace_back(std::make_unique<Scene>(scene_name));
+  return active_scenes_.back().get();
 }
 
 Scene *SceneManager::LoadScene(nlohmann::json &scene_json) {
   ZoneScoped;
   std::string scene_name = scene_json["name"];
-  p_active_scenes.push_back(std::make_unique<Scene>(scene_name));
-  Scene *s = p_active_scenes.back().get();
+  active_scenes_.push_back(std::make_unique<Scene>(scene_name));
+  Scene *s = active_scenes_.back().get();
 
   for (auto &sys : Engine::systems.systems) {
     sys->Deserialize(
@@ -159,7 +159,7 @@ nlohmann::json SceneManager::SaveScene(Scene *ser_scene) {
 
   nlohmann::json json{};
 
-  json["name"] = ser_scene->m_name;
+  json["name"] = ser_scene->scene_name;
   json["systems"] = nlohmann::json();
 
   for (auto &sys : Engine::systems.systems) {

@@ -128,7 +128,7 @@ nlohmann::json MaterialSystem::Serialize(Scene &current_scene) {
 
   nlohmann::json sys_json;
 
-  auto sys_view = current_scene.m_registry.view<Material>();
+  auto sys_view = current_scene.registry.view<Material>();
 
   for (auto [e, mat] : sys_view.each()) {
     nlohmann::json comp_json;
@@ -165,7 +165,7 @@ void MaterialSystem::Deserialize(Scene &current_scene, nlohmann::json &sys_json)
 
   for (auto [entity, entry] : sys_json.items()) {
     entt::entity e = GetEntityIDFromString(entity);
-    e = current_scene.m_registry.create(e);
+    e = current_scene.registry.create(e);
     AssetHandle shader_handle = entry["shader"];
     auto *shader_asset =
         Engine::assets.GetAsset<GLShader, AssetType::shader>(shader_handle);
@@ -194,7 +194,7 @@ void MaterialSystem::Deserialize(Scene &current_scene, nlohmann::json &sys_json)
       }
       }
     }
-    current_scene.m_registry.emplace<Material>(e, mat);
+    current_scene.registry.emplace<Material>(e, mat);
   }
 }
 } // namespace gem

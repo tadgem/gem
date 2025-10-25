@@ -146,7 +146,7 @@ void editor_application::main_menu_bar()
 Project editor_application::create_project(const std::string& name, const std::string& path)
 {
     Project proj{};
-    proj.m_name = name;
+    proj.project_name = name;
     std::filesystem::current_path(std::filesystem::path(path));
     return proj;
 }

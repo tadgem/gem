@@ -8,17 +8,17 @@ nlohmann::json Project::Serialize(AssetManager &am) {
   ZoneScoped;
   nlohmann::json json{};
 
-  json["project_name"] = m_name;
-  json["project_assets"] = m_project_assets;
-  json["scenes"] = m_scene_paths;
+  json["project_name"] = project_name;
+  json["project_assets"] = project_assets;
+  json["scenes"] = scene_paths;
 
   return json;
 }
 
 void Project::Deserialize(AssetManager &am, nlohmann::json &proj_json) {
   ZoneScoped;
-  m_name = proj_json["project_name"];
-  m_project_assets = proj_json["project_assets"];
-  m_scene_paths = proj_json["scenes"];
+  project_name = proj_json["project_name"];
+  project_assets = proj_json["project_assets"];
+  scene_paths = proj_json["scenes"];
 }
 } // namespace gem
