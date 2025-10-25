@@ -48,7 +48,7 @@ void tech::Shadow::DispatchShadowPass(GLFramebuffer &shadow_fb,
 
     for (auto [e, trans, emesh, ematerial] : renderables.each()) {
       shadow_shader.SetMat4f("model", trans.m_model);
-      emesh.m_mesh->m_vao.Draw();
+      emesh.mesh->vao.Draw();
     }
   }
 

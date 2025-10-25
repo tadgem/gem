@@ -49,11 +49,11 @@ void process_mesh(Model &model, aiMesh *m, aiNode *node, const aiScene *scene,
     Model::MeshEntry entry{};
     if (hasPositions && hasUVs && hasNormals) {
       for (unsigned int i = 0; i < m->mNumVertices; i++) {
-        entry.m_positions.push_back(
+        entry.positions.push_back(
             {m->mVertices[i].x, m->mVertices[i].y, m->mVertices[i].z});
-        entry.m_normals.push_back(
+        entry.normals.push_back(
             {m->mNormals[i].x, m->mNormals[i].y, m->mNormals[i].z});
-        entry.m_uvs.push_back(
+        entry.uvs.push_back(
             {m->mTextureCoords[0][i].x, m->mTextureCoords[0][i].y});
       }
     }
@@ -68,15 +68,15 @@ void process_mesh(Model &model, aiMesh *m, aiNode *node, const aiScene *scene,
         }
         for (unsigned int index = 0; index < m->mFaces[i].mNumIndices;
              index++) {
-          entry.m_indices.push_back(
+          entry.indices.push_back(
               static_cast<uint32_t>(m->mFaces[i].mIndices[index]));
         }
       }
     }
     AABB bb = {{m->mAABB.mMin.x, m->mAABB.mMin.y, m->mAABB.mMin.z},
                {m->mAABB.mMax.x, m->mAABB.mMax.y, m->mAABB.mMax.z}};
-    entry.m_mesh_aabb = bb;
-    entry.m_material_index = m->mMaterialIndex;
+    entry.mesh_aabb = bb;
+    entry.material_index = m->mMaterialIndex;
     mesh_entries.push_back(entry);
   } else {
     std::vector<float> verts;
@@ -121,12 +121,12 @@ void process_mesh(Model &model, aiMesh *m, aiNode *node, const aiScene *scene,
                {m->mAABB.mMax.x, m->mAABB.mMax.y, m->mAABB.mMax.z}};
 
     AMesh* new_mesh = new AMesh();
-    new_mesh->m_vao = mesh_builder.BuildVAO();
-    new_mesh->m_index_count = indices.size();
-    new_mesh->m_original_aabb = bb;
-    new_mesh->m_material_index = m->mMaterialIndex;
+    new_mesh->vao = mesh_builder.BuildVAO();
+    new_mesh->index_count = indices.size();
+    new_mesh->original_aabb = bb;
+    new_mesh->material_index = m->mMaterialIndex;
 
-    model.m_meshes.push_back(new_mesh);
+    model.meshes.push_back(new_mesh);
   }
 }
 
@@ -167,7 +167,7 @@ void get_material_texture(const std::string &directory, aiMaterial *material,
     AssetHandle h(final_path, AssetType::texture);
     TextureEntry tex_entry(gl_texture_type, h, final_path, tex);
 
-    mat.m_material_maps[gl_texture_type] = tex_entry;
+    mat.material_maps[gl_texture_type] = tex_entry;
   }
 }
 
@@ -186,7 +186,7 @@ void get_material_texture_entry(const std::string &directory,
 
     AssetHandle h(final_path, AssetType::texture);
     TextureEntry texture_entry(gl_texture_type, h, final_path, nullptr);
-    mat.m_material_maps[gl_texture_type] = texture_entry;
+    mat.material_maps[gl_texture_type] = texture_entry;
     texture_entries.push_back(texture_entry);
   }
 }
@@ -210,28 +210,28 @@ Model Model::LoadModelAndTextures(const std::string &path) {
   AABB model_aabb{};
   process_node(m, scene->mRootNode, scene, false, mesh_entries);
 
-  for (auto &mesh : m.m_meshes) {
-    if (mesh->m_original_aabb.min.x < model_aabb.min.x) {
-      model_aabb.min.x = mesh->m_original_aabb.min.x;
+  for (auto &mesh : m.meshes) {
+    if (mesh->original_aabb.min.x < model_aabb.min.x) {
+      model_aabb.min.x = mesh->original_aabb.min.x;
     }
-    if (mesh->m_original_aabb.min.y < model_aabb.min.y) {
-      model_aabb.min.y = mesh->m_original_aabb.min.y;
+    if (mesh->original_aabb.min.y < model_aabb.min.y) {
+      model_aabb.min.y = mesh->original_aabb.min.y;
     }
-    if (mesh->m_original_aabb.min.z < model_aabb.min.z) {
-      model_aabb.min.z = mesh->m_original_aabb.min.z;
+    if (mesh->original_aabb.min.z < model_aabb.min.z) {
+      model_aabb.min.z = mesh->original_aabb.min.z;
     }
 
-    if (mesh->m_original_aabb.max.x > model_aabb.max.x) {
-      model_aabb.max.x = mesh->m_original_aabb.max.x;
+    if (mesh->original_aabb.max.x > model_aabb.max.x) {
+      model_aabb.max.x = mesh->original_aabb.max.x;
     }
-    if (mesh->m_original_aabb.max.y > model_aabb.max.y) {
-      model_aabb.max.y = mesh->m_original_aabb.max.y;
+    if (mesh->original_aabb.max.y > model_aabb.max.y) {
+      model_aabb.max.y = mesh->original_aabb.max.y;
     }
-    if (mesh->m_original_aabb.max.z > model_aabb.max.z) {
-      model_aabb.max.z = mesh->m_original_aabb.max.z;
+    if (mesh->original_aabb.max.z > model_aabb.max.z) {
+      model_aabb.max.z = mesh->original_aabb.max.z;
     }
   }
-  m.m_aabb = model_aabb;
+  m.aabb = model_aabb;
 
   std::string directory = path.substr(0, path.find_last_of('/') + 1);
   for (int i = 0; i < scene->mNumMaterials; i++) {
@@ -254,7 +254,7 @@ Model Model::LoadModelAndTextures(const std::string &path) {
     get_material_texture(directory, material, mat, aiTextureType_METALNESS,
                          TextureMapType::metallicness);
 
-    m.m_materials.push_back(mat);
+    m.materials.push_back(mat);
   }
 
   return m;
@@ -304,7 +304,7 @@ Model Model::LoadModelAndTextureEntries(
                                aiTextureType_METALNESS,
                                TextureMapType::metallicness, texture_entries);
 
-    m.m_materials.push_back(mat);
+    m.materials.push_back(mat);
   }
 
   return m;
@@ -313,34 +313,34 @@ Model Model::LoadModelAndTextureEntries(
 void Model::UpdateAABB() {
   ZoneScoped;
   AABB model_aabb{};
-  for (auto &mesh : m_meshes) {
-    if (mesh->m_original_aabb.min.x < model_aabb.min.x) {
-      model_aabb.min.x = mesh->m_original_aabb.min.x;
+  for (auto &mesh : meshes) {
+    if (mesh->original_aabb.min.x < model_aabb.min.x) {
+      model_aabb.min.x = mesh->original_aabb.min.x;
     }
-    if (mesh->m_original_aabb.min.y < model_aabb.min.y) {
-      model_aabb.min.y = mesh->m_original_aabb.min.y;
+    if (mesh->original_aabb.min.y < model_aabb.min.y) {
+      model_aabb.min.y = mesh->original_aabb.min.y;
     }
-    if (mesh->m_original_aabb.min.z < model_aabb.min.z) {
-      model_aabb.min.z = mesh->m_original_aabb.min.z;
+    if (mesh->original_aabb.min.z < model_aabb.min.z) {
+      model_aabb.min.z = mesh->original_aabb.min.z;
     }
 
-    if (mesh->m_original_aabb.max.x > model_aabb.max.x) {
-      model_aabb.max.x = mesh->m_original_aabb.max.x;
+    if (mesh->original_aabb.max.x > model_aabb.max.x) {
+      model_aabb.max.x = mesh->original_aabb.max.x;
     }
-    if (mesh->m_original_aabb.max.y > model_aabb.max.y) {
-      model_aabb.max.y = mesh->m_original_aabb.max.y;
+    if (mesh->original_aabb.max.y > model_aabb.max.y) {
+      model_aabb.max.y = mesh->original_aabb.max.y;
     }
-    if (mesh->m_original_aabb.max.z > model_aabb.max.z) {
-      model_aabb.max.z = mesh->m_original_aabb.max.z;
+    if (mesh->original_aabb.max.z > model_aabb.max.z) {
+      model_aabb.max.z = mesh->original_aabb.max.z;
     }
   }
-  m_aabb = model_aabb;
+  aabb = model_aabb;
 }
 
 void Model::Release() {
   ZoneScoped;
-  for (AMesh* m : m_meshes) {
-    m->m_vao.Release();
+  for (AMesh* m : meshes) {
+    m->vao.Release();
   }
 }
 } // namespace gem

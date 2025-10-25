@@ -10,17 +10,17 @@ namespace gem {
 class AMesh
 {
 public:
-  uint32_t  m_index_count;
-  AABB      m_original_aabb;
-  AABB      m_transformed_aabb;
-  uint32_t  m_material_index;
-  VAO       m_vao;
+  uint32_t  index_count;
+  AABB      original_aabb;
+  AABB      transformed_aabb;
+  uint32_t  material_index;
+  VAO       vao;
 };
 
 struct MeshComponent {
-  AMesh* m_mesh;
-  AssetHandle m_handle;
-  u32 m_mesh_index = 0;
+  AMesh* mesh;
+  AssetHandle handle;
+  u32 mesh_index = 0;
 };
 
 class MeshSystem : public ECSSystem {

@@ -13,11 +13,11 @@ void MeshSystem::Cleanup() { ZoneScoped; }
 void try_update_mesh_component(MeshComponent &mc) {
   ZoneScoped;
 
-  if (Engine::assets.GetLoadProgress(mc.m_handle) ==
+  if (Engine::assets.GetLoadProgress(mc.handle) ==
       AssetLoadProgress::loaded) {
     auto model_asset =
-        Engine::assets.GetAsset<Model, AssetType::model>(mc.m_handle);
-    mc.m_mesh = model_asset->data.m_meshes[mc.m_mesh_index];
+        Engine::assets.GetAsset<Model, AssetType::model>(mc.handle);
+    mc.mesh = model_asset->data.meshes[mc.mesh_index];
   }
 }
 
@@ -27,7 +27,7 @@ void MeshSystem::Update(Scene &current_scene) {
   auto mesh_view = current_scene.m_registry.view<MeshComponent>();
 
   for (auto [e, meshc] : mesh_view.each()) {
-    if (meshc.m_mesh->m_vao.m_vao_id == INVALID_GL_HANDLE) {
+    if (meshc.mesh->vao.m_vao_id == INVALID_GL_HANDLE) {
       try_update_mesh_component(meshc);
     }
   }
@@ -40,8 +40,8 @@ nlohmann::json MeshSystem::Serialize(Scene &current_scene) {
   auto view = current_scene.m_registry.view<MeshComponent>();
   for (auto [e, mesh] : view.each()) {
     nlohmann::json comp_json{};
-    comp_json["asset_handle"] = mesh.m_handle;
-    comp_json["mesh_index"] = mesh.m_mesh_index;
+    comp_json["asset_handle"] = mesh.handle;
+    comp_json["mesh_index"] = mesh.mesh_index;
     sys_json[GetEntityIDString(e)] = comp_json;
   }
   return sys_json;
@@ -54,8 +54,8 @@ void MeshSystem::Deserialize(Scene &current_scene, nlohmann::json &sys_json) {
     entt::entity e = GetEntityIDFromString(entity);
     MeshComponent mc{};
 
-    mc.m_handle = entry["asset_handle"];
-    mc.m_mesh_index = entry["mesh_index"];
+    mc.handle = entry["asset_handle"];
+    mc.mesh_index = entry["mesh_index"];
 
     // todo: only do this on update, allow scene serialization to be async
     // might be ok but could hit race

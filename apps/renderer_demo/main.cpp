@@ -18,7 +18,7 @@ void on_im3d(GLRenderer & renderer, Scene & current_scene)
         return;
     }
     GLMesh & meshc = current_scene.m_registry.get<GLMesh>(renderer.m_last_selected_entity);
-    Im3d::DrawAlignedBox(ToIm3D(meshc.m_transformed_aabb.min), ToIm3D(meshc.m_transformed_aabb.max));
+    Im3d::DrawAlignedBox(ToIm3D(meshc.transformed_aabb.min), ToIm3D(meshc.transformed_aabb.max));
 }
 
 void on_imgui(GLRenderer & renderer, Scene * s, glm::vec2 mouse_pos,

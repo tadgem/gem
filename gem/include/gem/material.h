@@ -17,17 +17,17 @@ class Material {
 public:
   Material(AssetHandle shader_handle, GLShader &shader_program);
 
-  std::map<std::string, GLShader::UniformType> m_uniforms;
-  std::map<std::string, std::any> m_uniform_values;
+  std::map<std::string, GLShader::UniformType> uniforms;
+  std::map<std::string, std::any> uniform_values;
 
   template <typename _Ty>
   bool SetUniformValue(const std::string &name, const _Ty &val) {
 #ifdef ENABLE_MATERIAL_UNIFORM_CHECKS
-    if (m_uniforms.find(name) == m_uniforms.end()) {
+    if (uniforms.find(name) == uniforms.end()) {
       return false;
     }
 #endif
-    m_uniform_values[name] = val;
+    uniform_values[name] = val;
     return true;
   }
 
@@ -37,8 +37,8 @@ public:
 
   void BindUniforms(AssetManager &am);
 
-  GLShader &m_prog;
-  const AssetHandle m_shader_handle;
+  GLShader &program;
+  const AssetHandle shader_handle;
 };
 
 class MaterialSystem : public ECSSystem {

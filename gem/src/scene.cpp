@@ -33,8 +33,8 @@ std::vector<Entity> Scene::CreateEntityFromModel(
     std::map<std::string, TextureMapType> known_maps) {
   ZoneScoped;
   std::vector<Entity> entities{};
-  for (u32 i = 0; i < model_to_load.m_meshes.size(); i++) {
-    auto &entry = model_to_load.m_meshes[i];
+  for (u32 i = 0; i < model_to_load.meshes.size(); i++) {
+    auto &entry = model_to_load.meshes[i];
     std::stringstream entity_name;
     entity_name << "Entity " << p_created_entity_count;
     Entity e = CreateEntity(entity_name.str());
@@ -51,11 +51,11 @@ std::vector<Entity> Scene::CreateEntityFromModel(
     for (auto &[uniform_name, map_type] : known_maps) {
       // check if material has desired map type
       Model::MaterialEntry &material_entry =
-          model_to_load.m_materials[entry->m_material_index];
-      if (material_entry.m_material_maps.find(map_type) !=
-          material_entry.m_material_maps.end()) {
+          model_to_load.materials[entry->material_index];
+      if (material_entry.material_maps.find(map_type) !=
+          material_entry.material_maps.end()) {
         current_mat.SetSampler(uniform_name, texture_slot,
-                                material_entry.m_material_maps[map_type],
+                                material_entry.material_maps[map_type],
                                 GL_TEXTURE_2D);
 
         texture_slot++;
@@ -68,7 +68,7 @@ std::vector<Entity> Scene::CreateEntityFromModel(
 
   // TODO: Update to work from scene overall aabb
   m_scene_bounding_volume = Utils::TransformAABB(
-      model_to_load.m_aabb, model_matrix);
+      model_to_load.aabb, model_matrix);
 
   return entities;
 }

@@ -10,7 +10,7 @@
 namespace gem {
 
 Material::Material(AssetHandle shader_handle, GLShader &program)
-    : m_prog(program), m_shader_handle(shader_handle) {
+    : program(program), shader_handle(shader_handle) {
   ZoneScoped;
   int uniform_count;
   GLint size;  // size of the variable
@@ -19,14 +19,14 @@ Material::Material(AssetHandle shader_handle, GLShader &program)
   const GLsizei bufSize = 16; // maximum name length
   GLchar name[bufSize];       // variable name in GLSL
   GLsizei length;             // name length
-  glGetProgramiv(m_prog.m_shader_id, GL_ACTIVE_UNIFORMS, &uniform_count);
+  glGetProgramiv(program.m_shader_id, GL_ACTIVE_UNIFORMS, &uniform_count);
 
   for (int i = 0; i < uniform_count; i++) {
-    glGetActiveUniform(m_prog.m_shader_id, (GLuint)i, bufSize, &length, &size,
+    glGetActiveUniform(program.m_shader_id, (GLuint)i, bufSize, &length, &size,
                        &type, name);
     std::string uname = std::string(name);
     GLShader::UniformType utype = GLShader::GetUniformTypeFromGL(type);
-    m_uniforms.emplace(uname, utype);
+    uniforms.emplace(uname, utype);
   }
 }
 
@@ -34,12 +34,12 @@ bool Material::SetSampler(const std::string &sampler_name, GLenum texture_slot,
                            TextureEntry &tex_entry, GLenum texture_target) {
   ZoneScoped;
 #ifdef ENABLE_MATERIAL_UNIFORM_CHECKS
-  if (m_uniforms.find(sampler_name) == m_uniforms.end()) {
+  if (uniforms.find(sampler_name) == uniforms.end()) {
     return false;
   }
 #endif
 
-  m_uniform_values[sampler_name] =
+  uniform_values[sampler_name] =
       SamplerInfo{texture_slot, texture_target, tex_entry};
 
   return true;
@@ -47,18 +47,18 @@ bool Material::SetSampler(const std::string &sampler_name, GLenum texture_slot,
 
 void Material::BindUniforms(AssetManager &am) {
   ZoneScoped;
-  m_prog.Use();
-  for (auto &[name, val] : m_uniform_values) {
+  program.Use();
+  for (auto &[name, val] : uniform_values) {
 #ifdef ENABLE_MATERIAL_UNIFORM_CHECKS
-    if (m_uniforms.find(name) == m_uniforms.end()) {
+    if (uniforms.find(name) == uniforms.end()) {
       continue;
     }
 #endif
-    switch (m_uniforms[name]) {
+    switch (uniforms[name]) {
       // TODO: Image attachments for compute shaders....
     case GLShader::UniformType::sampler2D:
     case GLShader::UniformType::sampler3D: {
-      SamplerInfo info = std::any_cast<SamplerInfo>(m_uniform_values[name]);
+      SamplerInfo info = std::any_cast<SamplerInfo>(uniform_values[name]);
       if (info.tex_entry.m_texture == nullptr) {
         TextureAsset *ta =
             am.GetAsset<Texture, AssetType::texture>(info.tex_entry.m_handle);
@@ -68,47 +68,47 @@ void Material::BindUniforms(AssetManager &am) {
         if (ta->data.m_handle != INVALID_GL_HANDLE) {
           info.tex_entry.m_texture = &ta->data;
         }
-        m_uniform_values[name] = info;
+        uniform_values[name] = info;
       }
       int loc = info.sampler_slot - GL_TEXTURE0;
-      m_prog.SetInt(name, loc);
+      program.SetInt(name, loc);
       Texture::BindSamplerHandle(info.tex_entry.m_texture->m_handle,
                                    info.sampler_slot);
       break;
     }
     case GLShader::UniformType::_int: {
-      int iv = std::any_cast<int>(m_uniform_values[name]);
-      m_prog.SetInt(name, iv);
+      int iv = std::any_cast<int>(uniform_values[name]);
+      program.SetInt(name, iv);
       break;
     }
     case GLShader::UniformType::_float: {
-      float fv = std::any_cast<float>(m_uniform_values[name]);
-      m_prog.SetFloat(name, fv);
+      float fv = std::any_cast<float>(uniform_values[name]);
+      program.SetFloat(name, fv);
       break;
     }
     case GLShader::UniformType::vec2: {
-      glm::vec2 v2 = std::any_cast<glm::vec2>(m_uniform_values[name]);
-      m_prog.SetVec2f(name, v2);
+      glm::vec2 v2 = std::any_cast<glm::vec2>(uniform_values[name]);
+      program.SetVec2f(name, v2);
       break;
     }
     case GLShader::UniformType::vec3: {
-      glm::vec3 v3 = std::any_cast<glm::vec3>(m_uniform_values[name]);
-      m_prog.SetVec3f(name, v3);
+      glm::vec3 v3 = std::any_cast<glm::vec3>(uniform_values[name]);
+      program.SetVec3f(name, v3);
       break;
     }
     case GLShader::UniformType::vec4: {
-      glm::vec4 v4 = std::any_cast<glm::vec4>(m_uniform_values[name]);
-      m_prog.SetVec4f(name, v4);
+      glm::vec4 v4 = std::any_cast<glm::vec4>(uniform_values[name]);
+      program.SetVec4f(name, v4);
       break;
     }
     case GLShader::UniformType::mat3: {
-      glm::mat3 m3 = std::any_cast<glm::mat3>(m_uniform_values[name]);
-      m_prog.SetMat3f(name, m3);
+      glm::mat3 m3 = std::any_cast<glm::mat3>(uniform_values[name]);
+      program.SetMat3f(name, m3);
       break;
     }
     case GLShader::UniformType::mat4: {
-      glm::mat4 m4 = std::any_cast<glm::mat4>(m_uniform_values[name]);
-      m_prog.SetMat4f(name, m4);
+      glm::mat4 m4 = std::any_cast<glm::mat4>(uniform_values[name]);
+      program.SetMat4f(name, m4);
       break;
     }
     default:
@@ -132,17 +132,17 @@ nlohmann::json MaterialSystem::Serialize(Scene &current_scene) {
 
   for (auto [e, mat] : sys_view.each()) {
     nlohmann::json comp_json;
-    comp_json["shader"] = mat.m_shader_handle;
+    comp_json["shader"] = mat.shader_handle;
     comp_json["uniforms"] = nlohmann::json();
-    for (auto [name, uniform_type] : mat.m_uniforms) {
-      if (mat.m_uniform_values.find(name) != mat.m_uniform_values.end()) {
+    for (auto [name, uniform_type] : mat.uniforms) {
+      if (mat.uniform_values.find(name) != mat.uniform_values.end()) {
         nlohmann::json uniform_json{};
         uniform_json["uniform_type"] = uniform_type;
         switch (uniform_type) {
         case GLShader::UniformType::sampler2D:
         case GLShader::UniformType::sampler3D: {
           SamplerInfo info =
-              std::any_cast<SamplerInfo>(mat.m_uniform_values[name]);
+              std::any_cast<SamplerInfo>(mat.uniform_values[name]);
           uniform_json["slot"] = info.sampler_slot;
           uniform_json["target"] = info.texture_target;
           uniform_json["entry"] = info.tex_entry;

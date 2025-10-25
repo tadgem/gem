@@ -70,8 +70,8 @@ void add_cube(AssetManager &am) {
   Shapes::s_cube_mesh = new AMesh{36, cube_bb, cube_bb, 0, Shapes::s_cube_vao};
 
   Model cube_model{};
-  cube_model.m_meshes.push_back(Shapes::s_cube_mesh);
-  cube_model.m_aabb = Shapes::s_cube_mesh->m_original_aabb;
+  cube_model.meshes.push_back(Shapes::s_cube_mesh);
+  cube_model.aabb = Shapes::s_cube_mesh->original_aabb;
 
   am.provide_asset<Model, AssetType::model>("cube", cube_model);
 }
@@ -592,8 +592,8 @@ void add_cylinder(AssetManager &am) {
       new AMesh{36, cube_bb, cube_bb, 0, Shapes::s_cylinder_vao};
 
   Model cylinder_model{};
-  cylinder_model.m_meshes.push_back(Shapes::s_cylinder_mesh);
-  cylinder_model.m_aabb = Shapes::s_cylinder_mesh->m_original_aabb;
+  cylinder_model.meshes.push_back(Shapes::s_cylinder_mesh);
+  cylinder_model.aabb = Shapes::s_cylinder_mesh->original_aabb;
 
   am.provide_asset<Model, AssetType::model>("cylinder", cylinder_model);
 }
@@ -864,8 +864,8 @@ void add_cone(AssetManager &am) {
   Shapes::s_cone_mesh = new AMesh{ 36, cube_bb, cube_bb, 0, Shapes::s_cone_vao};
 
   Model cone_model{};
-  cone_model.m_meshes.push_back(Shapes::s_cone_mesh);
-  cone_model.m_aabb = Shapes::s_cone_mesh->m_original_aabb;
+  cone_model.meshes.push_back(Shapes::s_cone_mesh);
+  cone_model.aabb = Shapes::s_cone_mesh->original_aabb;
 
   am.provide_asset<Model, AssetType::model>("cone", cone_model);
 }
@@ -5496,8 +5496,8 @@ void add_torus(AssetManager &am) {
   Shapes::s_torus_mesh = new AMesh{ 36, cube_bb, cube_bb, 0, Shapes::s_torus_vao};
 
   Model torus_model{};
-  torus_model.m_meshes.push_back(Shapes::s_torus_mesh);
-  torus_model.m_aabb = Shapes::s_torus_mesh->m_original_aabb;
+  torus_model.meshes.push_back(Shapes::s_torus_mesh);
+  torus_model.aabb = Shapes::s_torus_mesh->original_aabb;
 
   am.provide_asset<Model, AssetType::model>("torus", torus_model);
 }
@@ -9360,8 +9360,8 @@ void add_sphere(AssetManager &am) {
       new AMesh{ sphere_num_verts, sphere_bb, sphere_bb, 0, Shapes::s_sphere_vao};
 
   Model sphere_model{};
-  sphere_model.m_meshes.push_back(Shapes::s_sphere_mesh);
-  sphere_model.m_aabb = Shapes::s_sphere_mesh->m_original_aabb;
+  sphere_model.meshes.push_back(Shapes::s_sphere_mesh);
+  sphere_model.aabb = Shapes::s_sphere_mesh->original_aabb;
 
   am.provide_asset<Model, AssetType::model>("sphere", sphere_model);
 }

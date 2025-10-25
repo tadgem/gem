@@ -11,24 +11,24 @@ namespace gem {
 class Model {
 public:
   struct MeshEntry {
-    std::vector<glm::vec3> m_positions;
-    std::vector<glm::vec3> m_normals;
-    std::vector<glm::vec2> m_uvs;
-    std::vector<u32> m_indices;
-    AABB m_mesh_aabb;
-    u32 m_material_index;
+    std::vector<glm::vec3> positions;
+    std::vector<glm::vec3> normals;
+    std::vector<glm::vec2> uvs;
+    std::vector<u32> indices;
+    AABB mesh_aabb;
+    u32 material_index;
 
     GEM_IMPL_ALLOC(MeshEntry)
   };
 
   struct MaterialEntry {
-    std::unordered_map<TextureMapType, TextureEntry> m_material_maps;
+    std::unordered_map<TextureMapType, TextureEntry> material_maps;
     GEM_IMPL_ALLOC(MaterialEntry);
   };
 
-  std::vector<AMesh*> m_meshes;
-  std::vector<MaterialEntry> m_materials;
-  AABB m_aabb;
+  std::vector<AMesh*> meshes;
+  std::vector<MaterialEntry> materials;
+  AABB aabb;
 
   static Model LoadModelAndTextures(const std::string &path);
   static Model

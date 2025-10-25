@@ -23,8 +23,8 @@ void Transform::UpdateTransforms(Scene &current_scene) {
 
   auto transform_mesh_view = current_scene.m_registry.view<Transform, MeshComponent>();
   for (auto [e, trans, mesh] : transform_mesh_view.each()) {
-    mesh.m_mesh->m_transformed_aabb =
-        Utils::TransformAABB(mesh.m_mesh->m_original_aabb, trans.m_model);
+    mesh.mesh->transformed_aabb =
+        Utils::TransformAABB(mesh.mesh->original_aabb, trans.m_model);
   }
 }
 

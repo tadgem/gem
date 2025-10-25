@@ -137,7 +137,7 @@ int main()
                 {"u_ao_map",        TextureMapType::ao}
             });
         glm::mat4 model = Utils::GetModelMatrix(glm::vec3(0.0), glm::vec3(0.0), glm::vec3(0.1));
-        renderer.m_voxel_data.current_bounding_box = Utils::TransformAABB(ma->data.m_aabb, model);
+        renderer.m_voxel_data.current_bounding_box = Utils::TransformAABB(ma->data.aabb, model);
     });
 
     auto cube_entity = s->CreateEntity("Test Cube");

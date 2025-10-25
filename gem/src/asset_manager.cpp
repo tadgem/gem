@@ -255,15 +255,15 @@ void submit_meshes_to_gpu(AssetIntermediate *model_asset) {
   VAOBuilder mesh_builder{};
   mesh_builder.Begin();
   std::vector<float> buffer;
-  for (int i = 0; i < entry.m_positions.size(); i++) {
-    buffer.push_back(entry.m_positions[i].x);
-    buffer.push_back(entry.m_positions[i].y);
-    buffer.push_back(entry.m_positions[i].z);
-    buffer.push_back(entry.m_normals[i].x);
-    buffer.push_back(entry.m_normals[i].y);
-    buffer.push_back(entry.m_normals[i].z);
-    buffer.push_back(entry.m_uvs[i].x);
-    buffer.push_back(entry.m_uvs[i].y);
+  for (int i = 0; i < entry.positions.size(); i++) {
+    buffer.push_back(entry.positions[i].x);
+    buffer.push_back(entry.positions[i].y);
+    buffer.push_back(entry.positions[i].z);
+    buffer.push_back(entry.normals[i].x);
+    buffer.push_back(entry.normals[i].y);
+    buffer.push_back(entry.normals[i].z);
+    buffer.push_back(entry.uvs[i].x);
+    buffer.push_back(entry.uvs[i].y);
   }
 
   mesh_builder.AddVertexBuffer(buffer);
@@ -272,19 +272,19 @@ void submit_meshes_to_gpu(AssetIntermediate *model_asset) {
   mesh_builder.AddVertexAttribute(2, 8 * sizeof(float), 2);
 
   std::vector<u32> indices;
-  for (int i = 0; i < entry.m_indices.size(); i++) {
-    indices.push_back(entry.m_indices[i]);
+  for (int i = 0; i < entry.indices.size(); i++) {
+    indices.push_back(entry.indices[i]);
   }
 
   mesh_builder.AddIndexBuffer(indices);
   AMesh* m = new AMesh();
-  m->m_index_count = static_cast<u32>(indices.size());
-  m->m_material_index = entry.m_material_index;
-  m->m_original_aabb = entry.m_mesh_aabb;
-  m->m_vao = mesh_builder.BuildVAO();
+  m->index_count = static_cast<u32>(indices.size());
+  m->material_index = entry.material_index;
+  m->original_aabb = entry.mesh_aabb;
+  m->vao = mesh_builder.BuildVAO();
   // create real mesh object on gpu
 
-  ma->data.m_meshes.push_back(m);
+  ma->data.meshes.push_back(m);
   inter->intermediate.erase(inter->intermediate.begin());
 }
 

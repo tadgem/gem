@@ -48,7 +48,7 @@ void tech::GBuffer::DispatchGBufferWithID(
 
     for (auto [e, trans, emesh, ematerial] : renderables.each()) {
 
-      if (ematerial.m_prog.m_shader_id != gbuffer_shader.m_shader_id) {
+      if (ematerial.program.m_shader_id != gbuffer_shader.m_shader_id) {
         continue;
       }
 
@@ -58,7 +58,7 @@ void tech::GBuffer::DispatchGBufferWithID(
       gbuffer_shader.SetMat4f("u_normal", trans.m_normal_matrix);
       int entity_index = static_cast<int>(e);
       gbuffer_shader.SetInt("u_entity_index", entity_index);
-      emesh.m_mesh->m_vao.Draw();
+      emesh.mesh->vao.Draw();
     }
   }
   gbuffer.Unbind();
@@ -92,7 +92,7 @@ void tech::GBuffer::DispatchGBufferTexturelessWithID(
         current_scene->m_registry.view<Transform, MeshComponent, Material>();
 
     for (auto [e, trans, emesh, ematerial] : renderables.each()) {
-      if (ematerial.m_prog.m_shader_id !=
+      if (ematerial.program.m_shader_id !=
           gbuffer_textureless_shader.m_shader_id) {
         continue;
       }
@@ -103,7 +103,7 @@ void tech::GBuffer::DispatchGBufferTexturelessWithID(
 
       int entity_index = static_cast<int>(e);
       gbuffer_textureless_shader.SetInt("u_entity_index", entity_index);
-      emesh.m_mesh->m_vao.Draw();
+      emesh.mesh->vao.Draw();
     }
   }
   gbuffer.Unbind();
