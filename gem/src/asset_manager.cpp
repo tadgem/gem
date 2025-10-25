@@ -13,12 +13,12 @@ namespace gem {
 
 using texture_intermediate_asset =
     TAssetIntermediate<Texture, std::vector<unsigned char>,
-                         AssetType::texture>;
+                         AssetType::kTexture>;
 using model_intermediate_asset =
     TAssetIntermediate<Model, std::vector<Model::MeshEntry>,
-                         AssetType::model>;
+                         AssetType::kModel>;
 using shader_intermediate_asset =
-    TAssetIntermediate<GLShader, std::string, AssetType::shader>;
+    TAssetIntermediate<GLShader, std::string, AssetType::kShader>;
 
 AssetHandle AssetManager::LoadAsset(const std::string &path,
                                        const AssetType &assetType,
@@ -249,7 +249,7 @@ void submit_meshes_to_gpu(AssetIntermediate *model_asset) {
   // cast to model asset
   model_intermediate_asset *inter =
       static_cast<model_intermediate_asset *>(model_asset);
-  TAsset<Model, AssetType::model> *ma = inter->get_concrete_asset();
+  TAsset<Model, AssetType::kModel> *ma = inter->get_concrete_asset();
   // go through each entry
   Model::MeshEntry &entry = inter->intermediate.front();
   VAOBuilder mesh_builder{};
@@ -293,7 +293,7 @@ void submit_texture_to_gpu(AssetIntermediate *texture_asset) {
   // cast to model asset
   texture_intermediate_asset *ta_inter =
       static_cast<texture_intermediate_asset *>(texture_asset);
-  TAsset<Texture, AssetType::texture> *ta = ta_inter->get_concrete_asset();
+  TAsset<Texture, AssetType::kTexture> *ta = ta_inter->get_concrete_asset();
 
   ta->data.SubmitToGPU();
   ta_inter->intermediate.clear();
@@ -315,8 +315,8 @@ AssetLoadResult load_model_asset_manager(const std::string &path) {
   // move this into a heap allocated object
   Model m = Model::LoadModelAndTextureEntries(path, associated_textures,
                                                 mesh_entries);
-  TAsset<Model, AssetType::model> *model_asset =
-      new TAsset<Model, AssetType::model>(m, path);
+  TAsset<Model, AssetType::kModel> *model_asset =
+      new TAsset<Model, AssetType::kModel>(m, path);
   model_intermediate_asset *model_intermediate =
       new model_intermediate_asset(model_asset, mesh_entries, path);
   std::string directory = Utils::GetDirFromPath(path);
@@ -324,7 +324,7 @@ AssetLoadResult load_model_asset_manager(const std::string &path) {
   AssetLoadResult ret{};
   for (auto &tex : associated_textures) {
     ret.new_assets_to_load.push_back(
-        AssetLoadInfo{tex.path, AssetType::texture});
+        AssetLoadInfo{tex.path, AssetType::kTexture});
   }
   for (int i = 0; i < mesh_entries.size(); i++) {
     ret.sync_load_tasks.push_back(submit_meshes_to_gpu);
@@ -336,8 +336,8 @@ AssetLoadResult load_model_asset_manager(const std::string &path) {
 
 void unload_model_asset_manager(Asset *_asset) {
   ZoneScoped;
-  TAsset<Model, AssetType::model> *ma =
-      static_cast<TAsset<Model, AssetType::model> *>(_asset);
+  TAsset<Model, AssetType::kModel> *ma =
+      static_cast<TAsset<Model, AssetType::kModel> *>(_asset);
   ma->data.Release();
 }
 
@@ -356,8 +356,8 @@ AssetLoadResult load_texture_asset_manager(const std::string &path) {
     t.LoadTextureSTB(binary);
   }
 
-  TAsset<Texture, AssetType::texture> *ta =
-      new TAsset<Texture, AssetType::texture>(t, path);
+  TAsset<Texture, AssetType::kTexture> *ta =
+      new TAsset<Texture, AssetType::kTexture>(t, path);
   texture_intermediate_asset *ta_inter =
       new texture_intermediate_asset(ta, binary, path);
 
@@ -367,8 +367,8 @@ AssetLoadResult load_texture_asset_manager(const std::string &path) {
 
 void unload_texture_asset_manager(Asset *_asset) {
   ZoneScoped;
-  TAsset<Texture, AssetType::texture> *ta =
-      static_cast<TAsset<Texture, AssetType::texture> *>(_asset);
+  TAsset<Texture, AssetType::kTexture> *ta =
+      static_cast<TAsset<Texture, AssetType::kTexture> *>(_asset);
   ta->data.ReleaseGPU();
 }
 
@@ -377,7 +377,7 @@ AssetLoadResult load_shader_asset_manager(const std::string &path) {
   std::string source = Utils::LoadStringFromPath(path);
   AssetLoadResult ret{};
   ret.loaded_asset_intermediate = new shader_intermediate_asset(
-      new TAsset<GLShader, AssetType::shader>(GLShader{}, path), source,
+      new TAsset<GLShader, AssetType::kShader>(GLShader{}, path), source,
       path);
   ret.sync_load_tasks.push_back(link_shader_program);
   ret.new_assets_to_load = {};
@@ -387,8 +387,8 @@ AssetLoadResult load_shader_asset_manager(const std::string &path) {
 
 void unload_shader_asset_manager(Asset *_asset) {
   ZoneScoped;
-  TAsset<GLShader, AssetType::shader> *sa =
-      static_cast<TAsset<GLShader, AssetType::shader> *>(_asset);
+  TAsset<GLShader, AssetType::kShader> *sa =
+      static_cast<TAsset<GLShader, AssetType::kShader> *>(_asset);
   sa->data.Release();
 }
 
@@ -396,17 +396,17 @@ void AssetManager::DispatchLoadTask(const AssetHandle &handle,
                                              AssetLoadInfo &info) {
   ZoneScoped;
   switch (info.asset_type) {
-  case AssetType::model:
+  case AssetType::kModel:
     pending_async_load_tasks_.emplace(
         handle, std::move(std::async(std::launch::async,
                                      load_model_asset_manager, info.path)));
     break;
-  case AssetType::texture:
+  case AssetType::kTexture:
     pending_async_load_tasks_.emplace(
         handle, std::move(std::async(std::launch::async,
                                      load_texture_asset_manager, info.path)));
     break;
-  case AssetType::shader:
+  case AssetType::kShader:
     pending_async_load_tasks_.emplace(
         handle, std::move(std::async(std::launch::async,
                                      load_shader_asset_manager, info.path)));
@@ -445,13 +445,13 @@ void AssetManager::UnloadAsset(const AssetHandle &handle) {
   }
 
   switch (handle.asset_type) {
-  case AssetType::model:
+  case AssetType::kModel:
     pending_unload_tasks_.emplace(handle, unload_model_asset_manager);
     break;
-  case AssetType::texture:
+  case AssetType::kTexture:
     pending_unload_tasks_.emplace(handle, unload_texture_asset_manager);
     break;
-  case AssetType::shader:
+  case AssetType::kShader:
     pending_unload_tasks_.emplace(handle, unload_shader_asset_manager);
     break;
   default:
@@ -535,7 +535,7 @@ void AssetManager::OnImGui() {
       std::filesystem::path p = ifd::FileDialog::Instance().GetResult();
       std::string res = p.u8string();
       printf("OPEN[%s]\n", res.c_str());
-      LoadAsset(res, AssetType::model);
+      LoadAsset(res, AssetType::kModel);
     }
     ifd::FileDialog::Instance().Close();
   }
@@ -545,7 +545,7 @@ void AssetManager::OnImGui() {
       std::filesystem::path p = ifd::FileDialog::Instance().GetResult();
       std::string res = p.u8string();
       printf("OPEN[%s]\n", res.c_str());
-      LoadAsset(res, AssetType::shader);
+      LoadAsset(res, AssetType::kShader);
     }
     ifd::FileDialog::Instance().Close();
   }

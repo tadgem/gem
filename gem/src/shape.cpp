@@ -73,7 +73,7 @@ void add_cube(AssetManager &am) {
   cube_model.meshes.push_back(Shapes::kCubeMesh);
   cube_model.aabb = Shapes::kCubeMesh->original_aabb;
 
-  am.provide_asset<Model, AssetType::model>("cube", cube_model);
+  am.provide_asset<Model, AssetType::kModel>("cube", cube_model);
 }
 
 void add_cylinder(AssetManager &am) {
@@ -595,7 +595,7 @@ void add_cylinder(AssetManager &am) {
   cylinder_model.meshes.push_back(Shapes::kCylinderMesh);
   cylinder_model.aabb = Shapes::kCylinderMesh->original_aabb;
 
-  am.provide_asset<Model, AssetType::model>("cylinder", cylinder_model);
+  am.provide_asset<Model, AssetType::kModel>("cylinder", cylinder_model);
 }
 
 void add_cone(AssetManager &am) {
@@ -867,7 +867,7 @@ void add_cone(AssetManager &am) {
   cone_model.meshes.push_back(Shapes::kConeMesh);
   cone_model.aabb = Shapes::kConeMesh->original_aabb;
 
-  am.provide_asset<Model, AssetType::model>("cone", cone_model);
+  am.provide_asset<Model, AssetType::kModel>("cone", cone_model);
 }
 
 void add_torus(AssetManager &am) {
@@ -5499,7 +5499,7 @@ void add_torus(AssetManager &am) {
   torus_model.meshes.push_back(Shapes::kTorusMesh);
   torus_model.aabb = Shapes::kTorusMesh->original_aabb;
 
-  am.provide_asset<Model, AssetType::model>("torus", torus_model);
+  am.provide_asset<Model, AssetType::kModel>("torus", torus_model);
 }
 
 void add_sphere(AssetManager &am) {
@@ -9363,7 +9363,7 @@ void add_sphere(AssetManager &am) {
   sphere_model.meshes.push_back(Shapes::kSphereMesh);
   sphere_model.aabb = Shapes::kSphereMesh->original_aabb;
 
-  am.provide_asset<Model, AssetType::model>("sphere", sphere_model);
+  am.provide_asset<Model, AssetType::kModel>("sphere", sphere_model);
 }
 
 void add_cube_pos_only() {

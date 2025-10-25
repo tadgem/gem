@@ -8,13 +8,13 @@
 namespace gem {
 
 enum class AssetType : u32 {
-  model,
-  texture,
-  shader,
-  audio,
-  text,
-  binary,
-  COUNT
+  kUnknown,
+  kModel,
+  kTexture,
+  kShader,
+  kAudio,
+  kText,
+  kBinary,
 };
 
 std::string get_asset_type_name(const AssetType &t);
@@ -23,7 +23,7 @@ struct AssetHandle {
   AssetType asset_type;
   HashString path_hash;
 
-  AssetHandle() : asset_type(AssetType::COUNT), path_hash(0) {};
+  AssetHandle() : asset_type(AssetType::kUnknown), path_hash(0) {};
   AssetHandle(const std::string &path, AssetType type);
   AssetHandle(const HashString &path_hash, AssetType type);
 
@@ -36,7 +36,7 @@ struct AssetHandle {
   }
 
   static AssetHandle INVALID() {
-    return AssetHandle(HashString(UINT64_MAX), AssetType::COUNT);
+    return AssetHandle(HashString(UINT64_MAX), AssetType::kUnknown);
   }
 
   NLOHMANN_DEFINE_TYPE_INTRUSIVE(AssetHandle, asset_type, path_hash);

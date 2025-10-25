@@ -15,7 +15,7 @@ public:
   efsw::WatchID watch_id;
 };
 
-void reload_shader(TAsset<shader, AssetType::shader> *shader_asset,
+void reload_shader(TAsset<shader, AssetType::kShader> *shader_asset,
                    std::string shader_source);
 
 } // namespace gem

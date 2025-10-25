@@ -42,5 +42,5 @@ public:
   GEM_IMPL_ALLOC(Model);
 };
 
-using ModelAsset = TAsset<Model, AssetType::model>;
+using ModelAsset = TAsset<Model, AssetType::kModel>;
 } // namespace gem

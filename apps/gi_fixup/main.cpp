@@ -124,7 +124,7 @@ int main()
     Material mat(renderer.gbuffer_shader->handle, renderer.gbuffer_shader->data);
     e.AddComponent<Material>(renderer.gbuffer_shader->handle, renderer.gbuffer_shader->data);
 
-    Engine::assets.LoadAsset("assets/models/sponza/Sponza.gltf", AssetType::model, [s, &renderer](Asset * a) {
+    Engine::assets.LoadAsset("assets/models/sponza/Sponza.gltf", AssetType::kModel, [s, &renderer](Asset * a) {
         spdlog::info("adding model to scene");
         auto* ma = dynamic_cast<ModelAsset *>(a);
         ma->data.UpdateAABB();

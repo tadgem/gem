@@ -61,7 +61,7 @@ void Material::BindUniforms(AssetManager &am) {
       SamplerInfo info = std::any_cast<SamplerInfo>(uniform_values[name]);
       if (info.tex_entry.texture_data == nullptr) {
         TextureAsset *ta =
-            am.GetAsset<Texture, AssetType::texture>(info.tex_entry.handle);
+            am.GetAsset<Texture, AssetType::kTexture>(info.tex_entry.handle);
         if (!ta) {
           continue;
         }
@@ -168,7 +168,7 @@ void MaterialSystem::Deserialize(Scene &current_scene, nlohmann::json &sys_json)
     e = current_scene.registry.create(e);
     AssetHandle shader_handle = entry["shader"];
     auto *shader_asset =
-        Engine::assets.GetAsset<GLShader, AssetType::shader>(shader_handle);
+        Engine::assets.GetAsset<GLShader, AssetType::kShader>(shader_handle);
     Material mat(shader_handle, shader_asset->data);
 
     nlohmann::json uniforms = entry["uniforms"];

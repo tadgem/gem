@@ -10,13 +10,13 @@ Asset::Asset(const std::string &p, AssetType type)
 std::string get_asset_type_name(const AssetType &t) {
   ZoneScoped;
   switch (t) {
-  case AssetType::model:
+  case AssetType::kModel:
     return "model";
-  case AssetType::text:
+  case AssetType::kText:
     return "text";
-  case AssetType::texture:
+  case AssetType::kTexture:
     return "texture";
-  case AssetType::shader:
+  case AssetType::kShader:
     return "shader";
   }
 

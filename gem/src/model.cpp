@@ -164,7 +164,7 @@ void get_material_texture(const std::string &directory, aiMaterial *material,
     spdlog::info("Loading Texture at Path: {}", final_path);
     Texture *tex = new Texture(final_path);
 
-    AssetHandle h(final_path, AssetType::texture);
+    AssetHandle h(final_path, AssetType::kTexture);
     TextureEntry tex_entry(gl_texture_type, h, final_path, tex);
 
     mat.material_maps[gl_texture_type] = tex_entry;
@@ -184,7 +184,7 @@ void get_material_texture_entry(const std::string &directory,
     aiGetMaterialTexture(material, ass_texture_type, 0, &resultPath);
     std::string final_path = directory + std::string(resultPath.C_Str());
 
-    AssetHandle h(final_path, AssetType::texture);
+    AssetHandle h(final_path, AssetType::kTexture);
     TextureEntry texture_entry(gl_texture_type, h, final_path, nullptr);
     mat.material_maps[gl_texture_type] = texture_entry;
     texture_entries.push_back(texture_entry);

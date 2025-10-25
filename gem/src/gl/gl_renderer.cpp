@@ -25,69 +25,69 @@ void GLRenderer::Init(AssetManager &am, glm::ivec2 resolution) {
   frame_index = 0;
   im3d_state = GLIm3d::LoadIm3D();
 
-  am.LoadAsset("assets/shaders/gbuffer.shader", AssetType::shader);
-  am.LoadAsset("assets/shaders/gbuffer_textureless.shader", AssetType::shader);
-  am.LoadAsset("assets/shaders/lighting.shader", AssetType::shader);
-  am.LoadAsset("assets/shaders/forward_lighting.shader", AssetType::shader);
-  am.LoadAsset("assets/shaders/visualize_3d_tex.shader", AssetType::shader);
+  am.LoadAsset("assets/shaders/gbuffer.shader", AssetType::kShader);
+  am.LoadAsset("assets/shaders/gbuffer_textureless.shader", AssetType::kShader);
+  am.LoadAsset("assets/shaders/lighting.shader", AssetType::kShader);
+  am.LoadAsset("assets/shaders/forward_lighting.shader", AssetType::kShader);
+  am.LoadAsset("assets/shaders/visualize_3d_tex.shader", AssetType::kShader);
   am.LoadAsset("assets/shaders/visualize_3d_tex_instances.shader",
-                AssetType::shader);
-  am.LoadAsset("assets/shaders/present.shader", AssetType::shader);
-  am.LoadAsset("assets/shaders/dir_light_shadow.shader", AssetType::shader);
-  am.LoadAsset("assets/shaders/voxel_cone_tracing.shader", AssetType::shader);
-  am.LoadAsset("assets/shaders/ssr.shader", AssetType::shader);
-  am.LoadAsset("assets/shaders/taa.shader", AssetType::shader);
-  am.LoadAsset("assets/shaders/denoise.shader", AssetType::shader);
-  am.LoadAsset("assets/shaders/gi_combine.shader", AssetType::shader);
-  am.LoadAsset("assets/shaders/downsample.shader", AssetType::shader);
+                AssetType::kShader);
+  am.LoadAsset("assets/shaders/present.shader", AssetType::kShader);
+  am.LoadAsset("assets/shaders/dir_light_shadow.shader", AssetType::kShader);
+  am.LoadAsset("assets/shaders/voxel_cone_tracing.shader", AssetType::kShader);
+  am.LoadAsset("assets/shaders/ssr.shader", AssetType::kShader);
+  am.LoadAsset("assets/shaders/taa.shader", AssetType::kShader);
+  am.LoadAsset("assets/shaders/denoise.shader", AssetType::kShader);
+  am.LoadAsset("assets/shaders/gi_combine.shader", AssetType::kShader);
+  am.LoadAsset("assets/shaders/downsample.shader", AssetType::kShader);
   am.LoadAsset("assets/shaders/gbuffer_voxelization.shader",
-                AssetType::shader);
-  am.LoadAsset("assets/shaders/voxel_mips.shader", AssetType::shader);
-  am.LoadAsset("assets/shaders/voxel_reprojection.shader", AssetType::shader);
-  am.LoadAsset("assets/shaders/voxel_blit.shader", AssetType::shader);
-  am.LoadAsset("assets/shaders/voxel_clear.shader", AssetType::shader);
+                AssetType::kShader);
+  am.LoadAsset("assets/shaders/voxel_mips.shader", AssetType::kShader);
+  am.LoadAsset("assets/shaders/voxel_reprojection.shader", AssetType::kShader);
+  am.LoadAsset("assets/shaders/voxel_blit.shader", AssetType::kShader);
+  am.LoadAsset("assets/shaders/voxel_clear.shader", AssetType::kShader);
 
   am.WaitAllLoads();
-  gbuffer_shader = am.GetAsset<GLShader, AssetType::shader>(
+  gbuffer_shader = am.GetAsset<GLShader, AssetType::kShader>(
       "assets/shaders/gbuffer.shader");
-  gbuffer_textureless_shader = am.GetAsset<GLShader, AssetType::shader>(
+  gbuffer_textureless_shader = am.GetAsset<GLShader, AssetType::kShader>(
       "assets/shaders/gbuffer_textureless.shader");
-  forward_lighting_shader = am.GetAsset<GLShader, AssetType::shader>(
+  forward_lighting_shader = am.GetAsset<GLShader, AssetType::kShader>(
       "assets/shaders/forward_lighting.shader");
-  lighting_shader = am.GetAsset<GLShader, AssetType::shader>(
+  lighting_shader = am.GetAsset<GLShader, AssetType::kShader>(
       "assets/shaders/lighting.shader");
-  visualise_3d_tex_shader = am.GetAsset<GLShader, AssetType::shader>(
+  visualise_3d_tex_shader = am.GetAsset<GLShader, AssetType::kShader>(
       "assets/shaders/visualize_3d_tex.shader");
   visualise_3d_tex_instances_shader =
-      am.GetAsset<GLShader, AssetType::shader>(
+      am.GetAsset<GLShader, AssetType::kShader>(
           "assets/shaders/visualize_3d_tex_instances.shader");
-  present_shader = am.GetAsset<GLShader, AssetType::shader>(
+  present_shader = am.GetAsset<GLShader, AssetType::kShader>(
       "assets/shaders/present.shader");
-  dir_light_shadow_shader = am.GetAsset<GLShader, AssetType::shader>(
+  dir_light_shadow_shader = am.GetAsset<GLShader, AssetType::kShader>(
       "assets/shaders/dir_light_shadow.shader");
-  voxel_cone_tracing_shader = am.GetAsset<GLShader, AssetType::shader>(
+  voxel_cone_tracing_shader = am.GetAsset<GLShader, AssetType::kShader>(
       "assets/shaders/voxel_cone_tracing.shader");
   ssr_shader =
-      am.GetAsset<GLShader, AssetType::shader>("assets/shaders/ssr.shader");
+      am.GetAsset<GLShader, AssetType::kShader>("assets/shaders/ssr.shader");
   taa_shader =
-      am.GetAsset<GLShader, AssetType::shader>("assets/shaders/taa.shader");
-  denoise_shader = am.GetAsset<GLShader, AssetType::shader>(
+      am.GetAsset<GLShader, AssetType::kShader>("assets/shaders/taa.shader");
+  denoise_shader = am.GetAsset<GLShader, AssetType::kShader>(
       "assets/shaders/denoise.shader");
-  combine_shader = am.GetAsset<GLShader, AssetType::shader>(
+  combine_shader = am.GetAsset<GLShader, AssetType::kShader>(
       "assets/shaders/gi_combine.shader");
-  downsample_shader = am.GetAsset<GLShader, AssetType::shader>(
+  downsample_shader = am.GetAsset<GLShader, AssetType::kShader>(
       "assets/shaders/downsample.shader");
   compute_voxelize_gbuffer_shader =
-      am.GetAsset<GLShader, AssetType::shader>(
+      am.GetAsset<GLShader, AssetType::kShader>(
           "assets/shaders/gbuffer_voxelization.shader");
-  compute_voxel_mips_shader = am.GetAsset<GLShader, AssetType::shader>(
+  compute_voxel_mips_shader = am.GetAsset<GLShader, AssetType::kShader>(
       "assets/shaders/voxel_mips.shader");
   compute_voxel_reprojection_shader =
-      am.GetAsset<GLShader, AssetType::shader>(
+      am.GetAsset<GLShader, AssetType::kShader>(
           "assets/shaders/voxel_reprojection.shader");
-  compute_voxel_blit_shader = am.GetAsset<GLShader, AssetType::shader>(
+  compute_voxel_blit_shader = am.GetAsset<GLShader, AssetType::kShader>(
       "assets/shaders/voxel_blit.shader");
-  compute_voxel_clear_shader = am.GetAsset<GLShader, AssetType::shader>(
+  compute_voxel_clear_shader = am.GetAsset<GLShader, AssetType::kShader>(
       "assets/shaders/voxel_clear.shader");
 
   window_resolution = resolution;
