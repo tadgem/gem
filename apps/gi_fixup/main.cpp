@@ -149,7 +149,7 @@ int main()
     cube_mat.SetUniformValue("u_metallic", 0.0f);
     cube_mat.SetUniformValue("u_roughness", 0.0f);
     cube_entity.AddComponent<MeshComponent>(
-        MeshComponent{Shapes::s_torus_mesh, {}, 0});
+        MeshComponent{Shapes::kTorusMesh, {}, 0});
 
 
     std::vector<PointLight> lights;

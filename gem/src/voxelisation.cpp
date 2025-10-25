@@ -23,17 +23,17 @@ Voxel::Grid Voxel::CreateGrid(glm::ivec3 resolution, AABB bb) {
   grid.UpdateVoxelUnit();
   grid.voxel_texture = Texture::Create3DTextureEmpty(resolution, GL_RGBA,
                                                         GL_RGBA16F, GL_FLOAT);
-  glAssert(glBindImageTexture(0, grid.voxel_texture.m_handle, 0, GL_TRUE, 0,
+  glAssert(glBindImageTexture(0, grid.voxel_texture.handle, 0, GL_TRUE, 0,
                               GL_READ_WRITE, GL_RGBA16F));
-  glAssert(glBindImageTexture(1, grid.voxel_texture.m_handle, 1, GL_TRUE, 0,
+  glAssert(glBindImageTexture(1, grid.voxel_texture.handle, 1, GL_TRUE, 0,
                               GL_READ_WRITE, GL_RGBA16F));
-  glAssert(glBindImageTexture(2, grid.voxel_texture.m_handle, 2, GL_TRUE, 0,
+  glAssert(glBindImageTexture(2, grid.voxel_texture.handle, 2, GL_TRUE, 0,
                               GL_READ_WRITE, GL_RGBA16F));
-  glAssert(glBindImageTexture(3, grid.voxel_texture.m_handle, 3, GL_TRUE, 0,
+  glAssert(glBindImageTexture(3, grid.voxel_texture.handle, 3, GL_TRUE, 0,
                               GL_READ_WRITE, GL_RGBA16F));
-  glAssert(glBindImageTexture(4, grid.voxel_texture.m_handle, 4, GL_TRUE, 0,
+  glAssert(glBindImageTexture(4, grid.voxel_texture.handle, 4, GL_TRUE, 0,
                               GL_READ_WRITE, GL_RGBA16F));
-  glAssert(glBindImageTexture(5, grid.voxel_texture.m_handle, 5, GL_TRUE, 0,
+  glAssert(glBindImageTexture(5, grid.voxel_texture.handle, 5, GL_TRUE, 0,
                               GL_READ_WRITE, GL_RGBA16F));
 
   return grid;
@@ -211,7 +211,7 @@ void Voxel::GridVisualizer::Draw(Voxel::Grid &vg, Camera &cam) {
   vs.SetVec3f("u_aabb.min", vg.current_bounding_box.min);
   vs.SetVec3f("u_aabb.max", vg.current_bounding_box.max);
   vs.SetInt("u_volume", 0);
-  Texture::BindSamplerHandle(vg.voxel_texture.m_handle, GL_TEXTURE0,
+  Texture::BindSamplerHandle(vg.voxel_texture.handle, GL_TEXTURE0,
                                GL_TEXTURE_3D);
   glDrawElementsInstanced(GL_TRIANGLES, static_cast<GLsizei>(m_index_count),
                           GL_UNSIGNED_INT, GL_ZERO, m_total_invocations);

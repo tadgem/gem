@@ -24,7 +24,7 @@ static glm::vec2 assimp_to_glm(const aiVector2D &aiVec) {
 
 TextureEntry::TextureEntry(TextureMapType tmt, AssetHandle ah,
                              const std::string &path, Texture *data)
-    : m_handle(ah), m_map_type(tmt), m_path(path), m_texture(data) {
+    : handle(ah), map_type(tmt), path(path), texture_data(data) {
   ZoneScoped;
 }
 

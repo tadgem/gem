@@ -418,7 +418,7 @@ void GLRenderer::Render(AssetManager &am, Camera &cam,
     TracyGpuZone("Composite Final Pass");
     GEM_GPU_MARKER("Composite Final Pass");
     m_final_pass.Bind();
-    Shapes::s_screen_quad.Use();
+    Shapes::kScreenQuad.Use();
     m_combine_shader->data.Use();
     m_combine_shader->data.SetFloat("u_brightness",
                                        m_tonemapping_brightness);

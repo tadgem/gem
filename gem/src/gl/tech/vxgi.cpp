@@ -23,7 +23,7 @@ void tech::VXGI::DispatchGBufferVoxelization(GLShader &voxelization,
   voxelization.SetVec3f("u_aabb.min", voxel_data.current_bounding_box.min);
   voxelization.SetVec3f("u_aabb.max", voxel_data.current_bounding_box.max);
   voxelization.SetVec3f("u_voxel_unit", voxel_data.voxel_unit);
-  Texture::BindImageHandle(voxel_data.voxel_texture.m_handle, 0, 0,
+  Texture::BindImageHandle(voxel_data.voxel_texture.handle, 0, 0,
                              GL_RGBA16F);
   Texture::BindSamplerHandle(gbuffer.m_colour_attachments[1], GL_TEXTURE0);
   Texture::BindSamplerHandle(lightpass_buffer.m_colour_attachments[0],
@@ -43,10 +43,10 @@ void tech::VXGI::DispatchGenerate3DTextureMips(GLShader &voxelization_mips,
   glm::vec3 last_mip_resolution = _3d_tex_res_vec;
   glm::vec3 current_mip_resolution = _3d_tex_res_vec / 2.0f;
   for (int i = 1; i < MAX_MIPS; i++) {
-    glBindTexture(GL_TEXTURE_3D, voxel_data.voxel_texture.m_handle);
-    Texture::BindImageHandle(voxel_data.voxel_texture.m_handle, 0, i,
+    glBindTexture(GL_TEXTURE_3D, voxel_data.voxel_texture.handle);
+    Texture::BindImageHandle(voxel_data.voxel_texture.handle, 0, i,
                                GL_RGBA16F);
-    Texture::BindImageHandle(voxel_data.voxel_texture.m_handle, 1, i - 1,
+    Texture::BindImageHandle(voxel_data.voxel_texture.handle, 1, i - 1,
                                GL_RGBA16F);
     voxelization_mips.SetVec3f("u_current_resolution", current_mip_resolution);
     glm::ivec3 dispatch_dims =
@@ -70,11 +70,11 @@ void tech::VXGI::DispatchConeTracingPass(
   ZoneScoped;
   GEM_GPU_MARKER("Cone Tracing Pass");
 
-  glBindTexture(GL_TEXTURE_3D, voxel_data.voxel_texture.m_handle);
+  glBindTexture(GL_TEXTURE_3D, voxel_data.voxel_texture.handle);
 
   glViewport(0, 0, window_res.x * resolution_scale,
              window_res.y * resolution_scale);
-  Shapes::s_screen_quad.Use();
+  Shapes::kScreenQuad.Use();
   buffer_conetracing.Bind();
   voxel_cone_tracing.Use();
   voxel_cone_tracing.SetVec3f("u_aabb.min", bounding_volume.min);
@@ -89,7 +89,7 @@ void tech::VXGI::DispatchConeTracingPass(
   voxel_cone_tracing.SetInt("u_normal_map", 1);
   Texture::BindSamplerHandle(gbuffer.m_colour_attachments[2], GL_TEXTURE1);
   voxel_cone_tracing.SetInt("u_voxel_map", 2);
-  Texture::BindSamplerHandle(voxel_data.voxel_texture.m_handle, GL_TEXTURE2,
+  Texture::BindSamplerHandle(voxel_data.voxel_texture.handle, GL_TEXTURE2,
                                GL_TEXTURE_3D);
   voxel_cone_tracing.SetInt("u_colour_map", 3);
   Texture::BindSamplerHandle(gbuffer.m_colour_attachments[0], GL_TEXTURE3);
@@ -108,7 +108,7 @@ void tech::VXGI::DispatchBlit3DTexture(GLShader &blit_voxel,
   ZoneScoped;
   GEM_GPU_MARKER("Voxel History Blit");
   blit_voxel.Use();
-  Texture::BindImageHandle(voxel_data.voxel_texture.m_handle, 0, 0,
+  Texture::BindImageHandle(voxel_data.voxel_texture.handle, 0, 0,
                              GL_RGBA16F);
   blit_voxel.SetVec3f("u_voxel_resolution", _3d_tex_res_vec);
 
@@ -122,7 +122,7 @@ void tech::VXGI::DispatchClear3DTexture(GLShader &clear_voxel,
   ZoneScoped;
   GEM_GPU_MARKER("Clear Voxel Grid");
   clear_voxel.Use();
-  Texture::BindImageHandle(voxel_data.voxel_texture.m_handle, 0, 0,
+  Texture::BindImageHandle(voxel_data.voxel_texture.handle, 0, 0,
                              GL_RGBA16F);
   glAssert(glDispatchCompute(_3d_tex_res_vec.x / 8, _3d_tex_res_vec.y / 8,
                              _3d_tex_res_vec.z / 8));

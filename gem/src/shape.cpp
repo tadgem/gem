@@ -65,13 +65,13 @@ void add_cube(AssetManager &am) {
   cube_with_normals_builder.AddVertexAttribute(1, 8 * sizeof(float), 3);
   cube_with_normals_builder.AddVertexAttribute(2, 8 * sizeof(float), 2);
 
-  Shapes::s_cube_vao = cube_with_normals_builder.BuildVAO();
+  Shapes::kCubeVAO = cube_with_normals_builder.BuildVAO();
   AABB cube_bb{{0, 0, 0}, {1, 1, 1}};
-  Shapes::s_cube_mesh = new AMesh{36, cube_bb, cube_bb, 0, Shapes::s_cube_vao};
+  Shapes::kCubeMesh = new AMesh{36, cube_bb, cube_bb, 0, Shapes::kCubeVAO};
 
   Model cube_model{};
-  cube_model.meshes.push_back(Shapes::s_cube_mesh);
-  cube_model.aabb = Shapes::s_cube_mesh->original_aabb;
+  cube_model.meshes.push_back(Shapes::kCubeMesh);
+  cube_model.aabb = Shapes::kCubeMesh->original_aabb;
 
   am.provide_asset<Model, AssetType::model>("cube", cube_model);
 }
@@ -586,14 +586,14 @@ void add_cylinder(AssetManager &am) {
   cylinder_builder.AddVertexAttribute(1, 8 * sizeof(float), 3);
   cylinder_builder.AddVertexAttribute(2, 8 * sizeof(float), 2);
 
-  Shapes::s_cylinder_vao = cylinder_builder.BuildVAO();
+  Shapes::kCylinderVAO = cylinder_builder.BuildVAO();
   AABB cube_bb{{0, 0, 0}, {1, 1, 1}};
-  Shapes::s_cylinder_mesh =
-      new AMesh{36, cube_bb, cube_bb, 0, Shapes::s_cylinder_vao};
+  Shapes::kCylinderMesh =
+      new AMesh{36, cube_bb, cube_bb, 0, Shapes::kCylinderVAO};
 
   Model cylinder_model{};
-  cylinder_model.meshes.push_back(Shapes::s_cylinder_mesh);
-  cylinder_model.aabb = Shapes::s_cylinder_mesh->original_aabb;
+  cylinder_model.meshes.push_back(Shapes::kCylinderMesh);
+  cylinder_model.aabb = Shapes::kCylinderMesh->original_aabb;
 
   am.provide_asset<Model, AssetType::model>("cylinder", cylinder_model);
 }
@@ -859,13 +859,13 @@ void add_cone(AssetManager &am) {
   cone_builder.AddVertexAttribute(1, 8 * sizeof(float), 3);
   cone_builder.AddVertexAttribute(2, 8 * sizeof(float), 2);
 
-  Shapes::s_cone_vao = cone_builder.BuildVAO();
+  Shapes::kConeVAO = cone_builder.BuildVAO();
   AABB cube_bb{{0, 0, 0}, {1, 1, 1}};
-  Shapes::s_cone_mesh = new AMesh{ 36, cube_bb, cube_bb, 0, Shapes::s_cone_vao};
+  Shapes::kConeMesh = new AMesh{ 36, cube_bb, cube_bb, 0, Shapes::kConeVAO};
 
   Model cone_model{};
-  cone_model.meshes.push_back(Shapes::s_cone_mesh);
-  cone_model.aabb = Shapes::s_cone_mesh->original_aabb;
+  cone_model.meshes.push_back(Shapes::kConeMesh);
+  cone_model.aabb = Shapes::kConeMesh->original_aabb;
 
   am.provide_asset<Model, AssetType::model>("cone", cone_model);
 }
@@ -5491,13 +5491,13 @@ void add_torus(AssetManager &am) {
   torus_builder.AddVertexAttribute(1, 8 * sizeof(float), 3);
   torus_builder.AddVertexAttribute(2, 8 * sizeof(float), 2);
 
-  Shapes::s_torus_vao = torus_builder.BuildVAO();
+  Shapes::kTorusVAO = torus_builder.BuildVAO();
   AABB cube_bb{{0, 0, 0}, {1, 1, 1}};
-  Shapes::s_torus_mesh = new AMesh{ 36, cube_bb, cube_bb, 0, Shapes::s_torus_vao};
+  Shapes::kTorusMesh = new AMesh{ 36, cube_bb, cube_bb, 0, Shapes::kTorusVAO};
 
   Model torus_model{};
-  torus_model.meshes.push_back(Shapes::s_torus_mesh);
-  torus_model.aabb = Shapes::s_torus_mesh->original_aabb;
+  torus_model.meshes.push_back(Shapes::kTorusMesh);
+  torus_model.aabb = Shapes::kTorusMesh->original_aabb;
 
   am.provide_asset<Model, AssetType::model>("torus", torus_model);
 }
@@ -9354,14 +9354,14 @@ void add_sphere(AssetManager &am) {
   sphere_builder.AddVertexAttribute(1, 8 * sizeof(float), 3);
   sphere_builder.AddVertexAttribute(2, 8 * sizeof(float), 2);
 
-  Shapes::s_sphere_vao = sphere_builder.BuildVAO();
+  Shapes::kSphereVAO = sphere_builder.BuildVAO();
   AABB sphere_bb{{0, 0, 0}, {1, 1, 1}};
-  Shapes::s_sphere_mesh =
-      new AMesh{ sphere_num_verts, sphere_bb, sphere_bb, 0, Shapes::s_sphere_vao};
+  Shapes::kSphereMesh =
+      new AMesh{ sphere_num_verts, sphere_bb, sphere_bb, 0, Shapes::kSphereVAO};
 
   Model sphere_model{};
-  sphere_model.meshes.push_back(Shapes::s_sphere_mesh);
-  sphere_model.aabb = Shapes::s_sphere_mesh->original_aabb;
+  sphere_model.meshes.push_back(Shapes::kSphereMesh);
+  sphere_model.aabb = Shapes::kSphereMesh->original_aabb;
 
   am.provide_asset<Model, AssetType::model>("sphere", sphere_model);
 }
@@ -9393,7 +9393,7 @@ void add_cube_pos_only() {
   cube_builder.AddIndexBuffer(cube_indices);
   cube_builder.AddVertexAttribute(0, 3 * sizeof(float), 3);
 
-  Shapes::s_cube_pos_only = cube_builder.BuildVAO();
+  Shapes::kCubePositionOnly = cube_builder.BuildVAO();
 }
 
 void add_screen_quad() {
@@ -9416,7 +9416,7 @@ void add_screen_quad() {
   screen_quad_builder.AddVertexAttribute(0, 5 * sizeof(float), 3);
   screen_quad_builder.AddVertexAttribute(1, 5 * sizeof(float), 2);
   screen_quad_builder.AddIndexBuffer(screen_quad_indices);
-  Shapes::s_screen_quad = screen_quad_builder.BuildVAO();
+  Shapes::kScreenQuad = screen_quad_builder.BuildVAO();
 }
 
 VAO Shapes::GenerateInstancedCube(std::vector<glm::mat4> &matrices,

@@ -21,7 +21,7 @@ void tech::PBRLighting::DispatchLightPass(
   GEM_GPU_MARKER("Lighting Pass");
   lighting_buffer.Bind();
   lighting_shader.Use();
-  Shapes::s_screen_quad.Use();
+  Shapes::kScreenQuad.Use();
 
   lighting_shader.SetInt("u_diffuse_map", 0);
   lighting_shader.SetInt("u_position_map", 1);

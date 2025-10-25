@@ -18,7 +18,7 @@ void tech::TemporalAntiAliasing::DispatchTAAPass(GLShader &taa, GLFramebuffer &p
   ZoneScoped;
   GEM_GPU_MARKER("TAA Pass");
   pass_resolve_buffer.Bind();
-  Shapes::s_screen_quad.Use();
+  Shapes::kScreenQuad.Use();
   taa.Use();
   taa.SetVec2f("u_resolution", {window_res.x, window_res.y});
   taa.SetInt("u_current_buffer", 0);

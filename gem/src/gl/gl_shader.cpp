@@ -251,9 +251,9 @@ GLShader::UniformType GLShader::GetUniformTypeFromGL(GLenum type) {
   case GL_FLOAT_MAT4:
     return UniformType::mat4;
   default:
-    return UniformType::UNKNOWN;
+    return UniformType::kUnknown;
   }
 
-  return UniformType::UNKNOWN;
+  return UniformType::kUnknown;
 }
 } // namespace gem

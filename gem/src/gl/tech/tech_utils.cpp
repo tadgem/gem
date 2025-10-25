@@ -35,7 +35,7 @@ void tech::Utils::DispatchPresentImage(GLShader &present_shader,
   ZoneScoped;
   GEM_GPU_MARKER("Present Image Pass");
   present_shader.Use();
-  Shapes::s_screen_quad.Use();
+  Shapes::kScreenQuad.Use();
   present_shader.SetInt(uniform_name.c_str(), texture_slot);
   Texture::BindSamplerHandle(texture, GL_TEXTURE0 + texture_slot);
   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);

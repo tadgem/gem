@@ -5,9 +5,9 @@
 namespace gem {
   class Shader {
   public:
-    enum class Stage { UNKNOWN, vertex, fragment, geometry, compute };
+    enum class Stage { kUnknown, vertex, fragment, geometry, compute };
     enum class UniformType {
-      UNKNOWN,
+      kUnknown,
       _int,
       _float,
       vec2,

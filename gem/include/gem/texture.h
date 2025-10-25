@@ -37,16 +37,16 @@ public:
 
   static void UnbindImage(uint32_t binding);
 
-  int m_width, m_height, m_depth, m_num_channels;
+  int texture_width, texture_height, texture_depth, num_channels;
 
   // TODO: Support Vulkan texture handles
-  gl_handle m_handle = INVALID_GL_HANDLE;
-  Mode m_mode = Mode::memory;
+  gl_handle handle = INVALID_GL_HANDLE;
+  Mode mode = Mode::memory;
 
   union {
     unsigned char *stb_data;
     gli::texture *gli_data;
-  } m_cpu_data;
+  } cpu_data;
 
   static Texture FromData(unsigned int *data, unsigned int count, int width,
                            int height, int depth, int nr_channels);
@@ -75,17 +75,17 @@ public:
 };
 
 struct TextureEntry {
-  TextureMapType m_map_type;
-  AssetHandle m_handle;
-  std::string m_path;
-  Texture *m_texture = nullptr;
+  TextureMapType map_type;
+  AssetHandle handle;
+  std::string path;
+  Texture *texture_data = nullptr;
 
-  TextureEntry() { m_texture = nullptr; };
+  TextureEntry() { texture_data = nullptr; };
   TextureEntry(TextureMapType tmt, AssetHandle ah, const std::string &path,
                 Texture *data);
   GEM_IMPL_ALLOC(TextureEntry);
 
-  NLOHMANN_DEFINE_TYPE_INTRUSIVE(TextureEntry, m_map_type, m_handle, m_path)
+  NLOHMANN_DEFINE_TYPE_INTRUSIVE(TextureEntry, map_type, handle, path)
 };
 
 struct SamplerInfo {

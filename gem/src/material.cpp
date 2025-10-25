@@ -59,20 +59,20 @@ void Material::BindUniforms(AssetManager &am) {
     case GLShader::UniformType::sampler2D:
     case GLShader::UniformType::sampler3D: {
       SamplerInfo info = std::any_cast<SamplerInfo>(uniform_values[name]);
-      if (info.tex_entry.m_texture == nullptr) {
+      if (info.tex_entry.texture_data == nullptr) {
         TextureAsset *ta =
-            am.GetAsset<Texture, AssetType::texture>(info.tex_entry.m_handle);
+            am.GetAsset<Texture, AssetType::texture>(info.tex_entry.handle);
         if (!ta) {
           continue;
         }
-        if (ta->data.m_handle != INVALID_GL_HANDLE) {
-          info.tex_entry.m_texture = &ta->data;
+        if (ta->data.handle != INVALID_GL_HANDLE) {
+          info.tex_entry.texture_data = &ta->data;
         }
         uniform_values[name] = info;
       }
       int loc = info.sampler_slot - GL_TEXTURE0;
       program.SetInt(name, loc);
-      Texture::BindSamplerHandle(info.tex_entry.m_texture->m_handle,
+      Texture::BindSamplerHandle(info.tex_entry.texture_data->handle,
                                    info.sampler_slot);
       break;
     }

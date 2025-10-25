@@ -17,7 +17,7 @@ void tech::ScreenSpaceReflections::DispatchSSRPass(GLShader &ssr, Camera &cam,
                                   glm::vec2 screen_dim) {
   ZoneScoped;
   GEM_GPU_MARKER("SSR Pass");
-  Shapes::s_screen_quad.Use();
+  Shapes::kScreenQuad.Use();
   ssr_buffer.Bind();
   glClearColor(0, 0, 0, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);

@@ -324,7 +324,7 @@ AssetLoadResult load_model_asset_manager(const std::string &path) {
   AssetLoadResult ret{};
   for (auto &tex : associated_textures) {
     ret.new_assets_to_load.push_back(
-        AssetLoadInfo{tex.m_path, AssetType::texture});
+        AssetLoadInfo{tex.path, AssetType::texture});
   }
   for (int i = 0; i < mesh_entries.size(); i++) {
     ret.sync_load_tasks.push_back(submit_meshes_to_gpu);
