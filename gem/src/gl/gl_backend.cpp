@@ -18,7 +18,7 @@ namespace gem {
 void GLBackend::Init(BackendInit &init_props) {
   ZoneScoped;
 #ifdef GEM_ENABLE_MEMORY_TRACKING
-  DebugMemoryTracker::s_instance = new DebugMemoryTracker();
+  DebugMemoryTracker::kInstance = new DebugMemoryTracker();
 #endif
 
 #ifdef __WIN32__

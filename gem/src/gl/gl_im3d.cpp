@@ -192,10 +192,10 @@ void GLIm3d::NewFrameIm3D(Im3dState &state, glm::vec2 screen_dim,
   glm::vec2 cursor_pos = Input::GetMousePosition();
 
   glm::vec3 rayOrigin = Utils::ScreenToWorldPos(cursor_pos, screen_dim,
-                                                   glm::inverse(cam.m_view),
-                                                   glm::inverse(cam.m_proj));
+                                                   glm::inverse(cam.view_matrix),
+                                                   glm::inverse(cam.proj_matrix));
   ;
-  glm::vec3 rayDirection = glm::normalize(rayOrigin - cam.m_pos);
+  glm::vec3 rayDirection = glm::normalize(rayOrigin - cam.position);
 
   ad.m_cursorRayOrigin = Im3d::Vec3(rayOrigin.x, rayOrigin.y, rayOrigin.z);
   ad.m_cursorRayDirection =
@@ -218,7 +218,7 @@ void GLIm3d::EndFrameIm3D(Im3dState &state, glm::ivec2 screen_dim,
   glDisable(GL_CULL_FACE);
 
   glViewport(0, 0, (GLsizei)screen_dim.x, (GLsizei)screen_dim.y);
-  glm::mat4 viewProj = cam.m_proj * cam.m_view;
+  glm::mat4 viewProj = cam.proj_matrix * cam.view_matrix;
 
   for (uint32_t i = 0, n = Im3d::GetDrawListCount(); i < n; ++i) {
     const Im3d::DrawList &drawList = Im3d::GetDrawLists()[i];

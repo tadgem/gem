@@ -75,23 +75,23 @@ public:
 
   void *operator new(size_t size) {
     std::string type_name = HashUtils::GetTypeName<TAsset<_Ty, _AssetType>>();
-    if (DebugMemoryTracker::s_instance->s_allocation_info.find(type_name) ==
-        DebugMemoryTracker::s_instance->s_allocation_info.end()) {
-      DebugMemoryTracker::s_instance->s_allocation_info.emplace(
+    if (DebugMemoryTracker::kInstance->allocation_info.find(type_name) ==
+        DebugMemoryTracker::kInstance->allocation_info.end()) {
+      DebugMemoryTracker::kInstance->allocation_info.emplace(
           type_name, DebugAllocInfo{0, 0});
     }
-    DebugMemoryTracker::s_instance->s_allocation_info[type_name].count++;
-    DebugMemoryTracker::s_instance->s_allocation_info[type_name].size += size;
+    DebugMemoryTracker::kInstance->allocation_info[type_name].count++;
+    DebugMemoryTracker::kInstance->allocation_info[type_name].size += size;
     return malloc(size);
   };
 
   void operator delete(void *p) {
     std::string type_name = HashUtils::GetTypeName<TAsset<_Ty, _AssetType>>();
     free(p);
-    if (!DebugMemoryTracker::s_instance)
+    if (!DebugMemoryTracker::kInstance)
       return;
-    DebugMemoryTracker::s_instance->s_allocation_info[type_name].count--;
-    DebugMemoryTracker::s_instance->s_allocation_info[type_name].size -=
+    DebugMemoryTracker::kInstance->allocation_info[type_name].count--;
+    DebugMemoryTracker::kInstance->allocation_info[type_name].size -=
         sizeof(TAsset<_Ty, _AssetType>);
   };
 };
@@ -124,13 +124,13 @@ public:
   void *operator new(size_t size) {
     std::string type_name = HashUtils::GetTypeName<
         TAssetIntermediate<_AssetType, _IntermediateType, _AssetTypeEnum>>();
-    if (DebugMemoryTracker::s_instance->s_allocation_info.find(type_name) ==
-        DebugMemoryTracker::s_instance->s_allocation_info.end()) {
-      DebugMemoryTracker::s_instance->s_allocation_info.emplace(
+    if (DebugMemoryTracker::kInstance->allocation_info.find(type_name) ==
+        DebugMemoryTracker::kInstance->allocation_info.end()) {
+      DebugMemoryTracker::kInstance->allocation_info.emplace(
           type_name, DebugAllocInfo{0, 0});
     }
-    DebugMemoryTracker::s_instance->s_allocation_info[type_name].count++;
-    DebugMemoryTracker::s_instance->s_allocation_info[type_name].size += size;
+    DebugMemoryTracker::kInstance->allocation_info[type_name].count++;
+    DebugMemoryTracker::kInstance->allocation_info[type_name].size += size;
     return malloc(size);
   };
 
@@ -138,10 +138,10 @@ public:
     std::string type_name = HashUtils::GetTypeName<
         TAssetIntermediate<_AssetType, _IntermediateType, _AssetTypeEnum>>();
     free(p);
-    if (!DebugMemoryTracker::s_instance)
+    if (!DebugMemoryTracker::kInstance)
       return;
-    DebugMemoryTracker::s_instance->s_allocation_info[type_name].count--;
-    DebugMemoryTracker::s_instance->s_allocation_info[type_name]
+    DebugMemoryTracker::kInstance->allocation_info[type_name].count--;
+    DebugMemoryTracker::kInstance->allocation_info[type_name]
         .size -= sizeof(
             TAssetIntermediate<_AssetType, _IntermediateType, _AssetTypeEnum>);
   };

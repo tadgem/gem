@@ -12,32 +12,32 @@ namespace gem {
 
 void Camera::Update(glm::vec2 screen_dim) {
   ZoneScoped;
-  m_last_vp = m_proj * m_view;
+  prev_view_proj = proj_matrix * view_matrix;
   glm::mat4 rotate = GetRotationMatrix();
   glm::mat4 translate = glm::mat4(1.0f);
-  translate = glm::translate(translate, -m_pos);
+  translate = glm::translate(translate, -position);
 
-  m_view = rotate * translate;
-  m_aspect = screen_dim.x / screen_dim.y;
+  view_matrix = rotate * translate;
+  aspect = screen_dim.x / screen_dim.y;
 
-  switch (m_projection_type) {
-  case perspective:
-    m_proj = glm::perspective(glm::radians(m_fov), screen_dim.x / screen_dim.y,
-                              m_near, m_far);
+  switch (projection_type) {
+  case kPerspective:
+    proj_matrix = glm::perspective(glm::radians(fov), screen_dim.x / screen_dim.y,
+                              near_plane, far_plane);
     break;
-  case orthographic:
+  case kOrthographic:
     // todo
     break;
   }
 
-  m_frustum_planes.m_planes = Utils::GetPlanesFromViewProjectionMatrix(m_proj * m_view);
+  frustum_planes.m_planes = Utils::GetPlanesFromViewProjectionMatrix(proj_matrix * view_matrix);
 }
 
 glm::mat4 Camera::GetRotationMatrix() {
   ZoneScoped;
   glm::quat qPitch =
-      glm::angleAxis(glm::radians(-m_euler.x), glm::vec3(1, 0, 0));
-  glm::quat qYaw = glm::angleAxis(glm::radians(m_euler.y), glm::vec3(0, 1, 0));
+      glm::angleAxis(glm::radians(-euler.x), glm::vec3(1, 0, 0));
+  glm::quat qYaw = glm::angleAxis(glm::radians(euler.y), glm::vec3(0, 1, 0));
   // omit roll
   glm::quat Rotation = qPitch * qYaw;
   Rotation = glm::normalize(Rotation);
@@ -68,9 +68,9 @@ void DebugCameraController::Update(glm::vec2 screen_dim, Camera &cam) {
   }
 
   glm::quat q_pitch =
-      glm::angleAxis(glm::radians(-cam.m_euler.x), glm::vec3(1, 0, 0));
+      glm::angleAxis(glm::radians(-cam.euler.x), glm::vec3(1, 0, 0));
   glm::quat q_yaw =
-      glm::angleAxis(glm::radians(cam.m_euler.y), glm::vec3(0, 1, 0));
+      glm::angleAxis(glm::radians(cam.euler.y), glm::vec3(0, 1, 0));
   glm::quat rotation = q_pitch * q_yaw;
 
   glm::vec3 forward = Utils::GetForwardFromQuat(rotation);
@@ -78,41 +78,41 @@ void DebugCameraController::Update(glm::vec2 screen_dim, Camera &cam) {
   glm::vec3 up = Utils::GetUpFromQuat(rotation);
   float frame_time = GPUBackend::Selected()->GetFrameTime();
 
-  cam.m_forward = forward;
-  cam.m_right = right;
-  cam.m_up = up;
+  cam.forward = forward;
+  cam.right = right;
+  cam.up = up;
 
   if (Input::GetKey(KeyboardKey::w)) {
-    cam.m_pos += forward * speed * frame_time;
+    cam.position += forward * speed * frame_time;
   }
 
   if (Input::GetKey(KeyboardKey::s)) {
-    cam.m_pos -= forward * movement_speed * frame_time;
+    cam.position -= forward * movement_speed * frame_time;
   }
 
   if (Input::GetKey(KeyboardKey::a)) {
-    cam.m_pos -= right * movement_speed * frame_time;
+    cam.position -= right * movement_speed * frame_time;
   }
 
   if (Input::GetKey(KeyboardKey::d)) {
-    cam.m_pos += right * movement_speed * frame_time;
+    cam.position += right * movement_speed * frame_time;
   }
 
   if (Input::GetKey(KeyboardKey::e)) {
-    cam.m_pos += up * movement_speed * frame_time;
+    cam.position += up * movement_speed * frame_time;
   }
 
   if (Input::GetKey(KeyboardKey::q)) {
-    cam.m_pos -= up * movement_speed * frame_time;
+    cam.position -= up * movement_speed * frame_time;
   }
 
   glm::vec2 mouse_velocity = Input::GetMouseVelocity() / screen_dim;
   if (glm::abs(mouse_velocity.x) > deadzone) {
-    cam.m_euler.y +=
+    cam.euler.y +=
         mouse_velocity.x * rotational_speed * rotational_factor * frame_time;
   }
   if (glm::abs(mouse_velocity.y) > deadzone) {
-    cam.m_euler.x -=
+    cam.euler.x -=
         mouse_velocity.y * rotational_speed * rotational_factor * frame_time;
   }
 }

@@ -469,9 +469,9 @@ void AssetManager::OnImGui() {
   if (ImGui::Begin("Assets Debug"))
   {
     if (ImGui::CollapsingHeader("CPU Memory")) {
-      ImGui::Text("Untracked : %.4f KB", (float)DebugMemoryTracker::s_UntrackedSize / 1024.0f);
+      ImGui::Text("Untracked : %.4f KB", (float)DebugMemoryTracker::kUntrackedSize / 1024.0f);
       for (auto& [k, v] :
-           DebugMemoryTracker::s_instance->s_allocation_info) {
+           DebugMemoryTracker::kInstance->allocation_info) {
         ImGui::Text("%s : %zu KB", k.c_str(), (v.size * v.count) / 1024);
       }
     }

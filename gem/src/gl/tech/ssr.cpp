@@ -26,8 +26,8 @@ void tech::ScreenSpaceReflections::DispatchSSRPass(GLShader &ssr, Camera &cam,
   ssr.Use();
   ssr.SetFloat("u_screen_width", screen_dim.x);
   ssr.SetFloat("u_screen_height", screen_dim.y);
-  ssr.SetMat4f("u_inv_projection", glm::inverse(cam.m_proj));
-  ssr.SetMat4f("u_projection", cam.m_proj);
+  ssr.SetMat4f("u_inv_projection", glm::inverse(cam.proj_matrix));
+  ssr.SetMat4f("u_projection", cam.proj_matrix);
   ssr.SetMat4f("u_rotation", cam.GetRotationMatrix());
 
   ssr.SetInt("u_gnormal_buffer", 0);

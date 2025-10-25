@@ -33,7 +33,7 @@ void tech::PBRLighting::DispatchLightPass(
       glm::quat(glm::radians(sun.direction)) * glm::vec3(0.0f, 0.0f, 1.0f);
   glm::vec3 lightPos = glm::vec3(0.0) - (dir * 100.0f);
 
-  lighting_shader.SetVec3f("u_cam_pos", cam.m_pos);
+  lighting_shader.SetVec3f("u_cam_pos", cam.position);
   lighting_shader.SetVec3f("u_dir_light_pos", lightPos);
 
   lighting_shader.SetVec3f("u_dir_light.direction",

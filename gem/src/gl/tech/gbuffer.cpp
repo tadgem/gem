@@ -20,12 +20,12 @@ void tech::GBuffer::DispatchGBufferWithID(
   glDisable(GL_DITHER);
 
   gbuffer.Bind();
-  glm::mat4 current_vp = cam.m_proj * cam.m_view;
+  glm::mat4 current_vp = cam.proj_matrix * cam.view_matrix;
 
   gbuffer_shader.Use();
   gbuffer_shader.SetVec2f("u_resolution", {win_res.x, win_res.y});
   gbuffer_shader.SetMat4f("u_vp", current_vp);
-  gbuffer_shader.SetMat4f("u_last_vp", cam.m_last_vp);
+  gbuffer_shader.SetMat4f("u_last_vp", cam.prev_view_proj);
   gbuffer_shader.SetInt("u_frame_index", frame_index);
   gbuffer_shader.SetInt("u_diffuse_map", 0);
   gbuffer_shader.SetInt("u_normal_map", 1);
@@ -74,13 +74,13 @@ void tech::GBuffer::DispatchGBufferTexturelessWithID(
   glDisable(GL_DITHER);
 
   gbuffer.Bind();
-  glm::mat4 current_vp = cam.m_proj * cam.m_view;
+  glm::mat4 current_vp = cam.proj_matrix * cam.view_matrix;
 
   gbuffer_textureless_shader.Use();
   gbuffer_textureless_shader.SetVec2f("u_resolution", {win_res.x, win_res.y});
   gbuffer_textureless_shader.SetMat4f("u_vp", current_vp);
-  gbuffer_textureless_shader.SetMat4f("u_last_vp", cam.m_last_vp);
-  gbuffer_textureless_shader.SetMat4f("u_view", cam.m_view);
+  gbuffer_textureless_shader.SetMat4f("u_last_vp", cam.prev_view_proj);
+  gbuffer_textureless_shader.SetMat4f("u_view", cam.view_matrix);
   gbuffer_textureless_shader.SetInt("u_frame_index", frame_index);
   gbuffer_textureless_shader.SetInt("u_prev_position_map", 0);
 

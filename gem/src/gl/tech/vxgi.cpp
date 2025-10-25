@@ -81,7 +81,7 @@ void tech::VXGI::DispatchConeTracingPass(
   voxel_cone_tracing.SetVec3f("u_aabb.max", bounding_volume.max);
   voxel_cone_tracing.SetVec3f("u_voxel_resolution", _3d_tex_res);
   voxel_cone_tracing.SetInt("u_position_map", 0);
-  voxel_cone_tracing.SetVec3f("u_cam_position", cam.m_pos);
+  voxel_cone_tracing.SetVec3f("u_cam_position", cam.position);
   voxel_cone_tracing.SetFloat("u_max_trace_distance", max_trace_distance);
   voxel_cone_tracing.SetFloat("u_diffuse_spec_mix", diffuse_spec_mix);
 

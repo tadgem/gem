@@ -6,17 +6,17 @@ namespace gem {
 
 DebugMemoryTracker::DebugMemoryTracker() {
   ZoneScoped;
-  if (s_instance != nullptr) {
+  if (kInstance != nullptr) {
     // error;
     return;
   }
 
-  s_instance = this;
+  kInstance = this;
 }
 
 DebugMemoryTracker::~DebugMemoryTracker() {
   ZoneScoped;
-  s_instance = nullptr;
+  kInstance = nullptr;
 }
 } // namespace gem
 #endif

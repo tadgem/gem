@@ -12,18 +12,18 @@ struct FrustumPlanes {
 };
 
 struct Camera {
-  enum projection_type { orthographic, perspective };
+  enum ProjectionType { kOrthographic, kPerspective };
 
-  glm::mat4 m_view;
-  glm::mat4 m_proj;
-  glm::mat4 m_last_vp;
+  glm::mat4 view_matrix;
+  glm::mat4 proj_matrix;
+  glm::mat4 prev_view_proj;
 
-  glm::vec3 m_pos, m_euler, m_forward, m_right, m_up;
-  float m_fov = 60.0f, m_aspect = 1.666f, m_near = 0.01f, m_far = 300.0f;
+  glm::vec3 position, euler, forward, right, up;
+  float fov = 60.0f, aspect = 1.666f, near_plane = 0.01f, far_plane = 300.0f;
 
-  FrustumPlanes m_frustum_planes;
+  FrustumPlanes frustum_planes;
 
-  projection_type m_projection_type = projection_type::perspective;
+  ProjectionType projection_type = ProjectionType::kPerspective;
 
   void Update(glm::vec2 screen_dim);
 

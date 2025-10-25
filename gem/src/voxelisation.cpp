@@ -203,7 +203,7 @@ void Voxel::GridVisualizer::Draw(Voxel::Grid &vg, Camera &cam) {
   vs.Use();
   vs.SetVec3i("u_texture_resolution", vg.resolution);
   vs.SetVec3i("u_voxel_group_resolution", glm::ivec3(m_texel_resolution));
-  vs.SetMat4f("u_view_projection", cam.m_proj * cam.m_view);
+  vs.SetMat4f("u_view_projection", cam.proj_matrix * cam.view_matrix);
   vs.SetMat4f("u_model",
               Utils::GetModelMatrix(
                   vg.current_bounding_box.min + m_debug_position_offset,
