@@ -14,15 +14,15 @@ editor_application::editor_application()
     m_editor_fsm.SetStartingState(editor_mode::no_open_project);
     m_editor_fsm.AddState(editor_mode::no_open_project, [this]() {
         this->on_open_project();
-        return fsm::NO_TRIGGER; 
+        return fsm::kNoTrigger; 
     });
     m_editor_fsm.AddState(editor_mode::edit, [this]() {
         this->on_edit();
-        return fsm::NO_TRIGGER; 
+        return fsm::kNoTrigger; 
     });
     m_editor_fsm.AddState(editor_mode::play, [this]() {
         this->on_play();
-        return fsm::NO_TRIGGER; 
+        return fsm::kNoTrigger; 
     });
 
     m_editor_fsm.AddEntry(editor_mode::play, []() {});

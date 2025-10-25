@@ -19,21 +19,21 @@ public:
     State(int state, std::function<int()> action,
           std::function<void()> entry = NULL,
           std::function<void()> exit = NULL);
-    bool m_has_entry;
-    bool m_has_exit;
+    bool has_entry;
+    bool has_exit;
     GEM_IMPL_ALLOC(FSM::State)
 
   protected:
-    std::function<void()> m_entry_procedure;
-    std::function<void()> m_exit_procedure;
-    std::function<int()> m_action;
-    const int m_state;
+    std::function<void()> entry_procedure_;
+    std::function<void()> exit_procedure_;
+    std::function<int()> action_;
+    const int state_;
     friend class FSM;
   };
   struct StateTransition {
-    int m_trigger;
-    int m_src_state;
-    int m_dst_state;
+    int trigger;
+    int src_state;
+    int dst_state;
 
     GEM_IMPL_ALLOC(FSM::StateTransition)
   };
@@ -86,18 +86,17 @@ public:
 
   // arbitrary, can probably be done in a better way but we are in trouble if we
   // have an FSM with more than 65000 states.
-  inline static const int NO_TRIGGER = 65536;
+  inline static const int kNoTrigger = 65536;
 
 protected:
-  int p_previous_state;
-  int p_current_state;
-  bool p_run_entry;
+  int previous_state_;
+  int current_state_;
+  bool run_entry_;
 
   void TransitionState(int new_state);
 
-  std::vector<State> p_states;
-  std::vector<StateTransition> p_transitions;
+  std::vector<State> states_;
+  std::vector<StateTransition> transitions_;
 };
 
-using fsm = FSM;
 } // namespace gem
