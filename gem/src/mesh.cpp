@@ -14,7 +14,7 @@ void try_update_mesh_component(MeshComponent &mc) {
   ZoneScoped;
 
   if (Engine::assets.GetLoadProgress(mc.handle) ==
-      AssetLoadProgress::loaded) {
+      AssetLoadProgress::kLoaded) {
     auto model_asset =
         Engine::assets.GetAsset<Model, AssetType::kModel>(mc.handle);
     mc.mesh = model_asset->data.meshes[mc.mesh_index];

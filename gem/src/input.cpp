@@ -44,13 +44,13 @@ GamepadStick Input::GetStickSDL(SDL_GamepadAxis &sdlAxis) {
   ZoneScoped;
   switch (sdlAxis) {
   case SDL_GamepadAxis::SDL_GAMEPAD_AXIS_LEFTX:
-    return GamepadStick::LS;
+    return GamepadStick::kLS;
   case SDL_GamepadAxis::SDL_GAMEPAD_AXIS_LEFTY:
-    return GamepadStick::LS;
+    return GamepadStick::kLS;
   case SDL_GamepadAxis::SDL_GAMEPAD_AXIS_RIGHTX:
-    return GamepadStick::RS;
+    return GamepadStick::kRS;
   case SDL_GamepadAxis::SDL_GAMEPAD_AXIS_RIGHTY:
-    return GamepadStick::RS;
+    return GamepadStick::kRS;
   }
   return GamepadStick::kInvalid;
 }
@@ -59,9 +59,9 @@ GamepadTrigger Input::GetTriggerSDL(SDL_GamepadAxis &sdlAxis) {
   ZoneScoped;
   switch (sdlAxis) {
   case SDL_GAMEPAD_AXIS_LEFT_TRIGGER:
-    return GamepadTrigger::LT;
+    return GamepadTrigger::kLT;
   case SDL_GAMEPAD_AXIS_RIGHT_TRIGGER:
-    return GamepadTrigger::RT;
+    return GamepadTrigger::kRT;
   }
   return GamepadTrigger::kInvalid;
 }
@@ -70,33 +70,33 @@ GamepadButton Input::GetButtonSDL(uint8_t sdlButton) {
   ZoneScoped;
   switch (sdlButton) {
   case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_SOUTH:
-    return GamepadButton::face_south;
+    return GamepadButton::kFaceSouth;
   case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_EAST:
-    return GamepadButton::face_east;
+    return GamepadButton::kFaceEast;
   case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_WEST:
-    return GamepadButton::face_west;
+    return GamepadButton::kFaceWest;
   case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_NORTH:
-    return GamepadButton::face_north;
+    return GamepadButton::kFaceNorth;
   case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_DPAD_UP:
-    return GamepadButton::up;
+    return GamepadButton::kDpadUp;
   case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_DPAD_DOWN:
-    return GamepadButton::down;
+    return GamepadButton::kDpadDown;
   case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_DPAD_LEFT:
-    return GamepadButton::left;
+    return GamepadButton::kDpadLeft;
   case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_DPAD_RIGHT:
-    return GamepadButton::right;
+    return GamepadButton::kDpadRight;
   case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER:
-    return GamepadButton::right_bumper;
+    return GamepadButton::kRightBumper;
   case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_LEFT_SHOULDER:
-    return GamepadButton::left_bumper;
+    return GamepadButton::kLeftBumper;
   case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_LEFT_STICK:
-    return GamepadButton::LS_click;
+    return GamepadButton::kClickLS;
   case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_RIGHT_STICK:
-    return GamepadButton::RS_click;
+    return GamepadButton::kClickRS;
   case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_START:
-    return GamepadButton::start;
+    return GamepadButton::kStart;
   case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_BACK:
-    return GamepadButton::home;
+    return GamepadButton::kHome;
   default:
     return GamepadButton::kInvalid;
   }
@@ -107,74 +107,74 @@ KeyboardKey Input::GetKeySDL(SDL_Keycode keyCode) {
   {
     if (keyCode >= SDLK_0 && keyCode <= SDLK_9) {
       int diff = keyCode - SDLK_0;
-      return static_cast<KeyboardKey>((int)KeyboardKey::zero + diff);
+      return static_cast<KeyboardKey>((int)KeyboardKey::k0 + diff);
     }
 
     if (keyCode >= SDLK_A && keyCode <= SDLK_Z) {
       int diff = keyCode - SDLK_A;
-      return static_cast<KeyboardKey>((int)KeyboardKey::a + diff);
+      return static_cast<KeyboardKey>((int)KeyboardKey::kA + diff);
     }
 
     if (keyCode >= SDLK_F1 && keyCode <= SDLK_F12) {
       int diff = keyCode - SDLK_F1;
-      return static_cast<KeyboardKey>((int)KeyboardKey::F1 + diff);
+      return static_cast<KeyboardKey>((int)KeyboardKey::kF1 + diff);
     }
 
     switch (keyCode) {
     case SDLK_MINUS:
-      return KeyboardKey::minus;
+      return KeyboardKey::kMinus;
     case SDLK_UNDERSCORE:
-      return KeyboardKey::underscore;
+      return KeyboardKey::kUnderscore;
     case SDLK_EQUALS:
-      return KeyboardKey::equals;
+      return KeyboardKey::kEquals;
     case SDLK_PLUS:
-      return KeyboardKey::plus;
+      return KeyboardKey::kPlus;
     case SDLK_BACKSPACE:
-      return KeyboardKey::backspace;
+      return KeyboardKey::kBackspace;
     case SDLK_RETURN:
-      return KeyboardKey::enter;
+      return KeyboardKey::kEnter;
     case SDLK_SPACE:
-      return KeyboardKey::space;
+      return KeyboardKey::kSpace;
     case SDLK_TAB:
-      return KeyboardKey::tab;
+      return KeyboardKey::kTab;
     case SDLK_CAPSLOCK:
-      return KeyboardKey::caps_lock;
+      return KeyboardKey::kCapsLock;
     case SDLK_LSHIFT:
-      return KeyboardKey::left_shift;
+      return KeyboardKey::kLeftShift;
     case SDLK_LCTRL:
-      return KeyboardKey::left_control;
+      return KeyboardKey::kLeftControl;
     case SDLK_LALT:
-      return KeyboardKey::left_alt;
+      return KeyboardKey::kLeftAlt;
     case SDLK_RSHIFT:
-      return KeyboardKey::right_shift;
+      return KeyboardKey::kRightShift;
     case SDLK_RCTRL:
-      return KeyboardKey::right_control;
+      return KeyboardKey::kRightControl;
     case SDLK_RALT:
-      return KeyboardKey::right_alt;
+      return KeyboardKey::kRightAlt;
     case SDLK_INSERT:
-      return KeyboardKey::insert;
+      return KeyboardKey::kInsert;
     case SDLK_HOME:
-      return KeyboardKey::home;
+      return KeyboardKey::kHome;
     case SDLK_PAGEUP:
-      return KeyboardKey::page_up;
+      return KeyboardKey::kPageUp;
     case SDLK_PAGEDOWN:
-      return KeyboardKey::page_down;
+      return KeyboardKey::kPageDown;
     case SDLK_DELETE:
-      return KeyboardKey::delete_;
+      return KeyboardKey::kDelete;
     case SDLK_END:
-      return KeyboardKey::end;
+      return KeyboardKey::kEnd;
     case SDLK_UP:
-      return KeyboardKey::up;
+      return KeyboardKey::kUp;
     case SDLK_DOWN:
-      return KeyboardKey::down;
+      return KeyboardKey::kDown;
     case SDLK_LEFT:
-      return KeyboardKey::left;
+      return KeyboardKey::kLeft;
     case SDLK_RIGHT:
-      return KeyboardKey::right;
+      return KeyboardKey::kRight;
     case SDLK_ESCAPE:
-      return KeyboardKey::escape;
+      return KeyboardKey::kEscape;
     case SDLK_GRAVE:
-      return KeyboardKey::tilde;
+      return KeyboardKey::kTilde;
     default:
       return KeyboardKey::kInvalid;
     }

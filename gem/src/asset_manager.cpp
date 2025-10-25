@@ -75,25 +75,25 @@ AssetManager::GetLoadProgress(const AssetHandle &handle) {
   ZoneScoped;
   for (auto &queued : enqueued_loads_) {
     if (queued.to_handle() == handle) {
-      return AssetLoadProgress::loading;
+      return AssetLoadProgress::kLoading;
     }
   }
 
   if (pending_async_load_tasks_.find(handle) != pending_async_load_tasks_.end() ||
       pending_sync_load_tasks_.find(handle) != pending_sync_load_tasks_.end()) {
-    return AssetLoadProgress::loading;
+    return AssetLoadProgress::kLoading;
   }
 
   if (pending_unload_tasks_.find(handle) !=
       pending_unload_tasks_.end()) {
-    return AssetLoadProgress::unloading;
+    return AssetLoadProgress::kUnloading;
   }
 
   if (loaded_assets_.find(handle) != loaded_assets_.end()) {
-    return AssetLoadProgress::loaded;
+    return AssetLoadProgress::kLoaded;
   }
 
-  return AssetLoadProgress::not_loaded;
+  return AssetLoadProgress::kNotLoaded;
 }
 
 bool AssetManager::AnyAssetsLoading() {

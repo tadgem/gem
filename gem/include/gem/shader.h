@@ -5,20 +5,20 @@
 namespace gem {
   class Shader {
   public:
-    enum class Stage { kUnknown, vertex, fragment, geometry, compute };
+    enum class Stage { kUnknown, kVertex, kFragment, kGeometry, kCompute };
     enum class UniformType {
       kUnknown,
-      _int,
-      _float,
-      vec2,
-      vec3,
-      vec4,
-      mat3,
-      mat4,
-      sampler2D,
-      sampler3D,
-      image2D,
-      image3D
+      kInt,
+      kFloat,
+      kVec2,
+      kVec3,
+      kVec4,
+      kMat3,
+      kMat4,
+      kSampler2D,
+      kSampler3D,
+      kImage2D,
+      kImage3D
     };
 
     static std::unordered_map<Shader::Stage, std::string>

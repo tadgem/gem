@@ -46,13 +46,13 @@ glm::mat4 Camera::GetRotationMatrix() {
 
 void DebugCameraController::Update(glm::vec2 screen_dim, Camera &cam) {
   ZoneScoped;
-  if (!Input::GetMouseButton(MouseButton::right) && !show_mouse) {
+  if (!Input::GetMouseButton(MouseButton::kRight) && !show_mouse) {
     SDL_ShowCursor();
     show_mouse = true;
     return;
   }
 
-  if (!Input::GetMouseButton(MouseButton::right)) {
+  if (!Input::GetMouseButton(MouseButton::kRight)) {
     return;
   }
 
@@ -63,7 +63,7 @@ void DebugCameraController::Update(glm::vec2 screen_dim, Camera &cam) {
 
   float speed = movement_speed;
 
-  if (Input::GetKey(KeyboardKey::left_shift)) {
+  if (Input::GetKey(KeyboardKey::kLeftShift)) {
     speed *= 3.0f;
   }
 
@@ -82,27 +82,27 @@ void DebugCameraController::Update(glm::vec2 screen_dim, Camera &cam) {
   cam.right = right;
   cam.up = up;
 
-  if (Input::GetKey(KeyboardKey::w)) {
+  if (Input::GetKey(KeyboardKey::kW)) {
     cam.position += forward * speed * frame_time;
   }
 
-  if (Input::GetKey(KeyboardKey::s)) {
+  if (Input::GetKey(KeyboardKey::kS)) {
     cam.position -= forward * movement_speed * frame_time;
   }
 
-  if (Input::GetKey(KeyboardKey::a)) {
+  if (Input::GetKey(KeyboardKey::kA)) {
     cam.position -= right * movement_speed * frame_time;
   }
 
-  if (Input::GetKey(KeyboardKey::d)) {
+  if (Input::GetKey(KeyboardKey::kD)) {
     cam.position += right * movement_speed * frame_time;
   }
 
-  if (Input::GetKey(KeyboardKey::e)) {
+  if (Input::GetKey(KeyboardKey::kE)) {
     cam.position += up * movement_speed * frame_time;
   }
 
-  if (Input::GetKey(KeyboardKey::q)) {
+  if (Input::GetKey(KeyboardKey::kQ)) {
     cam.position -= up * movement_speed * frame_time;
   }
 

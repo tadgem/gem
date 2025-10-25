@@ -7,10 +7,10 @@ std::unordered_map<gem::Shader::Stage, std::string>
 gem::Shader::SplitCompositeShader(const std::string &input) {
   ZoneScoped;
   static std::unordered_map<std::string, Shader::Stage> s_known_stages = {
-      {"#frag", Shader::Stage::fragment},
-      {"#vert", Shader::Stage::vertex},
-      {"#geom", Shader::Stage::geometry},
-      {"#compute", Shader::Stage::compute}};
+      {"#frag", Shader::Stage::kFragment},
+      {"#vert", Shader::Stage::kVertex},
+      {"#geom", Shader::Stage::kGeometry},
+      {"#compute", Shader::Stage::kCompute}};
 
   auto stages = std::unordered_map<Shader::Stage, std::string>();
   std::string version = "";

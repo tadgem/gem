@@ -130,11 +130,11 @@ int main()
         ma->data.UpdateAABB();
         s->CreateEntityFromModel(ma->handle, ma->data, renderer.gbuffer_shader->handle, renderer.gbuffer_shader->data, glm::vec3(0.1), glm::vec3(0.0, 0.0, 0.0),
             {
-                {"u_diffuse_map",   TextureMapType::diffuse},
-                {"u_normal_map",    TextureMapType::normal},
-                {"u_metallic_map",  TextureMapType::metallicness},
-                {"u_roughness_map", TextureMapType::roughness},
-                {"u_ao_map",        TextureMapType::ao}
+                {"u_diffuse_map",   TextureMapType::kDiffuse},
+                {"u_normal_map",    TextureMapType::kNormal},
+                {"u_metallic_map",  TextureMapType::kMetallic},
+                {"u_roughness_map", TextureMapType::kRoughness},
+                {"u_ao_map",        TextureMapType::kAO}
             });
         glm::mat4 model = Utils::GetModelMatrix(glm::vec3(0.0), glm::vec3(0.0), glm::vec3(0.1));
         renderer.voxel_data.current_bounding_box = Utils::TransformAABB(ma->data.aabb, model);
@@ -185,7 +185,7 @@ int main()
         }
 
         glm::vec2 mouse_pos = Input::GetMousePosition();
-        if (Input::GetMouseButton(MouseButton::left) && !ImGui::GetIO().WantCaptureMouse)
+        if (Input::GetMouseButton(MouseButton::kLeft) && !ImGui::GetIO().WantCaptureMouse)
         {
             renderer.GetEntityAtScreenPosition(mouse_pos);
         }

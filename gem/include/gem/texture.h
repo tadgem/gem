@@ -9,18 +9,18 @@
 namespace gem {
 
 enum class TextureMapType {
-  diffuse,
-  normal,
-  specular,
-  metallicness,
-  roughness,
-  ao
+  kDiffuse,
+  kNormal,
+  kSpecular,
+  kMetallic,
+  kRoughness,
+  kAO
 
 };
 
 class Texture {
 public:
-  enum class Mode { stb, gli, memory };
+  enum class Mode { kSTB, kGLI, kMemory };
 
   Texture();
   Texture(const std::string &path);
@@ -41,7 +41,7 @@ public:
 
   // TODO: Support Vulkan texture handles
   gl_handle handle = INVALID_GL_HANDLE;
-  Mode mode = Mode::memory;
+  Mode mode = Mode::kMemory;
 
   union {
     unsigned char *stb_data;

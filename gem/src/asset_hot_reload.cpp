@@ -33,7 +33,7 @@ void GemFileWatchListener::handleFileAction(efsw::WatchID watchid,
     clean_delimiters(full_path);
     AssetHandle ah = AssetHandle(full_path, AssetType::kShader);
     if (Engine::assets.GetLoadProgress(ah) ==
-        AssetLoadProgress::loaded) {
+        AssetLoadProgress::kLoaded) {
       spdlog::info("GemFileListener : Reloading : {}{}", dir, filename);
       std::string shader_source = Utils::LoadStringFromPath(full_path);
       auto *shader_asset =

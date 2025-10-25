@@ -219,14 +219,14 @@ void GLBackend::HandleInputEvents(SDL_Event &input_event) {
   if (input_event.type == SDL_EVENT_MOUSE_BUTTON_UP) {
     SDL_MouseButtonEvent buttonEvent = input_event.button;
     MouseButton button =
-        buttonEvent.button == 3 ? MouseButton::right : MouseButton::left;
+        buttonEvent.button == 3 ? MouseButton::kRight : MouseButton::kLeft;
     Input::UpdateMouseButton(button, false);
     return;
   }
   if (input_event.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
     SDL_MouseButtonEvent buttonEvent = input_event.button;
     MouseButton button =
-        buttonEvent.button == 3 ? MouseButton::right : MouseButton::left;
+        buttonEvent.button == 3 ? MouseButton::kRight : MouseButton::kLeft;
     Input::UpdateMouseButton(button, true);
     return;
   }

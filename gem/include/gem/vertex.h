@@ -26,7 +26,7 @@ public:
   template <typename _Ty>
   void AddVertexBuffer(_Ty *data, uint32_t count,
                          GLenum usage_flags = GL_STATIC_DRAW) {
-    if (GPUBackend::GetBackendAPI() == BackendAPI::open_gl) {
+    if (GPUBackend::GetBackendAPI() == BackendAPI::kOpenGL) {
       gl_handle vbo;
       glGenBuffers(1, &vbo);
 

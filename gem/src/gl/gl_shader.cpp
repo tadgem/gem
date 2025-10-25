@@ -204,23 +204,23 @@ GLShader GLShader::CreateFromComposite(const std::string &composite_shader) {
   std::unordered_map<GLShader::Stage, std::string> stages =
       SplitCompositeShader(composite_shader);
 
-  if (stages.find(GLShader::Stage::compute) != stages.end()) {
-    return GLShader(stages[GLShader::Stage::compute]);
+  if (stages.find(GLShader::Stage::kCompute) != stages.end()) {
+    return GLShader(stages[GLShader::Stage::kCompute]);
   }
 
-  if (stages.find(GLShader::Stage::vertex) != stages.end() &&
-      stages.find(GLShader::Stage::fragment) != stages.end() &&
-      stages.find(GLShader::Stage::geometry) == stages.end()) {
-    return GLShader(stages[GLShader::Stage::vertex],
-                     stages[GLShader::Stage::fragment]);
+  if (stages.find(GLShader::Stage::kVertex) != stages.end() &&
+      stages.find(GLShader::Stage::kFragment) != stages.end() &&
+      stages.find(GLShader::Stage::kGeometry) == stages.end()) {
+    return GLShader(stages[GLShader::Stage::kVertex],
+                     stages[GLShader::Stage::kFragment]);
   }
 
-  if (stages.find(GLShader::Stage::vertex) != stages.end() &&
-      stages.find(GLShader::Stage::fragment) != stages.end() &&
-      stages.find(GLShader::Stage::geometry) != stages.end()) {
-    return GLShader(stages[GLShader::Stage::vertex],
-                     stages[GLShader::Stage::geometry],
-                     stages[GLShader::Stage::fragment]);
+  if (stages.find(GLShader::Stage::kVertex) != stages.end() &&
+      stages.find(GLShader::Stage::kFragment) != stages.end() &&
+      stages.find(GLShader::Stage::kGeometry) != stages.end()) {
+    return GLShader(stages[GLShader::Stage::kVertex],
+                     stages[GLShader::Stage::kGeometry],
+                     stages[GLShader::Stage::kFragment]);
   }
   return {};
 }
@@ -229,27 +229,27 @@ GLShader::UniformType GLShader::GetUniformTypeFromGL(GLenum type) {
   ZoneScoped;
   switch (type) {
   case GL_SAMPLER_2D:
-    return UniformType::sampler2D;
+    return UniformType::kSampler2D;
   case GL_SAMPLER_3D:
-    return UniformType::sampler3D;
+    return UniformType::kSampler3D;
   case GL_IMAGE_2D:
-    return UniformType::image2D;
+    return UniformType::kImage2D;
   case GL_IMAGE_3D:
-    return UniformType::image3D;
+    return UniformType::kImage3D;
   case GL_INT:
-    return UniformType::_int;
+    return UniformType::kInt;
   case GL_FLOAT:
-    return UniformType::_float;
+    return UniformType::kFloat;
   case GL_FLOAT_VEC2:
-    return UniformType::vec2;
+    return UniformType::kVec2;
   case GL_FLOAT_VEC3:
-    return UniformType::vec3;
+    return UniformType::kVec3;
   case GL_FLOAT_VEC4:
-    return UniformType::vec4;
+    return UniformType::kVec4;
   case GL_FLOAT_MAT3:
-    return UniformType::mat3;
+    return UniformType::kMat3;
   case GL_FLOAT_MAT4:
-    return UniformType::mat4;
+    return UniformType::kMat4;
   default:
     return UniformType::kUnknown;
   }

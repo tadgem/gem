@@ -12,7 +12,7 @@ using AssetLoadCallback = void (*)(AssetIntermediate *);
 using AssetLoadedCallback = std::function<void(Asset *)>;
 using AssetUnloadCallback = void (*)(Asset *);
 
-enum class AssetLoadProgress { not_loaded, loading, loaded, unloading };
+enum class AssetLoadProgress { kNotLoaded, kLoading, kLoaded, kUnloading };
 
 struct AssetLoadInfo {
   std::string path;

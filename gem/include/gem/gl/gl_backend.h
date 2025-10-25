@@ -12,7 +12,7 @@ public:
   void ShutDown() override;
   void HandleInputEvents(SDL_Event &input_event) override;
   virtual const BackendAPI GetAPI() {
-    return BackendAPI::open_gl;
+    return BackendAPI::kOpenGL;
   };
   glm::vec2 GetWindowDimensions() override;
 

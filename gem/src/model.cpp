@@ -239,20 +239,20 @@ Model Model::LoadModelAndTextures(const std::string &path) {
     MaterialEntry mat{};
 
     get_material_texture(directory, material, mat, aiTextureType_DIFFUSE,
-                         TextureMapType::diffuse);
+                         TextureMapType::kDiffuse);
     get_material_texture(directory, material, mat, aiTextureType_NORMALS,
-                         TextureMapType::normal);
+                         TextureMapType::kNormal);
     get_material_texture(directory, material, mat, aiTextureType_DISPLACEMENT,
-                         TextureMapType::normal);
+                         TextureMapType::kNormal);
     get_material_texture(directory, material, mat, aiTextureType_SPECULAR,
-                         TextureMapType::specular);
+                         TextureMapType::kSpecular);
     get_material_texture(directory, material, mat,
-                         aiTextureType_AMBIENT_OCCLUSION, TextureMapType::ao);
+                         aiTextureType_AMBIENT_OCCLUSION, TextureMapType::kAO);
     get_material_texture(directory, material, mat,
                          aiTextureType_DIFFUSE_ROUGHNESS,
-                         TextureMapType::roughness);
+                         TextureMapType::kRoughness);
     get_material_texture(directory, material, mat, aiTextureType_METALNESS,
-                         TextureMapType::metallicness);
+                         TextureMapType::kMetallic);
 
     m.materials.push_back(mat);
   }
@@ -286,23 +286,23 @@ Model Model::LoadModelAndTextureEntries(
     MaterialEntry mat{};
 
     get_material_texture_entry(directory, material, mat, aiTextureType_DIFFUSE,
-                               TextureMapType::diffuse, texture_entries);
+                               TextureMapType::kDiffuse, texture_entries);
     get_material_texture_entry(directory, material, mat, aiTextureType_NORMALS,
-                               TextureMapType::normal, texture_entries);
+                               TextureMapType::kNormal, texture_entries);
     get_material_texture_entry(directory, material, mat,
                                aiTextureType_DISPLACEMENT,
-                               TextureMapType::normal, texture_entries);
+                               TextureMapType::kNormal, texture_entries);
     get_material_texture_entry(directory, material, mat, aiTextureType_SPECULAR,
-                               TextureMapType::specular, texture_entries);
+                               TextureMapType::kSpecular, texture_entries);
     get_material_texture_entry(directory, material, mat,
                                aiTextureType_AMBIENT_OCCLUSION,
-                               TextureMapType::ao, texture_entries);
+                               TextureMapType::kAO, texture_entries);
     get_material_texture_entry(directory, material, mat,
                                aiTextureType_DIFFUSE_ROUGHNESS,
-                               TextureMapType::roughness, texture_entries);
+                               TextureMapType::kRoughness, texture_entries);
     get_material_texture_entry(directory, material, mat,
                                aiTextureType_METALNESS,
-                               TextureMapType::metallicness, texture_entries);
+                               TextureMapType::kMetallic, texture_entries);
 
     m.materials.push_back(mat);
   }

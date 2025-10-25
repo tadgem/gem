@@ -11,7 +11,7 @@ namespace gem {
 
 class AMesh;
 
-enum class BackendAPI { open_gl, sdl };
+enum class BackendAPI { kOpenGL, kUnknown };
 
 void SetGemImGuiStyle();
 

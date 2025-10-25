@@ -135,7 +135,7 @@ void Texture::LoadTextureSTB(std::vector<unsigned char> &data) {
   ZoneScoped;
   // TODO: Split up STBI and GLI CPU loading and GL submission
   //  STBI CPU processing taking 22ms in release, only 2ms to submit to GPU
-  mode = Mode::stb;
+  mode = Mode::kSTB;
   unsigned char *stbi_data = nullptr;
 
   stbi_set_flip_vertically_on_load(1);
@@ -149,7 +149,7 @@ void Texture::LoadTextureSTB(std::vector<unsigned char> &data) {
 
 void Texture::LoadTextureGLI(std::vector<unsigned char> &data) {
   ZoneScoped;
-  mode = Mode::gli;
+  mode = Mode::kGLI;
   gli::texture dds_tex_raw =
       gli::load_dds((const char *)data.data(), data.size());
   gli::texture *dds_tex = new gli::texture(gli::flip(dds_tex_raw));
@@ -165,7 +165,7 @@ void Texture::ReleaseGPU() {
 }
 
 void Texture::SubmitToGPU() {
-  if (mode == Mode::stb) {
+  if (mode == Mode::kSTB) {
     ZoneScopedN("STBI Submit to GPU");
     glGenTextures(1, &handle);
     glBindTexture(GL_TEXTURE_2D, handle);
@@ -181,7 +181,7 @@ void Texture::SubmitToGPU() {
                  GL_UNSIGNED_BYTE, cpu_data.stb_data);
     glGenerateMipmap(GL_TEXTURE_2D);
     stbi_image_free(cpu_data.stb_data);
-  } else if (mode == Mode::gli) {
+  } else if (mode == Mode::kGLI) {
     ZoneScopedN("GLI Submit to GPU");
     gli::gl GL(gli::gl::PROFILE_GL33);
     gli::gl::format const format = GL.translate(

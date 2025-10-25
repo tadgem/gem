@@ -138,13 +138,13 @@ Im3dState GLIm3d::LoadIm3D() {
   auto points_stages = GLShader::SplitCompositeShader(points);
   auto lines_stages = GLShader::SplitCompositeShader(lines);
 
-  GLShader points_shader(points_stages[GLShader::Stage::vertex],
-                          points_stages[GLShader::Stage::fragment]);
-  GLShader tris_shader(tris_stages[GLShader::Stage::vertex],
-                        tris_stages[GLShader::Stage::fragment]);
-  GLShader lines_shader(lines_stages[GLShader::Stage::vertex],
-                         lines_stages[GLShader::Stage::geometry],
-                         lines_stages[GLShader::Stage::fragment]);
+  GLShader points_shader(points_stages[GLShader::Stage::kVertex],
+                          points_stages[GLShader::Stage::kFragment]);
+  GLShader tris_shader(tris_stages[GLShader::Stage::kVertex],
+                        tris_stages[GLShader::Stage::kFragment]);
+  GLShader lines_shader(lines_stages[GLShader::Stage::kVertex],
+                         lines_stages[GLShader::Stage::kGeometry],
+                         lines_stages[GLShader::Stage::kFragment]);
 
   gl_handle im3d_vertex_buffer;
   gl_handle im3d_vao;
@@ -182,11 +182,11 @@ void GLIm3d::NewFrameIm3D(Im3dState &state, glm::vec2 screen_dim,
   Im3d::AppData &ad = Im3d::GetAppData();
   ad.m_viewportSize = {screen_dim.x, screen_dim.y};
   ad.m_keyDown[Im3d::Key::Mouse_Left] =
-      Input::GetMouseButton(MouseButton::left);
-  ad.m_keyDown[Im3d::Key::Key_L] = Input::GetKey(KeyboardKey::l);
-  ad.m_keyDown[Im3d::Key::Key_R] = Input::GetKey(KeyboardKey::r);
-  ad.m_keyDown[Im3d::Key::Key_S] = Input::GetKey(KeyboardKey::s);
-  ad.m_keyDown[Im3d::Key::Key_T] = Input::GetKey(KeyboardKey::t);
+      Input::GetMouseButton(MouseButton::kLeft);
+  ad.m_keyDown[Im3d::Key::Key_L] = Input::GetKey(KeyboardKey::kL);
+  ad.m_keyDown[Im3d::Key::Key_R] = Input::GetKey(KeyboardKey::kR);
+  ad.m_keyDown[Im3d::Key::Key_S] = Input::GetKey(KeyboardKey::kS);
+  ad.m_keyDown[Im3d::Key::Key_T] = Input::GetKey(KeyboardKey::kT);
   ad.m_deltaTime = GPUBackend::Selected()->GetFrameTime();
 
   glm::vec2 cursor_pos = Input::GetMousePosition();

@@ -56,8 +56,8 @@ void Material::BindUniforms(AssetManager &am) {
 #endif
     switch (uniforms[name]) {
       // TODO: Image attachments for compute shaders....
-    case GLShader::UniformType::sampler2D:
-    case GLShader::UniformType::sampler3D: {
+    case GLShader::UniformType::kSampler2D:
+    case GLShader::UniformType::kSampler3D: {
       SamplerInfo info = std::any_cast<SamplerInfo>(uniform_values[name]);
       if (info.tex_entry.texture_data == nullptr) {
         TextureAsset *ta =
@@ -76,37 +76,37 @@ void Material::BindUniforms(AssetManager &am) {
                                    info.sampler_slot);
       break;
     }
-    case GLShader::UniformType::_int: {
+    case GLShader::UniformType::kInt: {
       int iv = std::any_cast<int>(uniform_values[name]);
       program.SetInt(name, iv);
       break;
     }
-    case GLShader::UniformType::_float: {
+    case GLShader::UniformType::kFloat: {
       float fv = std::any_cast<float>(uniform_values[name]);
       program.SetFloat(name, fv);
       break;
     }
-    case GLShader::UniformType::vec2: {
+    case GLShader::UniformType::kVec2: {
       glm::vec2 v2 = std::any_cast<glm::vec2>(uniform_values[name]);
       program.SetVec2f(name, v2);
       break;
     }
-    case GLShader::UniformType::vec3: {
+    case GLShader::UniformType::kVec3: {
       glm::vec3 v3 = std::any_cast<glm::vec3>(uniform_values[name]);
       program.SetVec3f(name, v3);
       break;
     }
-    case GLShader::UniformType::vec4: {
+    case GLShader::UniformType::kVec4: {
       glm::vec4 v4 = std::any_cast<glm::vec4>(uniform_values[name]);
       program.SetVec4f(name, v4);
       break;
     }
-    case GLShader::UniformType::mat3: {
+    case GLShader::UniformType::kMat3: {
       glm::mat3 m3 = std::any_cast<glm::mat3>(uniform_values[name]);
       program.SetMat3f(name, m3);
       break;
     }
-    case GLShader::UniformType::mat4: {
+    case GLShader::UniformType::kMat4: {
       glm::mat4 m4 = std::any_cast<glm::mat4>(uniform_values[name]);
       program.SetMat4f(name, m4);
       break;
@@ -139,8 +139,8 @@ nlohmann::json MaterialSystem::Serialize(Scene &current_scene) {
         nlohmann::json uniform_json{};
         uniform_json["uniform_type"] = uniform_type;
         switch (uniform_type) {
-        case GLShader::UniformType::sampler2D:
-        case GLShader::UniformType::sampler3D: {
+        case GLShader::UniformType::kSampler2D:
+        case GLShader::UniformType::kSampler3D: {
           SamplerInfo info =
               std::any_cast<SamplerInfo>(mat.uniform_values[name]);
           uniform_json["slot"] = info.sampler_slot;
@@ -182,8 +182,8 @@ void MaterialSystem::Deserialize(Scene &current_scene, nlohmann::json &sys_json)
       GLShader::UniformType uniform_type = uniform_json["uniform_type"];
 
       switch (uniform_type) {
-      case GLShader::UniformType::sampler2D:
-      case GLShader::UniformType::sampler3D: {
+      case GLShader::UniformType::kSampler2D:
+      case GLShader::UniformType::kSampler3D: {
         TextureEntry tex_entry = uniform_json["entry"];
         mat.SetSampler(uniform_name, uniform_json["slot"], tex_entry,
                         uniform_json["target"]);
