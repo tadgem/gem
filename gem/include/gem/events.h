@@ -9,18 +9,18 @@
 namespace gem {
 
 enum class EventQueue : u32 {
-  engine,
-  game,
+  kEngine,
+  kGame,
 };
 
 enum class EngineEvent : u32 {
-  invalid = 0,
-  asset_loaded,
+  kInvalid = 0,
+  kAssetLoaded,
 
 };
 
 enum class GameEvent : u32 {
-  invalid = 0,
+  kInvalid = 0,
 };
 
 struct AEventData {};
@@ -32,28 +32,28 @@ struct AEventData {};
 
 // sample event data
 struct AssetLoadedData : AEventData {
-  AssetHandle m_handle_loaded = {};
+  AssetHandle handle_loaded = {};
 
-  EVENT_DATA_IMPL(AssetLoadedData, EventQueue::engine,
-                  EngineEvent::asset_loaded)
+  EVENT_DATA_IMPL(AssetLoadedData, EventQueue::kEngine,
+                  EngineEvent::kAssetLoaded)
   GEM_IMPL_ALLOC(AssetLoadedData)
 };
 
 // helper struct to quickly find subscribed events
 struct EventComparator {
-  u32 m_queue;
-  u32 m_index;
+  u32 queue;
+  u32 index;
 
   EventComparator(const EventComparator &) = default;
   EventComparator &operator=(const EventComparator &) = default;
 
   bool operator==(EventComparator const &rhs) const {
     ZoneScoped;
-    return m_queue == rhs.m_queue && m_index == rhs.m_index;
+    return queue == rhs.queue && index == rhs.index;
   }
 
   bool operator<(const EventComparator &o) const {
-    return m_index < o.m_index && m_queue < o.m_queue;
+    return index < o.index && queue < o.queue;
   };
 
   GEM_IMPL_ALLOC(EventComparator)
@@ -64,7 +64,7 @@ struct EventComparator {
 template <> struct std::hash<gem::EventComparator> {
   std::size_t operator()(const gem::EventComparator &ah) const {
     ZoneScoped;
-    return std::hash<u32>()(ah.m_queue) ^ std::hash<u32>()(ah.m_index);
+    return std::hash<u32>()(ah.queue) ^ std::hash<u32>()(ah.index);
   }
 };
 
@@ -72,7 +72,7 @@ namespace gem {
 
 class EventHandler {
 protected:
-  std::unordered_map<EventComparator, std::vector<void *>> p_subscriptions;
+  std::unordered_map<EventComparator, std::vector<void *>> subscriptions_;
 
 public:
   template <typename _EventData>
@@ -86,11 +86,11 @@ public:
     _EventData prototype{};
     EventComparator ec{static_cast<u32>(prototype.get_queue()),
                         static_cast<u32>(prototype.get_index())};
-    if (p_subscriptions.find(ec) == p_subscriptions.end()) {
-      p_subscriptions.emplace(ec, std::vector<void *>());
+    if (subscriptions_.find(ec) == subscriptions_.end()) {
+      subscriptions_.emplace(ec, std::vector<void *>());
     }
 
-    p_subscriptions[ec].emplace_back((void *)(callback));
+    subscriptions_[ec].emplace_back((void *)(callback));
   }
 
   template <typename _EventData>
@@ -104,7 +104,7 @@ public:
     _EventData prototype{};
     EventComparator ec{static_cast<u32>(prototype.get_queue()),
                         static_cast<u32>(prototype.get_index())};
-    if (p_subscriptions.find(ec) == p_subscriptions.end()) {
+    if (subscriptions_.find(ec) == subscriptions_.end()) {
       return;
     }
 
@@ -112,14 +112,14 @@ public:
 
     int index = -1;
 
-    for (int i = 0; i < p_subscriptions[ec].size(); i++) {
-      if (p_subscriptions[ec][i] == callback_addr) {
+    for (int i = 0; i < subscriptions_[ec].size(); i++) {
+      if (subscriptions_[ec][i] == callback_addr) {
         index == i;
       }
     }
 
     if (index >= 0) {
-      p_subscriptions[ec].erase(p_subscriptions[ec].begin() + index);
+      subscriptions_[ec].erase(subscriptions_[ec].begin() + index);
     }
   }
 
@@ -132,11 +132,11 @@ public:
     _EventData prototype{};
     EventComparator ec{static_cast<u32>(prototype.get_queue()),
                         static_cast<u32>(prototype.get_index())};
-    if (p_subscriptions.find(ec) == p_subscriptions.end()) {
+    if (subscriptions_.find(ec) == subscriptions_.end()) {
       return;
     }
 
-    for (void *subscription : p_subscriptions[ec]) {
+    for (void *subscription : subscriptions_[ec]) {
       void (*callback)(_EventData) = (void (*)(_EventData))(subscription);
       callback(data);
     }

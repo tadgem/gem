@@ -38,18 +38,18 @@ void Engine::LoadProjectFromDisk(const std::string &filepath) {
 
 void Engine::Shutdown() {
   ZoneScoped;
-  systems.m_systems.clear();
-  systems.m_system_type_aliases.clear();
+  systems.systems.clear();
+  systems.system_type_aliases.clear();
 }
 void Engine::Update() {
   assets.Update();
 
-  for (auto &cb : debug_callbacks.m_callbacks) {
+  for (auto &cb : debug_callbacks.callbacks) {
     cb();
   }
-  debug_callbacks.m_callbacks.clear();
+  debug_callbacks.callbacks.clear();
 }
 } // namespace gem
 void DebugCallbackCollection::Add(std::function<void()> debug_callback) {
-  m_callbacks.emplace_back(debug_callback);
+  callbacks.emplace_back(debug_callback);
 }

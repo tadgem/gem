@@ -8,7 +8,7 @@
 #include "scene.h"
 
 struct DebugCallbackCollection {
-  std::vector<std::function<void()>> m_callbacks;
+  std::vector<std::function<void()>> callbacks;
 
   void Add(std::function<void()> debug_callback);
 };

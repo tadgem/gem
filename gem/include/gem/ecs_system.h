@@ -12,9 +12,9 @@ class Scene;
 class AssetManager;
 class ECSSystem {
 public:
-  const HashString m_sys_hash;
+  const HashString kSysHash;
 
-  ECSSystem(HashString sys_hash) : m_sys_hash(sys_hash) {}
+  ECSSystem(HashString sys_hash) : kSysHash(sys_hash) {}
 
   virtual void Init() = 0;
   virtual void Update(Scene &current_scene) = 0;
@@ -35,16 +35,16 @@ public:
 
 class SystemManager {
 public:
-  std::vector<std::unique_ptr<ECSSystem>> m_systems;
-  std::unordered_map<hash_string_ge, ECSSystem *> m_system_type_aliases;
+  std::vector<std::unique_ptr<ECSSystem>> systems;
+  std::unordered_map<hash_string_ge, ECSSystem *> system_type_aliases;
 
   template <typename _SysType, typename... Args>
   ECSSystem *AddSystem(Args &&...args) {
     static_assert(std::is_base_of<ECSSystem, _SysType>());
     HashString type_str_hash = HashString{HashUtils::GetTypeHash<_SysType>()};
-    m_systems.push_back(std::make_unique<_SysType>());
-    m_system_type_aliases.emplace(type_str_hash, m_systems.back().get());
-    return m_system_type_aliases[type_str_hash];
+    systems.push_back(std::make_unique<_SysType>());
+    system_type_aliases.emplace(type_str_hash, systems.back().get());
+    return system_type_aliases[type_str_hash];
   }
 
   GEM_IMPL_ALLOC(SystemManager)

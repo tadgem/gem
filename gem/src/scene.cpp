@@ -80,7 +80,7 @@ bool Scene::DoesEntityExist(u32 index) {
 
 void Scene::Update() {
   ZoneScoped;
-  for (auto &sys : Engine::systems.m_systems) {
+  for (auto &sys : Engine::systems.systems) {
     sys->Update(*this);
   }
 }
@@ -145,9 +145,9 @@ Scene *SceneManager::LoadScene(nlohmann::json &scene_json) {
   p_active_scenes.push_back(std::make_unique<Scene>(scene_name));
   Scene *s = p_active_scenes.back().get();
 
-  for (auto &sys : Engine::systems.m_systems) {
+  for (auto &sys : Engine::systems.systems) {
     sys->Deserialize(
-        *s, scene_json["systems"][std::to_string(sys->m_sys_hash.m_value)]);
+        *s, scene_json["systems"][std::to_string(sys->kSysHash.m_value)]);
   }
 
   return s;
@@ -162,8 +162,8 @@ nlohmann::json SceneManager::SaveScene(Scene *ser_scene) {
   json["name"] = ser_scene->m_name;
   json["systems"] = nlohmann::json();
 
-  for (auto &sys : Engine::systems.m_systems) {
-    json["systems"][std::to_string(sys->m_sys_hash.m_value)] =
+  for (auto &sys : Engine::systems.systems) {
+    json["systems"][std::to_string(sys->kSysHash.m_value)] =
         sys->Serialize(*ser_scene);
   }
 
