@@ -27,12 +27,12 @@ struct BackendInit {
 
 class GPUBackend {
 protected:
-  float p_frametime = 0.0f;
-  uint64_t m_now_counter, m_last_counter;
+  float frametime_ = 0.0f;
+  uint64_t now_counter_, last_counter_;
 
 private:
-  inline static BackendAPI s_selected_backend_api;
-  inline static GPUBackend *s_selected_backend = nullptr;
+  inline static BackendAPI kSelectedBackendAPI;
+  inline static GPUBackend *kSelectedBackend = nullptr;
 
 public:
   virtual void Init(BackendInit &init_props) = 0;
@@ -44,22 +44,22 @@ public:
   virtual glm::vec2 GetWindowDimensions() = 0;
   virtual const BackendAPI GetAPI() = 0;
 
-  [[nodiscard]] float GetFrameTime() const { return p_frametime; }
+  [[nodiscard]] float GetFrameTime() const { return frametime_; }
 
-  SDL_Window *m_window = nullptr;
-  bool m_quit = false;
-  ImGuiIO *m_imgui_io = nullptr;
+  SDL_Window *window = nullptr;
+  bool quit = false;
+  ImGuiIO *imgui_io = nullptr;
 
-  static GPUBackend *Selected() { return s_selected_backend; }
-  static BackendAPI GetBackendAPI() { return s_selected_backend_api; }
+  static GPUBackend *Selected() { return kSelectedBackend; }
+  static BackendAPI GetBackendAPI() { return kSelectedBackendAPI; }
 
   template <typename _Backend, typename... Args>
   static void InitBackend(BackendInit &props, Args &&...args) {
     static_assert(std::is_base_of<GPUBackend, _Backend>());
     auto *backend = new _Backend(std::forward<Args>(args)...);
     backend->Init(props);
-    s_selected_backend = static_cast<GPUBackend *>(backend);
-    s_selected_backend_api = s_selected_backend->GetAPI();
+    kSelectedBackend = static_cast<GPUBackend *>(backend);
+    kSelectedBackendAPI = kSelectedBackend->GetAPI();
   }
 };
 

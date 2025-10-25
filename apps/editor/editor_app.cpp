@@ -35,7 +35,7 @@ editor_application::editor_application()
 
 void editor_application::run()
 {
-    while (!GPUBackend::Selected()->m_quit)
+    while (!GPUBackend::Selected()->quit)
     {
       Engine::assets.Update();
 

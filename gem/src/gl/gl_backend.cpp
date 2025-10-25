@@ -68,21 +68,21 @@ void GLBackend::Init(BackendInit &init_props) {
   SDL_WindowFlags window_flags =
       (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE |
                         SDL_WINDOW_HIGH_PIXEL_DENSITY);
-  m_window =
+  window =
       SDL_CreateWindow("GEM Engine", init_props.window_resolution.x,
                        init_props.window_resolution.y, window_flags);
-  if (m_window == nullptr) {
+  if (window == nullptr) {
     printf("Error: SDL_CreateWindow(): %s\n", SDL_GetError());
     return;
   }
 
-  m_sdl_gl_context = new SDL_GLContext(SDL_GL_CreateContext(m_window));
-  SDL_GL_MakeCurrent(m_window, *m_sdl_gl_context);
+  m_sdl_gl_context = new SDL_GLContext(SDL_GL_CreateContext(window));
+  SDL_GL_MakeCurrent(window, *m_sdl_gl_context);
   glewExperimental = true;
 
   if (glewInit() != GLEW_OK) {
     printf("GLEW init failed!");
-    SDL_DestroyWindow(m_window);
+    SDL_DestroyWindow(window);
     SDL_Quit();
     return;
   }
@@ -101,23 +101,23 @@ void GLBackend::Init(BackendInit &init_props) {
   // Setup Dear ImGui context
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
-  m_imgui_io = &ImGui::GetIO();
-  m_imgui_io->ConfigFlags |=
+  imgui_io = &ImGui::GetIO();
+  imgui_io->ConfigFlags |=
       ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
-  m_imgui_io->ConfigFlags |=
+  imgui_io->ConfigFlags |=
       ImGuiConfigFlags_NavEnableGamepad; // Enable Gamepad Controls
-  m_imgui_io->ConfigFlags |=
+  imgui_io->ConfigFlags |=
       ImGuiConfigFlags_DockingEnable; // Enable imgui window docking
 
   // Setup Dear ImGui style
   SetGemImGuiStyle();
 
   // Setup Platform/Renderer backends
-  ImGui_ImplSDL3_InitForOpenGL(m_window, *m_sdl_gl_context);
+  ImGui_ImplSDL3_InitForOpenGL(window, *m_sdl_gl_context);
   ImGui_ImplOpenGL3_Init(glsl_version);
 
-  m_now_counter = SDL_GetPerformanceCounter();
-  m_last_counter = 0;
+  now_counter_ = SDL_GetPerformanceCounter();
+  last_counter_ = 0;
 
   InitBuiltInAssets(this);
   InitImGuiFileDialogImpl();
@@ -129,7 +129,7 @@ void GLBackend::ProcessEvents() {
   while (SDL_PollEvent(&event)) {
     ImGui_ImplSDL3_ProcessEvent(&event);
     if (event.type == SDL_EVENT_QUIT) {
-      m_quit = true;
+      quit = true;
     }
 //    if (event.type == SDL_EventType::Window_E &&
 //        event.window.event == SDL_WINDOWEVENT_CLOSE &&
@@ -139,7 +139,7 @@ void GLBackend::ProcessEvents() {
 
     HandleInputEvents(event);
   }
-  if (SDL_GetWindowFlags(m_window) & SDL_WINDOW_MINIMIZED) {
+  if (SDL_GetWindowFlags(window) & SDL_WINDOW_MINIMIZED) {
     SDL_Delay(10);
   }
 }
@@ -147,15 +147,15 @@ void GLBackend::ProcessEvents() {
 void GLBackend::PreFrame() {
   ZoneScoped;
   static ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 1.00f);
-  m_last_counter = m_now_counter;
-  m_now_counter = SDL_GetPerformanceCounter();
+  last_counter_ = now_counter_;
+  now_counter_ = SDL_GetPerformanceCounter();
 
-  p_frametime =
-      static_cast<float>((m_now_counter - m_last_counter) /
+  frametime_ =
+      static_cast<float>((now_counter_ - last_counter_) /
                          static_cast<float>(SDL_GetPerformanceFrequency()));
 
-  glViewport(0, 0, (int)m_imgui_io->DisplaySize.x,
-             (int)m_imgui_io->DisplaySize.y);
+  glViewport(0, 0, (int)imgui_io->DisplaySize.x,
+             (int)imgui_io->DisplaySize.y);
   glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w,
                clear_color.z * clear_color.w, clear_color.w);
   glClear(GL_COLOR_BUFFER_BIT);
@@ -177,7 +177,7 @@ void GLBackend::PostFrame() {
     GEM_GPU_MARKER("ImGui");
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-    SDL_GL_SwapWindow(m_window);
+    SDL_GL_SwapWindow(window);
   }
 }
 
@@ -190,7 +190,7 @@ void GLBackend::ShutDown() {
   if (m_sdl_gl_context != nullptr) {
     SDL_GL_DestroyContext(*m_sdl_gl_context);
   }
-  SDL_DestroyWindow(m_window);
+  SDL_DestroyWindow(window);
   delete m_sdl_gl_context;
   SDL_Quit();
 }
@@ -291,7 +291,7 @@ void GLBackend::HandleInputEvents(SDL_Event &input_event) {
 glm::vec2 GLBackend::GetWindowDimensions() {
   ZoneScoped;
   int w, h;
-  SDL_GetWindowSize(m_window, &w, &h);
+  SDL_GetWindowSize(window, &w, &h);
   return glm::vec2{static_cast<float>(w), static_cast<float>(h)};
 }
 } // namespace gem

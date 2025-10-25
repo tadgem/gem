@@ -12,7 +12,7 @@ int main()
     Camera cam{};
 
     auto im3d_s = GLIm3d::LoadIm3D();
-    while (!GPUBackend::Selected()->m_quit)
+    while (!GPUBackend::Selected()->quit)
     {       
         GPUBackend::Selected()->ProcessEvents();
         GPUBackend::Selected()->PreFrame();

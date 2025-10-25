@@ -36,8 +36,8 @@ void on_imgui(GLRenderer & renderer, Scene * s, glm::vec2 mouse_pos,
 
         ImGui::Begin("Demo Settings");
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
-                    1000.0f / GPUBackend::Selected()->m_imgui_io->Framerate,
-                    GPUBackend::Selected()->m_imgui_io->Framerate);
+                    1000.0f / GPUBackend::Selected()->imgui_io->Framerate,
+                    GPUBackend::Selected()->imgui_io->Framerate);
 
         ImGui::Text("Mouse Pos : %.3f, %.3f", mouse_pos.x, mouse_pos.y);
         ImGui::Text("Selected Entity ID : %d", renderer.m_last_selected_entity);
@@ -134,7 +134,7 @@ int main()
 
     std::vector<Scene *> scenes{ s };
 
-    while (!GPUBackend::Selected()->m_quit)
+    while (!GPUBackend::Selected()->quit)
     {
         glEnable(GL_DEPTH_TEST);
         Engine::Update();
