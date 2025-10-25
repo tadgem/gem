@@ -6,38 +6,38 @@ namespace gem {
 bool Input::GetGamepadButton(int index, GamepadButton button) {
   ZoneScoped;
   // AASSERT(index < MAX_SUPPORTED_GAMEPADS, "Invalid Gamepad Index Provided");
-  return s_gamepad_state[index].current_frame_gamepad_button_state[button];
+  return kGamepadState[index].current_frame_gamepad_button_state[button];
 }
 
 glm::vec2 Input::GetGamepadStick(int index, GamepadStick stick) {
   ZoneScoped;
   // AASSERT(index < MAX_SUPPORTED_GAMEPADS, "Invalid Gamepad Index Provided");
-  return s_gamepad_state[index].current_frame_stick_state[stick];
+  return kGamepadState[index].current_frame_stick_state[stick];
 }
 
 bool Input::GetKey(KeyboardKey key) {
   ZoneScoped;
-  return s_keyboard_state.current_frame_key_state[key];
+  return kKeyboardState.current_frame_key_state[key];
 }
 
 bool Input::GetMouseButton(MouseButton button) {
   ZoneScoped;
-  return s_mouse_state.current_frame_mouse_button_state[button];
+  return kMouseState.current_frame_mouse_button_state[button];
 }
 
 glm::vec2 Input::GetMousePosition() {
   ZoneScoped;
-  return s_mouse_state.current_frame_mouse_location;
+  return kMouseState.current_frame_mouse_location;
 }
 
 glm::vec2 Input::GetMouseVelocity() {
   ZoneScoped;
-  return s_mouse_state.current_frame_mouse_velocity;
+  return kMouseState.current_frame_mouse_velocity;
 }
 
 float Input::GetMouseScroll() {
   ZoneScoped;
-  return s_mouse_state.current_frame_scroll;
+  return kMouseState.current_frame_scroll;
 }
 
 GamepadStick Input::GetStickSDL(SDL_GamepadAxis &sdlAxis) {
@@ -52,7 +52,7 @@ GamepadStick Input::GetStickSDL(SDL_GamepadAxis &sdlAxis) {
   case SDL_GamepadAxis::SDL_GAMEPAD_AXIS_RIGHTY:
     return GamepadStick::RS;
   }
-  return GamepadStick::invalid;
+  return GamepadStick::kInvalid;
 }
 
 GamepadTrigger Input::GetTriggerSDL(SDL_GamepadAxis &sdlAxis) {
@@ -63,7 +63,7 @@ GamepadTrigger Input::GetTriggerSDL(SDL_GamepadAxis &sdlAxis) {
   case SDL_GAMEPAD_AXIS_RIGHT_TRIGGER:
     return GamepadTrigger::RT;
   }
-  return GamepadTrigger::invalid;
+  return GamepadTrigger::kInvalid;
 }
 
 GamepadButton Input::GetButtonSDL(uint8_t sdlButton) {
@@ -98,7 +98,7 @@ GamepadButton Input::GetButtonSDL(uint8_t sdlButton) {
   case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_BACK:
     return GamepadButton::home;
   default:
-    return GamepadButton::invalid;
+    return GamepadButton::kInvalid;
   }
 }
 
@@ -176,7 +176,7 @@ KeyboardKey Input::GetKeySDL(SDL_Keycode keyCode) {
     case SDLK_GRAVE:
       return KeyboardKey::tilde;
     default:
-      return KeyboardKey::invalid;
+      return KeyboardKey::kInvalid;
     }
   }
 }
@@ -186,7 +186,7 @@ void Input::UpdateGamepadButton(int gamepad_index, GamepadButton b,
   ZoneScoped;
   // AASSERT(gamepad_index < MAX_SUPPORTED_GAMEPADS, "Invalid Gamepad Index
   // Provided");
-  s_gamepad_state->current_frame_gamepad_button_state[b] = value;
+  kGamepadState->current_frame_gamepad_button_state[b] = value;
 }
 
 void Input::UpdateGamepadTrigger(int gamepad_index, GamepadTrigger b,
@@ -194,7 +194,7 @@ void Input::UpdateGamepadTrigger(int gamepad_index, GamepadTrigger b,
   ZoneScoped;
   // AASSERT(gamepad_index < MAX_SUPPORTED_GAMEPADS, "Invalid Gamepad Index
   // Provided");
-  s_gamepad_state->current_frame_trigger_state[b] = value;
+  kGamepadState->current_frame_trigger_state[b] = value;
 }
 
 void Input::UpdateGamepadStick(int gamepad_index, GamepadStick b,
@@ -202,17 +202,17 @@ void Input::UpdateGamepadStick(int gamepad_index, GamepadStick b,
   ZoneScoped;
   // AASSERT(gamepad_index < MAX_SUPPORTED_GAMEPADS, "Invalid Gamepad Index
   // Provided");
-  s_gamepad_state->current_frame_stick_state[b] = value;
+  kGamepadState->current_frame_stick_state[b] = value;
 }
 
 void Input::UpdateMouseButton(MouseButton b, bool value) {
   ZoneScoped;
-  s_mouse_state.current_frame_mouse_button_state[b] = value;
+  kMouseState.current_frame_mouse_button_state[b] = value;
 }
 
 void Input::UpdateMouseScroll(float value) {
   ZoneScoped;
-  s_mouse_state.current_frame_scroll = value;
+  kMouseState.current_frame_scroll = value;
 }
 
 void Input::UpdateMousePosition(glm::vec2 screen_dim, glm::vec2 value) {
@@ -222,36 +222,36 @@ void Input::UpdateMousePosition(glm::vec2 screen_dim, glm::vec2 value) {
   val.x = glm::max(value.x, 0.0f);
   val.y = glm::min(value.y, screen_dim.y);
   val.y = glm::max(value.y, 0.0f);
-  s_mouse_state.current_frame_mouse_location = value;
-  s_mouse_state.current_frame_mouse_velocity =
-      value - s_mouse_state.last_frame_mouse_location;
+  kMouseState.current_frame_mouse_location = value;
+  kMouseState.current_frame_mouse_velocity =
+      value - kMouseState.last_frame_mouse_location;
 }
 
 void Input::UpdateKey(KeyboardKey k, bool value) {
   ZoneScoped;
-  s_keyboard_state.current_frame_key_state[k] = value;
+  kKeyboardState.current_frame_key_state[k] = value;
 }
 
 void Input::UpdateLastFrame() {
   ZoneScoped;
-  s_keyboard_state.last_frame_key_state =
-      s_keyboard_state.current_frame_key_state;
+  kKeyboardState.last_frame_key_state =
+      kKeyboardState.current_frame_key_state;
 
-  s_mouse_state.last_frame_mouses_button_state =
-      s_mouse_state.current_frame_mouse_button_state;
-  s_mouse_state.last_frame_mouse_location =
-      s_mouse_state.current_frame_mouse_location;
-  s_mouse_state.last_frame_mouse_velocity =
-      s_mouse_state.current_frame_mouse_velocity;
-  s_mouse_state.last_frame_scroll = s_mouse_state.current_frame_scroll;
+  kMouseState.last_frame_mouses_button_state =
+      kMouseState.current_frame_mouse_button_state;
+  kMouseState.last_frame_mouse_location =
+      kMouseState.current_frame_mouse_location;
+  kMouseState.last_frame_mouse_velocity =
+      kMouseState.current_frame_mouse_velocity;
+  kMouseState.last_frame_scroll = kMouseState.current_frame_scroll;
 
   for (int i = 0; i < MAX_SUPPORTED_GAMEPADS; i++) {
-    s_gamepad_state[i].last_frame_stick_state =
-        s_gamepad_state->current_frame_stick_state;
-    s_gamepad_state[i].last_frame_gamepad_button_state =
-        s_gamepad_state->current_frame_gamepad_button_state;
-    s_gamepad_state[i].last_frame_stick_state =
-        s_gamepad_state->current_frame_stick_state;
+    kGamepadState[i].last_frame_stick_state =
+        kGamepadState->current_frame_stick_state;
+    kGamepadState[i].last_frame_gamepad_button_state =
+        kGamepadState->current_frame_gamepad_button_state;
+    kGamepadState[i].last_frame_stick_state =
+        kGamepadState->current_frame_stick_state;
   }
 }
 } // namespace gem

@@ -147,7 +147,7 @@ Scene *SceneManager::LoadScene(nlohmann::json &scene_json) {
 
   for (auto &sys : Engine::systems.systems) {
     sys->Deserialize(
-        *s, scene_json["systems"][std::to_string(sys->kSysHash.m_value)]);
+        *s, scene_json["systems"][std::to_string(sys->kSysHash.hash_value)]);
   }
 
   return s;
@@ -163,7 +163,7 @@ nlohmann::json SceneManager::SaveScene(Scene *ser_scene) {
   json["systems"] = nlohmann::json();
 
   for (auto &sys : Engine::systems.systems) {
-    json["systems"][std::to_string(sys->kSysHash.m_value)] =
+    json["systems"][std::to_string(sys->kSysHash.hash_value)] =
         sys->Serialize(*ser_scene);
   }
 

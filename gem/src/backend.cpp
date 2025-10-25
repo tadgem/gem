@@ -42,7 +42,7 @@ void SetGemImGuiStyle() {
   ZoneScoped;
   ImFontConfig font_config = ImFontConfig();
   font_config.FontDataOwnedByAtlas = false;
-  ImGui::GetIO().Fonts->AddFontFromMemoryTTF((void *)&funnel_sans_ttf_bin[0],
+  ImGui::GetIO().Fonts->AddFontFromMemoryTTF((void *)&kFunnelSansTTF[0],
                                              FUNNELSANS_TTF_SIZE, 18.0f,
                                              &font_config);
   ImVec4 *colors = ImGui::GetStyle().Colors;

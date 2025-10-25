@@ -36,10 +36,10 @@ struct HashString {
 #ifdef TRACK_HASH_STRING_ORIGINALS
   inline static std::unordered_map<u64, std::string> s_hash_string_originals;
 #endif
-  HashString() { m_value = 0; }
+  HashString() { hash_value = 0; }
 
   HashString(const std::string &input)
-      : m_value(HashUtils::GetStringHash(input)) {
+      : hash_value(HashUtils::GetStringHash(input)) {
     ZoneScoped;
 #ifdef TRACK_HASH_STRING_ORIGINALS
 #ifdef CHECK_FOR_HASH_STRING_COLLISIONS
@@ -51,25 +51,25 @@ struct HashString {
       }
     }
 #endif
-    s_hash_string_originals[m_value] = input;
+    s_hash_string_originals[hash_value] = input;
 #endif
   }
 
-  HashString(u64 value) : m_value(value) {}
+  HashString(u64 value) : hash_value(value) {}
 
-  template <typename T> HashString() : m_value(HashUtils::GetTypeHash<T>()) {}
+  template <typename T> HashString() : hash_value(HashUtils::GetTypeHash<T>()) {}
 
-  u64 m_value;
+  u64 hash_value;
 
   bool operator==(HashString const &rhs) const {
-    return m_value == rhs.m_value;
+    return hash_value == rhs.hash_value;
   }
 
-  bool operator<(const HashString &o) const { return m_value < o.m_value; };
+  bool operator<(const HashString &o) const { return hash_value < o.hash_value; };
 
-  operator u64() const { return m_value; };
+  operator u64() const { return hash_value; };
 
-  NLOHMANN_DEFINE_TYPE_INTRUSIVE(HashString, m_value)
+  NLOHMANN_DEFINE_TYPE_INTRUSIVE(HashString, hash_value)
 };
 
 using hash_string_ge = HashString;
@@ -77,6 +77,6 @@ using hash_string_ge = HashString;
 
 template <> struct std::hash<gem::HashString> {
   std::size_t operator()(const gem::HashString &h) const {
-    return std::hash<u64>()(h.m_value) ^ std::hash<u64>()(h.m_value);
+    return std::hash<u64>()(h.hash_value) ^ std::hash<u64>()(h.hash_value);
   }
 };

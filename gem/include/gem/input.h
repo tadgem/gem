@@ -6,19 +6,19 @@
 namespace gem {
 
 enum class GamepadStick {
-  invalid = -1,
+  kInvalid = -1,
   LS,
   RS,
 };
 
 enum class GamepadTrigger {
-  invalid = -1,
+  kInvalid = -1,
   LT,
   RT,
 };
 
 enum class GamepadButton {
-  invalid = -1,
+  kInvalid = -1,
   face_north,
   face_south,
   face_east,
@@ -37,7 +37,7 @@ enum class GamepadButton {
 };
 
 enum class MouseButton {
-  invalid = -1,
+  kInvalid = -1,
   left,
   middle,
   right,
@@ -47,7 +47,7 @@ enum class MouseButton {
 };
 
 enum class KeyboardKey {
-  invalid = -1,
+  kInvalid = -1,
   a,
   b,
   c,
@@ -181,8 +181,8 @@ protected:
 
   static constexpr int MAX_SUPPORTED_GAMEPADS = 4;
 
-  inline static MouseState s_mouse_state;
-  inline static KeyboardState s_keyboard_state;
-  inline static GamepadState s_gamepad_state[MAX_SUPPORTED_GAMEPADS];
+  inline static MouseState kMouseState;
+  inline static KeyboardState kKeyboardState;
+  inline static GamepadState kGamepadState[MAX_SUPPORTED_GAMEPADS];
 };
 } // namespace gem
