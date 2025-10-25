@@ -6,7 +6,7 @@ namespace gem {
 
 GLFramebuffer::GLFramebuffer() {
   ZoneScoped;
-  m_handle = INVALID_GL_HANDLE;
+  handle = INVALID_GL_HANDLE;
 }
 
 void GLFramebuffer::Unbind() {
@@ -16,7 +16,7 @@ void GLFramebuffer::Unbind() {
 
 void GLFramebuffer::Cleanup() {
   ZoneScoped;
-  glDeleteFramebuffers(1, &m_handle);
+  glDeleteFramebuffers(1, &handle);
 }
 
 void GLFramebuffer::AddColourAttachment(GLenum attachment_index,
@@ -36,9 +36,9 @@ void GLFramebuffer::AddColourAttachment(GLenum attachment_index,
 
   glFramebufferTexture2D(GL_FRAMEBUFFER, attachment_index, GL_TEXTURE_2D,
                          textureColorbuffer, 0);
-  m_colour_attachments.push_back(textureColorbuffer);
-  m_width = width;
-  m_height = height;
+  colour_attachments.push_back(textureColorbuffer);
+  framebuffer_width = width;
+  framebuffer_height = height;
 }
 
 void GLFramebuffer::AddDepthAttachment(uint32_t width, uint32_t height,
@@ -53,9 +53,9 @@ void GLFramebuffer::AddDepthAttachment(uint32_t width, uint32_t height,
   glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
                             GL_RENDERBUFFER, rbo);
 
-  m_depth_attachment = rbo;
-  m_width = width;
-  m_height = height;
+  depth_attachment = rbo;
+  framebuffer_width = width;
+  framebuffer_height = height;
 }
 
 void GLFramebuffer::AddDepthAttachmentSamplerFriendly(uint32_t width,
@@ -76,9 +76,9 @@ void GLFramebuffer::AddDepthAttachmentSamplerFriendly(uint32_t width,
   glDrawBuffer(GL_NONE);
   glReadBuffer(GL_NONE);
 
-  m_depth_attachment = depthMap;
-  m_width = width;
-  m_height = height;
+  depth_attachment = depthMap;
+  framebuffer_width = width;
+  framebuffer_height = height;
 }
 
 void GLFramebuffer::Check() {
@@ -86,7 +86,7 @@ void GLFramebuffer::Check() {
   auto zero = GL_COLOR_ATTACHMENT0;
   std::vector<unsigned int> attachments;
 
-  for (auto &a : m_colour_attachments) {
+  for (auto &a : colour_attachments) {
     attachments.push_back(zero);
     zero++;
   }
@@ -113,8 +113,8 @@ GLFramebuffer GLFramebuffer::Create(glm::vec2 resolution,
   fb.Bind();
   for (auto &info : attachments) {
     fb.AddColourAttachment(attachment, resolution.x, resolution.y,
-                             info.m_internal_format, info.m_format,
-                             info.m_filter, info.m_pixel_format);
+                             info.internal_format, info.format,
+                             info.filter, info.pixel_format);
     attachment++;
   }
   if (add_depth) {
@@ -128,9 +128,9 @@ GLFramebuffer GLFramebuffer::Create(glm::vec2 resolution,
 
 void GLFramebuffer::Bind() {
   ZoneScoped;
-  if (m_handle == INVALID_GL_HANDLE) {
-    glGenFramebuffers(1, &m_handle);
+  if (handle == INVALID_GL_HANDLE) {
+    glGenFramebuffers(1, &handle);
   }
-  glBindFramebuffer(GL_FRAMEBUFFER, m_handle);
+  glBindFramebuffer(GL_FRAMEBUFFER, handle);
 }
 } // namespace gem

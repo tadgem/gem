@@ -61,11 +61,11 @@ void tech::PBRLighting::DispatchLightPass(
     lighting_shader.SetFloat(int_name.str(), point_lights[i].intensity);
   }
 
-  Texture::BindSamplerHandle(gbuffer.m_colour_attachments[0], GL_TEXTURE0);
-  Texture::BindSamplerHandle(gbuffer.m_colour_attachments[1], GL_TEXTURE1);
-  Texture::BindSamplerHandle(gbuffer.m_colour_attachments[2], GL_TEXTURE2);
-  Texture::BindSamplerHandle(gbuffer.m_colour_attachments[3], GL_TEXTURE3);
-  Texture::BindSamplerHandle(dir_light_shadow_buffer.m_depth_attachment,
+  Texture::BindSamplerHandle(gbuffer.colour_attachments[0], GL_TEXTURE0);
+  Texture::BindSamplerHandle(gbuffer.colour_attachments[1], GL_TEXTURE1);
+  Texture::BindSamplerHandle(gbuffer.colour_attachments[2], GL_TEXTURE2);
+  Texture::BindSamplerHandle(gbuffer.colour_attachments[3], GL_TEXTURE3);
+  Texture::BindSamplerHandle(dir_light_shadow_buffer.depth_attachment,
                                GL_TEXTURE4);
 
   // bind all maps

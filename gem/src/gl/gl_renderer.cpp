@@ -299,7 +299,7 @@ void GLRenderer::Render(AssetManager &am, Camera &cam,
     m_gbuffer_downsample.Bind();
     gl::tech::Utils::DispatchPresentImage(
         m_downsample_shader->data, "u_prev_mip", 0,
-        m_gbuffer.m_colour_attachments[2]);
+        m_gbuffer.colour_attachments[2]);
     m_gbuffer_downsample.Unbind();
   }
 
@@ -308,7 +308,7 @@ void GLRenderer::Render(AssetManager &am, Camera &cam,
 
     gl::tech::TemporalAntiAliasing::DispatchTAAPass(
         m_taa_shader->data, m_lightpass_buffer, m_lightpass_buffer_resolve,
-        m_lightpass_buffer_history, m_gbuffer.m_colour_attachments[4],
+        m_lightpass_buffer_history, m_gbuffer.colour_attachments[4],
         m_window_resolution);
   }
 
@@ -324,7 +324,7 @@ void GLRenderer::Render(AssetManager &am, Camera &cam,
   if (m_debug_draw_lighting_pass) {
     gl::tech::Utils::DispatchPresentImage(
         m_present_shader->data, "u_image_sampler", 0,
-        m_lightpass_buffer_resolve.m_colour_attachments.front());
+        m_lightpass_buffer_resolve.colour_attachments.front());
   }
 
   m_ssr_buffer_resolve.Bind();
@@ -341,7 +341,7 @@ void GLRenderer::Render(AssetManager &am, Camera &cam,
     glViewport(0, 0, m_window_resolution.x, m_window_resolution.y);
     gl::tech::TemporalAntiAliasing::DispatchTAAPass(
         m_taa_shader->data, m_ssr_buffer, m_ssr_buffer_resolve,
-        m_ssr_buffer_history, m_gbuffer.m_colour_attachments[4],
+        m_ssr_buffer_history, m_gbuffer.colour_attachments[4],
         m_window_resolution);
   }
 
@@ -351,7 +351,7 @@ void GLRenderer::Render(AssetManager &am, Camera &cam,
       gl::tech::TemporalAntiAliasing::DispatchTAAPass(
           m_taa_shader->data, m_conetracing_buffer,
           m_conetracing_buffer_resolve, m_conetracing_buffer_history,
-          m_gbuffer.m_colour_attachments[4], m_window_resolution);
+          m_gbuffer.colour_attachments[4], m_window_resolution);
 
       glViewport(0, 0, m_window_resolution.x * m_vxgi_resolution_scale,
                  m_window_resolution.y * m_vxgi_resolution_scale);
@@ -369,43 +369,43 @@ void GLRenderer::Render(AssetManager &am, Camera &cam,
   if (m_debug_draw_cone_tracing_pass_no_taa) {
     gl::tech::Utils::DispatchPresentImage(
         m_present_shader->data, "u_image_sampler", 0,
-        m_conetracing_buffer.m_colour_attachments.front());
+        m_conetracing_buffer.colour_attachments.front());
   }
   if (m_debug_draw_lighting_pass_no_taa) {
     gl::tech::Utils::DispatchPresentImage(
         m_present_shader->data, "u_image_sampler", 0,
-        m_lightpass_buffer.m_colour_attachments.front());
+        m_lightpass_buffer.colour_attachments.front());
   }
 
   if (m_debug_draw_ssr_pass) {
     gl::tech::Utils::DispatchPresentImage(
         m_present_shader->data, "u_image_sampler", 0,
-        m_ssr_buffer_resolve.m_colour_attachments.front());
+        m_ssr_buffer_resolve.colour_attachments.front());
   }
   {
     TracyGpuZone("Blit lightpass to history");
     gl::tech::Utils::DispatchBlitToFB(
         m_lightpass_buffer_history, m_present_shader->data, "u_image_sampler",
-        0, m_lightpass_buffer_resolve.m_colour_attachments[0]);
+        0, m_lightpass_buffer_resolve.colour_attachments[0]);
   }
   {
     TracyGpuZone("Blit Gbuffer position to history");
     gl::tech::Utils::DispatchBlitToFB(
         m_position_buffer_history, m_present_shader->data, "u_image_sampler",
-        0, m_gbuffer.m_colour_attachments[1]);
+        0, m_gbuffer.colour_attachments[1]);
   }
   {
     TracyGpuZone("Blit voxel cone tracing to history");
     gl::tech::Utils::DispatchBlitToFB(
         m_conetracing_buffer_history, m_present_shader->data,
         "u_image_sampler", 0,
-        m_conetracing_buffer_denoise.m_colour_attachments.front());
+        m_conetracing_buffer_denoise.colour_attachments.front());
   }
   {
     TracyGpuZone("Blit ssr pass to history");
     gl::tech::Utils::DispatchBlitToFB(
         m_ssr_buffer_history, m_present_shader->data, "u_image_sampler", 0,
-        m_ssr_buffer_resolve.m_colour_attachments.front());
+        m_ssr_buffer_resolve.colour_attachments.front());
   }
 
   glClear(GL_DEPTH_BUFFER_BIT);
@@ -427,14 +427,14 @@ void GLRenderer::Render(AssetManager &am, Camera &cam,
                                        m_tonemapping_saturation);
     m_combine_shader->data.SetInt("lighting_pass", 0);
     Texture::BindSamplerHandle(
-        m_lightpass_buffer_resolve.m_colour_attachments.front(), GL_TEXTURE0);
+        m_lightpass_buffer_resolve.colour_attachments.front(), GL_TEXTURE0);
     m_combine_shader->data.SetInt("cone_tracing_pass", 1);
     Texture::BindSamplerHandle(
-        m_conetracing_buffer_resolve.m_colour_attachments.front(), GL_TEXTURE1);
+        m_conetracing_buffer_resolve.colour_attachments.front(), GL_TEXTURE1);
     m_combine_shader->data.SetInt("ssr_pass", 2);
     m_combine_shader->data.SetInt("ssr_pass", 2);
     Texture::BindSamplerHandle(
-        m_ssr_buffer_resolve.m_colour_attachments.front(), GL_TEXTURE2);
+        m_ssr_buffer_resolve.colour_attachments.front(), GL_TEXTURE2);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
     Texture::BindSamplerHandle(0, GL_TEXTURE0);
@@ -442,7 +442,7 @@ void GLRenderer::Render(AssetManager &am, Camera &cam,
     m_final_pass.Unbind();
     gl::tech::Utils::DispatchPresentImage(
         m_present_shader->data, "u_image_sampler", 0,
-        m_final_pass.m_colour_attachments.front());
+        m_final_pass.colour_attachments.front());
 
     m_conetracing_buffer_resolve.Bind();
     glClear(GL_COLOR_BUFFER_BIT);

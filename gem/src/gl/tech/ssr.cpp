@@ -31,17 +31,17 @@ void tech::ScreenSpaceReflections::DispatchSSRPass(GLShader &ssr, Camera &cam,
   ssr.SetMat4f("u_rotation", cam.GetRotationMatrix());
 
   ssr.SetInt("u_gnormal_buffer", 0);
-  Texture::BindSamplerHandle(gbuffer.m_colour_attachments[2], GL_TEXTURE0);
+  Texture::BindSamplerHandle(gbuffer.colour_attachments[2], GL_TEXTURE0);
 
   ssr.SetInt("u_gcolour_buffer", 1);
-  Texture::BindSamplerHandle(lighting_buffer.m_colour_attachments.front(),
+  Texture::BindSamplerHandle(lighting_buffer.colour_attachments.front(),
                                GL_TEXTURE1);
 
   ssr.SetInt("u_gpbr_buffer", 2);
-  Texture::BindSamplerHandle(gbuffer.m_colour_attachments[3], GL_TEXTURE2);
+  Texture::BindSamplerHandle(gbuffer.colour_attachments[3], GL_TEXTURE2);
 
   ssr.SetInt("u_depth_buffer", 3);
-  Texture::BindSamplerHandle(gbuffer.m_depth_attachment, GL_TEXTURE3);
+  Texture::BindSamplerHandle(gbuffer.depth_attachment, GL_TEXTURE3);
 
   glStencilFunc(GL_EQUAL, 1, 0xFF);
   glStencilMask(0x00);

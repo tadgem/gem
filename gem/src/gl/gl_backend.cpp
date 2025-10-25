@@ -76,8 +76,8 @@ void GLBackend::Init(BackendInit &init_props) {
     return;
   }
 
-  m_sdl_gl_context = new SDL_GLContext(SDL_GL_CreateContext(window));
-  SDL_GL_MakeCurrent(window, *m_sdl_gl_context);
+  gl_context = new SDL_GLContext(SDL_GL_CreateContext(window));
+  SDL_GL_MakeCurrent(window, *gl_context);
   glewExperimental = true;
 
   if (glewInit() != GLEW_OK) {
@@ -113,7 +113,7 @@ void GLBackend::Init(BackendInit &init_props) {
   SetGemImGuiStyle();
 
   // Setup Platform/Renderer backends
-  ImGui_ImplSDL3_InitForOpenGL(window, *m_sdl_gl_context);
+  ImGui_ImplSDL3_InitForOpenGL(window, *gl_context);
   ImGui_ImplOpenGL3_Init(glsl_version);
 
   now_counter_ = SDL_GetPerformanceCounter();
@@ -187,11 +187,11 @@ void GLBackend::ShutDown() {
   ImGui_ImplSDL3_Shutdown();
   ImGui::DestroyContext();
 
-  if (m_sdl_gl_context != nullptr) {
-    SDL_GL_DestroyContext(*m_sdl_gl_context);
+  if (gl_context != nullptr) {
+    SDL_GL_DestroyContext(*gl_context);
   }
   SDL_DestroyWindow(window);
-  delete m_sdl_gl_context;
+  delete gl_context;
   SDL_Quit();
 }
 

@@ -2,8 +2,8 @@
 #include "gem/mesh.h"
 namespace gem {
 class GLMesh : public AMesh {
-  VAO m_vao;
+  VAO vao;
 
-  void Draw() { m_vao.Draw(); }
+  void Draw() { vao.Draw(); }
 };
 }

@@ -41,19 +41,19 @@ public:
   }
 
   struct GLAttachmentInfo {
-    GLenum m_internal_format;
-    GLenum m_format;
-    GLenum m_filter;
-    GLenum m_pixel_format;
+    GLenum internal_format;
+    GLenum format;
+    GLenum filter;
+    GLenum pixel_format;
   };
 
   static GLFramebuffer Create(glm::vec2 resolution,
                                std::vector<GLAttachmentInfo> colour_attachments,
                                bool add_depth = true);
 
-  gl_handle m_handle;
-  std::vector<gl_handle> m_colour_attachments;
-  gl_handle m_depth_attachment;
-  uint32_t m_width, m_height;
+  gl_handle handle;
+  std::vector<gl_handle> colour_attachments;
+  gl_handle depth_attachment;
+  uint32_t framebuffer_width, framebuffer_height;
 };
 } // namespace gem

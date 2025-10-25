@@ -22,10 +22,10 @@ void tech::TemporalAntiAliasing::DispatchTAAPass(GLShader &taa, GLFramebuffer &p
   taa.Use();
   taa.SetVec2f("u_resolution", {window_res.x, window_res.y});
   taa.SetInt("u_current_buffer", 0);
-  Texture::BindSamplerHandle(pass_buffer.m_colour_attachments.front(),
+  Texture::BindSamplerHandle(pass_buffer.colour_attachments.front(),
                                GL_TEXTURE0);
   taa.SetInt("u_history_buffer", 1);
-  Texture::BindSamplerHandle(pass_history_buffer.m_colour_attachments.front(),
+  Texture::BindSamplerHandle(pass_history_buffer.colour_attachments.front(),
                                GL_TEXTURE1);
   taa.SetInt("u_velocity_buffer", 2);
   Texture::BindSamplerHandle(velocity_buffer_attachment, GL_TEXTURE2);

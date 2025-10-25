@@ -16,6 +16,6 @@ public:
   };
   glm::vec2 GetWindowDimensions() override;
 
-  SDL_GLContext *m_sdl_gl_context;
+  SDL_GLContext *gl_context;
 };
 } // namespace gem

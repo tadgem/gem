@@ -40,7 +40,7 @@ void tech::GBuffer::DispatchGBufferWithID(
   Texture::BindSamplerHandle(0, GL_TEXTURE3);
   Texture::BindSamplerHandle(0, GL_TEXTURE4);
   Texture::BindSamplerHandle(
-      previous_position_buffer.m_colour_attachments.front(), GL_TEXTURE5);
+      previous_position_buffer.colour_attachments.front(), GL_TEXTURE5);
 
   for (Scene *current_scene : scenes) {
     auto renderables =
@@ -85,7 +85,7 @@ void tech::GBuffer::DispatchGBufferTexturelessWithID(
   gbuffer_textureless_shader.SetInt("u_prev_position_map", 0);
 
   Texture::BindSamplerHandle(
-      previous_position_buffer.m_colour_attachments.front(), GL_TEXTURE0);
+      previous_position_buffer.colour_attachments.front(), GL_TEXTURE0);
 
   for (Scene *current_scene : scenes) {
     auto renderables =

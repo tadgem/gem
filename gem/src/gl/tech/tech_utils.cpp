@@ -23,7 +23,7 @@ void tech::Utils::DispatchDenoiseImage(GLShader &denoise_shader,
   denoise_shader.SetFloat("uThreshold", aThreshold);
   denoise_shader.SetFloat("uKSigma", aKSigma);
   denoise_shader.SetVec2f("wSize", {window_res.x, window_res.y});
-  Texture::BindSamplerHandle(input.m_colour_attachments.front(), GL_TEXTURE0);
+  Texture::BindSamplerHandle(input.colour_attachments.front(), GL_TEXTURE0);
   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
   denoised.Unbind();
 }

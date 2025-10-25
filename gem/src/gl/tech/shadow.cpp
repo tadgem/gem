@@ -36,7 +36,7 @@ void tech::Shadow::DispatchShadowPass(GLFramebuffer &shadow_fb,
 
   shadow_fb.Bind();
   glClear(GL_DEPTH_BUFFER_BIT);
-  glViewport(0, 0, shadow_fb.m_width, shadow_fb.m_height);
+  glViewport(0, 0, shadow_fb.framebuffer_width, shadow_fb.framebuffer_height);
   glEnable(GL_CULL_FACE);
   glCullFace(GL_FRONT);
   shadow_shader.Use();

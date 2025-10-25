@@ -25,8 +25,8 @@ void tech::VXGI::DispatchGBufferVoxelization(GLShader &voxelization,
   voxelization.SetVec3f("u_voxel_unit", voxel_data.voxel_unit);
   Texture::BindImageHandle(voxel_data.voxel_texture.handle, 0, 0,
                              GL_RGBA16F);
-  Texture::BindSamplerHandle(gbuffer.m_colour_attachments[1], GL_TEXTURE0);
-  Texture::BindSamplerHandle(lightpass_buffer.m_colour_attachments[0],
+  Texture::BindSamplerHandle(gbuffer.colour_attachments[1], GL_TEXTURE0);
+  Texture::BindSamplerHandle(lightpass_buffer.colour_attachments[0],
                                GL_TEXTURE1);
   glAssert(glDispatchCompute(window_res.x / 10, window_res.y / 10, 1));
   glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
@@ -85,14 +85,14 @@ void tech::VXGI::DispatchConeTracingPass(
   voxel_cone_tracing.SetFloat("u_max_trace_distance", max_trace_distance);
   voxel_cone_tracing.SetFloat("u_diffuse_spec_mix", diffuse_spec_mix);
 
-  Texture::BindSamplerHandle(gbuffer.m_colour_attachments[1], GL_TEXTURE0);
+  Texture::BindSamplerHandle(gbuffer.colour_attachments[1], GL_TEXTURE0);
   voxel_cone_tracing.SetInt("u_normal_map", 1);
-  Texture::BindSamplerHandle(gbuffer.m_colour_attachments[2], GL_TEXTURE1);
+  Texture::BindSamplerHandle(gbuffer.colour_attachments[2], GL_TEXTURE1);
   voxel_cone_tracing.SetInt("u_voxel_map", 2);
   Texture::BindSamplerHandle(voxel_data.voxel_texture.handle, GL_TEXTURE2,
                                GL_TEXTURE_3D);
   voxel_cone_tracing.SetInt("u_colour_map", 3);
-  Texture::BindSamplerHandle(gbuffer.m_colour_attachments[0], GL_TEXTURE3);
+  Texture::BindSamplerHandle(gbuffer.colour_attachments[0], GL_TEXTURE3);
   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
   buffer_conetracing.Unbind();
   Texture::BindSamplerHandle(0, GL_TEXTURE0);
