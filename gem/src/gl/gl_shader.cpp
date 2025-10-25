@@ -11,7 +11,7 @@ namespace gem {
 GLShader::GLShader(const std::string &comp) {
   ZoneScoped;
   auto c = CompileShader(comp, GL_COMPUTE_SHADER);
-  m_shader_id = LinkShader(c);
+  linked_program_id = LinkShader(c);
 
   glDeleteShader(c);
 }
@@ -21,7 +21,7 @@ GLShader::GLShader(const std::string &vert, const std::string &frag) {
   auto v = CompileShader(vert, GL_VERTEX_SHADER);
   auto f = CompileShader(frag, GL_FRAGMENT_SHADER);
 
-  m_shader_id = LinkShader(v, f);
+  linked_program_id = LinkShader(v, f);
 
   glDeleteShader(v);
   glDeleteShader(f);
@@ -34,7 +34,7 @@ GLShader::GLShader(const std::string &vert, const std::string &geom,
   auto g = CompileShader(geom, GL_GEOMETRY_SHADER);
   auto f = CompileShader(frag, GL_FRAGMENT_SHADER);
 
-  m_shader_id = LinkShader(v, g, f);
+  linked_program_id = LinkShader(v, g, f);
 
   glDeleteShader(v);
   glDeleteShader(g);
@@ -43,79 +43,79 @@ GLShader::GLShader(const std::string &vert, const std::string &geom,
 
 void GLShader::Use() {
   ZoneScoped;
-  glUseProgram(m_shader_id);
+  glUseProgram(linked_program_id);
 }
 
 void GLShader::Release() {
   ZoneScoped;
-  glDeleteProgram(m_shader_id);
+  glDeleteProgram(linked_program_id);
 }
 
 void GLShader::SetBool(const std::string &name, bool value) const {
   ZoneScoped;
-  glUniform1i(glGetUniformLocation(m_shader_id, name.c_str()), (int)value);
+  glUniform1i(glGetUniformLocation(linked_program_id, name.c_str()), (int)value);
 }
 
 void GLShader::SetInt(const std::string &name, int value) const {
   ZoneScoped;
-  glUniform1i(glGetUniformLocation(m_shader_id, name.c_str()), value);
+  glUniform1i(glGetUniformLocation(linked_program_id, name.c_str()), value);
 }
 
 void GLShader::SetUint(const std::string &name, unsigned int value) const {
   ZoneScoped;
-  glUniform1ui(glGetUniformLocation(m_shader_id, name.c_str()), value);
+  glUniform1ui(glGetUniformLocation(linked_program_id, name.c_str()), value);
 }
 
 void GLShader::SetFloat(const std::string &name, float value) const {
   ZoneScoped;
-  glUniform1f(glGetUniformLocation(m_shader_id, name.c_str()), value);
+  glUniform1f(glGetUniformLocation(linked_program_id, name.c_str()), value);
 }
 
 void GLShader::SetVec2f(const std::string &name, glm::vec2 value) const {
   ZoneScoped;
-  glUniform2f(glGetUniformLocation(m_shader_id, name.c_str()), value.x,
+  glUniform2f(glGetUniformLocation(linked_program_id, name.c_str()), value.x,
               value.y);
 }
 
 void GLShader::SetVec3f(const std::string &name, glm::vec3 value) const {
   ZoneScoped;
-  glUniform3f(glGetUniformLocation(m_shader_id, name.c_str()), value.x, value.y,
+  glUniform3f(glGetUniformLocation(linked_program_id, name.c_str()), value.x, value.y,
               value.z);
 }
 
 void GLShader::SetVec4f(const std::string &name, glm::vec4 value) const {
   ZoneScoped;
-  glUniform4f(glGetUniformLocation(m_shader_id, name.c_str()), value.x, value.y,
+  glUniform4f(glGetUniformLocation(linked_program_id, name.c_str()), value.x, value.y,
               value.z, value.w);
 }
 
 void GLShader::SetVec2i(const std::string &name, glm::ivec2 value) const {
   ZoneScoped;
-  glUniform2i(glGetUniformLocation(m_shader_id, name.c_str()), value.x,
+  glUniform2i(glGetUniformLocation(linked_program_id, name.c_str()), value.x,
               value.y);
 }
 
 void GLShader::SetVec3i(const std::string &name, glm::ivec3 value) const {
   ZoneScoped;
-  glUniform3i(glGetUniformLocation(m_shader_id, name.c_str()), value.x, value.y,
+  glUniform3i(glGetUniformLocation(linked_program_id, name.c_str()), value.x, value.y,
               value.z);
 }
 
 void GLShader::SetVec4i(const std::string &name, glm::ivec4 value) const {
   ZoneScoped;
-  glUniform4i(glGetUniformLocation(m_shader_id, name.c_str()), value.x, value.y,
+  glUniform4i(glGetUniformLocation(linked_program_id, name.c_str()), value.x, value.y,
               value.z, value.w);
 }
 
 void GLShader::SetMat3f(const std::string &name, glm::mat3 value) const {
   ZoneScoped;
-  glUniformMatrix3fv(glGetUniformLocation(m_shader_id, name.c_str()), 1,
+  glUniformMatrix3fv(glGetUniformLocation(linked_program_id, name.c_str()), 1,
                      GL_FALSE, glm::value_ptr(value));
 }
 
 void GLShader::SetMat4f(const std::string &name, glm::mat4 value) const {
   ZoneScoped;
-  glUniformMatrix4fv(glGetUniformLocation(m_shader_id, name.c_str()), 1,
+  glUniformMatrix4fv(glGetUniformLocation(linked_program_id, name.c_str()), 1,
                      GL_FALSE, glm::value_ptr(value));
 }
 

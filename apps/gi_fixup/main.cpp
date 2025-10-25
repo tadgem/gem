@@ -18,9 +18,9 @@ struct DebugVoxelGrid
 void on_imgui(GLRenderer & renderer, Scene * s, glm::vec2 mouse_pos,
               DirectionalLight & dir2, Transform & cube_trans, std::vector<PointLight>& lights)
 {
-    if (s->DoesEntityExist((u32) renderer.m_last_selected_entity))
+    if (s->DoesEntityExist((u32) renderer.last_selected_entity))
     {
-        EntityData & data = s->registry.get<EntityData>(renderer.m_last_selected_entity);
+        EntityData & data = s->registry.get<EntityData>(renderer.last_selected_entity);
         ImGui::Begin(data.entity_name.c_str());
         // do each component ImGui
         ImGui::End();
@@ -34,7 +34,7 @@ void on_imgui(GLRenderer & renderer, Scene * s, glm::vec2 mouse_pos,
                     GPUBackend::Selected()->imgui_io->Framerate);
 
         ImGui::Text("Mouse Pos : %.3f, %.3f", mouse_pos.x, mouse_pos.y);
-        ImGui::Text("Selected Entity ID : %d", renderer.m_last_selected_entity);
+        ImGui::Text("Selected Entity ID : %d", renderer.last_selected_entity);
         ImGui::Separator();
         ImGui::Text("Lights");
         ImGui::ColorEdit3("Dir Light Colour", &dir2.colour[0]);
@@ -121,14 +121,14 @@ int main()
 
     e.HasComponent<EntityData>();
     auto& data = e.GetComponent<EntityData>();
-    Material mat(renderer.m_gbuffer_shader->handle, renderer.m_gbuffer_shader->data);
-    e.AddComponent<Material>(renderer.m_gbuffer_shader->handle, renderer.m_gbuffer_shader->data);
+    Material mat(renderer.gbuffer_shader->handle, renderer.gbuffer_shader->data);
+    e.AddComponent<Material>(renderer.gbuffer_shader->handle, renderer.gbuffer_shader->data);
 
     Engine::assets.LoadAsset("assets/models/sponza/Sponza.gltf", AssetType::model, [s, &renderer](Asset * a) {
         spdlog::info("adding model to scene");
         auto* ma = dynamic_cast<ModelAsset *>(a);
         ma->data.UpdateAABB();
-        s->CreateEntityFromModel(ma->handle, ma->data, renderer.m_gbuffer_shader->handle, renderer.m_gbuffer_shader->data, glm::vec3(0.1), glm::vec3(0.0, 0.0, 0.0),
+        s->CreateEntityFromModel(ma->handle, ma->data, renderer.gbuffer_shader->handle, renderer.gbuffer_shader->data, glm::vec3(0.1), glm::vec3(0.0, 0.0, 0.0),
             {
                 {"u_diffuse_map",   TextureMapType::diffuse},
                 {"u_normal_map",    TextureMapType::normal},
@@ -137,14 +137,14 @@ int main()
                 {"u_ao_map",        TextureMapType::ao}
             });
         glm::mat4 model = Utils::GetModelMatrix(glm::vec3(0.0), glm::vec3(0.0), glm::vec3(0.1));
-        renderer.m_voxel_data.current_bounding_box = Utils::TransformAABB(ma->data.aabb, model);
+        renderer.voxel_data.current_bounding_box = Utils::TransformAABB(ma->data.aabb, model);
     });
 
     auto cube_entity = s->CreateEntity("Test Cube");
     auto& cube_trans = cube_entity.AddComponent<Transform>();
     auto& cube_mat = cube_entity.AddComponent<Material>(
-        renderer.m_gbuffer_textureless_shader->handle,
-                renderer.m_gbuffer_textureless_shader->data);
+        renderer.gbuffer_textureless_shader->handle,
+                renderer.gbuffer_textureless_shader->data);
     cube_mat.SetUniformValue("u_diffuse", glm::vec3(1.0, 0.0, 0.0));
     cube_mat.SetUniformValue("u_metallic", 0.0f);
     cube_mat.SetUniformValue("u_roughness", 0.0f);

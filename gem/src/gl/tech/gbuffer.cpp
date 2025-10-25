@@ -48,7 +48,7 @@ void tech::GBuffer::DispatchGBufferWithID(
 
     for (auto [e, trans, emesh, ematerial] : renderables.each()) {
 
-      if (ematerial.program.m_shader_id != gbuffer_shader.m_shader_id) {
+      if (ematerial.program.linked_program_id != gbuffer_shader.linked_program_id) {
         continue;
       }
 
@@ -92,8 +92,8 @@ void tech::GBuffer::DispatchGBufferTexturelessWithID(
         current_scene->registry.view<Transform, MeshComponent, Material>();
 
     for (auto [e, trans, emesh, ematerial] : renderables.each()) {
-      if (ematerial.program.m_shader_id !=
-          gbuffer_textureless_shader.m_shader_id) {
+      if (ematerial.program.linked_program_id !=
+          gbuffer_textureless_shader.linked_program_id) {
         continue;
       }
 

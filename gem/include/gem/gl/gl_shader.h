@@ -10,7 +10,7 @@ namespace gem {
 class GLShader : public Shader {
 public:
 
-  unsigned int m_shader_id;
+  unsigned int linked_program_id;
 
   GLShader() = default;
   GLShader(const std::string &comp);

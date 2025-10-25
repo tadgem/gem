@@ -170,9 +170,9 @@ void GLIm3d::ShutdownIm3D(Im3dState &state) {
   ZoneScoped;
   glDeleteVertexArrays(1, &state.im3d_vao);
   glDeleteBuffers(1, &state.im3d_vertex_buffer);
-  glDeleteProgram(state.points_shader.m_shader_id);
-  glDeleteProgram(state.line_shader.m_shader_id);
-  glDeleteProgram(state.tris_shader.m_shader_id);
+  glDeleteProgram(state.points_shader.linked_program_id);
+  glDeleteProgram(state.line_shader.linked_program_id);
+  glDeleteProgram(state.tris_shader.linked_program_id);
 }
 
 void GLIm3d::NewFrameIm3D(Im3dState &state, glm::vec2 screen_dim,
@@ -228,17 +228,17 @@ void GLIm3d::EndFrameIm3D(Im3dState &state, glm::ivec2 screen_dim,
     switch (drawList.m_primType) {
     case Im3d::DrawPrimitive_Points:
       prim = GL_POINTS;
-      sh = state.points_shader.m_shader_id;
+      sh = state.points_shader.linked_program_id;
       glDisable(GL_CULL_FACE); // points are view-aligned
       break;
     case Im3d::DrawPrimitive_Lines:
       prim = GL_LINES;
-      sh = state.line_shader.m_shader_id;
+      sh = state.line_shader.linked_program_id;
       glDisable(GL_CULL_FACE); // lines are view-aligned
       break;
     case Im3d::DrawPrimitive_Triangles:
       prim = GL_TRIANGLES;
-      sh = state.tris_shader.m_shader_id;
+      sh = state.tris_shader.linked_program_id;
       // glAssert(glEnable(GL_CULL_FACE)); // culling valid for triangles, but
       // optional
       break;

@@ -19,10 +19,10 @@ Material::Material(AssetHandle shader_handle, GLShader &program)
   const GLsizei bufSize = 16; // maximum name length
   GLchar name[bufSize];       // variable name in GLSL
   GLsizei length;             // name length
-  glGetProgramiv(program.m_shader_id, GL_ACTIVE_UNIFORMS, &uniform_count);
+  glGetProgramiv(program.linked_program_id, GL_ACTIVE_UNIFORMS, &uniform_count);
 
   for (int i = 0; i < uniform_count; i++) {
-    glGetActiveUniform(program.m_shader_id, (GLuint)i, bufSize, &length, &size,
+    glGetActiveUniform(program.linked_program_id, (GLuint)i, bufSize, &length, &size,
                        &type, name);
     std::string uname = std::string(name);
     GLShader::UniformType utype = GLShader::GetUniformTypeFromGL(type);
