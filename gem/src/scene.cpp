@@ -2,7 +2,7 @@
 
 #include "gem/scene.h"
 #include "gem/dbg_assert.h"
-#include "gem/engine.h"
+#include "gem/gem.h"
 #include "gem/gl/gl_shader.h"
 #include "gem/material.h"
 #include "gem/model.h"
@@ -80,7 +80,7 @@ bool Scene::DoesEntityExist(u32 index) {
 
 void Scene::Update() {
   ZoneScoped;
-  for (auto &sys : Engine::systems.systems) {
+  for (auto &sys : Systems.systems) {
     sys->Update(*this);
   }
 }
@@ -112,11 +112,11 @@ Entity::Entity(Scene *escene, entt::entity e) : scene(escene), handle(e) {
   ZoneScoped;
 }
 
-SceneManager::SceneManager() { ZoneScoped; }
+SceneCollection::SceneCollection() { ZoneScoped; }
 
-void SceneManager::CloseScene(HashString scene_hash) { ZoneScoped; }
+void SceneCollection::CloseScene(HashString scene_hash) { ZoneScoped; }
 
-Scene *SceneManager::GetScene(HashString scene_hash) {
+Scene *SceneCollection::GetScene(HashString scene_hash) {
   ZoneScoped;
 
   for (auto &scene : active_scenes_) {
@@ -127,7 +127,7 @@ Scene *SceneManager::GetScene(HashString scene_hash) {
   return nullptr;
 }
 
-Scene *SceneManager::CreateScene(const std::string &scene_name) {
+Scene *SceneCollection::CreateScene(const std::string &scene_name) {
   ZoneScoped;
   HashString scene_hash(scene_name);
   Scene *existing_scene = GetScene(scene_hash);
@@ -139,13 +139,13 @@ Scene *SceneManager::CreateScene(const std::string &scene_name) {
   return active_scenes_.back().get();
 }
 
-Scene *SceneManager::LoadScene(nlohmann::json &scene_json) {
+Scene *SceneCollection::LoadScene(nlohmann::json &scene_json) {
   ZoneScoped;
   std::string scene_name = scene_json["name"];
   active_scenes_.push_back(std::make_unique<Scene>(scene_name));
   Scene *s = active_scenes_.back().get();
 
-  for (auto &sys : Engine::systems.systems) {
+  for (auto &sys : Systems.systems) {
     sys->Deserialize(
         *s, scene_json["systems"][std::to_string(sys->kSysHash.hash_value)]);
   }
@@ -153,7 +153,7 @@ Scene *SceneManager::LoadScene(nlohmann::json &scene_json) {
   return s;
 }
 
-nlohmann::json SceneManager::SaveScene(Scene *ser_scene) {
+nlohmann::json SceneCollection::SaveScene(Scene *ser_scene) {
   ZoneScoped;
   GEM_ASSERT(ser_scene, "Trying to save an invalid scene");
 
@@ -162,21 +162,21 @@ nlohmann::json SceneManager::SaveScene(Scene *ser_scene) {
   json["name"] = ser_scene->scene_name;
   json["systems"] = nlohmann::json();
 
-  for (auto &sys : Engine::systems.systems) {
+  for (auto &sys : Systems.systems) {
     json["systems"][std::to_string(sys->kSysHash.hash_value)] =
         sys->Serialize(*ser_scene);
   }
 
   return json;
 }
-void SceneManager::SaveSceneToPath(const std::string &path,
+void SceneCollection::SaveSceneToPath(const std::string &path,
                                        Scene *ser_scene) {
 
   nlohmann::json scene_json = SaveScene(ser_scene);
   Utils::SaveStringToPath(path, scene_json.dump());
 }
 
-Scene *SceneManager::LoadSceneFromPath(const std::string &scene_path) {
+Scene *SceneCollection::LoadSceneFromPath(const std::string &scene_path) {
   std::string scene_json_str = Utils::LoadStringFromPath(scene_path);
   if (scene_json_str.empty()) {
     return nullptr;

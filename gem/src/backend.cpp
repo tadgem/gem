@@ -8,7 +8,7 @@
 
 #include "gem/backend.h"
 #include "gem/dbg_memory.h"
-#include "gem/engine.h"
+#include "gem/gem.h"
 #include "gem/funnelsans.ttf.h"
 #include "gem/input.h"
 #include "gem/mesh.h"
@@ -32,7 +32,7 @@ void InitBuiltInAssets(gem::GPUBackend* backend) {
   gem:: Texture::black = new gem::Texture(
       gem::Texture::FromData(black_data.data(), white_data.size(), 1, 1, 1, 4));
 
-  gem::Shapes::InitBuiltInAssets(gem::Engine::assets, backend);
+  gem::Shapes::InitBuiltInAssets(gem::Assets, backend);
 
   // mesh::m_cube = mesh {shapes::m_cube, 36, gem::aabb{{0,0,0}, {1,1,1}}};
 }

@@ -33,7 +33,7 @@ public:
   virtual ~ECSSystem() {}
 };
 
-class SystemManager {
+class SystemCollection {
 public:
   std::vector<std::unique_ptr<ECSSystem>> systems;
   std::unordered_map<hash_string_ge, ECSSystem *> system_type_aliases;
@@ -47,6 +47,6 @@ public:
     return system_type_aliases[type_str_hash];
   }
 
-  GEM_IMPL_ALLOC(SystemManager)
+  GEM_IMPL_ALLOC(SystemCollection)
 };
 } // namespace gem

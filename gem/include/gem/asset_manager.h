@@ -42,6 +42,7 @@ struct AssetLoadResult {
 };
 
 class AssetManager {
+
 public:
   AssetManager();
 

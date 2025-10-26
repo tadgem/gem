@@ -32,7 +32,7 @@ void on_imgui(GLRenderer & renderer, Scene * s, glm::vec2 mouse_pos,
         ImGui::End();
     }
     {
-        renderer.OnImGui(Engine::assets);
+        renderer.OnImGui(Assets);
 
         ImGui::Begin("Demo Settings");
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
@@ -74,13 +74,13 @@ void on_imgui(GLRenderer & renderer, Scene * s, glm::vec2 mouse_pos,
 int main()
 {
     glm::ivec2 resolution = {1920, 1080};
-    Engine::Init(resolution);
+    Init(resolution);
     GLRenderer renderer{};
-    renderer.Init(Engine::assets, resolution);
+    renderer.Init(Assets, resolution);
 
     Camera cam{};
     DebugCameraController controller{};
-    Scene * s = Engine::scenes.CreateScene("test_scene");
+    Scene * s = Scenes.CreateScene("test_scene");
     Entity e = s->CreateEntity("Daddalus");
 
     e.HasComponent<EntityData>();
@@ -88,7 +88,7 @@ int main()
     Material mat(renderer.m_gbuffer_shader->handle, renderer.m_gbuffer_shader->m_data);
     e.AddComponent<Material>(renderer.m_gbuffer_shader->handle, renderer.m_gbuffer_shader->m_data);
 
-    Engine::assets.LoadAsset("assets/models/sponza/Sponza.gltf", AssetType::kModel, [s, &renderer](Asset * a) {
+    Assets.LoadAsset("assets/models/sponza/Sponza.gltf", AssetType::kModel, [s, &renderer](Asset * a) {
         spdlog::info("adding model to scene");
         auto* ma = dynamic_cast<ModelAsset *>(a);
         ma->m_data.UpdateAABB();
@@ -101,7 +101,7 @@ int main()
                 {"u_ao_map", TextureMapType::kAO}
             });
         renderer.m_voxel_data.current_bounding_box = ma->m_data.m_aabb;
-        nlohmann::json scene_json = Engine::scenes.SaveScene(s);
+        nlohmann::json scene_json = Scenes.SaveScene(s);
         std::string scene_json_str = scene_json.dump();
         spdlog::info("finished adding model to scene, dumping scene json");
         spdlog::info(scene_json_str);
@@ -137,7 +137,7 @@ int main()
     while (!GPUBackend::Selected()->quit)
     {
         glEnable(GL_DEPTH_TEST);
-        Engine::Update();
+        Update();
 
         GPUBackend::Selected()->ProcessEvents();
         GPUBackend::Selected()->PreFrame();
@@ -160,11 +160,11 @@ int main()
 
         on_imgui(renderer, s, mouse_pos, dir2, cube_trans, lights);
 
-        renderer.Render(Engine::assets, cam, scenes);
+        renderer.Render(Assets, cam, scenes);
         GPUBackend::Selected()->PostFrame();
     }
     GPUBackend::Selected()->ShutDown();
-    Engine::Shutdown();
+    Shutdown();
 
     return 0;
 }

@@ -7,9 +7,9 @@ using namespace gem;
 editor_application::editor_application()
 {
     glm::ivec2 resolution = {1920, 1080};
-    Engine::Init(resolution);
+    Init(resolution);
     GLRenderer renderer{};
-    renderer.Init(Engine::assets, resolution);
+    renderer.Init(Assets, resolution);
 
     m_editor_fsm.SetStartingState(editor_mode::no_open_project);
     m_editor_fsm.AddState(editor_mode::no_open_project, [this]() {
@@ -37,7 +37,7 @@ void editor_application::run()
 {
     while (!GPUBackend::Selected()->quit)
     {
-      Engine::assets.Update();
+      Assets.Update();
 
         GPUBackend::Selected()->ProcessEvents();
         GPUBackend::Selected()->PreFrame();
@@ -49,7 +49,7 @@ void editor_application::run()
         GPUBackend::Selected()->PostFrame();
     }
     GPUBackend::Selected()->ShutDown();
-    Engine::Shutdown();
+    Shutdown();
 }
 
 static char s_create_project_name_buffer[256]{ 0 };
@@ -95,8 +95,8 @@ void editor_application::on_open_project()
             std::filesystem::path p = ifd::FileDialog::Instance().GetResult();
             std::string res = p.u8string();
             std::filesystem::path directory = p.parent_path();
-            Engine::active_project = create_project(std::string(s_create_project_name_buffer), directory.string());
-            Engine::SaveProjectToDisk(p.filename().string(), directory.string());
+            ActiveProject = create_project(std::string(s_create_project_name_buffer), directory.string());
+            SaveProjectToDisk(p.filename().string(), directory.string());
             m_editor_fsm.Trigger(editor_trigger::project_loaded);
         }
         ifd::FileDialog::Instance().Close();
@@ -106,7 +106,7 @@ void editor_application::on_open_project()
         if (ifd::FileDialog::Instance().HasResult()) {
             std::filesystem::path p = ifd::FileDialog::Instance().GetResult();
             std::string res = p.u8string();
-            Engine::LoadProjectFromDisk(res);
+            LoadProjectFromDisk(res);
             m_editor_fsm.Trigger(editor_trigger::project_loaded);
         }
         ifd::FileDialog::Instance().Close();

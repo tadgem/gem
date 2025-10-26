@@ -3,7 +3,7 @@
 #include "gem/material.h"
 #include "gem/asset_definitions.h"
 #include "gem/asset_manager.h"
-#include "gem/engine.h"
+#include "gem/gem.h"
 #include "gem/profile.h"
 #include "gem/scene.h"
 
@@ -168,7 +168,7 @@ void MaterialSystem::Deserialize(Scene &current_scene, nlohmann::json &sys_json)
     e = current_scene.registry.create(e);
     AssetHandle shader_handle = entry["shader"];
     auto *shader_asset =
-        Engine::assets.GetAsset<GLShader, AssetType::kShader>(shader_handle);
+        Assets.GetAsset<GLShader, AssetType::kShader>(shader_handle);
     Material mat(shader_handle, shader_asset->data);
 
     nlohmann::json uniforms = entry["uniforms"];

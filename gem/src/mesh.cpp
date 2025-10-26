@@ -1,7 +1,7 @@
 #define GLM_ENABLE_EXPERIMENTAL
 
 #include "gem/mesh.h"
-#include "gem/engine.h"
+#include "gem/gem.h"
 #include "gem/scene.h"
 
 namespace gem {
@@ -13,10 +13,10 @@ void MeshSystem::Cleanup() { ZoneScoped; }
 void try_update_mesh_component(MeshComponent &mc) {
   ZoneScoped;
 
-  if (Engine::assets.GetLoadProgress(mc.handle) ==
+  if (Assets.GetLoadProgress(mc.handle) ==
       AssetLoadProgress::kLoaded) {
     auto model_asset =
-        Engine::assets.GetAsset<Model, AssetType::kModel>(mc.handle);
+        Assets.GetAsset<Model, AssetType::kModel>(mc.handle);
     mc.mesh = model_asset->data.meshes[mc.mesh_index];
   }
 }

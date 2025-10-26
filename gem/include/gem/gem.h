@@ -2,7 +2,6 @@
 #include "gem/asset_manager.h"
 #include "gem/backend.h"
 #include "gem/camera.h"
-#include "gem/engine.h"
 #include "gem/events.h"
 #include "gem/fsm.h"
 #include "gem/input.h"
@@ -10,6 +9,7 @@
 #include "gem/lights.h"
 #include "gem/material.h"
 #include "gem/model.h"
+#include "gem/project.h"
 #include "gem/scene.h"
 #include "gem/shape.h"
 #include "gem/texture.h"
@@ -30,3 +30,28 @@
 #include "imgui.h"
 #include "gem/gl/gl_dbg.h"
 #include "spdlog/spdlog.h"
+
+
+
+struct DebugCallbackCollection {
+	std::vector<std::function<void()>> callbacks;
+
+	void Add(std::function<void()> debug_callback);
+};
+
+namespace gem {
+
+	extern AssetManager				Assets;
+	extern EventHandler				Events;
+	extern GLRenderer				Renderer;
+	extern SceneCollection			Scenes;
+	extern SystemCollection			Systems;
+	extern Project					ActiveProject;
+	extern DebugCallbackCollection	DebugCallbacks;
+
+	void Init(const glm::ivec2& resolution);
+	void Update();
+	void SaveProjectToDisk(const std::string& filename, const std::string& directory);
+	void LoadProjectFromDisk(const std::string& filepath);
+
+} // namespace gem

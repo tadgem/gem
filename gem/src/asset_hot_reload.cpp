@@ -1,7 +1,5 @@
 #include "gem/asset_hot_reload.h"
-#include "gem/engine.h"
-#include "gem/utils.h"
-#include "spdlog/spdlog.h"
+#include "gem/gem.h"
 
 namespace gem {
 
@@ -32,14 +30,14 @@ void GemFileWatchListener::handleFileAction(efsw::WatchID watchid,
     std::string full_path = dir + filename;
     clean_delimiters(full_path);
     AssetHandle ah = AssetHandle(full_path, AssetType::kShader);
-    if (Engine::assets.GetLoadProgress(ah) ==
+    if (Assets.GetLoadProgress(ah) ==
         AssetLoadProgress::kLoaded) {
       spdlog::info("GemFileListener : Reloading : {}{}", dir, filename);
       std::string shader_source = Utils::LoadStringFromPath(full_path);
       auto *shader_asset =
-          Engine::assets.GetAsset<GLShader, AssetType::kShader>(ah);
+          AssetManager ().GetAsset<GLShader, AssetType::kShader>(ah);
 
-      Engine::debug_callbacks.Add([shader_asset, shader_source]() {
+      DebugCallbacks.Add([shader_asset, shader_source]() {
         shader_asset->data.Release();
         shader_asset->data = GLShader(shader_source);
       });

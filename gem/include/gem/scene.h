@@ -4,6 +4,7 @@
 #include "gem/alias.h"
 #include "gem/dbg_memory.h"
 #include "gem/texture.h"
+#include "gem/asset.h"
 #include "json.hpp"
 #include <map>
 #include <memory>
@@ -87,9 +88,9 @@ struct EntityData {
   Entity parent = Entity::INVALID();
 };
 
-class SceneManager {
+class SceneCollection {
 public:
-  SceneManager();
+  SceneCollection();
 
   Scene *           CreateScene(const std::string &name);
   Scene *           LoadScene(nlohmann::json &scene_json);
@@ -99,7 +100,7 @@ public:
   nlohmann::json    SaveScene(Scene *ser_scene);
   void              SaveSceneToPath(const std::string &path, Scene *ser_scene);
 
-  GEM_IMPL_ALLOC(SceneManager)
+  GEM_IMPL_ALLOC(SceneCollection)
 protected:
   std::vector<std::unique_ptr<Scene>> active_scenes_;
 };
